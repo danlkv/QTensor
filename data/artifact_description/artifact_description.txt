@@ -1,0 +1,511 @@
+LESSKEY=/etc/lesskey.bin
+MODULE_VERSION_STACK=3.2.11.3
+KSH_AUTOLOAD=1
+MKLROOT=/theta-archive/intel/compilers_and_libraries_2019.5.281/linux/mkl
+PE_LIBSCI_VOLATILE_PRGENV=CRAY CRAYCLANG GNU INTEL
+PE_SMA_DEFAULT_PKGCONFIG_VARIABLES=PE_SMA_COMPFLAG_@prgenv@
+MANPATH=/opt/python/3.6.1.1/share/man:/opt/cray/pe/mpt/7.7.10/gni/man/mpich:/opt/cray/pe/perftools/7.0.5/man:/opt/cray/pe/papi/5.6.0.5/share/pdoc/man:/opt/cray/pe/atp/2.1.3/man:/opt/cray/alps/6.6.43-6.0.7.1_5.51__ga796da32.ari/man:/opt/cray/job/2.2.3-6.0.7.1_5.48__g6c4e934.ari/man:/opt/cray/pe/pmi/5.0.14/man:/opt/cray/pe/libsci/19.06.1/man:/opt/cray/pe/man/csmlversion:/opt/cray/pe/craype/2.6.1/man:/theta-archive/intel/documentation_2019/en/man:/theta-archive/intel/documentation_2019/en/man/common:/theta-archive/intel/documentation_2019/en/debugger/gdb-ia/man:/theta-archive/intel/inspector_2019.2.0.588057/man:/theta-archive/intel/clck/2019.2/man:/theta-archive/intel/advisor_2019.2.0.588361/man:/theta-archive/intel/itac/2019.2.026/man:/opt/cray/pe/modules/3.2.11.3/share/man:/usr/local/man:/usr/share/man:/usr/man:/opt/cray/share/man:/opt/cray/pe/man
+DB2INSTANCE=db2cat
+NNTPSERVER=news
+PE_PAPI_DEFAULT_ACCEL_FAMILY_LIBS_nvidia=,-lcupti,-lcudart,-lcuda
+PE_PETSC_DEFAULT_GENCOMPILERS_CRAY_sandybridge=9.0
+PE_TPSL_64_DEFAULT_GENCOMPS_CRAYCLANG_sandybridge=90
+PE_TPSL_DEFAULT_GENCOMPS_INTEL_x86_skylake=190
+PE_CXX_PKGCONFIG_LIBS=mpichcxx
+XDG_SESSION_ID=10394
+HOSTNAME=thetalogin6
+IBM_DB_LIB=/dbhome/db2cat/sqllib/lib
+CRAY_UDREG_INCLUDE_OPTS=-I/opt/cray/udreg/2.3.2-6.0.7.1_5.15__g5196236.ari/include
+PE_FFTW_DEFAULT_TARGET_mic_knl=mic_knl
+PE_TPSL_DEFAULT_GENCOMPILERS_CRAYCLANG_x86_skylake=9.0
+XKEYSYMDB=/usr/X11R6/lib/X11/XKeysymDB
+CRAY_SITE_LIST_DIR=/etc/opt/cray/pe/modules
+LIBRARYMODULES=acml:alps:cray-dwarf:cray-fftw:cray-ga:cray-hdf5:cray-hdf5-parallel:cray-libsci:cray-libsci_acc:cray-mpich:cray-mpich-abi:cray-mpich2:cray-netcdf:cray-netcdf-hdf5parallel:cray-parallel-netcdf:cray-petsc:cray-petsc-complex:cray-shmem:cray-tpsl:cray-trilinos:cudatoolkit:fftw:ga:hdf5:hdf5-parallel:iobuf:libfast:netcdf:netcdf-hdf5parallel:ntk:onesided:papi:petsc:petsc-complex:pmi:tpsl:trilinos:xt-libsci:xt-mpich2:xt-mpt:xt-papi
+PE_NETCDF_DEFAULT_VOLATILE_PKGCONFIG_PATH=/opt/cray/pe/netcdf/4.6.3.1/@PRGENV@/@PE_NETCDF_DEFAULT_GENCOMPS@/lib/pkgconfig
+PE_PARALLEL_NETCDF_DEFAULT_VOLATILE_PKGCONFIG_PATH=/opt/cray/pe/parallel-netcdf/1.11.1.0/@PRGENV@/@PE_PARALLEL_NETCDF_DEFAULT_GENCOMPS@/lib/pkgconfig
+PE_SMA_DEFAULT_COMPFLAG_GNU=-fcray-pointer
+PE_TRILINOS_DEFAULT_VOLATILE_PKGCONFIG_PATH=/opt/cray/pe/trilinos/12.14.1.0/@PRGENV@/@PE_TRILINOS_DEFAULT_GENCOMPS@/@PE_TRILINOS_DEFAULT_TARGET@/lib/pkgconfig
+IPPROOT=/theta-archive/intel/compilers_and_libraries_2019.5.281/linux/ipp
+PE_ENV=INTEL
+PE_HDF5_DEFAULT_GENCOMPILERS_GNU=8.2 7.1
+PE_MPICH_ALTERNATE_LIBS_dpm=_dpm
+PE_MPICH_DEFAULT_GENCOMPS_CRAYCLANG=90
+PE_SMA_DEFAULT_COMPFLAG=
+PE_TPSL_64_DEFAULT_GENCOMPILERS_CRAY_x86_64=9.0
+SHELL=/bin/bash
+TERM=st-256color
+HOST=thetalogin6
+PE_PETSC_DEFAULT_GENCOMPILERS_CRAYCLANG_sandybridge=9.0
+PE_TPSL_64_DEFAULT_GENCOMPILERS_CRAYCLANG_x86_64=9.0
+PE_TPSL_DEFAULT_GENCOMPS_CRAY_x86_skylake=90
+PKGCONFIG_ENABLED=1
+HISTSIZE=1000
+PROFILEREAD=true
+INTEL_MINOR_VERSION=5.281
+PE_PETSC_DEFAULT_GENCOMPS_CRAY_sandybridge=90
+PE_TPSL_64_DEFAULT_GENCOMPILERS_CRAYCLANG_haswell=9.0
+PE_TPSL_DEFAULT_GENCOMPILERS_GNU_x86_skylake=8.2 7.1
+SSH_CLIENT=73.51.233.101 60878 22
+CRAYPE_DIR=/opt/cray/pe/craype/2.6.1
+CRAY_UGNI_POST_LINK_OPTS=-L/opt/cray/ugni/6.0.14.0-6.0.7.1_3.15__gea11d3d.ari/lib64
+CRAY_XPMEM_POST_LINK_OPTS=-L/opt/cray/xpmem/2.2.15-6.0.7.1_5.13__g7549d06.ari/lib64
+PE_NETCDF_DEFAULT_VOLATILE_PRGENV=GNU
+PE_PARALLEL_NETCDF_DEFAULT_VOLATILE_PRGENV=GNU
+PE_PETSC_DEFAULT_GENCOMPS_GNU_haswell=82 71
+PE_PETSC_DEFAULT_GENCOMPS_INTEL_haswell=190
+PE_TPSL_64_DEFAULT_GENCOMPS_INTEL_x86_skylake=190
+PE_TPSL_DEFAULT_GENCOMPS_GNU_sandybridge=82 71
+PE_TPSL_DEFAULT_REQUIRED_PRODUCTS=PE_MPICH:PE_LIBSCI
+PE_TRILINOS_DEFAULT_VOLATILE_PRGENV=CRAYCLANG GNU INTEL
+LIBRARY_PATH=/theta-archive/intel/compilers_and_libraries_2019.5.281/linux/daal/lib/intel64:/theta-archive/intel/compilers_and_libraries_2019.5.281/linux/compiler/lib/intel64:/theta-archive/intel/compilers_and_libraries_2019.5.281/linux/mkl/lib/intel64:/theta-archive/intel/compilers_and_libraries_2019.5.281/linux/tbb/lib/intel64/gcc4.7:/theta-archive/intel/compilers_and_libraries_2019.5.281/linux/ipp/lib/intel64
+PE_FFTW_DEFAULT_VOLATILE_PKGCONFIG_PATH=/opt/cray/pe/fftw/3.3.8.3/@PE_FFTW_DEFAULT_TARGET@/lib/pkgconfig
+PE_HDF5_DEFAULT_VOLATILE_PRGENV=GNU
+PE_HDF5_PARALLEL_DEFAULT_VOLATILE_PKGCONFIG_PATH=/opt/cray/pe/hdf5-parallel/1.10.5.1/@PRGENV@/@PE_HDF5_PARALLEL_DEFAULT_GENCOMPS@/lib/pkgconfig
+PE_NETCDF_HDF5PARALLEL_DEFAULT_VOLATILE_PKGCONFIG_PATH=/opt/cray/pe/netcdf-hdf5parallel/4.6.3.1/@PRGENV@/@PE_NETCDF_HDF5PARALLEL_DEFAULT_GENCOMPS@/lib/pkgconfig
+CRAY_MPICH2_DIR=/opt/cray/pe/mpt/7.7.10/gni/mpich-intel/16.0
+INTEL_PATH=/theta-archive/intel/compilers_and_libraries_2019.5.281
+PE_GA_DEFAULT_VOLATILE_PRGENV=GNU
+PE_LIBSCI_DEFAULT_GENCOMPS_GNU_x86_64=81 71
+PE_TPSL_DEFAULT_GENCOMPILERS_CRAYCLANG_sandybridge=9.0
+LD_PRELOAD=/soft/buildtools/trackdeps/$LIB/trackdeps.so
+MORE=-sl
+IBM_DB_DIR=/dbhome/db2cat/sqllib
+FPATH=:/opt/cray/pe/modules/3.2.11.3/init/sh_funcs/no_redirect
+PERFTOOLS_VERSION=7.0.5
+PE_MPICH_DEFAULT_GENCOMPILERS_GNU=8.2 8.1 7.1
+PE_PKGCONFIG_PRODUCTS=PE_MPICH:PE_LIBSCI
+PE_TPSL_DEFAULT_GENCOMPS_INTEL_x86_64=190
+PE_MPICH_GENCOMPS_GNU=82 81 71
+PE_PAPI_DEFAULT_ACCEL_LIBS_nvidia35=,-lcupti,-lcudart,-lcuda
+PE_PETSC_DEFAULT_GENCOMPILERS_CRAY_x86_skylake=9.0
+PE_PETSC_DEFAULT_REQUIRED_PRODUCTS=PE_MPICH:PE_LIBSCI:PE_HDF5_PARALLEL:PE_TPSL
+PE_TPSL_64_DEFAULT_GENCOMPS_CRAYCLANG_x86_skylake=90
+PE_TPSL_64_DEFAULT_GENCOMPS_CRAY_haswell=90
+PE_TPSL_64_DEFAULT_VOLATILE_PKGCONFIG_PATH=/opt/cray/pe/tpsl/19.06.1/@PRGENV@64/@PE_TPSL_64_DEFAULT_GENCOMPS@/@PE_TPSL_64_DEFAULT_TARGET@/lib/pkgconfig
+PE_CRAY_DEFAULT_FIXED_PKGCONFIG_PATH=/opt/cray/pe/parallel-netcdf/1.11.1.0/CRAY/9.0/lib/pkgconfig:/opt/cray/pe/netcdf-hdf5parallel/4.6.3.1/CRAY/9.0/lib/pkgconfig:/opt/cray/pe/netcdf/4.6.3.1/CRAY/9.0/lib/pkgconfig:/opt/cray/pe/hdf5-parallel/1.10.5.1/CRAY/9.0/lib/pkgconfig:/opt/cray/pe/hdf5/1.10.5.1/CRAY/9.0/lib/pkgconfig:/opt/cray/pe/ga/5.3.0.10/CRAY/8.6/lib/pkgconfig
+PE_PETSC_DEFAULT_GENCOMPS_GNU_x86_skylake=82 71
+PE_PETSC_DEFAULT_GENCOMPS_INTEL_x86_skylake=190
+PE_MPICH_GENCOMPILERS_CRAYCLANG=9.0
+SSH_TTY=/dev/pts/83
+PE_LIBSCI_DEFAULT_OMP_REQUIRES_openmp=_mp
+PE_PETSC_DEFAULT_GENCOMPILERS_CRAYCLANG_haswell=9.0
+PE_PETSC_DEFAULT_GENCOMPS_CRAY_x86_64=90
+PE_TPSL_64_DEFAULT_GENCOMPILERS_CRAY_sandybridge=9.0
+PE_FORTRAN_PKGCONFIG_LIBS=mpichf90
+CRAYPAT_ALPS_COMPONENT=/opt/cray/pe/perftools/7.0.5/sbin/pat_alps
+CRAYPAT_LD_LIBRARY_PATH=/opt/cray/pe/gcc-libs:/opt/cray/gcc-libs:/opt/cray/pe/perftools/7.0.5/lib64
+PE_MPICH_DEFAULT_GENCOMPILERS_CRAYCLANG=9.0
+PE_PETSC_DEFAULT_GENCOMPS_CRAYCLANG_x86_64=90
+PE_SMA_DEFAULT_VOLATILE_PKGCONFIG_PATH=/opt/cray/pe/mpt/7.7.10/gni/sma@PE_SMA_DEFAULT_DIR_DEFAULT64@/lib64/pkgconfig
+PE_TPSL_64_DEFAULT_GENCOMPILERS_CRAYCLANG_sandybridge=9.0
+ALLINEA_QUEUE_DLL=/opt/cray/pe/mpt/7.7.10/gni/mpich-intel/16.0/lib/libtvmpich.so.3.0.1
+PE_MPICH_GENCOMPS_CRAYCLANG=90
+PE_TRILINOS_DEFAULT_GENCOMPS_INTEL_x86_64=190
+CRAY_MPICH_BASEDIR=/opt/cray/pe/mpt/7.7.10/gni
+USER=USER
+JRE_HOME=/usr/lib64/jvm/java/jre
+PE_HDF5_PARALLEL_DEFAULT_GENCOMPILERS_GNU=8.2 7.1
+PE_NETCDF_HDF5PARALLEL_DEFAULT_GENCOMPILERS_GNU=8.2 7.1
+PE_TPSL_64_DEFAULT_GENCOMPS_CRAY_x86_skylake=90
+PE_TPSL_64_DEFAULT_GENCOMPS_INTEL_haswell=190
+PE_TPSL_DEFAULT_GENCOMPILERS_CRAYCLANG_x86_64=9.0
+LD_LIBRARY_PATH=/soft/perftools/darshan/darshan-3.1.8/lib:/opt/cray/pe/papi/5.6.0.5/lib64:/opt/cray/job/2.2.3-6.0.7.1_5.48__g6c4e934.ari/lib64:/theta-archive/intel/compilers_and_libraries_2019.5.281/linux/daal/lib/intel64:/theta-archive/intel/compilers_and_libraries_2019.5.281/linux/compiler/lib/intel64:/theta-archive/intel/compilers_and_libraries_2019.5.281/linux/mkl/lib/intel64:/theta-archive/intel/compilers_and_libraries_2019.5.281/linux/tbb/lib/intel64/gcc4.7:/theta-archive/intel/compilers_and_libraries_2019.5.281/linux/ipp/lib/intel64:/dbhome/db2cat/sqllib/lib64:/dbhome/db2cat/sqllib/lib64/gskit:/dbhome/db2cat/sqllib/lib32
+CRAYPE_LINK_TYPE=static
+LS_COLORS=
+PE_FFTW_DEFAULT_TARGET_interlagos=interlagos
+PE_LIBSCI_DEFAULT_VOLATILE_PRGENV=CRAY CRAYCLANG GNU INTEL
+PE_TPSL_DEFAULT_GENCOMPS_CRAY_x86_64=90
+PE_TRILINOS_DEFAULT_GENCOMPILERS_GNU_x86_64=8.2 7.1
+PE_TRILINOS_DEFAULT_GENCOMPILERS_INTEL_x86_64=19.0
+CRAY_RCA_POST_LINK_OPTS=-L/opt/cray/rca/2.2.18-6.0.7.1_5.52__g2aa4f39.ari/lib64 -lrca 
+PE_LIBSCI_PKGCONFIG_VARIABLES=PE_LIBSCI_OMP_REQUIRES_@openmp@:PE_SCI_EXT_LIBPATH:PE_SCI_EXT_LIBNAME
+PE_PETSC_DEFAULT_VOLATILE_PRGENV=CRAY CRAY64 CRAYCLANG CRAYCLANG64 GNU GNU64 INTEL INTEL64
+PE_PKGCONFIG_LIBS=darshan-runtime:mpich:AtpSigHandler:cray-rca:libsci_mpi:libsci
+PE_TPSL_64_DEFAULT_GENCOMPILERS_GNU_sandybridge=8.2 7.1
+PE_TPSL_64_DEFAULT_GENCOMPILERS_INTEL_haswell=19.0
+PE_MPICH_FIXED_PRGENV=INTEL
+XNLSPATH=/usr/share/X11/nls
+PE_PETSC_DEFAULT_GENCOMPILERS_CRAY_x86_64=9.0
+PE_PETSC_DEFAULT_GENCOMPS_GNU_sandybridge=82 71
+PE_PETSC_DEFAULT_GENCOMPS_INTEL_sandybridge=190
+PE_TPSL_64_DEFAULT_GENCOMPS_CRAYCLANG_x86_64=90
+PE_TPSL_DEFAULT_GENCOMPS_GNU_haswell=82 71
+INTEL_VERSION=19.0.5.281
+MPICH_ABORT_ON_ERROR=1
+PE_LIBSCI_DEFAULT_GENCOMPS_CRAY_x86_64=90
+PE_PAPI_DEFAULT_PKGCONFIG_VARIABLES=PE_PAPI_ACCEL_LIBS_@accelerator@ PE_PAPI_ACCEL_FAMILY_LIBS_@accelerator_family@
+PE_PETSC_DEFAULT_GENCOMPILERS_CRAY_haswell=9.0
+PE_TPSL_64_DEFAULT_GENCOMPS_CRAYCLANG_haswell=90
+PE_TPSL_64_DEFAULT_GENCOMPS_INTEL_sandybridge=190
+MPICH_DIR=/opt/cray/pe/mpt/7.7.10/gni/mpich-intel/16.0
+HOSTTYPE=x86_64
+ATP_POST_LINK_OPTS=-Wl,-L/opt/cray/pe/atp/2.1.3/libApp/ 
+CPATH=/theta-archive/intel/compilers_and_libraries_2019.5.281/linux/daal/include:/theta-archive/intel/compilers_and_libraries_2019.5.281/linux/compiler/include:/theta-archive/intel/compilers_and_libraries_2019.5.281/linux/mkl/include:/theta-archive/intel/compilers_and_libraries_2019.5.281/linux/pstl/include:/theta-archive/intel/compilers_and_libraries_2019.5.281/linux/tbb/include:/theta-archive/intel/compilers_and_libraries_2019.5.281/linux/ipp/include
+PE_FFTW_DEFAULT_REQUIRED_PRODUCTS=PE_MPICH
+PE_FFTW_DEFAULT_TARGET_sandybridge=sandybridge
+PE_HDF5_PARALLEL_DEFAULT_REQUIRED_PRODUCTS=PE_MPICH
+PE_NETCDF_HDF5PARALLEL_DEFAULT_REQUIRED_PRODUCTS=PE_HDF5_PARALLEL
+PE_PETSC_DEFAULT_GENCOMPILERS_INTEL_sandybridge=19.0
+PE_TPSL_64_DEFAULT_GENCOMPILERS_CRAY_haswell=9.0
+PE_MPICH_FORTRAN_PKGCONFIG_LIBS=mpichf90
+IBM_DB_HOME=/dbhome/db2cat/sqllib
+RCLOCAL_PRGENV=true
+FROM_HEADER=
+CHPL_CG_CPP_LINES=1
+OFFLOAD_INIT=on_start
+PE_LIBSCI_DEFAULT_GENCOMPILERS_INTEL_x86_64=16.0
+PE_LIBSCI_GENCOMPS_INTEL_x86_64=160
+PE_PRODUCT_LIST=CRAYPE_MIC-KNL:CRAY_RCA:CRAY_ALPS:DVS:CRAY_XPMEM:CRAY_DMAPP:CRAY_PMI:CRAY_UGNI:CRAY_UDREG:CRAY_LIBSCI:CRAYPE:INTEL:PERFTOOLS:CRAYPAT
+PE_TPSL_DEFAULT_GENCOMPILERS_CRAY_x86_64=9.0
+PE_MPICH_DIR_CRAYCLANG_DEFAULT64=64
+PAGER=less
+PE_PETSC_DEFAULT_GENCOMPILERS_GNU_x86_64=8.2 7.1
+PE_TPSL_DEFAULT_GENCOMPS_GNU_x86_skylake=82 71
+CRAY_MPICH_ROOTDIR=/opt/cray/pe/mpt/7.7.10
+VIRTUAL_ENV=/gpfs/mira-home/USER/numpy-env
+CSHEDIT=emacs
+PE_LIBSCI_GENCOMPILERS_GNU_x86_64=8.1 7.1
+PE_TPSL_64_DEFAULT_GENCOMPILERS_INTEL_x86_64=19.0
+PE_MPICH_GENCOMPILERS_CRAY=9.0
+PE_MPICH_MODULE_NAME=cray-mpich
+XDG_CONFIG_DIRS=/etc/xdg
+CRAYPAT_ROOT=/opt/cray/pe/perftools/7.0.5
+INTEL_MAJOR_VERSION=19.0
+PE_LIBSCI_DEFAULT_GENCOMPILERS_CRAY_x86_64=9.0
+PE_LIBSCI_GENCOMPS_CRAY_x86_64=90
+PE_MPICH_DEFAULT_VOLATILE_PRGENV=GNU CRAYCLANG CRAY
+PE_MPICH_TARGET_VAR_nvidia20=-lcudart
+PE_TPSL_64_DEFAULT_REQUIRED_PRODUCTS=PE_MPICH:PE_LIBSCI
+PE_TPSL_DEFAULT_GENCOMPS_CRAY_haswell=90
+PE_TPSL_DEFAULT_GENCOMPS_CRAY_sandybridge=90
+MINICOM=-c on
+LIBGL_DEBUG=quiet
+USERMODULES=PrgEnv-cray:PrgEnv-gnu:PrgEnv-intel:PrgEnv-pathscale:PrgEnv-pgi:acml:alps:apprentice:apprentice2:atp:blcr:cce:chapel:cray-ccdb:cray-fftw:cray-ga:cray-hdf5:cray-hdf5-parallel:cray-lgdb:cray-libsci:cray-libsci_acc:cray-mpich:cray-mpich-compat:cray-mpich2:cray-netcdf:cray-netcdf-hdf5parallel:cray-parallel-netcdf:cray-petsc:cray-petsc-complex:cray-shmem:cray-snplauncher:cray-tpsl:cray-trilinos:craypat:craype:craypkg-gen:cudatoolkit:ddt:fftw:ga:gcc:hdf5:hdf5-parallel:intel:iobuf:java:lgdb:libfast:libsci_acc:mpich1:netcdf:netcdf-hdf5parallel:netcdf-nofsync:netcdf-nofsync-hdf5parallel:ntk:onesided:papi:parallel-netcdf:pathscale:perftools:perftools-lite:petsc:petsc-complex:pgi:pmi:stat:totalview:tpsl:trilinos:xt-asyncpe:xt-craypat:xt-lgdb:xt-libsci:xt-mpich2:xt-mpt:xt-papi:xt-shmem:xt-totalview
+CRAY_DMAPP_INCLUDE_OPTS=-I/opt/cray/dmapp/7.1.1-6.0.7.1_6.6__g45d1b37.ari/include -I/opt/cray/gni-headers/5.0.12.0-6.0.7.1_3.13__g3b1768f.ari/include 
+CRAY_LIBSCI_BASE_DIR=/opt/cray/pe/libsci/19.06.1
+CRAY_LIBSCI_DIR=/opt/cray/pe/libsci/19.06.1
+DVS_VERSION=0.9.0
+NLSPATH=/theta-archive/intel/debugger_2019/gdb/intel64/share/locale/%l_%t/%N:/theta-archive/intel/compilers_and_libraries_2019.5.281/linux/compiler/lib/intel64_lin/locale/%l_%t/%N:/theta-archive/intel/compilers_and_libraries_2019.5.281/linux/mkl/lib/intel64_lin/locale/%l_%t/%N
+PE_LIBSCI_PKGCONFIG_LIBS=libsci_mpi:libsci
+PE_NETCDF_DEFAULT_GENCOMPS_GNU=
+PE_PARALLEL_NETCDF_DEFAULT_GENCOMPS_GNU=82 71
+PE_TPSL_64_DEFAULT_GENCOMPS_GNU_x86_64=82 71
+PATH=/home/USER/.local/bin:/gpfs/mira-home/USER/numpy-env/bin:/opt/python/3.6.1.1/bin:/home/USER/.local/bin:/opt/xalt/bin:/soft/buildtools/trackdeps/bin:/soft/perftools/darshan/darshan-3.1.8/bin:/opt/modulefiles/nompirun/bin:/opt/cray/pe/mpt/7.7.10/gni/bin:/opt/cray/pe/perftools/7.0.5/bin:/opt/cray/pe/papi/5.6.0.5/bin:/opt/cray/rca/2.2.18-6.0.7.1_5.52__g2aa4f39.ari/bin:/opt/cray/alps/6.6.43-6.0.7.1_5.51__ga796da32.ari/sbin:/opt/cray/job/2.2.3-6.0.7.1_5.48__g6c4e934.ari/bin:/opt/cray/pe/craype/2.6.1/bin:/theta-archive/intel/bin:/theta-archive/intel/debugger_2019/bin:/theta-archive/intel/debugger_2019/gdb/targets/intel64/linux/bin:/theta-archive/intel/debugger_2019/gdb/intel64/bin:/theta-archive/intel/compilers_and_libraries_2019/linux/bin:/theta-archive/intel/compilers_and_libraries_2019.5.281/linux/daal/bin:/theta-archive/intel/compilers_and_libraries_2019.5.281/linux/bin:/theta-archive/intel/compilers_and_libraries_2019.5.281/linux/mkl/bin:/theta-archive/intel/compilers_and_libraries_2019.5.281/linux/mkl/benchmarks/hpcg/bin:/theta-archive/intel/compilers_and_libraries_2019.5.281/linux/pstl/bin:/theta-archive/intel/compilers_and_libraries_2019.5.281/linux/tbb/bin:/theta-archive/intel/compilers_and_libraries_2019.5.281/linux/ipp/bin:/theta-archive/intel/inspector_2019.2.0.588057/bin64:/theta-archive/intel/vtune_amplifier_2019.2.0.588069/bin64:/theta-archive/intel/vtune_amplifier_2019.2.0.588069/backend/bin64:/theta-archive/intel/advisor_2019.2.0.588361/bin64:/theta-archive/intel/parallel_studio_xe_2019.2.057/bin:/theta-archive/intel/itac/2019.2.026/intel64/bin:/opt/cray/pe/modules/3.2.11.3/bin:/usr/local/bin:/usr/bin:/bin:/usr/bin/X11:/usr/games:/dbhome/db2cat/sqllib/bin:/dbhome/db2cat/sqllib/adm:/dbhome/db2cat/sqllib/misc:/usr/lib/mit/bin:/usr/lib/mit/sbin:/opt/cray/pe/bin
+MAIL=/var/mail/USER
+MODULE_VERSION=3.2.11.3
+PAT_REPORT_PRUNE_NAME=_cray$mt_execute_,_cray$mt_start_,__cray_hwpc_,f_cray_hwpc_,cstart,__pat_,pat_region_,PAT_,OMP.slave_loop,slave_entry,_new_slave_entry,_thread_pool_slave_entry,THREAD_POOL_join,__libc_start_main,_start,__start,start_thread,__wrap_,UPC_ADIO_,_upc_,upc_,__caf_,__pgas_,syscall,__device_stub
+PE_HDF5_DEFAULT_VOLATILE_PKGCONFIG_PATH=/opt/cray/pe/hdf5/1.10.5.1/@PRGENV@/@PE_HDF5_DEFAULT_GENCOMPS@/lib/pkgconfig
+PE_PKGCONFIG_DEFAULT_PRODUCTS=PE_TRILINOS:PE_TPSL_64:PE_TPSL:PE_PETSC:PE_PARALLEL_NETCDF:PE_NETCDF_HDF5PARALLEL:PE_NETCDF:PE_MPICH:PE_LIBSCI:PE_HDF5_PARALLEL:PE_HDF5:PE_GA:PE_FFTW
+PE_TPSL_DEFAULT_GENCOMPILERS_GNU_x86_64=8.2 7.1
+PE_MPICH_GENCOMPILERS_GNU=8.2 8.1 7.1
+CPU=x86_64
+XTPE_NETWORK_TARGET=aries
+ATP_IGNORE_SIGTERM=1
+PE_FFTW_DEFAULT_TARGET_abudhabi=abudhabi
+PE_NETCDF_DEFAULT_GENCOMPILERS_GNU=8.2 7.1
+PE_PARALLEL_NETCDF_DEFAULT_GENCOMPILERS_GNU=8.2 7.1
+PE_TPSL_64_DEFAULT_GENCOMPILERS_GNU_x86_skylake=8.2 7.1
+PE_TPSL_DEFAULT_GENCOMPILERS_GNU_haswell=8.2 7.1
+_=/usr/bin/env
+JAVA_BINDIR=/usr/lib64/jvm/java/bin
+PE_HDF5_PARALLEL_DEFAULT_FIXED_PRGENV=CRAY CRAYCLANG INTEL
+PE_HDF5_PARALLEL_DEFAULT_GENCOMPS_GNU=
+PE_NETCDF_HDF5PARALLEL_DEFAULT_FIXED_PRGENV=CRAY CRAYCLANG INTEL
+PE_NETCDF_HDF5PARALLEL_DEFAULT_GENCOMPS_GNU=
+PE_SMA_DEFAULT_DIR_CRAY_DEFAULT64=64
+PE_TPSL_64_DEFAULT_GENCOMPILERS_CRAY_x86_skylake=9.0
+CRAY_UDREG_POST_LINK_OPTS=-L/opt/cray/udreg/2.3.2-6.0.7.1_5.15__g5196236.ari/lib64
+PE_TPSL_64_DEFAULT_GENCOMPS_CRAY_sandybridge=90
+PE_TPSL_64_DEFAULT_VOLATILE_PRGENV=CRAY CRAY64 CRAYCLANG CRAYCLANG64 GNU GNU64 INTEL INTEL64
+TBBROOT=/theta-archive/intel/compilers_and_libraries_2019.5.281/linux/tbb
+PWD=/home/USER/qsim/Qensor/data/artifact_description/Author-Kit
+INPUTRC=/etc/inputrc
+CRAYPE_VERSION=2.6.1
+CRAY_ALPS_POST_LINK_OPTS=-L/opt/cray/alps/6.6.43-6.0.7.1_5.51__ga796da32.ari/lib64
+PE_MPICH_VOLATILE_PRGENV=GNU CRAYCLANG CRAY
+JAVA_HOME=/usr/lib64/jvm/java
+TARGETMODULES=craype-abudhabi:craype-abudhabi-cu:craype-accel-host:craype-accel-nvidia20:craype-accel-nvidia30:craype-accel-nvidia35:craype-barcelona:craype-broadwell:craype-haswell:craype-hugepages128K:craype-hugepages128M:craype-hugepages16M:craype-hugepages256M:craype-hugepages2M:craype-hugepages32M:craype-hugepages4M:craype-hugepages512K:craype-hugepages512M:craype-hugepages64M:craype-hugepages8M:craype-intel-knc:craype-interlagos:craype-interlagos-cu:craype-istanbul:craype-ivybridge:craype-mc12:craype-mc8:craype-mic-knl:craype-network-aries:craype-network-gemini:craype-network-infiniband:craype-network-none:craype-network-seastar:craype-sandybridge:craype-shanghai:craype-target-compute_node:craype-target-local_host:craype-target-native:craype-xeon:xtpe-barcelona:xtpe-interlagos:xtpe-interlagos-cu:xtpe-istanbul:xtpe-mc12:xtpe-mc8:xtpe-network-gemini:xtpe-network-seastar:xtpe-shanghai:xtpe-target-native:xtpe-xeon
+_LMFILES_=/opt/cray/pe/modulefiles/modules/3.2.11.3:/opt/modulefiles/intel/19.0.5.281:/opt/cray/pe/craype/2.6.1/modulefiles/craype-network-aries:/opt/cray/pe/modulefiles/craype/2.6.1:/opt/cray/pe/modulefiles/cray-libsci/19.06.1:/opt/cray/ari/modulefiles/udreg/2.3.2-6.0.7.1_5.15__g5196236.ari:/opt/cray/ari/modulefiles/ugni/6.0.14.0-6.0.7.1_3.15__gea11d3d.ari:/opt/cray/pe/modulefiles/pmi/5.0.14:/opt/cray/ari/modulefiles/dmapp/7.1.1-6.0.7.1_6.6__g45d1b37.ari:/opt/cray/ari/modulefiles/gni-headers/5.0.12.0-6.0.7.1_3.13__g3b1768f.ari:/opt/cray/ari/modulefiles/xpmem/2.2.15-6.0.7.1_5.13__g7549d06.ari:/opt/cray/ari/modulefiles/job/2.2.3-6.0.7.1_5.48__g6c4e934.ari:/opt/cray/ari/modulefiles/dvs/2.7_2.2.120-6.0.7.1_12.5__g74cb2cc4:/opt/cray/ari/modulefiles/alps/6.6.43-6.0.7.1_5.51__ga796da32.ari:/opt/cray/ari/modulefiles/rca/2.2.18-6.0.7.1_5.52__g2aa4f39.ari:/opt/cray/pe/modulefiles/atp/2.1.3:/opt/cray/pe/modulefiles/perftools-base/7.0.5:/opt/cray/pe/modulefiles/PrgEnv-intel/6.0.5:/opt/cray/pe/craype/2.6.1/modulefiles/craype-mic-knl:/opt/cray/pe/modulefiles/cray-mpich/7.7.10:/opt/modulefiles/nompirun/nompirun:/soft/environment/modules/modulefiles/darshan/3.1.8:/soft/environment/modules/modulefiles/trackdeps:/soft/environment/modules/modulefiles/xalt:/opt/modulefiles/cray-python/3.6.1.1
+PE_LIBSCI_DEFAULT_OMP_REQUIRES=
+PE_MPICH_DEFAULT_GENCOMPS_CRAY=90
+PE_PETSC_DEFAULT_GENCOMPILERS_GNU_sandybridge=8.2 7.1
+PE_TPSL_DEFAULT_GENCOMPILERS_INTEL_haswell=19.0
+PE_LIBSCI_MODULE_NAME=cray-libsci/19.06.1
+PE_TPSL_DEFAULT_GENCOMPS_CRAYCLANG_x86_64=90
+PE_PETSC_DEFAULT_GENCOMPS_CRAYCLANG_sandybridge=90
+PE_TPSL_64_DEFAULT_GENCOMPS_GNU_x86_skylake=82 71
+PE_TPSL_DEFAULT_GENCOMPS_CRAYCLANG_haswell=90
+PE_INTEL_FIXED_PKGCONFIG_PATH=/opt/cray/pe/mpt/7.7.10/gni/mpich-INTEL/16.0/lib/pkgconfig
+MODULEPATH=/opt/cray/pe/perftools/7.0.5/modulefiles:/opt/cray/ari/modulefiles:/opt/cray/pe/craype/2.6.1/modulefiles:/opt/cray/pe/modulefiles:/opt/cray/modulefiles:/opt/modulefiles:/soft/environment/modules/modulefiles
+PYTHONSTARTUP=/etc/pythonstart
+PE_LIBSCI_GENCOMPILERS_CRAY_x86_64=9.0
+PE_MPICH_NV_LIBS_nvidia20=-lcudart
+PE_MPICH_VOLATILE_PKGCONFIG_PATH=/opt/cray/pe/mpt/7.7.10/gni/mpich-@PRGENV@@PE_MPICH_DIR_DEFAULT64@/@PE_MPICH_GENCOMPS@/lib/pkgconfig
+SDK_HOME=/usr/lib64/jvm/java
+TZ=UTC
+LOADEDMODULES=modules/3.2.11.3:intel/19.0.5.281:craype-network-aries:craype/2.6.1:cray-libsci/19.06.1:udreg/2.3.2-6.0.7.1_5.15__g5196236.ari:ugni/6.0.14.0-6.0.7.1_3.15__gea11d3d.ari:pmi/5.0.14:dmapp/7.1.1-6.0.7.1_6.6__g45d1b37.ari:gni-headers/5.0.12.0-6.0.7.1_3.13__g3b1768f.ari:xpmem/2.2.15-6.0.7.1_5.13__g7549d06.ari:job/2.2.3-6.0.7.1_5.48__g6c4e934.ari:dvs/2.7_2.2.120-6.0.7.1_12.5__g74cb2cc4:alps/6.6.43-6.0.7.1_5.51__ga796da32.ari:rca/2.2.18-6.0.7.1_5.52__g2aa4f39.ari:atp/2.1.3:perftools-base/7.0.5:PrgEnv-intel/6.0.5:craype-mic-knl:cray-mpich/7.7.10:nompirun/nompirun:darshan/3.1.8:trackdeps:xalt:cray-python/3.6.1.1
+PE_LIBSCI_GENCOMPILERS_CRAYCLANG_x86_64=9.0
+PE_MPICH_DEFAULT_DIR_CRAYCLANG_DEFAULT64=64
+SHMEM_ABORT_ON_ERROR=1
+CRAY_DMAPP_POST_LINK_OPTS=-L/opt/cray/dmapp/7.1.1-6.0.7.1_6.6__g45d1b37.ari/lib64
+PE_FFTW_DEFAULT_TARGET_ivybridge=ivybridge
+PE_FFTW_DEFAULT_TARGET_share=share
+PE_FFTW_DEFAULT_TARGET_x86_skylake=x86_skylake
+PE_PETSC_DEFAULT_GENCOMPILERS_INTEL_x86_skylake=19.0
+PE_PKG_CONFIG_PATH=/opt/cray/pe/cti/1.0.8/lib/pkgconfig:/opt/cray/pe/cti/1.0.7/lib/pkgconfig:/opt/cray/pe/cti/1.0.6/lib/pkgconfig:/opt/cray/pe/cti/1.0.4/lib/pkgconfig:/opt/cray/pe/cti/1.0.5/lib/pkgconfig
+CRAY_RCA_INCLUDE_OPTS=-I/opt/cray/rca/2.2.18-6.0.7.1_5.52__g2aa4f39.ari/include -I/opt/cray/krca/2.2.4-6.0.7.1_5.48__g8505b97.ari/include -I/opt/cray-hss-devel/8.0.0/include 
+PAT_BUILD_PAPI_BASEDIR=/opt/cray/pe/papi/5.6.0.5
+PE_LIBSCI_OMP_REQUIRES_openmp=_mp
+PE_TPSL_DEFAULT_GENCOMPILERS_CRAY_x86_skylake=9.0
+PE_TPSL_DEFAULT_GENCOMPILERS_INTEL_x86_64=19.0
+PE_TPSL_DEFAULT_GENCOMPS_CRAYCLANG_x86_skylake=90
+CRAY_MPICH_DIR=/opt/cray/pe/mpt/7.7.10/gni/mpich-intel/16.0
+PE_MPICH_CXX_PKGCONFIG_LIBS=mpichcxx
+DB2_HOME=/dbhome/db2cat/sqllib
+DAALROOT=/theta-archive/intel/compilers_and_libraries_2019.5.281/linux/daal
+PE_CRAYCLANG_DEFAULT_FIXED_PKGCONFIG_PATH=/opt/cray/pe/parallel-netcdf/1.11.1.0/CRAYCLANG/9.0/lib/pkgconfig:/opt/cray/pe/netcdf-hdf5parallel/4.6.3.1/CRAYCLANG/9.0/lib/pkgconfig:/opt/cray/pe/netcdf/4.6.3.1/CRAYCLANG/9.0/lib/pkgconfig:/opt/cray/pe/hdf5-parallel/1.10.5.1/CRAYCLANG/9.0/lib/pkgconfig:/opt/cray/pe/hdf5/1.10.5.1/CRAYCLANG/9.0/lib/pkgconfig
+PE_LIBSCI_DEFAULT_GENCOMPS_INTEL_x86_64=160
+PE_MPICH_PKGCONFIG_VARIABLES=PE_MPICH_NV_LIBS_@accelerator@:PE_MPICH_ALTERNATE_LIBS_@multithreaded@:PE_MPICH_ALTERNATE_LIBS_@dpm@
+PE_PETSC_DEFAULT_GENCOMPS_CRAY_x86_skylake=90
+APP2_STATE=7.0.5
+CRAY_PMI_POST_LINK_OPTS=-L/opt/cray/pe/pmi/5.0.14/lib64
+PE_HDF5_DEFAULT_FIXED_PRGENV=CRAY CRAYCLANG INTEL
+PE_TPSL_DEFAULT_GENCOMPILERS_INTEL_x86_skylake=19.0
+PE_TPSL_DEFAULT_VOLATILE_PKGCONFIG_PATH=/opt/cray/pe/tpsl/19.06.1/@PRGENV@/@PE_TPSL_DEFAULT_GENCOMPS@/@PE_TPSL_DEFAULT_TARGET@/lib/pkgconfig
+CRAY_MPICH2_VER=7.7.10
+PE_MPICH_PKGCONFIG_LIBS=mpich
+GPG_TTY=/dev/pts/83
+INTEL_PYTHONHOME=/theta-archive/intel/debugger_2019/python/intel64
+PE_GA_DEFAULT_GENCOMPILERS_GNU=8.2 7.3
+PE_LIBSCI_VOLATILE_PKGCONFIG_PATH=/opt/cray/pe/libsci/19.06.1/@PRGENV@/@PE_LIBSCI_GENCOMPS@/@PE_LIBSCI_TARGET@/lib/pkgconfig
+PE_MPICH_ALTERNATE_LIBS_multithreaded=_mt
+PE_NETCDF_DEFAULT_FIXED_PRGENV=CRAY CRAYCLANG INTEL
+PE_PARALLEL_NETCDF_DEFAULT_FIXED_PRGENV=CRAY CRAYCLANG INTEL
+PE_TRILINOS_DEFAULT_GENCOMPS_CRAYCLANG_x86_64=90
+HOME=/home/USER
+SHLVL=2
+JDK_HOME=/usr/lib64/jvm/java
+QT_SYSTEM_DIR=/usr/share/desktop-data
+CRAY_LIBSCI_VERSION=19.06.1
+PE_HDF5_PARALLEL_DEFAULT_VOLATILE_PRGENV=GNU
+PE_MPICH_TARGET_VAR_nvidia35=-lcudart
+PE_NETCDF_HDF5PARALLEL_DEFAULT_VOLATILE_PRGENV=GNU
+PE_PETSC_DEFAULT_GENCOMPILERS_CRAYCLANG_x86_64=9.0
+PE_PKGCONFIG_PRODUCTS_DEFAULT=PE_PAPI
+PE_TPSL_64_DEFAULT_GENCOMPS_GNU_haswell=82 71
+OSTYPE=linux
+LESS_ADVANCED_PREPROCESSOR=no
+IBM_DB_INCLUDE=/dbhome/db2cat/sqllib/include
+PE_MPICH_DEFAULT_VOLATILE_PKGCONFIG_PATH=/opt/cray/pe/mpt/7.7.10/gni/mpich-@PRGENV@@PE_MPICH_DEFAULT_DIR_DEFAULT64@/@PE_MPICH_DEFAULT_GENCOMPS@/lib/pkgconfig
+PE_TPSL_DEFAULT_VOLATILE_PRGENV=CRAY CRAY64 CRAYCLANG CRAYCLANG64 GNU GNU64 INTEL INTEL64
+XCURSOR_THEME=DMZ
+LS_OPTIONS=-N --color=none -T 0
+CRAY_PMI_INCLUDE_OPTS=-I/opt/cray/pe/pmi/5.0.14/include
+PE_TPSL_DEFAULT_GENCOMPS_INTEL_sandybridge=190
+WINDOWMANAGER=
+PRGENVMODULES=PrgEnv-cray:PrgEnv-gnu:PrgEnv-intel:PrgEnv-pgi
+CRAYPE_NETWORK_TARGET=aries
+ATP_MRNET_COMM_PATH=/opt/cray/pe/atp/2.1.3/libexec/atp_mrnet_commnode_wrapper
+PE_TPSL_DEFAULT_GENCOMPILERS_CRAY_haswell=9.0
+PKG_CONFIG_PATH_DEFAULT=/opt/cray/pe/papi/5.7.0.2/lib64/pkgconfig
+PE_MPICH_DIR_CRAY_DEFAULT64=64
+PE_PETSC_DEFAULT_GENCOMPILERS_GNU_haswell=8.2 7.1
+PE_TPSL_64_DEFAULT_GENCOMPILERS_CRAYCLANG_x86_skylake=9.0
+PE_TPSL_DEFAULT_GENCOMPILERS_INTEL_sandybridge=19.0
+LOGNAME=USER
+MACHTYPE=x86_64-suse-linux
+LESS=-M -I -R
+CRAY_GNI_HEADERS_INCLUDE_OPTS=-I/opt/cray/gni-headers/5.0.12.0-6.0.7.1_3.13__g3b1768f.ari/include
+CRAY_LIBSCI_PREFIX_DIR=/opt/cray/pe/libsci/19.06.1/INTEL/16.0/x86_64
+PE_HDF5_DEFAULT_GENCOMPS_GNU=
+PE_MPICH_NV_LIBS=
+PE_NETCDF_DEFAULT_REQUIRED_PRODUCTS=PE_HDF5
+PE_TPSL_64_DEFAULT_GENCOMPILERS_GNU_haswell=8.2 7.1
+PE_TPSL_64_DEFAULT_GENCOMPILERS_INTEL_sandybridge=19.0
+PE_TPSL_DEFAULT_GENCOMPS_GNU_x86_64=82 71
+PE_TRILINOS_DEFAULT_REQUIRED_PRODUCTS=PE_MPICH:PE_HDF5_PARALLEL:PE_NETCDF_HDF5PARALLEL:PE_LIBSCI:PE_TPSL
+PYTHONPATH=/opt/python/3.6.1.1
+CVS_RSH=ssh
+DMAPP_ABORT_ON_ERROR=1
+PE_LIBSCI_DEFAULT_GENCOMPILERS_CRAYCLANG_x86_64=9.0
+PE_LIBSCI_GENCOMPS_CRAYCLANG_x86_64=90
+PE_LIBSCI_OMP_REQUIRES=
+PE_MPICH_DEFAULT_GENCOMPILERS_CRAY=9.0
+PE_TRILINOS_DEFAULT_GENCOMPS_GNU_x86_64=82 71
+PE_MPICH_GENCOMPS_CRAY=90
+SSH_CONNECTION=73.51.233.101 60878 140.221.69.22 22
+CLASSPATH=/theta-archive/intel/compilers_and_libraries_2019.5.281/linux/daal/lib/daal.jar:/dbhome/db2cat/sqllib/java/db2java.zip:/dbhome/db2cat/sqllib/java/sqlj.zip:/dbhome/db2cat/sqllib/function:/dbhome/db2cat/sqllib/java/db2jcc_license_cu.jar:/dbhome/db2cat/sqllib/tools/clpplus.jar:/dbhome/db2cat/sqllib/tools/jline-0.9.93.jar:/dbhome/db2cat/sqllib/java/db2jcc.jar:.
+XDG_DATA_DIRS=/usr/share
+TOOLMODULES=apprentice:apprentice2:atp:chapel:cray-lgdb:cray-snplauncher:craypat:craypkg-gen:ddt:gdb:iobuf:papi:perftools:perftools-lite:stat:totalview:xt-craypat:xt-lgdb:xt-papi:xt-totalview
+DVS_INCLUDE_OPTS=-I/opt/cray/dvs/2.7_2.2.120-6.0.7.1_12.5__g74cb2cc4/include
+PE_LIBSCI_DEFAULT_REQUIRED_PRODUCTS=PE_MPICH
+PE_MPICH_DEFAULT_FIXED_PRGENV=INTEL
+PE_MPICH_DEFAULT_GENCOMPS_GNU=82 81 71
+PE_TPSL_DEFAULT_GENCOMPILERS_CRAY_sandybridge=9.0
+TRACKDEPS_CMDS=cc1 cc1plus f951 clang clang-3.9 clang-4.0 clang-5.0 clang-6.0 clang-7.0 cpp as mcpcom fortcom ccfe ftnfe driver ar ld.bfd ld.gold ld
+MODULESHOME=/opt/cray/pe/modules/3.2.11.3
+CRAY_PRGENVINTEL=loaded
+PE_GA_DEFAULT_FIXED_PRGENV=CRAY INTEL
+PE_LIBSCI_DEFAULT_GENCOMPS_CRAYCLANG_x86_64=90
+PE_LIBSCI_DEFAULT_VOLATILE_PKGCONFIG_PATH=/opt/cray/pe/libsci/19.06.1/@PRGENV@/@PE_LIBSCI_DEFAULT_GENCOMPS@/@PE_LIBSCI_DEFAULT_TARGET@/lib/pkgconfig
+PE_TPSL_DEFAULT_GENCOMPILERS_GNU_sandybridge=8.2 7.1
+TRACKDEPS_LOG_PATH=/lus/theta-fs0/logs/trackdeps
+LESSOPEN=lessopen.sh %s
+PE_MPICH_NV_LIBS_nvidia35=-lcudart
+PE_PETSC_DEFAULT_GENCOMPILERS_CRAYCLANG_x86_skylake=9.0
+PE_PETSC_DEFAULT_VOLATILE_PKGCONFIG_PATH=/opt/cray/pe/petsc/3.11.2.0/complex/@PRGENV@/@PE_PETSC_DEFAULT_GENCOMPS@/@PE_PETSC_DEFAULT_TARGET@/lib/pkgconfig
+PKG_CONFIG_PATH=/soft/perftools/darshan/darshan-3.1.8/lib/pkgconfig:/opt/cray/rca/2.2.18-6.0.7.1_5.52__g2aa4f39.ari/lib64/pkgconfig:/opt/cray/alps/6.6.43-6.0.7.1_5.51__ga796da32.ari/lib64/pkgconfig:/opt/cray/xpmem/2.2.15-6.0.7.1_5.13__g7549d06.ari/lib64/pkgconfig:/opt/cray/gni-headers/5.0.12.0-6.0.7.1_3.13__g3b1768f.ari/lib64/pkgconfig:/opt/cray/dmapp/7.1.1-6.0.7.1_6.6__g45d1b37.ari/lib64/pkgconfig:/opt/cray/pe/pmi/5.0.14/lib64/pkgconfig:/opt/cray/ugni/6.0.14.0-6.0.7.1_3.15__gea11d3d.ari/lib64/pkgconfig:/opt/cray/udreg/2.3.2-6.0.7.1_5.15__g5196236.ari/lib64/pkgconfig:/opt/cray/pe/craype/2.6.1/pkg-config:/opt/cray/pe/iobuf/2.0.9/lib/pkgconfig:/opt/cray/pe/atp/2.1.3/lib/pkgconfig
+COMPILER_PATH=/opt/xalt/bin
+PELOCAL_PRGENV=true
+CRAYPAT_OPTS_EXECUTABLE=sbin/pat-opts
+LIBSCI_BASE_DIR=/opt/cray/pe/libsci/19.06.1
+PE_PETSC_DEFAULT_GENCOMPS_CRAYCLANG_haswell=90
+PE_TPSL_64_DEFAULT_GENCOMPS_INTEL_x86_64=190
+PE_TPSL_DEFAULT_GENCOMPS_CRAYCLANG_sandybridge=90
+INFOPATH=/theta-archive/intel/documentation_2019/en/debugger/gdb-ia/info
+LIBSCI_VERSION=19.06.1
+PE_LIBSCI_DEFAULT_PKGCONFIG_VARIABLES=PE_LIBSCI_DEFAULT_OMP_REQUIRES_@openmp@:PE_SCI_EXT_LIBPATH:PE_SCI_EXT_LIBNAME
+PE_MPICH_NV_LIBS_nvidia60=-lcudart
+PE_TPSL_64_DEFAULT_GENCOMPS_GNU_sandybridge=82 71
+XDG_RUNTIME_DIR=/run/user/34799
+CRAY_PRE_COMPILE_OPTS=-hnetwork=aries
+CRAY_ALPS_INCLUDE_OPTS=-I/opt/cray/alps/6.6.43-6.0.7.1_5.51__ga796da32.ari/include
+PE_FFTW_DEFAULT_TARGET_broadwell=broadwell
+PE_LIBSCI_GENCOMPILERS_INTEL_x86_64=16.0
+PE_TPSL_64_DEFAULT_GENCOMPILERS_GNU_x86_64=8.2 7.1
+PE_TPSL_DEFAULT_GENCOMPILERS_CRAYCLANG_haswell=9.0
+CRAY_CPU_TARGET=mic-knl
+CRAY_UGNI_INCLUDE_OPTS=-I/opt/cray/ugni/6.0.14.0-6.0.7.1_3.15__gea11d3d.ari/include
+CRAY_XPMEM_INCLUDE_OPTS=-I/opt/cray/xpmem/2.2.15-6.0.7.1_5.13__g7549d06.ari/include
+PE_LIBSCI_REQUIRED_PRODUCTS=PE_MPICH
+PE_PAPI_DEFAULT_ACCELL_FAMILY_LIBS=
+PE_PETSC_DEFAULT_GENCOMPILERS_GNU_x86_skylake=8.2 7.1
+PE_TPSL_64_DEFAULT_GENCOMPS_CRAY_x86_64=90
+craype_already_loaded=0
+PE_LIBSCI_DEFAULT_GENCOMPILERS_GNU_x86_64=8.1 7.1
+PE_LIBSCI_GENCOMPS_GNU_x86_64=81 71
+PE_TPSL_DEFAULT_GENCOMPS_INTEL_haswell=190
+LESSCLOSE=lessclose.sh %s %s
+DB2LIB=/dbhome/db2cat/sqllib/lib
+ATP_HOME=/opt/cray/pe/atp/2.1.3
+PE_FFTW_DEFAULT_TARGET_x86_64=x86_64
+PE_PETSC_DEFAULT_GENCOMPILERS_INTEL_x86_64=19.0
+PE_PETSC_DEFAULT_GENCOMPS_CRAYCLANG_x86_skylake=90
+G_BROKEN_FILENAMES=1
+CRAY_LD_LIBRARY_PATH=/opt/cray/pe/mpt/7.7.10/gni/mpich-intel/16.0/lib:/opt/cray/pe/perftools/7.0.5/lib64:/opt/cray/rca/2.2.18-6.0.7.1_5.52__g2aa4f39.ari/lib64:/opt/cray/alps/6.6.43-6.0.7.1_5.51__ga796da32.ari/lib64:/opt/cray/xpmem/2.2.15-6.0.7.1_5.13__g7549d06.ari/lib64:/opt/cray/dmapp/7.1.1-6.0.7.1_6.6__g45d1b37.ari/lib64:/opt/cray/pe/pmi/5.0.14/lib64:/opt/cray/ugni/6.0.14.0-6.0.7.1_3.15__gea11d3d.ari/lib64:/opt/cray/udreg/2.3.2-6.0.7.1_5.15__g5196236.ari/lib64:/opt/cray/pe/libsci/19.06.1/INTEL/16.0/x86_64/lib
+PE_FFTW_DEFAULT_TARGET_haswell=haswell
+PE_GA_DEFAULT_GENCOMPS_GNU=82 73
+PE_GA_DEFAULT_VOLATILE_PKGCONFIG_PATH=/opt/cray/pe/ga/5.3.0.10/@PRGENV@/@PE_GA_DEFAULT_GENCOMPS@/lib/pkgconfig
+PE_INTEL_DEFAULT_FIXED_PKGCONFIG_PATH=/opt/cray/pe/parallel-netcdf/1.11.1.0/INTEL/18.0/lib/pkgconfig:/opt/cray/pe/netcdf-hdf5parallel/4.6.3.1/INTEL/18.0/lib/pkgconfig:/opt/cray/pe/netcdf/4.6.3.1/INTEL/18.0/lib/pkgconfig:/opt/cray/pe/mpt/7.7.10/gni/mpich-INTEL/16.0/lib/pkgconfig:/opt/cray/pe/hdf5-parallel/1.10.5.1/INTEL/18.0/lib/pkgconfig:/opt/cray/pe/hdf5/1.10.5.1/INTEL/18.0/lib/pkgconfig:/opt/cray/pe/ga/5.3.0.10/INTEL/18.0/lib/pkgconfig
+PE_PAPI_DEFAULT_ACCEL_LIBS=
+PE_PETSC_DEFAULT_GENCOMPILERS_INTEL_haswell=19.0
+PE_SMA_DEFAULT_DIR_PGI_DEFAULT64=64
+PE_TPSL_64_DEFAULT_GENCOMPILERS_INTEL_x86_skylake=19.0
+PE_TRILINOS_DEFAULT_GENCOMPILERS_CRAYCLANG_x86_64=9.0
+COLORTERM=1
+JAVA_ROOT=/usr/lib64/jvm/java
+PE_MPICH_DEFAULT_DIR_CRAY_DEFAULT64=64
+PE_PETSC_DEFAULT_GENCOMPS_CRAY_haswell=90
+PE_PETSC_DEFAULT_GENCOMPS_GNU_x86_64=82 71
+PE_PETSC_DEFAULT_GENCOMPS_INTEL_x86_64=190
+intel_already_loaded=0
+BASH_FUNC_module%%=() {  eval `/opt/cray/pe/modules/3.2.11.3/bin/modulecmd bash $*`
+}
+LSB Version:	n/a
+Distributor ID:	SUSE
+Description:	SUSE Linux Enterprise Server 12 SP3
+Release:	12.3
+Codename:	n/a
+Linux thetalogin6 4.4.180-94.113-default #1 SMP Fri Dec 13 14:20:57 UTC 2019 (c6649f6) x86_64 x86_64 x86_64 GNU/Linux
+Architecture:          x86_64
+CPU op-mode(s):        32-bit, 64-bit
+Byte Order:            Little Endian
+CPU(s):                32
+On-line CPU(s) list:   0-31
+Thread(s) per core:    1
+Core(s) per socket:    16
+Socket(s):             2
+NUMA node(s):          2
+Vendor ID:             GenuineIntel
+CPU family:            6
+Model:                 63
+Model name:            Intel(R) Xeon(R) CPU E5-2698 v3 @ 2.30GHz
+Stepping:              2
+CPU MHz:               3185.899
+CPU max MHz:           3600.0000
+CPU min MHz:           1200.0000
+BogoMIPS:              4600.30
+Virtualization:        VT-x
+L1d cache:             32K
+L1i cache:             32K
+L2 cache:              256K
+L3 cache:              40960K
+NUMA node0 CPU(s):     0,2,4,6,8,10,12,14,16,18,20,22,24,26,28,30
+NUMA node1 CPU(s):     1,3,5,7,9,11,13,15,17,19,21,23,25,27,29,31
+Flags:                 fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush dts acpi mmx fxsr sse sse2 ss ht tm pbe syscall nx pdpe1gb rdtscp lm constant_tsc arch_perfmon pebs bts rep_good nopl xtopology nonstop_tsc aperfmperf eagerfpu pni pclmulqdq dtes64 monitor ds_cpl vmx smx est tm2 ssse3 sdbg fma cx16 xtpr pdcm pcid dca sse4_1 sse4_2 x2apic movbe popcnt tsc_deadline_timer aes xsave avx f16c rdrand lahf_lm abm ida arat epb invpcid_single pln pts dtherm kaiser tpr_shadow vnmi flexpriority ept vpid fsgsbase tsc_adjust bmi1 avx2 smep bmi2 erms invpcid cqm xsaveopt cqm_llc cqm_occup_llc
+MemTotal:       263704480 kB
+MemFree:        86375976 kB
+MemAvailable:   120495716 kB
+Buffers:          365032 kB
+Cached:         73389404 kB
+SwapCached:        79984 kB
+Active:         65581344 kB
+Inactive:       10418940 kB
+Active(anon):   63812612 kB
+Inactive(anon):  8378824 kB
+Active(file):    1768732 kB
+Inactive(file):  2040116 kB
+Unevictable:     8388688 kB
+Mlocked:         8388688 kB
+SwapTotal:      134217724 kB
+SwapFree:       133850464 kB
+Dirty:               288 kB
+Writeback:             0 kB
+AnonPages:      10563456 kB
+Mapped:          1437424 kB
+Shmem:          69945596 kB
+Slab:           90202540 kB
+SReclaimable:   32159584 kB
+SUnreclaim:     58042956 kB
+KernelStack:       35280 kB
+PageTables:       106876 kB
+NFS_Unstable:          0 kB
+Bounce:                0 kB
+WritebackTmp:          0 kB
+CommitLimit:    266069964 kB
+Committed_AS:   100889392 kB
+VmallocTotal:   34359738367 kB
+VmallocUsed:           0 kB
+VmallocChunk:          0 kB
+HardwareCorrupted:     0 kB
+AnonHugePages:   9113600 kB
+HugePages_Total:       0
+HugePages_Free:        0
+HugePages_Rsvd:        0
+HugePages_Surp:        0
+Hugepagesize:       2048 kB
+DirectMap4k:    30739156 kB
+DirectMap2M:    224886784 kB
+DirectMap1G:    14680064 kB
+NAME   MAJ:MIN RM   SIZE RO TYPE MOUNTPOINT
+loop0    7:0    0     3G  0 loop 
+loop1    7:1    0  34.5G  0 loop /var/opt/cray/imps-image-binding/PE/squash_mounts/squashfs_RjoxbR_mount_point
+loop2    7:2    0   1.6G  0 loop /var/opt/cray/imps-image-binding/diags/squash_mounts/squashfs_RJEzoL_mount_point
+loop3    7:3    0         0 loop 
+loop4    7:4    0         0 loop 
+loop5    7:5    0         0 loop 
+loop6    7:6    0         0 loop 
+loop7    7:7    0         0 loop 
+sda      8:0    0   700G  0 disk 
+|-sda1   8:1    0  1007K  0 part 
+|-sda2   8:2    0     2G  0 part /boot
+|-sda3   8:3    0    20G  0 part 
+|-sda4   8:4    0   256G  0 part /tmp
+`-sda5   8:5    0   128G  0 part [SWAP]
+sdb      8:16   0 417.3G  0 disk 
+|-sdb1   8:17   0    10G  0 part /var/crash
+`-sdb2   8:18   0 407.3G  0 part /var/opt/cray/persistent
+sr0     11:0    1  1024M  0 rom  
+[0:2:0:0]    disk    DELL     PERC H330 Mini   4.25  /dev/sda    751GB
+[0:2:1:0]    disk    DELL     PERC H330 Mini   4.25  /dev/sdb    448GB
+[10:0:0:0]   cd/dvd  PLDS     DVD-ROM DU-8D5LH FD51  /dev/sr0        -
