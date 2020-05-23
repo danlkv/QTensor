@@ -6,8 +6,9 @@ import utils_qaoa
 
 
 def as_json(size
+            , qaoa_layers=1
             , type='randomreg', degree=3, seed=42
-            , repr_way='dict_of_lists'
+            , repr_way='dict_of_dicts'
            ):
 
     """
@@ -18,11 +19,12 @@ def as_json(size
     types_allowed = ['randomreg', 'grid', 'rectgrid', 'randomgnp']
     if type in types_allowed:
         args = dict(S=size
+                    , p = qaoa_layers
                     , type=type
                     , degree=degree
                     , seed=seed
                    )
-        G = utils_qaoa.get_test_graph(**args)
+        G, n_qubits = utils_qaoa.get_test_expr_graph(**args)
         #dict_ = nx.to_dict_of_dicts(G)
         if repr_way=='dict_of_dicts':
             dict_ = nx.to_dict_of_dicts(G)
@@ -30,12 +32,13 @@ def as_json(size
             dict_ = nx.to_dict_of_lists(G)
         to_db =  {}
         # TODO: generator of id should be separate
-        to_db['_id'] = f"S{size}_{type}_d{degree}_s{seed}"
+        to_db['_id'] = f"p{qaoa_layers}_expr.S{size}_{type}_d{degree}_s{seed}"
         to_db['graph'] = dict_
         to_db['n_edges'] = G.number_of_edges()
         to_db['n_nodes'] = G.number_of_nodes()
+        to_db['n_qubits'] = n_qubits
         to_db['extra'] = args
-        to_db['tags'] = ['qaoa', 'maxCut']
+        to_db['tags'] = ['qaoa', 'maxCut', 'expr']
         str = json.dumps(to_db)
         print(str)
 
