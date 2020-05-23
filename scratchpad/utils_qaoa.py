@@ -5,20 +5,22 @@ import networkx as nx
 
 
 def get_test_graph(S, type='grid', **kw):
+    degree = kw.get('degree',4)
+    seed = kw.get('seed', 42)
+
     if type=='grid':
         G = nx.grid_2d_graph(S+1, (2+S)//2)
     elif type=='rectgrid':
         G = nx.grid_2d_graph(S, S)
     elif type=='rectgrid':
         G = nx.grid_2d_graph(S, S)
+
     elif type=='randomreg':
         n = 2*int(S*S/32)
-        d = kw.get('degree', 4)
-        G = nx.random_regular_graph(d, n, seed=kw.get('seed', 42))
+        G = nx.random_regular_graph(degree, n, seed=seed)
     elif type=='randomgnp':
         n = 2*int(S*S/32)
-        d = kw.get('degree', 4)
-        G = nx.gnm_random_graph(n, d*n//2, seed=kw.get('seed', 42))
+        G = nx.gnm_random_graph(n, degree*n//2, seed=seed)
 
     #G = nx.triangular_lattice_graph(S, S)
     # remove grid labelling
