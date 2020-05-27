@@ -2,7 +2,7 @@
 
 Three levels of logs:
 
- - Signatures of contractions only `log_localhost_signatures_N'
+ - Signatures of contractions only `log_localhost_signatures_N`
  - Signatures with buckets `log_with_buckets_N`
  - Full log `log_full_N`
 
