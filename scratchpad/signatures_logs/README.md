@@ -1,14 +1,12 @@
 # Log of operations performed
 
+Three levels of logs are provided:
 
-## signatures only
+ - Signatures of contractions only `log_localhost_signatures_N'
+ - Signatures with buckets `log_with_buckets_N`
+ - Full log `log_full_N`
 
-files: `log_localhost_signatures_N` where `N` is the size of task
-
-## signatures with bucket info
-
-
-files: `log_with_buckets_N` where `N` is the size of task
+Where `N` is the size of the task
 
 
 ### Signature format:
