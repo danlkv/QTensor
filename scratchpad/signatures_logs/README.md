@@ -30,5 +30,5 @@ For example:
 
 Format of bucket info: `[tensor] -> tensor_result`.
 
-The resulting tensor is logged to track dependence of operation.
+The resulting tensor is logged to track dependences of operations.
 
