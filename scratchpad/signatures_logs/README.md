@@ -19,7 +19,7 @@ for example:
 
 ```T_ijk * T_klj = [1,2,3], [3,4,2] -> [1,2,3,4]```
 
-### Bucket format:
+### Tensor format:
 
 `NAME( v_i, .... )` where `v_i` are unique indices of the tensor with id `i`
 
@@ -28,4 +28,7 @@ For example:
 ``` T_ijkl = E982(v_999,v_1007,v_1012,v_1014) ```
 
 
+Format of bucket info: `[tensor] -> tensor_result`.
+
+The resulting tensor is logged to track dependence of operation.
 
