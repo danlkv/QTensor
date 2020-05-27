@@ -33,7 +33,9 @@ def as_json(size
         to_db =  {}
         # TODO: generator of id should be separate
         to_db['_id'] = f"p{qaoa_layers}_expr.S{size}_{type}_d{degree}_s{seed}"
-        to_db['graph'] = dict_
+        # Note: mongodb will try to use all the nested dicts,
+        #       so store the graph as string
+        to_db['graph'] = json.dumps(dict_)
         to_db['n_edges'] = G.number_of_edges()
         to_db['n_nodes'] = G.number_of_nodes()
         to_db['n_qubits'] = n_qubits
