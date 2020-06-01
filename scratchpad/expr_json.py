@@ -17,6 +17,44 @@ def get_tensors_from_graph(graph, remove_data_key=False):
         tensors.append(tensor)
     return tensors
 
+def reorder_tensors(tensors, permutation):
+    ## independent
+    def permutation_to_dict(permutation):
+        perm_dict = {}
+        for n, idx in enumerate(permutation):
+            if isinstance(idx, int):
+                # handle int
+                perm_dict[idx] = n
+            else:
+                # handle qtree.optimizer.Var
+                if idx.name.startswith('v'):
+                    perm_dict[idx] = idx.copy(n)
+                else:
+                    perm_dict[idx] = idx.copy(n, name=idx.name)
+        return perm_dict
+    ##
+
+    perm_dict = permutation_to_dict(permutation)
+    for tensor in tensors:
+        new_indices = [perm_dict[idx] for idx in tensor['indices']]
+        tensor['indices'] = tuple(new_indices)
+    # the dicts are mutably modified 
+    return tensors
+
+def test_reorder_tensors_small():
+    tensors =[
+        {'indices':(1,2)}
+        ,{'indices':(2,2)}
+        ,{'indices':(4,1,3)}
+    ]
+
+    permutation = (2,4,1,3)
+    perm_tensors = reorder_tensors(tensors, permutation)
+    print(perm_tensors)
+    assert perm_tensors[0]['indices'] == (2,0)
+    assert perm_tensors[1]['indices'] == (0,0)
+    assert perm_tensors[2]['indices'] == (1,2,3)
+
 
 def as_json(size
             , qaoa_layers=1
@@ -60,5 +98,7 @@ def as_json(size
     else:
         raise Exception(f"Invalid graph type {type}, should be one of {types_allowed}")
 
-fire.Fire(as_json)
+print(__name__)
+if __name__ == "__main__":
+    fire.Fire(as_json)
 

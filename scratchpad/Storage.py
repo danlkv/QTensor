@@ -1,5 +1,5 @@
 from mongocat import MongoCat
-import JSON
+import json
 from bson import ObjectId
 from pathlib import Path
 
@@ -25,7 +25,7 @@ class FileStorage:
         else:
             id_ = object['_id']
 
-        line = JSON.dumps(object)
+        line = json.dumps(object)
         with open(self.filename, 'a+') as f:
             f.write(line+'\n')
 
