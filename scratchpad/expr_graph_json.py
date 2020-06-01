@@ -4,6 +4,19 @@ import networkx as nx
 
 import utils_qaoa
 
+def get_tensors_from_graph(graph, remove_data_key=False):
+    args = dict( data='tensor' )
+    if graph.is_multigraph():
+        args['keys'] = True
+
+    tensors = []
+    for edgedata in graph.edges.data(**args):
+        u, v, key, tensor = edgedata
+        if remove_data_key:
+            del tensor['data_key']
+        tensors.append(tensor)
+    return tensors
+
 
 def as_json(size
             , qaoa_layers=1
@@ -35,9 +48,9 @@ def as_json(size
         to_db['_id'] = f"p{qaoa_layers}_expr.S{size}_{type}_d{degree}_s{seed}"
         # Note: mongodb will try to use all the nested dicts,
         #       so store the graph as string
+        to_db['tensors'] = get_tensors_from_graph(G, remove_data_key=True)
+
         to_db['graph'] = json.dumps(dict_)
-        to_db['n_edges'] = G.number_of_edges()
-        to_db['n_nodes'] = G.number_of_nodes()
         to_db['n_qubits'] = n_qubits
         to_db['extra'] = args
         to_db['tags'] = ['qaoa', 'maxCut', 'expr']
