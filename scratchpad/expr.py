@@ -4,7 +4,7 @@ import networkx as nx
 
 import utils_qaoa
 
-def get_tensors_from_graph(graph, remove_data_key=False):
+def get_tensors_from_graph(graph):
     args = dict( data='tensor' )
     if graph.is_multigraph():
         args['keys'] = True
@@ -12,8 +12,6 @@ def get_tensors_from_graph(graph, remove_data_key=False):
     tensors = []
     for edgedata in graph.edges.data(**args):
         u, v, key, tensor = edgedata
-        if remove_data_key:
-            del tensor['data_key']
         tensors.append(tensor)
     # use only unique
     tensors = ({id(t):t for t in tensors}).values()
@@ -51,6 +49,8 @@ def as_json(size
         # Note: mongodb will try to use all the nested dicts,
         #       so store the graph as string
         to_db['tensors'] = get_tensors_from_graph(G, remove_data_key=True)
+        for t in to_db['tensors']:
+            del t['data_key']
 
         to_db['graph'] = json.dumps(dict_)
         to_db['n_qubits'] = n_qubits

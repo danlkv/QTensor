@@ -3,9 +3,11 @@ import json
 import networkx as nx
 import numpy as np
 import copy
+import sys
+sys.path.append('..')
 
 import utils_qaoa
-import expr_json
+import expr
 import qtree
 
 def reorder_tensors(tensors, permutation):
@@ -41,7 +43,7 @@ def test_reorder_tensors_in_graph():
         ,5
     )
 
-    tensors = expr_json.get_tensors_from_graph(G)
+    tensors = expr.get_tensors_from_graph(G)
     mapping = {v:i for i, v in enumerate(order)}
 
     tensors_orig = copy.deepcopy(tensors)
@@ -85,15 +87,17 @@ def test_reorder_tensors_small():
     assert perm_tensors[2]['indices'] == (1,2,3)
 
 def optimize_order(graph):
-    peo = qtree.graph_model.get_peo(graph, int_vars=True)
-    tensors
-
+    peo, tw = qtree.graph_model.get_peo(graph, int_vars=True)
+    mapping = {v:i for i, v in enumerate(peo)}
+    tensors = expr.get_tensors_from_graph(graph)
+    reorder_tensors(tensors, peo)
+    graph = nx.relabel_nodes(graph, mapping, copy=True)
+    return peo, tw, graph
 
 
 def as_json(size
             , qaoa_layers=1
             , type='randomreg', degree=3, seed=42
-            , repr_way='dict_of_dicts'
            ):
 
     """
@@ -110,19 +114,22 @@ def as_json(size
                     , seed=seed
                    )
         G, n_qubits = utils_qaoa.get_test_expr_graph(**args)
-        #dict_ = nx.to_dict_of_dicts(G)
-        if repr_way=='dict_of_dicts':
-            dict_ = nx.to_dict_of_dicts(G)
-        elif repr_way=='dict_of_lists':
-            dict_ = nx.to_dict_of_lists(G)
+        peo, tw, G = optimize_order(G)
+
         to_db =  {}
         # TODO: generator of id should be separate
-        to_db['_id'] = f"p{qaoa_layers}_expr.S{size}_{type}_d{degree}_s{seed}"
+        to_db['_id'] = f"ordered.p{qaoa_layers}_expr.S{size}_{type}_d{degree}_s{seed}"
         # Note: mongodb will try to use all the nested dicts,
         #       so store the graph as string
-        to_db['tensors'] = get_tensors_from_graph(G, remove_data_key=True)
+        to_db['tensors'] = expr.get_tensors_from_graph(G)
+        for t in to_db['tensors']:
+            del t['data_key']
 
-        to_db['graph'] = json.dumps(dict_)
+        to_db['transforms'] =[{
+            'type':'order',
+            'params': {'order':peo, 'tw':tw}
+        }]
+
         to_db['n_qubits'] = n_qubits
         to_db['extra'] = args
         to_db['tags'] = ['qaoa', 'maxCut', 'expr']
