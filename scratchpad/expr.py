@@ -48,7 +48,8 @@ def as_json(size
         to_db['_id'] = f"p{qaoa_layers}_expr.S{size}_{type}_d{degree}_s{seed}"
         # Note: mongodb will try to use all the nested dicts,
         #       so store the graph as string
-        to_db['tensors'] = get_tensors_from_graph(G, remove_data_key=True)
+        to_db['tensors'] = get_tensors_from_graph(G)
+
         for t in to_db['tensors']:
             del t['data_key']
 
