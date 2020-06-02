@@ -18,6 +18,11 @@ def get_tensors_from_graph(graph):
     tensors = list(tensors)
     return tensors
 
+def get_id(**args):
+    print(args)
+    id = "p{p}_expr.S{S}_{type}_d{degree}_seed{seed}".format(**args)
+    return id
+
 def as_json(size
             , qaoa_layers=1
             , type='randomreg', degree=3, seed=42
@@ -45,7 +50,7 @@ def as_json(size
             dict_ = nx.to_dict_of_lists(G)
         to_db =  {}
         # TODO: generator of id should be separate
-        to_db['_id'] = f"p{qaoa_layers}_expr.S{size}_{type}_d{degree}_s{seed}"
+        to_db['_id'] = get_id(**args)
         # Note: mongodb will try to use all the nested dicts,
         #       so store the graph as string
         to_db['tensors'] = get_tensors_from_graph(G)
