@@ -5,6 +5,7 @@ import sys
 sys.path.append('..')
 
 import utils_qaoa
+import utils
 import expr
 import qtree
 
@@ -89,8 +90,12 @@ def test_reorder_tensors_small():
     assert perm_tensors[1]['indices'] == (0,0)
     assert perm_tensors[2]['indices'] == (1,2,3)
 
-def optimize_order(graph):
-    peo, tw = qtree.graph_model.get_peo(graph, int_vars=True)
+def optimize_order(graph, ordering_algo='qbb'):
+    if ordering_algo=='qbb':
+        peo, tw = qtree.graph_model.get_peo(graph, int_vars=True)
+    if ordering_algo=='nghs':
+        peo, _nghs = utils.get_locale_peo(graph, utils.n_neighbors)
+        tw = max(_nghs) - 1
     mapping = {v:i for i, v in enumerate(peo)}
     tensors = expr.get_tensors_from_graph(graph)
     reorder_tensors(tensors, peo)

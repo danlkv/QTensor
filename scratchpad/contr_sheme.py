@@ -1,6 +1,7 @@
 import json
 import fire
 import sys
+import time
 import networkx as nx
 
 import expr_optim
@@ -24,11 +25,15 @@ def read_expressions():
 
 
 
-def as_json(read=True):
+def as_json(read=True
+            , ordering='qbb'
+           ):
     """
     Return a JSON representation of optimized expression
 
     """
+    if ordering not in ['qbb', 'nghs']:
+        raise Exception("ordering should be one of 'nghs', 'qbb'")
     if read:
         exprs = read_expressions()
     else:
@@ -41,11 +46,14 @@ def as_json(read=True):
     for G, expr_id in exprs:
         print(G.nodes())
 
-        peo, tw, G = expr_optim.optimize_order(G)
+        
+        start_t = time.time()
+        peo, tw, G = expr_optim.optimize_order(G, ordering_algo=ordering)
+        end_t = time.time()
 
         to_db =  {}
         # TODO: generator of id should be separate
-        to_db['_id'] = 'ordered_qbb.'+ expr_id
+        to_db['_id'] = f'ordered_{ordering}.'+ expr_id
         to_db['expr_id'] = expr_id
         # Note: mongodb will try to use all the nested dicts,
         #       so store the graph as string
@@ -56,9 +64,19 @@ def as_json(read=True):
             except KeyError:
                 pass
 
+        def get_machine_id():
+            import socket
+            import getpass
+            host = socket.gethostname()
+            user = getpass.getuser()
+            return user + '@' + host
+
         to_db['transforms'] =[{
-            'type':'order',
-            'params': {'order':peo, 'tw':tw, 'algo':'QuickBB'}
+            'type':'order'
+            ,'contract': {'order':peo}
+            ,'extra': {'tw':tw, 'algo': ordering
+                       ,'perf':{'time':end_t-start_t, 'run_by':get_machine_id()}
+                      }
         }]
 
         str = json.dumps(to_db)

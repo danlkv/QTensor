@@ -19,7 +19,6 @@ def get_tensors_from_graph(graph):
     return tensors
 
 def get_id(**args):
-    print(args)
     id = "p{p}_expr.S{S}_{type}_d{degree}_seed{seed}".format(**args)
     return id
 
