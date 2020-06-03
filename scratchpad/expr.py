@@ -26,7 +26,6 @@ def get_id(**args):
 def as_json(size
             , qaoa_layers=1
             , type='randomreg', degree=3, seed=42
-            , repr_way='dict_of_dicts'
            ):
 
     """
@@ -44,10 +43,7 @@ def as_json(size
                    )
         G, n_qubits = utils_qaoa.get_test_expr_graph(**args)
         #dict_ = nx.to_dict_of_dicts(G)
-        if repr_way=='dict_of_dicts':
-            dict_ = nx.to_dict_of_dicts(G)
-        elif repr_way=='dict_of_lists':
-            dict_ = nx.to_dict_of_lists(G)
+        graph_repr = nx.node_link_data(G)
         to_db =  {}
         # TODO: generator of id should be separate
         to_db['_id'] = get_id(**args)
@@ -58,7 +54,7 @@ def as_json(size
         for t in to_db['tensors']:
             del t['data_key']
 
-        to_db['graph'] = json.dumps(dict_)
+        to_db['graph'] = graph_repr
         to_db['n_qubits'] = n_qubits
         to_db['extra'] = args
         to_db['tags'] = ['qaoa', 'maxCut', 'expr']
@@ -68,7 +64,6 @@ def as_json(size
     else:
         raise Exception(f"Invalid graph type {type}, should be one of {types_allowed}")
 
-print(__name__)
 if __name__ == "__main__":
     fire.Fire(as_json)
 
