@@ -33,7 +33,7 @@ commands. Feel the power of UNIX philosophy!
 
 ### Optimize straight from db and store the result
 
-for example, take 100 qubits and p=1 tensor expression, and run QuickBB on it
+for example, take every expression for 100 qubits and p=1 tensor expression, and run QuickBB on it
 
 ```bash
 ⟩ mongocat -F -d tensim expr_graphs --query '{"n_qubits":100, "extra.p":1}' |\
