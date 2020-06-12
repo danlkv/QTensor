@@ -3,6 +3,8 @@ import fire
 import sys
 import time
 import networkx as nx
+import sys
+sys.path.append('..')
 
 import expr_optim
 import expr

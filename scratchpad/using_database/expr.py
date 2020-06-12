@@ -1,4 +1,6 @@
 import fire
+import sys
+sys.path.append('..')
 import json
 import networkx as nx
 
