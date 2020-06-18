@@ -27,11 +27,13 @@ for p in powers:
         duration_batch = end - start
         duration = duration_batch / batch
         loop_durations.append(duration)
-        if duration > 1:
-            batch /= 2
+        if duration_batch > 1:
+            batch = int(batch/2) + 1
 
+    median = np.median(loop_durations)
     mean = np.mean(loop_durations)
-    print(', '.join([str(N), str(mean)]))
+    max = np.max(loop_durations)
+    print(', '.join([str(N), str(median), str(mean), str(max)]))
 
     p_durations.append(mean)
 
