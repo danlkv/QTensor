@@ -6,7 +6,7 @@ print('Numpy config:')
 np.show_config()
 
 
-powers = range(3, 10)
+powers = range(3, 13)
 nloops = 100
 batch = 1000
 
@@ -28,13 +28,10 @@ for p in powers:
         duration = duration_batch / batch
         loop_durations.append(duration)
         if duration > 1:
-            duration /= 2
+            batch /= 2
 
     mean = np.mean(loop_durations)
     print(', '.join([str(N), str(mean)]))
 
     p_durations.append(mean)
-
-
-
 
