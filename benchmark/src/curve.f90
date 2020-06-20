@@ -1,6 +1,6 @@
-program   Test1
+program     Curve
 
-integer         n, p
+integer         n, p, batch
 integer         idx, jdx, power, maxiter
 double precision            tmp
 double precision            start, finish
@@ -15,31 +15,47 @@ double precision            marks(maxiter)
 
 external        DGEMM
 
+! Set number of iterations in internal loop
 batch = 1000
+
+! Iterate over different matrix sizes
 do p=3,power
+    ! Set new matrix sizes
     n = 2 ** p
+
+    ! Allocate square matrices
     allocate(A(n,n))
     allocate(B(n,n))
     allocate(C(n,n))
 
+    ! Randomly initialize values
     call random_number(A(n,n))
     call random_number(B(n,n))
     call random_number(C(n,n))
 
-
+    ! Try to load matrices in cache
     call DGEMM('N','N',n,n,n,alpha,A,n,B,n,beta,C,n)
+    
+    ! Get `maxiter` benchmark samples
     do idx=1,maxiter
+
+        ! Time `batch` evaluations
         call cpu_time(start)
-        do jdx=1, batch
+        do jdx=1,batch
             call DGEMM('N','N',n,n,n,alpha,A,  n,  B,  n,  beta,C,  n  )
         end do
         call cpu_time(finish)
+
+        ! Average time over batch size
         marks(idx) = (finish - start) / batch
+
+        ! If timing takes too long, reduce batch size if possible
         if (finish - start .gt. 1) then
             batch = batch / 2 + 1
         end if
     end do
 
+    ! Poor selection sort
     do idx=1,maxiter
         do jdx=idx,maxbatch
             if (marks(idx).gt.marks(jdx)) then
@@ -50,6 +66,7 @@ do p=3,power
         end do
     end do
 
+    ! Compute and print min, mean, median, max
     mi = marks(1)
     if (mod(maxiter, 2) == 0) then
         median = (marks(maxiter / 2) + marks(maxiter / 2 + 1)) / 2.0
@@ -62,6 +79,7 @@ do p=3,power
     print*
     print '(i6, 10(",", F15.12))', n, mi, median, mean,  ma
 
+    ! Deallocate matrices
     deallocate(A)
     deallocate(B)
     deallocate(C)
