@@ -26,7 +26,8 @@ build:
 	${CC} -I${INC} -m64 -mkl ./src/curve.f90 -Wl,--start-group ${GROUP} -Wl,--end-group -L${LIB} -liomp5 -lpthread -ldl ${OPTS} -o ./build/curve.out
 
 
-VARS=cycles,cache-misses,page-faults,L1-dcache-loads
+VARS=cycles,cache-misses,page-faults,L1-dcache-loads,L1-dcache-load-misses
+VARS1=$(VARS),L1-dcache-prefetches,L1-dcache-prefetch-misses
 stat: clean build
-	perf stat -B -e $(VARS) ./build/curve.out $(power)
+	perf stat -B -e $(VARS1) ./build/curve.out $(power)
 
