@@ -9,14 +9,14 @@ FLAGS = -m64 -mkl -pthread -static-intel -liomp5 -ldl
 
 build: clean
 	mkdir -p ./build
-	${CC} ${FLAGS} ./src/curve.f90 -o ./build/curve.out
+	${CC} ${FLAGS} -O0 ./src/curve.f90 -o ./build/curve.out
 
 debug: clean
 	${CC} ${FLAGS} -g -O0 -debug all ./src/curve.f90 -o ./build/curve.out
 
-bench: clean
+opt: clean
 	mkdir -p ./build
-	${CC} ${FLAGS} -O0 ./src/curve.f90 -o ./build/curve.out
+	${CC} ${FLAGS} -O3 ./src/curve.f90 -o ./build/curve.out
 
 VARS:=cycles,instructions$\
 ,cache-misses,page-faults$\
