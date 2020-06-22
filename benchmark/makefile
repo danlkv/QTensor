@@ -5,8 +5,8 @@ endif
 
 # HOST = $(shell hostname)
 
-CC=gfortran
-# CC = ifort
+# CC=gfortran
+CC = ifort
 
 INC = ${MKLROOT}/include
 

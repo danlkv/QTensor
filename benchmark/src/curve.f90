@@ -1,5 +1,7 @@
 program     Curve
 
+USE mkl_service
+
 integer         n, p, batch
 integer         idx, jdx, power, maxiter
 double precision            tmp
@@ -7,10 +9,12 @@ double precision            start, finish
 double precision            mi, median, mean, ma
 double precision            alpha, beta
 parameter       (alpha=1.0, beta=0.0)
-parameter       (power=13)
+parameter       (power=12)
+integer*8 maxn
 parameter       (maxn = 2 ** power)
 parameter       (maxiter=100)
-double precision, allocatable :: A(:,:), B(:,:), C(:,:)
+double precision A,B,C
+pointer (Aptr,A(maxn,*)), (Bptr,B(maxn,*)), (Cptr,C(maxn,*))
 double precision            marks(maxiter)
 
 external        DGEMM
@@ -18,15 +22,17 @@ external        DGEMM
 ! Set number of iterations in internal loop
 batch = 1000
 
+Aptr = mkl_calloc(maxn * maxn, 8, 64)
+Bptr = mkl_calloc(maxn * maxn, 8, 64)
+Cptr = mkl_calloc(maxn * maxn, 8, 64)
+
+
 ! Iterate over different matrix sizes
 do p=3,power
     ! Set new matrix sizes
     n = 2 ** p
 
     ! Allocate square matrices
-    allocate(A(n,n))
-    allocate(B(n,n))
-    allocate(C(n,n))
 
     ! Randomly initialize values
     call random_number(A(n,n))
@@ -34,7 +40,7 @@ do p=3,power
     call random_number(C(n,n))
 
     ! Try to load matrices in cache
-    call DGEMM('N','N',n,n,n,alpha,A,n,B,n,beta,C,n)
+    call DGEMM('N','N',n,n,n,alpha,A, ,B,n,beta,C,n)
     
     ! Get `maxiter` benchmark samples
     do idx=1,maxiter
@@ -79,12 +85,14 @@ do p=3,power
     print*
     print '(i6, 10(",", F15.12))', n, mi, median, mean,  ma
 
-    ! Deallocate matrices
-    deallocate(A)
-    deallocate(B)
-    deallocate(C)
 end do 
 
+! Deallocate matrices
+call mkl_free(Aptr)
+call mkl_free(Bptr)
+call mkl_free(Cptr)
+
 stop
+
 end
 
