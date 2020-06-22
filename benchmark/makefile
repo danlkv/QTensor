@@ -14,7 +14,7 @@ build: clean
 debug: clean
 	${CC} ${FLAGS} -g -O0 -debug all ./src/curve.f90 -o ./build/curve.out
 
-bench:
+bench: clean
 	mkdir -p ./build
 	${CC} ${FLAGS} -O0 ./src/curve.f90 -o ./build/curve.out
 
@@ -22,6 +22,6 @@ VARS:=cycles,instructions$\
 ,cache-misses,page-faults$\
 ,L1-dcache-loads,L1-dcache-load-misses$\
 ,L1-dcache-prefetches,L1-dcache-prefetch-misses
-stat: clean build
+stat: bench
 	perf stat -B -e $(subst : ,:, $(VARS)) ./build/curve.out $(power)
 
