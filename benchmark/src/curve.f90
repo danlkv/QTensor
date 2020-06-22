@@ -38,7 +38,7 @@ read(power_str, *, iostat=stat) power_arg
 print* , power_arg
 
 ! Iterate over different matrix sizes
-do p=3,power
+do p=power_arg,power_arg
     ! Set new matrix sizes
     n = 2 ** p
 
