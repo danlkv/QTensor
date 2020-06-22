@@ -18,7 +18,10 @@ build: clean
 	${CC} -m64 -mkl -pthread -static-intel ./src/curve.f90  -o ./build/curve.out
 
 
-VARS=cycles,cache-misses,page-faults,L1-dcache-loads
-stat: build
-	perf stat -B -e $(VARS) ./build/curve.out $(power)
+VARS:=cycles,instructions$\
+,cache-misses,page-faults$\
+,L1-dcache-loads,L1-dcache-load-misses$\
+,L1-dcache-prefetches,L1-dcache-prefetch-misses
+stat: clean build
+	perf stat -B -e $(subst : ,:, $(VARS)) ./build/curve.out $(power)
 
