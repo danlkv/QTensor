@@ -50,7 +50,7 @@ do p=3,power
     call random_number(C(n,n))
 
     ! Try to load matrices in cache
-    call DGEMM('N','N',n,n,n,alpha,A, ,B,n,beta,C,n)
+    call DGEMM('N','N',n,n,n,alpha,A,n,B,n,beta,C,n)
     
     ! Get `maxiter` benchmark samples
     do idx=1,maxiter
