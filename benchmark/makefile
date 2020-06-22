@@ -1,14 +1,5 @@
-
-ifndef MKLROOT
-	MKLROOT = /home/cameron/intel/mkl
-endif
-
-# HOST = $(shell hostname)
-
-# CC=gfortran
 CC = ifort
 
-INC = ${MKLROOT}/include
 
 GROUP = ${MKLROOT}/lib/intel64/libmkl_gf_lp64.a 
 GROUP += ${MKLROOT}/lib/intel64/libmkl_intel_thread.a 
@@ -21,12 +12,13 @@ OPTS = -DUSE_MM_MALLOC -DSTANDALONE -DOPENQU_HAVE_MPI -DMKL_ILP64
 clean:
 	-rm -rf ./build
 
-build:
+# -liomp5 -ldl 
+build: clean
 	mkdir -p ./build
-	${CC} -I${INC} -m64 -mkl ./src/curve.f90 -Wl,--start-group ${GROUP} -Wl,--end-group -L${LIB} -liomp5 -lpthread -ldl ${OPTS} -o ./build/curve.out
+	${CC} -m64 -mkl -pthread -static-intel ./src/curve.f90  -o ./build/curve.out
 
 
 VARS=cycles,cache-misses,page-faults,L1-dcache-loads
-stat: clean build
+stat: build
 	perf stat -B -e $(VARS) ./build/curve.out $(power)
 
