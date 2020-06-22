@@ -1,6 +1,8 @@
-program     Curve
+program Curve
 
 USE mkl_service
+use str2int_mod
+
 
 integer         n, p, batch
 integer         idx, jdx, power, maxiter
@@ -16,6 +18,9 @@ parameter       (maxiter=100)
 double precision A,B,C
 pointer (Aptr,A(maxn,*)), (Bptr,B(maxn,*)), (Cptr,C(maxn,*))
 double precision            marks(maxiter)
+character(len=3) power_str
+integer stat
+integer power_arg
 
 external        DGEMM
 
@@ -26,6 +31,11 @@ Aptr = mkl_calloc(maxn * maxn, 8, 64)
 Bptr = mkl_calloc(maxn * maxn, 8, 64)
 Cptr = mkl_calloc(maxn * maxn, 8, 64)
 
+! parse the power num
+call get_command_argument(1, power_str)
+print* , power_str
+read(power_str, *, iostat=stat) power_arg
+print* , power_arg
 
 ! Iterate over different matrix sizes
 do p=3,power
