@@ -11,7 +11,9 @@ import setuptools
 REQUIRED_PACKAGES = [
     'numpy==1.18.1',
     'networkx==2.3',
-    'matplotlib==3.1.3'
+    'matplotlib==3.1.3',
+    'cirq'
+
 ]
 
 setuptools.setup(name='qtree',
