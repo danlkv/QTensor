@@ -102,3 +102,11 @@ venv.bak/
 
 # mypy
 .mypy_cache/
+
+# IDEA Ignores #
+*.iml
+*.ipr
+*.iws
+.idea/
+out/
+local.properties
