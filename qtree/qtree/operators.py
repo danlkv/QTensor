@@ -216,7 +216,7 @@ def op_scale(factor, operator, name):
 class M(Gate):
     """
     Measurement gate. This is essentially the identity operator, but
-    it forces the inntroduction of a variable in the graphical model
+    it forces the introduction of a variable in the graphical model
     """
     def gen_tensor(self):
         return np.array([[1, 0], [0, 1]], dtype=defs.NP_ARRAY_TYPE)
@@ -245,18 +245,6 @@ class H(Gate):
     cirq_op = cirq.H
 
 
-class cZ(Gate):
-    """
-    Controlled :math:`Z` gate
-    """
-    def gen_tensor(self):
-        return np.array([[1, 1],
-                         [1, -1]],
-                        dtype=defs.NP_ARRAY_TYPE)
-    _changes_qubits = tuple()
-    cirq_op = cirq.CZ
-
-
 class Z(Gate):
     """
     :math:`Z`-gate
@@ -269,6 +257,19 @@ class Z(Gate):
     cirq_op = cirq.Z
 
 
+class cZ(Gate):
+    """
+    Controlled :math:`Z`-gate
+    """
+    def gen_tensor(self):
+        return np.array([1, 1, 1, -1],
+                        dtype=defs.NP_ARRAY_TYPE)
+    # or np.array([[[1., 0.],[0., 1.]],[[0., 1.],[1., 0.]]])
+
+    _changes_qubits = tuple()
+    cirq_op = cirq.CZ
+
+
 class T(Gate):
     """
     :math:`T`-gate
@@ -279,6 +280,43 @@ class T(Gate):
 
     _changes_qubits = tuple()
     cirq_op = cirq.T
+
+
+class Tdag(Gate):
+    """
+    :math:`T` inverse gate
+    """
+    def gen_tensor(self):
+        pass
+        return np.array([1, np.exp(-1.j*np.pi/4)],
+                        dtype=defs.NP_ARRAY_TYPE)
+
+    _changes_qubits = tuple()
+    cirq_op = cirq.inverse(cirq.T)
+
+
+class S(Gate):
+    """
+    :math:`S`-gate
+    """
+    def gen_tensor(self):
+        return np.array([1, 1j],
+                        dtype=defs.NP_ARRAY_TYPE)
+
+    _changes_qubits = tuple()
+    cirq_op = cirq.S
+
+
+class Sdag(Gate):
+    """
+    :math:`S` inverse gate
+    """
+    def gen_tensor(self):
+        return np.array([1, -1j],
+                        dtype=defs.NP_ARRAY_TYPE)
+
+    _changes_qubits = tuple()
+    cirq_op = cirq.inverse(cirq.S)
 
 
 class X_1_2(Gate):
@@ -334,6 +372,15 @@ class cX(Gate):
     cirq_op = cirq.CNOT
 
 
+class ccX(Gate):
+    def gen_tensor(self):
+        #TODO: tensor shapes
+        return np.array([])
+
+    _changes_qubits = (2, )
+    cirq_op = cirq.CCNOT
+
+
 class Y(Gate):
     def gen_tensor(self):
         return np.array([[0, -1j],
@@ -343,6 +390,57 @@ class Y(Gate):
     _changes_qubits = (0, )
 
     def cirq_op(self, x): return cirq.Y(x)
+
+
+class cY(Gate):
+    def gen_tensor(self):
+        return np.array([[[1., 0.],
+                          [0., 1.]],
+                         [[0., -1j],
+                          [1j, 0.]]])
+
+    _changes_qubits = (0, )
+
+    def cirq_op(self, x): pass
+
+
+class YPhase(ParametricGate):
+    """A gate that rotates around the Y axis of the Bloch sphere.
+
+        The unitary matrix of ``YPowGate(exponent=t)`` is:
+
+            [[g·c, -g·s],
+             [g·s, g·c]]
+
+        where:
+
+            c = cos(π·t/2)
+            s = sin(π·t/2)
+            g = exp(i·π·t/2).
+    """
+
+    _changes_qubits = tuple()
+
+    @staticmethod
+    def _gen_tensor(**parameters):
+        """Rotation along Y axis"""
+        alpha = parameters['alpha']
+
+        c = np.cos(np.pi * alpha / 2)
+        s = np.sin(np.pi * alpha / 2)
+        g = np.exp(1j * np.pi * alpha / 2)
+
+        return np.array([[g * c, -1 * g * s],
+                         [g * s, g * c]])
+
+    def cirq_op(self, x): return cirq.YPowGate(
+            exponent=float(self._parameters['alpha']))(x)
+
+
+def ry(parameters: [float], *qubits):
+    """Arbitrary :math:`Y` rotation"""
+
+    return YPhase(*qubits, alpha=parameters[0]/np.pi)
 
 
 class ZPhase(ParametricGate):
@@ -365,10 +463,10 @@ class ZPhase(ParametricGate):
             exponent=float(self._parameters['alpha']))(x)
 
 
-def rz(rads):
+def rz(parameters: [float], *qubits):
     """Arbitrary :math:`Z` rotation"""
 
-    return ZPhase(alpha=rads/np.pi)
+    return ZPhase(*qubits, alpha=parameters[0]/np.pi)
 
 
 class XPhase(ParametricGate):
@@ -397,10 +495,10 @@ class XPhase(ParametricGate):
             exponent=float(self._parameters['alpha']))(x)
 
 
-def rx(rads):
+def rx(parameters: [float], *qubits):
     """Arbitrary :math:`X` rotation"""
 
-    return XPhase(alpha=rads/np.pi - 0.5)
+    return XPhase(*qubits, alpha=parameters[0]/np.pi - 0.5)
 
 
 class XPhase(ParametricGate):
@@ -427,6 +525,57 @@ class XPhase(ParametricGate):
 
     def cirq_op(self, x): return cirq.XPowGate(
             exponent=float(self._parameters['alpha']))(x)
+
+
+class U(ParametricGate):
+    """ Arbitrary single qubit unitary operator
+    U(t, p, l) =
+    [exp(-j*(p+l)/2)*c, -exp(-j*(p-l)/2)*s],
+    [exp( j*(p-l)/2)*s,  exp( j*(p+l)/2)*c]
+
+    where c = cos(t/2)
+          s = sin(t/2)
+    """
+
+    _changes_qubits = (0,)
+
+    @staticmethod
+    def _gen_tensor(**parameters):
+        """Rotation along X axis"""
+        theta = parameters['theta']
+        phi = parameters['phi']
+        lambda_param = parameters['lambda_param']
+
+        c = np.cos(theta / 2)
+        s = np.sin(theta / 2)
+
+        mat_00 = np.exp(-1j * (phi + lambda_param) / 2) * c
+        mat_01 = -np.exp(-1j * (phi - lambda_param) / 2) * s
+        mat_10 = np.exp(1j * (phi - lambda_param) / 2) * s
+        mat_11 = np.exp(1j * (phi + lambda_param) / 2) * c
+
+        return np.array([[mat_00, mat_01],
+                         [mat_10, mat_11]])
+
+    def cirq_op(self, x): pass
+
+
+def u3(parameters: [float], *qubits):
+    """Arbitrary single qubit rotation"""
+
+    return U(*qubits, theta=parameters[0], phi=parameters[1], lambda_param=parameters[2])
+
+
+def u2(parameters: [float], *qubits):
+    """Qiskit rotation operation"""
+
+    return U(*qubits, theta=np.pi/2, phi=parameters[0], lambda_param=parameters[1])
+
+
+def u1(parameters: [float], *qubits):
+    """Qiskit rotation operation"""
+
+    return U(*qubits, theta=0, phi=0, lambda_param=parameters[0])
 
 
 def read_circuit_file(filename, max_depth=None):
@@ -508,7 +657,7 @@ def read_circuit_file(filename, max_depth=None):
     return qubit_count, circuit
 
 
-def read_qasm_file(filename, max_depth=None):
+def read_qasm_file(filename, max_ins=None):
     """
     Read circuit file in the QASM format and return
     quantum circuit in the form of a list of lists
@@ -517,8 +666,8 @@ def read_qasm_file(filename, max_depth=None):
     ----------
     filename : str
              circuit file in the QASM format
-    max_depth : int
-             maximal depth of gates to read
+    max_ins : int
+             maximal depth of instructions to read
 
     Returns
     -------
@@ -527,8 +676,111 @@ def read_qasm_file(filename, max_depth=None):
     circuit : list of lists
             quantum circuit as a list of layers of gates
     """
+    from qiskit import QuantumCircuit
 
-    pass
+    output_circuit = []
+    indexed_circuit = []
+
+    qiskit_circuit = QuantumCircuit.from_qasm_file(filename)
+    circuit_qubits = qiskit_circuit.qubits
+
+    # creates the indexed circuit, which replaces
+    # qubits with their indices
+    for circuit_operation in qiskit_circuit:
+        qubit_list = []
+        for circuit_operation_qubits in circuit_operation[1]:
+            qubit_list.append(circuit_qubits.index(circuit_operation_qubits))
+
+        indexed_circuit.append((circuit_operation[0], qubit_list))
+
+    # for each operation, append the resulting internal gate representation(s)
+    for circuit_operation in indexed_circuit:
+        operations = _qiskit_operation_to_internal_representation(circuit_operation)
+        output_circuit.append(operations)
+
+    # flatten the list. It may be of arbitrary depth due to nested gate definitions
+    output_circuit = list(_flatten(output_circuit))
+
+    return_circuit = []
+    for gate in output_circuit:
+        return_circuit.append([gate])
+
+    qubit_count = qiskit_circuit.num_qubits
+    return qubit_count, return_circuit
+
+
+def _qiskit_operation_to_internal_representation(circuit_operation):
+    """
+    Read a modified circuit operation and return
+    an internal representation of it
+
+    Parameters
+    ----------
+    circuit_operation : (qiskit_instruction, [int])
+            tuple of a qiskit instruction and the
+            indices of the qubits it acts on
+
+    Returns
+    -------
+    output_circuit : list of gate operations in
+            internal representation
+    """
+    from qiskit import circuit
+    name_to_gate_dict = {
+        'id': I,
+        'u0': 'U_0',
+        'u1': u1,
+        'u2': u2,
+        'u3': u3,
+        'x': X,
+        'y': Y,
+        'z': Z,
+        'h': H,
+        's': S,
+        'sdg': Sdag,
+        't': T,
+        'tdg': Tdag,
+        'rx': rx,
+        'ry': ry,
+        'rz': rz,
+        'reset': '\\left|0\\right\\rangle',
+        'cx': cX,
+        'CX': cX,
+        'ccx': 'ccX',
+        'cy': cY,
+        'cz': cZ
+    }
+
+    instruction = circuit_operation[0]
+    instruction_qubits = circuit_operation[1]
+
+    output_circuit = []
+
+    # if the operation is part of the qiskit standard gate set
+    if (instruction.name in name_to_gate_dict) and (isinstance(instruction, circuit.gate.Gate)):
+        if instruction.params:
+            op = name_to_gate_dict[instruction.name](instruction.params, *instruction_qubits)
+        else:
+            op = name_to_gate_dict[instruction.name](*instruction_qubits)
+
+        output_circuit.append(op)
+
+    # if the operation is a custom-defined gate whose basic gate definition needs to be found
+    else:
+        if (isinstance(instruction, circuit.Instruction)) and instruction.definition:
+            for definition in instruction.definition:
+                # replaces the definition of which qubits the custom gate acts on with the actual qubit indices
+                new_qubit_list = []
+                for definition_qubits in definition[1]:
+                    new_qubit_list.append(instruction_qubits[definition_qubits.index])
+
+                defined_operation = (definition[0], new_qubit_list)
+
+                # recursively call the function until all nested custom gates are defined
+                op = _qiskit_operation_to_internal_representation(defined_operation)
+                output_circuit.append(op)
+
+    return output_circuit
 
 
 class placeholder:
@@ -560,3 +812,23 @@ class placeholder:
     @property
     def uuid(self):
         return self._uuid
+
+
+def _flatten(l):
+    """
+    https://stackoverflow.com/questions/2158395/flatten-an-irregular-list-of-lists
+    Parameters
+    ----------
+    l: iterable
+        arbitrarily nested list of lists
+
+    Returns
+    -------
+    generator of a flattened list
+    """
+    import collections
+    for el in l:
+        if isinstance(el, collections.Iterable) and not isinstance(el, (str, bytes)):
+            yield from _flatten(el)
+        else:
+            yield el
