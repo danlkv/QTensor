@@ -22,14 +22,15 @@ if not QUICKBB_COMMAND:
     log.warn('QuickBB solver is unavailable')
         
 # Check for Tamaki solver
-TAMAKI_SOLVER_PATH = os.path.dirname(
-    shutil.which('tw-exact'))
-if not TAMAKI_SOLVER_PATH:
-    tamaki_solver_path = os.path.join(
-        THIRDPARTY_PATH, 'tamaki_treewidth')
-    if os.path.isdir(tamaki_solver_path):
-        TAMAKI_SOLVER_PATH = tamaki_solver_path
-if not TAMAKI_SOLVER_PATH:
+try:
+    TAMAKI_SOLVER_PATH = os.path.dirname(
+        shutil.which('tw-exact'))
+    if not TAMAKI_SOLVER_PATH:
+        tamaki_solver_path = os.path.join(
+            THIRDPARTY_PATH, 'tamaki_treewidth')
+        if os.path.isdir(tamaki_solver_path):
+            TAMAKI_SOLVER_PATH = tamaki_solver_path
+except Exception:
     log.warn('Tamaki solver is unavailable')
 
 MAXIMAL_MEMORY = 1e22   # 100000000 64bit complex numbers
