@@ -47,6 +47,9 @@ class Gate:
     dagger():
             Class method that returns a daggered class
 
+    dagger_me():
+            Changes the instance's gen_tensor inplace
+
     is_parametric(): bool
             Returns False for gates without parameters
     """
@@ -72,14 +75,25 @@ class Gate:
 
     @classmethod
     def dagger(cls):
-        # Maybe the better way is to create a separate object
-        # Warning: dagger().dagger().dagger() will define many things
+        # This thing modifies the base class itself.
+        orig = cls.gen_tensor
         def conj_tensor(self):
-            t = self.gen_tensor()
+            t = orig(self)
             return t.conj().T
         cls.gen_tensor = conj_tensor
-        cls.__name__ += 'dag'
+        cls.__name__ += '.dag'
         return cls
+
+    def dagger_me(self):
+        # Maybe the better way is to create a separate object
+        # Warning: dagger().dagger().dagger() will define many things
+        orig = self.gen_tensor
+        def conj_tensor():
+            t = orig()
+            return t.conj().T
+        self.gen_tensor = conj_tensor
+        self._parameters['dag'] = not self._parameters['dag']
+        return self
 
     @property
     def name(self):
