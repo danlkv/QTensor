@@ -15,7 +15,7 @@
 
 # + [markdown] toc=true
 # <h1>Table of Contents<span class="tocSkip"></span></h1>
-# <div class="toc"><ul class="toc-item"><li><span><a href="#Sum-of-all-amplitudes-for-all-inputs" data-toc-modified-id="Sum-of-all-amplitudes-for-all-inputs-1"><span class="toc-item-num">1&nbsp;&nbsp;</span>Sum of all amplitudes for all inputs</a></span></li><li><span><a href="#Sum-of-amplitudes-for-single-input" data-toc-modified-id="Sum-of-amplitudes-for-single-input-2"><span class="toc-item-num">2&nbsp;&nbsp;</span>Sum of amplitudes for single input</a></span></li><li><span><a href="#Single-amplitude-for-single-input" data-toc-modified-id="Single-amplitude-for-single-input-3"><span class="toc-item-num">3&nbsp;&nbsp;</span>Single amplitude for single input</a></span></li><li><span><a href="#Simulate-all-output-states-for-given-input" data-toc-modified-id="Simulate-all-output-states-for-given-input-4"><span class="toc-item-num">4&nbsp;&nbsp;</span>Simulate all output states for given input</a></span><ul class="toc-item"><li><span><a href="#First-error.-Bucket-order" data-toc-modified-id="First-error.-Bucket-order-4.1"><span class="toc-item-num">4.1&nbsp;&nbsp;</span>First error. Bucket order</a></span></li><li><span><a href="#Second-error.-Variable-relabel" data-toc-modified-id="Second-error.-Variable-relabel-4.2"><span class="toc-item-num">4.2&nbsp;&nbsp;</span>Second error. Variable relabel</a></span></li></ul></li></ul></div>
+# <div class="toc"><ul class="toc-item"><li><span><a href="#Sum-of-all-amplitudes-for-all-inputs" data-toc-modified-id="Sum-of-all-amplitudes-for-all-inputs-1"><span class="toc-item-num">1&nbsp;&nbsp;</span>Sum of all amplitudes for all inputs</a></span></li><li><span><a href="#Sum-of-amplitudes-for-single-input" data-toc-modified-id="Sum-of-amplitudes-for-single-input-2"><span class="toc-item-num">2&nbsp;&nbsp;</span>Sum of amplitudes for single input</a></span></li><li><span><a href="#Single-amplitude-for-single-input" data-toc-modified-id="Single-amplitude-for-single-input-3"><span class="toc-item-num">3&nbsp;&nbsp;</span>Single amplitude for single input</a></span></li><li><span><a href="#Simulate-all-output-states-for-given-input" data-toc-modified-id="Simulate-all-output-states-for-given-input-4"><span class="toc-item-num">4&nbsp;&nbsp;</span>Simulate all output states for given input</a></span><ul class="toc-item"><li><span><a href="#First-error.-Bucket-order" data-toc-modified-id="First-error.-Bucket-order-4.1"><span class="toc-item-num">4.1&nbsp;&nbsp;</span>First error. Bucket order</a></span></li><li><span><a href="#Second-error.-Variable-relabel" data-toc-modified-id="Second-error.-Variable-relabel-4.2"><span class="toc-item-num">4.2&nbsp;&nbsp;</span>Second error. Variable relabel</a></span></li><li><span><a href="#Correct-usage" data-toc-modified-id="Correct-usage-4.3"><span class="toc-item-num">4.3&nbsp;&nbsp;</span>Correct usage</a></span></li></ul></li></ul></div>
 
 # +
 import numpy as np
@@ -145,6 +145,8 @@ result.data
 
 # Wrong result! Because the ordering is inverse. We first contracted our input variable, which was already sliced to the first state
 
+# ### Second error. Variable relabel
+
 # +
 reversed_buckets = list(reversed(numpy_buckets))
 
@@ -155,9 +157,9 @@ result = optimizer.bucket_elimination(reversed_buckets
 result.data
 # -
 
-# ### Second error. Variable relabel
+# ### Correct usage
 
-# Have to reorder the buckets
+# Have to reorder the buckets. From the **original** buckets, not numpy
 
 all_tensors = sum(tensor_expr, [])
 print(all_tensors)
