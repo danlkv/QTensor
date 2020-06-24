@@ -44,6 +44,9 @@ class Gate:
             others (like ccX). The order of dimensions IS ALWAYS
             (new_a, a, b_new, b, c, d_new, d, ...)
 
+    dagger():
+            This gate's gen_tensor is changed to return a daggered tensor
+
     is_parametric(): bool
             Returns False for gates without parameters
     """
@@ -51,7 +54,9 @@ class Gate:
     def __init__(self, *qubits):
         self._qubits = tuple(qubits)
         # supposedly unique id for an instance
-        self._parameters = {}
+        self._parameters = {
+            'dag':False
+        }
         self._check_qubit_count(qubits)
 
     def _check_qubit_count(self, qubits):
@@ -64,6 +69,16 @@ class Gate:
                 "Wrong number of qubits for gate {}:\n"
                 "{}, required: {}".format(
                     self.name, len(qubits), n_qubits))
+
+    def dagger(self):
+        # Maybe the better way is to create a separate object
+        # Warning: dagger().dagger().dagger() will define many things
+        def conj_tensor():
+            t = self.gen_tensor()
+            return t.conj().T
+        self.gen_tensor = conj_tensor
+        self._parameters['dag'] = not self._parameters['dag']
+        return self
 
     @property
     def name(self):
@@ -137,10 +152,9 @@ class ParametricGate(Gate):
             Returns True
     """
     def __init__(self, *qubits, **parameters):
-        self._qubits = tuple(qubits)
+        super().__init__(*qubits)
         # supposedly unique id for an instance
-        self._parameters = parameters
-        self._check_qubit_count(qubits)
+        self._parameters.update(parameters)
 
     def _check_qubit_count(self, qubits):
         # fill parameters and save a copy
