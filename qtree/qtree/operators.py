@@ -45,7 +45,7 @@ class Gate:
             (new_a, a, b_new, b, c, d_new, d, ...)
 
     dagger():
-            This gate's gen_tensor is changed to return a daggered tensor
+            Class method that returns a daggered class
 
     is_parametric(): bool
             Returns False for gates without parameters
@@ -70,15 +70,16 @@ class Gate:
                 "{}, required: {}".format(
                     self.name, len(qubits), n_qubits))
 
-    def dagger(self):
+    @classmethod
+    def dagger(cls):
         # Maybe the better way is to create a separate object
         # Warning: dagger().dagger().dagger() will define many things
-        def conj_tensor():
+        def conj_tensor(self):
             t = self.gen_tensor()
             return t.conj().T
-        self.gen_tensor = conj_tensor
-        self._parameters['dag'] = not self._parameters['dag']
-        return self
+        cls.gen_tensor = conj_tensor
+        cls.__name__ += 'dag'
+        return cls
 
     @property
     def name(self):
