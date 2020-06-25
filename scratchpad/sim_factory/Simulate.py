@@ -1,5 +1,6 @@
 import sys
 import networkx as nx
+import tensornetwork as tn
 import qtree
 
 sys.path.append('..')
@@ -17,12 +18,12 @@ class Simulation:
             graph.add_node(gate)
             other_gates = []
             for i, qubit in enumerate(self.iter_qubits(gate)):
-                prev_gate = qubit_map.get(qubit)
+                prev_gate, j = qubit_map.get(qubit, (None,None))
                 if prev_gate:
-                    other_gates.append(prev_gate)
+                    other_gates.append(gate)
+                    graph.add_edge(gate, prev_gate, indices=(i, j))
 
-                qubit_map[qubit] = gate
-                graph.add_edges_from([ gate, prev_gate ])
+                qubit_map[qubit] = gate, i
 
         return graph
 
@@ -96,3 +97,44 @@ class QtreeSimulate(Simulation):
         result = qtree.optimizer.bucket_elimination(
             sliced_buckets, qtree.np_framework.process_bucket_np)
         return result
+
+class TensoNetSimulate(Simulation):
+
+    def iter_qubits(self, gate):
+        return super().iter_qubits(gate)
+
+    def circuit_gates(self):
+        # Flatten the thing
+        all_gates = sum(self.qc, [])
+        return all_gates
+
+    def simulate(self):
+        return self.simulate_state()
+
+    def node_to_ndarray(self, node):
+        return node.gen_tensor().data
+
+    def simulate_state(self):
+        net = self.generate_tensor_net()
+        # Convert networkx to tensornet
+        nx_nodes = list(net.nodes())
+        tn_nodes = [tn.Node(self.node_to_ndarray(node), name=node.name) for node in nx_nodes]
+        node_map = dict(zip(nx_nodes, tn_nodes))
+
+        for u in nx_nodes:
+            for v in net[u]:
+                tn1, tn2 = node_map[u], node_map[v]
+                i, j = net[u][v]['indices']
+                print(tn1, tn2, i, j)
+                tn1[i] ^ tn2[j]
+
+        free_idxs = tn.get_all_dangling(tn_nodes)
+        print('free', free_idxs)
+        return tn.contractors.auto(tn_nodes)
+
+
+
+
+
+
+
