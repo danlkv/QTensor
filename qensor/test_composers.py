@@ -5,7 +5,7 @@ import numpy as np
 
 import cirq
 
-f get_test_problem():
+def get_test_problem():
     w = np.array([[0,1,1,0],[1,0,1,1],[1,1,0,1],[0,1,1,0]])
     G = nx.from_numpy_matrix(w)
     gamma, beta = [np.pi/3], [np.pi/2]
