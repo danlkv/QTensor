@@ -7,6 +7,7 @@ import networkx as nx
 def get_test_problem():
     w = np.array([[0,1,1,0],[1,0,1,1],[1,1,0,1],[0,1,1,0]])
     G = nx.from_numpy_matrix(w)
+
     G = nx.random_regular_graph(3, 10)
     gamma, beta = [np.pi/3], [np.pi/2]
     return G, gamma, beta
@@ -37,3 +38,19 @@ def test_qtree():
 
     assert result
 
+
+def test_qtree_energy():
+    G, gamma, beta = get_test_problem()
+
+    composer = QtreeQAOAComposer(
+        graph=G, gamma=[np.pi/3], beta=[np.pi/4])
+    composer.energy_expectation()
+
+    print(composer.circuit)
+    sim = QtreeSimulator()
+    result = sim.simulate(composer.circuit)
+    print(result.data)
+    E = result.data
+    print('Energy', E)
+    assert np.imag(E)<1e-6
+    assert E
