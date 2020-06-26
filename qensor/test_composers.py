@@ -1,18 +1,11 @@
-from .CircuitComposer import QAOAComposer
-from .OpFactory import CirqCreator, QtreeCreator
+from qensor import CirqQAOAComposer, QtreeQAOAComposer
 
 import networkx as nx
 import numpy as np
 
 import cirq
 
-class CirqQAOAComposer(QAOAComposer, CirqCreator):
-    pass
-
-class QtreeQAOAComposer(QAOAComposer, QtreeCreator):
-    pass
-
-def get_test_problem():
+f get_test_problem():
     w = np.array([[0,1,1,0],[1,0,1,1],[1,1,0,1],[0,1,1,0]])
     G = nx.from_numpy_matrix(w)
     gamma, beta = [np.pi/3], [np.pi/2]
@@ -24,7 +17,7 @@ def test_cirq():
 
     composer = CirqQAOAComposer(
         graph=G, gamma=[np.pi/3], beta=[np.pi/4])
-    composer.anzatz_state()
+    composer.ansatz_state()
     sim = cirq.Simulator()
     result = sim.simulate(composer.circuit)
 
@@ -32,3 +25,16 @@ def test_cirq():
     assert result
 
 
+def test_qtree():
+    G, gamma, beta = get_test_problem()
+
+    composer = QtreeQAOAComposer(
+        graph=G, gamma=[np.pi/3], beta=[np.pi/4])
+    composer.ansatz_state()
+
+    print(composer.circuit)
+    assert composer.circuit
+
+
+if __name__ =='__main__':
+    test_qtree()
