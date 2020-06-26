@@ -3,7 +3,7 @@
 ## Installation
 
 ```bash
-git clone ----recurse-submodules https://github.com/DaniloZZZ/Qensor
+git clone --recurse-submodules https://github.com/DaniloZZZ/Qensor
 cd Qensor
 cd qtree && pip install .
 pip install .
