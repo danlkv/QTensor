@@ -25,7 +25,7 @@ class QtreeQAOAComposer(QAOAComposer, QtreeCreator):
 
 def QAOA_energy(G, gamma, beta):
     composer = QtreeQAOAComposer(
-        graph=G, gamma=[np.pi/3], beta=[np.pi/4])
+        graph=G, gamma=gamma, beta=beta)
     composer.energy_expectation()
 
     print(composer.circuit)
