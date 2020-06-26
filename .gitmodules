@@ -1,6 +1,6 @@
 [submodule "qtree"]
 	path = qtree
-	url = git@github.com:DaniloZZZ/qtree.git
+	url = https://github.com/DaniloZZZ/qtree
 
 [submodule "Author-Kit"]
     path = data/artifact_description/Author-Kit
