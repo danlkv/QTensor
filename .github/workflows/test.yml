@@ -32,7 +32,7 @@ jobs:
       run: |
         pip install .
         pip install pytest mock
-        cd qtree && python setup.py install
+        cd qtree && pip install .
   
     - name: Test
       run: pytest
