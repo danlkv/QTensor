@@ -41,12 +41,6 @@ def get_test_circ_filename(root, size, depth=10, id_=0):
     grid = f'{size}x{size}'
     return f'{root}/inst/cz_v2/{grid}/inst_{grid}_{depth}_{id_}.txt'
 
-
-def test_circ(*args, **kwargs):
-    test_file = get_test_circ_filename(*args, **kwargs)
-    return qtree.read_circuit_file(test_file)
-
-
 def reorder_graph(graph, peo):
     graph, label_dict = qtree.graph_model.relabel_graph_nodes(
         graph, dict(zip(peo, sorted(graph.nodes(), key=int)))
