@@ -35,4 +35,4 @@ jobs:
         cd qtree && pip install .
   
     - name: Test
-      run: pytest
+      run: cd src && pytest
