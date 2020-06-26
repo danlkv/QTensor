@@ -1,4 +1,3 @@
-import tensornetwork as tn
 import qtree
 import cirq
 
