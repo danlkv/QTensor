@@ -55,5 +55,7 @@ class QAOAComposer(CircuitComposer):
         return self.circuit
 
     def energy_edge(self, u, v):
-        self.circuit.append(self.operators.cZ(u, v))
+        #self.circuit.append(self.operators.CC(u, v))
+        self.circuit.append(self.operators.Z(u))
+        self.circuit.append(self.operators.Z(v))
 

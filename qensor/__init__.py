@@ -36,5 +36,17 @@ def QAOA_energy(G, gamma, beta):
     if np.imag(E)>1e-6:
         print(f"Warning: Energy result imaginary part was: {np.imag(E)}")
 
-    return np.real(E)
+    """
+    C = sum(CC)
+    2*CC = 1 - ZZ
+    2*C = sum(1-CC)
+    2*C = Ed - sum(CC)
+    C = (Ed - E)/2
+    """
+    E = np.real(E)
+
+    Ed = G.number_of_edges()
+    C = (Ed - E)/2
+
+    return C
 

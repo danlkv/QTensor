@@ -1,5 +1,7 @@
 import cirq
 import qtree
+import qiskit.circuit.library as qiskit_lib
+import numpy as np
 
 class OpFactory:
     pass
@@ -17,6 +19,29 @@ class CirqFactory:
 
 QtreeFactory = qtree.operators
 
+class CC(qtree.operators.Gate):
+    name = 'CC'
+    _changes_qubits=tuple()
+    def gen_tensor(self):
+        tensor = np.array([
+            [0,1]
+            ,[1,1]
+        ])
+        return tensor
+
+
+QtreeFactory.CC = CC
+
+class QiskitFactory:
+    H=qiskit_lib.HGate
+    cX=qiskit_lib.CXGate
+
+    @staticmethod
+    def ZPhase(x, alpha):
+        return qiskit_lib.RZGate(phi=alpha*np.pi)
+
+    cZ=qiskit_lib.CZGate
+
 
 class CircuitCreator:
     operators = OpFactory
@@ -32,6 +57,9 @@ class CircuitCreator:
     def get_circuit(self):
         raise NotImplementedError
 
+    def apply_gate(self, gate, *qubits, **params):
+        self.circuit.append(gate(**params), *qubits)
+
 
 class CirqCreator(CircuitCreator):
     operators = CirqFactory
@@ -41,6 +69,9 @@ class CirqCreator(CircuitCreator):
     def get_circuit(self):
         return cirq.Circuit()
 
+    def apply_gate(self, gate, *qubits, **params):
+        self.circuit.append(gate(*qubits, **params))
+
 class QtreeCreator(CircuitCreator):
     operators = QtreeFactory
 
@@ -48,3 +79,7 @@ class QtreeCreator(CircuitCreator):
         return list(range(self.n_qubits))
     def get_circuit(self):
         return []
+
+    def apply_gate(self, gate, *qubits, **params):
+        self.circuit.append(gate(*qubits, **params))
+
