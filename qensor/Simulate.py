@@ -14,7 +14,7 @@ class Simulator:
 
 
 class QtreeSimulator(Simulator):
-    def __init__(self, bucket_backend=NumpyBackend):
+    def __init__(self, bucket_backend=NumpyBackend()):
         self.bucket_backend = bucket_backend
 
     def simulate(self, qc):
