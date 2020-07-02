@@ -1,4 +1,5 @@
 import qtree
+from qensor.ProcessingFrameworks import NumpyBackend
 import cirq
 
 from qensor import utils
@@ -13,6 +14,8 @@ class Simulator:
 
 
 class QtreeSimulator(Simulator):
+    def __init__(self, bucket_backend=NumpyBackend):
+        self.bucket_backend = bucket_backend
 
     def simulate(self, qc):
         return self.simulate_state(qc)
@@ -45,10 +48,10 @@ class QtreeSimulator(Simulator):
         slice_dict.update(
             qtree.utils.slice_from_bits(target_state, bra_vars)
         )
-        sliced_buckets = qtree.np_framework.get_sliced_np_buckets(
+        sliced_buckets = self.bucket_backend.get_sliced_np_buckets(
             perm_buckets, data_dict, slice_dict)
         result = qtree.optimizer.bucket_elimination(
-            sliced_buckets, qtree.np_framework.process_bucket_np)
+            sliced_buckets, self.bucket_backend.process_bucket_np)
         return result
 
 class CirqSimulator(Simulator):
