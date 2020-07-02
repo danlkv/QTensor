@@ -48,10 +48,10 @@ class QtreeSimulator(Simulator):
         slice_dict.update(
             qtree.utils.slice_from_bits(target_state, bra_vars)
         )
-        sliced_buckets = self.bucket_backend.get_sliced_np_buckets(
+        sliced_buckets = self.bucket_backend.get_sliced_buckets(
             perm_buckets, data_dict, slice_dict)
         result = qtree.optimizer.bucket_elimination(
-            sliced_buckets, self.bucket_backend.process_bucket_np)
+            sliced_buckets, self.bucket_backend.process_bucket)
         return result
 
 class CirqSimulator(Simulator):
