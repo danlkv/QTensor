@@ -54,8 +54,9 @@ class QAOAComposer(CircuitComposer):
             self.mixer_operator(beta[i])
         return self.circuit
 
-    def energy_edge(self, u, v):
+    def energy_edge(self, i, j):
         #self.circuit.append(self.operators.CC(u, v))
+        u, v = self.qubits[i], self.qubits[j]
         self.circuit.append(self.operators.Z(u))
         self.circuit.append(self.operators.Z(v))
 

@@ -35,6 +35,7 @@ def QAOA_energy(G, gamma, beta):
         sim = QtreeSimulator()
         result = sim.simulate(composer.circuit)
         E = result.data
+        print(E)
         total_E += E
 
     E = total_E
