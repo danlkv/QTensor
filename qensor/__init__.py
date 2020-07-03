@@ -24,15 +24,22 @@ class QtreeQAOAComposer(QAOAComposer, QtreeCreator):
         return self.circuit
 
 def QAOA_energy(G, gamma, beta):
-    composer = QtreeQAOAComposer(
-        graph=G, gamma=gamma, beta=beta)
-    composer.energy_expectation()
+    total_E = 0
 
-    print(composer.circuit)
-    sim = QtreeSimulator()
-    result = sim.simulate(composer.circuit)
-    print(result.data)
-    E = result.data
+    for edge in G.edges():
+        u,v = edge
+        # TODO: take only a neighbourhood part of the graph
+        composer = QtreeQAOAComposer(
+            graph=G, gamma=gamma, beta=beta)
+        composer.energy_edge(u,v)
+        sim = QtreeSimulator()
+        result = sim.simulate(composer.circuit)
+        E = result.data
+        total_E += E
+
+    E = total_E
+    #print(result.data)
+    #print(composer.circuit)
     if np.imag(E)>1e-6:
         print(f"Warning: Energy result imaginary part was: {np.imag(E)}")
 
