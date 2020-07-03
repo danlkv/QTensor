@@ -8,12 +8,10 @@ class CirqQAOAComposer(QAOAComposer, CirqCreator):
     pass
 
 class QtreeQAOAComposer(QAOAComposer, QtreeCreator):
-    def energy_expectation(self):
+    def energy_expectation(self, i, j):
         G = self.graph
         self.ansatz_state()
-        for i,j in G.edges():
-            u, v = self.qubits[i], self.qubits[j]
-            self.energy_edge(u, v)
+        self.energy_edge(i, j)
 
         beta, gamma = self.params['beta'], self.params['gamma']
         conjugate = QtreeQAOAComposer(G, beta=beta, gamma=gamma)
@@ -27,11 +25,11 @@ def QAOA_energy(G, gamma, beta):
     total_E = 0
 
     for edge in G.edges():
-        u,v = edge
+        i,j = edge
         # TODO: take only a neighbourhood part of the graph
         composer = QtreeQAOAComposer(
             graph=G, gamma=gamma, beta=beta)
-        composer.energy_edge(u,v)
+        composer.energy_expectation(i,j)
         sim = QtreeSimulator()
         result = sim.simulate(composer.circuit)
         E = result.data
