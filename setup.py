@@ -8,6 +8,7 @@ REQUIRED_PACKAGES = [
     'google-api-core[grpc]<=1.14.0',
     'cirq'
     ,'qiskit'
+    ,'pyrofiler'
 
 ]
 
