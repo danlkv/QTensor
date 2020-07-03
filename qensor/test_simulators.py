@@ -44,7 +44,7 @@ def test_qtree_energy():
 
     composer = QtreeQAOAComposer(
         graph=G, gamma=[np.pi/3], beta=[np.pi/4])
-    composer.energy_expectation()
+    composer.energy_expectation(*list(G.edges())[0])
 
     print(composer.circuit)
     sim = QtreeSimulator()
