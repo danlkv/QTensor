@@ -433,20 +433,22 @@ def main(file=None,p=5,shots=1,g=[],b=[],lang='ibm',opt_iters=50,ER=[]):
     gamma, beta = [-gamma/2/np.pi], [beta/1/np.pi]
     from qensor import QAOA_energy, QtreeQAOAComposer, QtreeSimulator
     from qensor import CirqQAOAComposer, CirqSimulator
-    composer = QtreeQAOAComposer(
-        graph=G, gamma=gamma, beta=beta)
-    composer.ansatz_state()
+    from qensor.ProcessingFrameworks import PerfNumpyBackend
 
-    print(composer.circuit)
-    sim = QtreeSimulator()
-    result = sim.simulate(composer.circuit)
+    def simulate_one_amp():
+        composer = QtreeQAOAComposer(
+            graph=G, gamma=gamma, beta=beta)
+        composer.ansatz_state()
+        print(composer.circuit)
+        sim = QtreeSimulator()
+        result = sim.simulate(composer.circuit)
+        print('Qensor 1 amp',result.data)
+        print('Qensor 1 prob',np.abs(result.data)**2)
 
-    print('Qensor 1 amp',result.data)
-    print('Qensor 1 prob',np.abs(result.data)**2)
-    qtree_amp = result.data
+    simulate_one_amp()
 
     start = time.time()
-    E = QAOA_energy(G, gamma, beta)
+    E = QAOA_energy(G, gamma, beta, profile=True)
     print('Qensor full time', time.time() - start)
     print('Qensor:')
     print(E)

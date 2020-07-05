@@ -3,6 +3,7 @@ import numpy as np
 from .CircuitComposer import QAOAComposer
 from .OpFactory import CirqCreator, QtreeCreator
 from qensor.Simulate import CirqSimulator, QtreeSimulator
+from qensor.ProcessingFrameworks import PerfNumpyBackend, NumpyBackend
 
 class CirqQAOAComposer(QAOAComposer, CirqCreator):
     pass
@@ -21,8 +22,13 @@ class QtreeQAOAComposer(QAOAComposer, QtreeCreator):
         self.circuit = self.circuit + list(reversed(conjugate))
         return self.circuit
 
-def QAOA_energy(G, gamma, beta):
+def QAOA_energy(G, gamma, beta, profile=False):
     total_E = 0
+    if profile:
+        backend = PerfNumpyBackend()
+    else:
+        backend = NumpyBackend()
+    sim = QtreeSimulator(bucket_backend=backend)
 
     for edge in G.edges():
         i,j = edge
@@ -30,9 +36,10 @@ def QAOA_energy(G, gamma, beta):
         composer = QtreeQAOAComposer(
             graph=G, gamma=gamma, beta=beta)
         composer.energy_expectation(i,j)
-        sim = QtreeSimulator()
         result = sim.simulate(composer.circuit)
         E = result.data
+        if profile:
+            print(backend.gen_report())
         print(E)
         total_E += E
 
