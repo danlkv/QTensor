@@ -33,7 +33,9 @@ class QtreeSimulator(Simulator):
                                                ignore_variables=ket_vars+bra_vars)
 
         peo_ints, treewidth = utils.get_locale_peo(graph, utils.n_neighbors)
-
+        print("graph_nodes:", graph.number_of_nodes())
+        print("max_treewidth:", max(treewidth))
+        # TODO: Get max of treewidth here, and graph.numberOfNodes()
         peo = [qtree.optimizer.Var(var, size=graph.nodes[var]['size'],
                         name=graph.nodes[var]['name'])
                     for var in peo_ints]
@@ -53,6 +55,7 @@ class QtreeSimulator(Simulator):
         result = qtree.optimizer.bucket_elimination(
             sliced_buckets, self.bucket_backend.process_bucket)
         return result
+
 
 class CirqSimulator(Simulator):
 

@@ -1,5 +1,18 @@
 from qtree import np_framework
 from pyrofiler import timing
+# from time import time
+
+
+# def printer(result, description='Profile results'):
+#     print(description, ':', result)
+#
+#
+# def timing(description: str, callback=printer) -> None:
+#     start = time()
+#     yield
+#     ellapsed_time = time() - start
+#     callback(ellapsed_time, description=description)
+
 
 class BucketBackend:
     def process_bucket(self, bucket, no_sum=False):
@@ -23,14 +36,15 @@ class PerfBackend(BucketBackend):
         self._print = print
         self._profile_results = {}
 
-    def _profile_callback(self, result, label, indices):
+    def _profile_callback(self, elapsed_time, label, indices):
         if self._print:
-            print(f"PROF:: perf data {label}: {result}")
-        self._profile_results[str(indices)] = indices, result
+            print(f"PROF:: perf data {label}: {elapsed_time}")
+        self._profile_results[str(indices)] = indices, elapsed_time
 
     def process_bucket(self, bucket, no_sum=False):
         indices = [tensor.indices for tensor in bucket]
-        with timing('process bucket time', indices
+        with timing('process bucket time'
+                , indices
                          , callback=self._profile_callback):
             return self.backend.process_bucket(bucket, no_sum=no_sum)
 
@@ -44,14 +58,21 @@ class PerfBackend(BucketBackend):
         max_lines = 25
         total_data = len(data)
         total_time = sum(d[1] for d in data)
-        rep = '\n'.join(report_lines[:max_lines])
-        if len(report_lines) > max_lines:
-            rep += f'\n ... and {total_data-max_lines} lines more...'
-        rep += '\n======\n'
-        rep += 'Total time: ' + str(total_time)
-        rep += '\nTotal bucket contractions: ' + str(total_data)
-        rep += '\nMean time for contraction: ' + str(total_time/total_data)
+        rep = ""
+        # rep = '\n'.join(report_lines[:max_lines])
+        # if len(report_lines) > max_lines:
+        #     rep += f'\n ... and {total_data-max_lines} lines more...'
+        # rep += '\n======\n'
+        # rep += 'Total time: ' + str(total_time)
+        # rep += '\nTotal bucket contractions: ' + str(total_data)
+        # rep += '\nMean time for a contraction: ' + str(total_time/total_data)
+        # rep += '\n'
+        # rep += '\n======\n'
+        rep += 'Total_time: ' + str(total_time)
+        rep += '\nNum_bucket_contractions: ' + str(total_data)
+        rep += '\nMean_time_for_contraction: ' + str(total_time / total_data)
         rep += '\n'
+        # rep += '\n======\n'
         return rep
 
 
@@ -59,3 +80,4 @@ class PerfBackend(BucketBackend):
 
 class PerfNumpyBackend(PerfBackend):
     Backend = NumpyBackend
+    backend = Backend

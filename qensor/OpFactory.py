@@ -18,6 +18,7 @@ class CirqFactory:
     cZ=cirq.CZ
 
 QtreeFactory = qtree.operators
+# QtreeFactory = qtree.operators_full_matrix
 
 class CC(qtree.operators.Gate):
     name = 'CC'
