@@ -20,25 +20,34 @@ class QtreeSimulator(Simulator):
     def simulate(self, qc):
         return self.simulate_state(qc)
 
-    def simulate_state(self, qc):
-        all_gates = qc
-        n_qubits = len(set(sum([g.qubits for g in all_gates], tuple())))
-        circuit = [[g] for g in qc]
-
-
-        buckets, data_dict, bra_vars, ket_vars = qtree.optimizer.circ2buckets(
-            n_qubits, circuit)
-
+    def optimize_buckets(self, buckets, ignored_vars=[]):
         graph = qtree.graph_model.buckets2graph(buckets,
-                                               ignore_variables=ket_vars+bra_vars)
+                                               ignore_variables=ignored_vars)
 
         peo_ints, treewidth = utils.get_locale_peo(graph, utils.n_neighbors)
+        print('max tw', max(treewidth))
 
         peo = [qtree.optimizer.Var(var, size=graph.nodes[var]['size'],
                         name=graph.nodes[var]['name'])
                     for var in peo_ints]
 
-        peo = ket_vars + bra_vars + peo
+        peo = ignored_vars + peo
+        self.peo = peo
+        return peo
+
+    def simulate_state(self, qc, peo=None):
+        all_gates = qc
+        n_qubits = len(set(sum([g.qubits for g in all_gates], tuple())))
+        self.n_qubits = n_qubits
+        circuit = [[g] for g in qc]
+
+
+        buckets, data_dict, bra_vars, ket_vars = qtree.optimizer.circ2buckets(
+            n_qubits, circuit)
+        
+        if peo is None:
+            peo = self.optimize_buckets(buckets, ignored_vars=bra_vars+ket_vars)
+
         perm_buckets, perm_dict = qtree.optimizer.reorder_buckets(buckets, peo)
         ket_vars = sorted([perm_dict[idx] for idx in ket_vars], key=str)
         bra_vars = sorted([perm_dict[idx] for idx in bra_vars], key=str)

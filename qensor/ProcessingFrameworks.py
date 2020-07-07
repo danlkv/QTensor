@@ -18,9 +18,10 @@ class NumpyBackend(BucketBackend):
 class PerfBackend(BucketBackend):
     Backend = BucketBackend
 
-    def __init__(self, *args, print=False, **kwargs):
+    def __init__(self, *args, print=False, num_lines=10, **kwargs):
         self.backend = self.Backend(*args, **kwargs)
         self._print = print
+        self.max_lines = num_lines
         self._profile_results = {}
 
     def _profile_callback(self, result, label, indices):
@@ -41,7 +42,7 @@ class PerfBackend(BucketBackend):
         data = self._profile_results.values()
         data = sorted(data, key= lambda pair: pair[1], reverse=True)
         report_lines =  [str([ d[1], d[0] ]) for d in data]
-        max_lines = 25
+        max_lines = self.max_lines
         total_data = len(data)
         total_time = sum(d[1] for d in data)
         rep = '\n'.join(report_lines[:max_lines])
