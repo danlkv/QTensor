@@ -383,59 +383,13 @@ def main(file=None,p=5,shots=1,g=[],b=[],lang='ibm',opt_iters=50,ER=[]):
 
 
 
-
-    ##TESTING STARTS HERE##
-
-    G = networkx.random_regular_graph(3, 6)
-    
-    #meta_adj_mat,G = create_graph(10,1,file)
-    #print(G)
-    meta_adj_mat = networkx.to_numpy_array(G)
-    #print(meta_adj_mat)
-    gamma, beta = np.pi/8, np.pi/6
-    meta_circ_str,nqbits = circuit_gen(meta_adj_mat,[gamma],[beta],p,'ibm')
-    print(meta_circ_str)
-
-    start = time.time()
-    meta_run = IBM_run(meta_circ_str,nqbits,shots)
-    print('qiskit sim time', time.time()-start)
-
-    #print(meta_run)
-    avr_C=0
-    max_C  = [0,0]
-    hist   = {}
-    for k in range(len(G.edges())+1):
-        hist[str(k)] = hist.get(str(k),0)
-
-    for sample in list(meta_run.keys()):
-
-        # use sampled bit string x to compute C(x)
-        x         = [int(num) for num in list(sample)]
-        tmp_eng   = cost_function_C(x,G)
-    
-        # compute the expectation value and energy distribution
-        avr_C     = avr_C    + meta_run[sample]*tmp_eng
-        hist[str(round(tmp_eng))] = hist.get(str(round(tmp_eng)),0) + meta_run[sample]
-    
-        # save best bit string
-        if( max_C[1] < tmp_eng):
-            max_C[0] = sample
-            max_C[1] = tmp_eng
-    print(hist)
-
-
-    print('qiskit energy time', time.time()-start)
-    print('Qiskit:')
-    print(avr_C/shots)
-    label = '0'*G.number_of_nodes()
-    print('Qiskit first prob: ',meta_run[label]/shots)
-
-    gamma, beta = [-gamma/2/np.pi], [beta/1/np.pi]
     from qensor import QAOA_energy, QtreeQAOAComposer, QtreeSimulator
     from qensor import CirqQAOAComposer, CirqSimulator
     from qensor.ProcessingFrameworks import PerfNumpyBackend
 
-    def simulate_one_amp():
+    ##TESTING STARTS HERE##
+
+    def simulate_one_amp(G, gamma, beta):
         composer = QtreeQAOAComposer(
             graph=G, gamma=gamma, beta=beta)
         composer.ansatz_state()
@@ -445,27 +399,85 @@ def main(file=None,p=5,shots=1,g=[],b=[],lang='ibm',opt_iters=50,ER=[]):
         print('Qensor 1 amp',result.data)
         print('Qensor 1 prob',np.abs(result.data)**2)
 
-    simulate_one_amp()
 
-    start = time.time()
-    E = QAOA_energy(G, gamma, beta, profile=True)
-    print('Qensor full time', time.time() - start)
-    print('Qensor:')
-    print(E)
-    #print((G.number_of_edges()-E)/2)
+    def profile_graph(G, gamma, beta):
+        
+        #meta_adj_mat,G = create_graph(10,1,file)
+        #print(G)
+        meta_adj_mat = networkx.to_numpy_array(G)
+        #print(meta_adj_mat)
 
-    print('Cirq:')
-    composer = CirqQAOAComposer(
-        graph=G, gamma=gamma, beta=beta)
-    composer.ansatz_state()
+        start = time.time()
+        def simulate_qiskit(meta_adj_mat):
+            meta_circ_str,nqbits = circuit_gen(meta_adj_mat,[gamma],[beta],p,'ibm')
+            meta_run = IBM_run(meta_circ_str,nqbits,shots)
+            print('qiskit sim time', time.time()-start)
 
-    print(composer.circuit)
-    sim = CirqSimulator()
-    result = sim.simulate(composer.circuit)
-    print(result)
-    final_cirq = result.final_state
-    probs = np.square(np.abs(final_cirq))
-    print('Cirq probs', probs)
+            #print(meta_run)
+            avr_C=0
+            max_C  = [0,0]
+            hist   = {}
+            for k in range(len(G.edges())+1):
+                hist[str(k)] = hist.get(str(k),0)
+
+            for sample in list(meta_run.keys()):
+
+                # use sampled bit string x to compute C(x)
+                x         = [int(num) for num in list(sample)]
+                tmp_eng   = cost_function_C(x,G)
+            
+                # compute the expectation value and energy distribution
+                avr_C     = avr_C    + meta_run[sample]*tmp_eng
+                hist[str(round(tmp_eng))] = hist.get(str(round(tmp_eng)),0) + meta_run[sample]
+            
+                # save best bit string
+                if( max_C[1] < tmp_eng):
+                    max_C[0] = sample
+                    max_C[1] = tmp_eng
+            print(hist)
+
+            qiskit_time = time.time() - start
+            print('qiskit energy time', qiskit_time)
+            print('Qiskit:')
+            print(avr_C/shots)
+            label = '0'*G.number_of_nodes()
+            try:
+                print('Qiskit first prob: ',meta_run[label]/shots)
+            except KeyError:
+                print('Qiskit does not have samples for state 0')
+            return qiskit_time
+        try:
+            qiskit_time = 0
+            #qiskit_time = simulate_qiskit(meta_adj_mat)
+        except Exception as e:
+            print('Qiskit error', e)
+            qiskit_time = 0
+
+        gamma, beta = [-gamma/2/np.pi, gamma, gamma], [beta/1/np.pi, beta, beta]
+
+
+        start = time.time()
+        E = QAOA_energy(G, gamma, beta, profile=False)
+        qensor_time = time.time() - start
+        print('Qensor full time', qensor_time)
+        print('Qensor:')
+        print(E)
+        return qiskit_time, qensor_time
+
+    gamma, beta = np.pi/8, np.pi/6
+    qiskit_profs = []
+    qensor_profs = []
+    for n in range(50, 134, 8):
+        G = networkx.random_regular_graph(3, n)
+        qiskit_time, qensor_time = profile_graph(G, gamma, beta)
+        qiskit_profs.append(qiskit_time)
+        qensor_profs.append(qensor_time)
+
+        #print((G.number_of_edges()-E)/2)
+    tostr = lambda x: [str(a) for a in x]
+    print(', '.join(tostr(qiskit_profs)))
+    print(', '.join(tostr(qensor_profs)))
+
 
 
 if __name__ == '__main__':
