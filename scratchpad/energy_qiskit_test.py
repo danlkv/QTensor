@@ -14,6 +14,7 @@ import scipy.stats as ss
 import math
 import copy
 #--from skopt import gp_minimize
+np.random.seed(42)
 
 ##Following steps for QAOA:
 # 1. Create the driver and cost hamiltonians
@@ -384,6 +385,7 @@ def main(file=None,p=5,shots=1,g=[],b=[],lang='ibm',opt_iters=50,ER=[]):
 
 
     from qensor import QAOA_energy, QtreeQAOAComposer, QtreeSimulator
+    from qensor import QAOA_energy_no_lightcones
     from qensor import CirqQAOAComposer, CirqSimulator
     from qensor.ProcessingFrameworks import PerfNumpyBackend
 
@@ -402,16 +404,17 @@ def main(file=None,p=5,shots=1,g=[],b=[],lang='ibm',opt_iters=50,ER=[]):
 
     def profile_graph(G, gamma, beta):
         
-        #meta_adj_mat,G = create_graph(10,1,file)
         #print(G)
         meta_adj_mat = networkx.to_numpy_array(G)
+        print(meta_adj_mat)
         #print(meta_adj_mat)
 
         start = time.time()
         def simulate_qiskit(meta_adj_mat):
-            meta_circ_str,nqbits = circuit_gen(meta_adj_mat,[gamma],[beta],p,'ibm')
+            meta_circ_str, nqbits = circuit_gen(meta_adj_mat,[gamma],[beta],p,'ibm')
             meta_run = IBM_run(meta_circ_str,nqbits,shots)
             print('qiskit sim time', time.time()-start)
+            print('qiskit cirq\n', meta_circ_str)
 
             #print(meta_run)
             avr_C=0
@@ -423,8 +426,10 @@ def main(file=None,p=5,shots=1,g=[],b=[],lang='ibm',opt_iters=50,ER=[]):
             for sample in list(meta_run.keys()):
 
                 # use sampled bit string x to compute C(x)
-                x         = [int(num) for num in list(sample)]
+                x         = [int(num) for num in reversed(list(sample))]
+                #x         = [int(num) for num in (list(sample))]
                 tmp_eng   = cost_function_C(x,G)
+                #print("cost", x, tmp_eng)
             
                 # compute the expectation value and energy distribution
                 avr_C     = avr_C    + meta_run[sample]*tmp_eng
@@ -438,37 +443,61 @@ def main(file=None,p=5,shots=1,g=[],b=[],lang='ibm',opt_iters=50,ER=[]):
 
             qiskit_time = time.time() - start
             print('qiskit energy time', qiskit_time)
-            print('Qiskit:')
-            print(avr_C/shots)
+            print('Qiskit:',avr_C/shots)
             label = '0'*G.number_of_nodes()
             try:
                 print('Qiskit first prob: ',meta_run[label]/shots)
             except KeyError:
                 print('Qiskit does not have samples for state 0')
-            return qiskit_time
+            return qiskit_time, avr_C/shots
         try:
-            qiskit_time = 0
-            #qiskit_time = simulate_qiskit(meta_adj_mat)
+            qiskit_time, qiskit_e = 0, 0
+            qiskit_time, qiskit_e = simulate_qiskit(meta_adj_mat)
         except Exception as e:
             print('Qiskit error', e)
-            qiskit_time = 0
 
-        gamma, beta = [-gamma/2/np.pi, gamma, gamma], [beta/1/np.pi, beta, beta]
+        #gamma, beta = [-gamma/2/np.pi, gamma, gamma], [beta/1/np.pi, beta, beta]
+        gamma, beta = [-gamma/2/np.pi ], [beta/1/np.pi]
 
 
         start = time.time()
         E = QAOA_energy(G, gamma, beta, profile=False)
+        print('Qensor:', E)
+        print('Delta:',E-qiskit_e)
+        #assert E-E_no_lightcones<1e-6
         qensor_time = time.time() - start
         print('Qensor full time', qensor_time)
-        print('Qensor:')
-        print(E)
         return qiskit_time, qensor_time
 
     gamma, beta = np.pi/8, np.pi/6
     qiskit_profs = []
     qensor_profs = []
-    for n in range(50, 134, 8):
-        G = networkx.random_regular_graph(3, n)
+    graphs = [networkx.random_regular_graph(2, n) for n in range(6, 9, 2)]
+    for n in range(4, 8, 1):
+        G = networkx.complete_graph(n)
+        graphs.append(G)
+
+        continue
+        G = networkx.Graph()
+        G.add_nodes_from(range(n))
+        G.add_edges_from(zip(range(n), range(1,n)))
+        G.add_edges_from([[0,n-1]])
+        graphs.append(G)
+    n= 4
+    G = networkx.Graph()
+    G.add_nodes_from(range(n))
+    G.add_edges_from(zip(range(n), range(1,n)))
+    G.add_edges_from([[0,n-1]])
+    graphs.append(G)
+
+    G = networkx.Graph()
+    G.add_nodes_from(range(n))
+    G.add_edges_from(zip(range(n), range(1,n)))
+    G.add_edges_from([[0,n-1]])
+    G.add_edges_from([[1,3]])
+    graphs.append(G)
+    for G in graphs:
+        #G.add_edges_from([[1,n-1]])
         qiskit_time, qensor_time = profile_graph(G, gamma, beta)
         qiskit_profs.append(qiskit_time)
         qensor_profs.append(qensor_time)
