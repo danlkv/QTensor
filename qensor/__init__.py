@@ -94,6 +94,7 @@ def QAOA_energy(G, gamma, beta, profile=False):
 
         i,j = mapping[i], mapping[j]
         composer.energy_expectation(i,j)
+        #print('qiskit circ', composer.circuit)
         if hasattr(sim, 'peo'):
             peo=sim.peo
             if len(peo) != graph.number_of_nodes():
@@ -123,6 +124,7 @@ def QAOA_energy(G, gamma, beta, profile=False):
     C = (Ed - E)/2
     """
     E = np.real(E)
+    print('tot', E)
 
     Ed = G.number_of_edges()
     C = (Ed - E)/2

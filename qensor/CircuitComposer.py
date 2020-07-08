@@ -23,9 +23,9 @@ class QAOAComposer(CircuitComposer):
         self.graph = graph
 
     def x_term(self, u, beta):
-        self.circuit.append(self.operators.H(u))
-        self.circuit.append(self.operators.ZPhase(u, alpha=2*beta))
-        self.circuit.append(self.operators.H(u))
+        #self.circuit.append(self.operators.H(u))
+        self.circuit.append(self.operators.XPhase(u, alpha=2*beta))
+        #self.circuit.append(self.operators.H(u))
     def mixer_operator(self, beta):
         G = self.graph
         for n in G:

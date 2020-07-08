@@ -25,7 +25,6 @@ class QtreeSimulator(Simulator):
                                                ignore_variables=ignored_vars)
 
         peo_ints, treewidth = utils.get_locale_peo(graph, utils.n_neighbors)
-        print('max tw', max(treewidth))
 
         peo = [qtree.optimizer.Var(var, size=graph.nodes[var]['size'],
                         name=graph.nodes[var]['name'])
