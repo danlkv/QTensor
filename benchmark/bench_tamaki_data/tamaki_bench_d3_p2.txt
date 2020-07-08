@@ -1,0 +1,95 @@
+problem_graph_size: 4
+peo_processing: 0.2681698799133301
+graph_nodes: 48
+max_treewidth: 4
+Total_time: 0.0028820037841796875
+Num_bucket_contractions: 56
+Mean_time_for_contraction: 5.146435328892299e-05
+
+problem_graph_size: 6
+peo_processing: 0.2668342590332031
+graph_nodes: 72
+max_treewidth: 6
+Total_time: 0.004136085510253906
+Num_bucket_contractions: 84
+Mean_time_for_contraction: 4.9239113217308406e-05
+
+problem_graph_size: 8
+peo_processing: 0.2844431400299072
+graph_nodes: 96
+max_treewidth: 6
+Total_time: 0.006321907043457031
+Num_bucket_contractions: 112
+Mean_time_for_contraction: 5.644559860229492e-05
+
+problem_graph_size: 10
+peo_processing: 0.3124830722808838
+graph_nodes: 120
+max_treewidth: 6
+Total_time: 0.006721973419189453
+Num_bucket_contractions: 140
+Mean_time_for_contraction: 4.801409585135323e-05
+
+problem_graph_size: 12
+peo_processing: 0.3809809684753418
+graph_nodes: 144
+max_treewidth: 8
+Total_time: 0.008959531784057617
+Num_bucket_contractions: 168
+Mean_time_for_contraction: 5.333054633367629e-05
+
+problem_graph_size: 14
+peo_processing: 0.46413421630859375
+graph_nodes: 168
+max_treewidth: 8
+Total_time: 0.010102033615112305
+Num_bucket_contractions: 196
+Mean_time_for_contraction: 5.154098783220563e-05
+
+problem_graph_size: 16
+peo_processing: 0.6605591773986816
+graph_nodes: 192
+max_treewidth: 9
+Total_time: 0.010541439056396484
+Num_bucket_contractions: 224
+Mean_time_for_contraction: 4.705999578748431e-05
+
+problem_graph_size: 18
+peo_processing: 1.1366729736328125
+graph_nodes: 216
+max_treewidth: 9
+Total_time: 0.013291597366333008
+Num_bucket_contractions: 252
+Mean_time_for_contraction: 5.274443399338495e-05
+
+problem_graph_size: 20
+peo_processing: 6.388474225997925
+graph_nodes: 240
+max_treewidth: 11
+Total_time: 0.014132976531982422
+Num_bucket_contractions: 280
+Mean_time_for_contraction: 5.0474916185651506e-05
+
+problem_graph_size: 22
+peo_processing: 10.149614810943604
+graph_nodes: 264
+max_treewidth: 11
+Total_time: 0.015481948852539062
+Num_bucket_contractions: 308
+Mean_time_for_contraction: 5.0266067703048906e-05
+
+problem_graph_size: 24
+peo_processing: 1.8527851104736328
+graph_nodes: 288
+max_treewidth: 9
+Total_time: 0.015520572662353516
+Num_bucket_contractions: 336
+Mean_time_for_contraction: 4.61921805427188e-05
+
+problem_graph_size: 26
+peo_processing: 52.574673891067505
+graph_nodes: 312
+max_treewidth: 12
+Total_time: 0.018459558486938477
+Num_bucket_contractions: 364
+Mean_time_for_contraction: 5.071307276631449e-05

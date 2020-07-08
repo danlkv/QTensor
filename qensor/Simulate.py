@@ -21,6 +21,8 @@ class QtreeSimulator(Simulator):
         return self.simulate_state(qc)
 
     def simulate_state(self, qc):
+        from time import time
+
         all_gates = qc
         n_qubits = len(set(sum([g.qubits for g in all_gates], tuple())))
         circuit = [[g] for g in qc]
@@ -32,15 +34,34 @@ class QtreeSimulator(Simulator):
         graph = qtree.graph_model.buckets2graph(buckets,
                                                ignore_variables=ket_vars+bra_vars)
 
+        ###########################################
         peo_ints, treewidth = utils.get_locale_peo(graph, utils.n_neighbors)
-        print("graph_nodes:", graph.number_of_nodes())
-        print("max_treewidth:", max(treewidth))
+
         # TODO: Get max of treewidth here, and graph.numberOfNodes()
+        start = time()
         peo = [qtree.optimizer.Var(var, size=graph.nodes[var]['size'],
                         name=graph.nodes[var]['name'])
                     for var in peo_ints]
 
         peo = ket_vars + bra_vars + peo
+        elapsed = time() - start
+        print("peo_processing:", elapsed)
+        print("graph_nodes:", graph.number_of_nodes())
+        print("max_treewidth:", max(treewidth))
+        # print("OLD PEO", peo)
+        ###########################################
+        # TODO: Using the Tamaki solver. Put this in a separate part
+        # import qtree.graph_model as gm
+        # start = time()
+        # peo, tw = gm.get_peo(graph)
+        # peo = ket_vars + bra_vars + peo
+        # # print("NEW PEO", peo)
+        # elapsed = time() - start
+        # print("peo_processing:", elapsed)
+        # print("graph_nodes:", graph.number_of_nodes())
+        # print("max_treewidth:", tw)
+        # TODO: end Tamaki solver
+        ###########################################
         perm_buckets, perm_dict = qtree.optimizer.reorder_buckets(buckets, peo)
         ket_vars = sorted([perm_dict[idx] for idx in ket_vars], key=str)
         bra_vars = sorted([perm_dict[idx] for idx in bra_vars], key=str)

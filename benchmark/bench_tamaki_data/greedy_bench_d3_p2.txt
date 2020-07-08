@@ -1,0 +1,207 @@
+problem_graph_size: 4
+peo_processing: 0.00013113021850585938
+graph_nodes: 48
+max_treewidth: 5
+Total_time: 0.0027627944946289062
+Num_bucket_contractions: 56
+Mean_time_for_contraction: 4.933561597551618e-05
+
+problem_graph_size: 6
+peo_processing: 0.00018668174743652344
+graph_nodes: 72
+max_treewidth: 6
+Total_time: 0.004060029983520508
+Num_bucket_contractions: 84
+Mean_time_for_contraction: 4.833369028000605e-05
+
+problem_graph_size: 8
+peo_processing: 0.00038909912109375
+graph_nodes: 96
+max_treewidth: 7
+Total_time: 0.005219697952270508
+Num_bucket_contractions: 112
+Mean_time_for_contraction: 4.6604446002415246e-05
+
+problem_graph_size: 10
+peo_processing: 0.0005078315734863281
+graph_nodes: 120
+max_treewidth: 8
+Total_time: 0.0068798065185546875
+Num_bucket_contractions: 140
+Mean_time_for_contraction: 4.9141475132533485e-05
+
+problem_graph_size: 12
+peo_processing: 0.00048279762268066406
+graph_nodes: 144
+max_treewidth: 10
+Total_time: 0.008393526077270508
+Num_bucket_contractions: 168
+Mean_time_for_contraction: 4.996146474565778e-05
+
+problem_graph_size: 14
+peo_processing: 0.0004901885986328125
+graph_nodes: 168
+max_treewidth: 9
+Total_time: 0.009754419326782227
+Num_bucket_contractions: 196
+Mean_time_for_contraction: 4.976744554480728e-05
+
+problem_graph_size: 16
+peo_processing: 0.0005087852478027344
+graph_nodes: 192
+max_treewidth: 11
+Total_time: 0.010890483856201172
+Num_bucket_contractions: 224
+Mean_time_for_contraction: 4.861823150089809e-05
+
+problem_graph_size: 18
+peo_processing: 0.0006017684936523438
+graph_nodes: 216
+max_treewidth: 13
+Total_time: 0.013012170791625977
+Num_bucket_contractions: 252
+Mean_time_for_contraction: 5.1635598379468164e-05
+
+problem_graph_size: 20
+peo_processing: 0.0006690025329589844
+graph_nodes: 240
+max_treewidth: 13
+Total_time: 0.016467809677124023
+Num_bucket_contractions: 280
+Mean_time_for_contraction: 5.8813605989728653e-05
+
+problem_graph_size: 22
+peo_processing: 0.0010807514190673828
+graph_nodes: 264
+max_treewidth: 15
+Total_time: 0.01750493049621582
+Num_bucket_contractions: 308
+Mean_time_for_contraction: 5.683418992277864e-05
+
+problem_graph_size: 24
+peo_processing: 0.0016036033630371094
+graph_nodes: 288
+max_treewidth: 12
+Total_time: 0.016339540481567383
+Num_bucket_contractions: 336
+Mean_time_for_contraction: 4.862958476656959e-05
+
+problem_graph_size: 26
+peo_processing: 0.0008139610290527344
+graph_nodes: 312
+max_treewidth: 15
+Total_time: 0.02092266082763672
+Num_bucket_contractions: 364
+Mean_time_for_contraction: 5.7479837438562414e-05
+
+problem_graph_size: 28
+peo_processing: 0.0010690689086914062
+graph_nodes: 336
+max_treewidth: 14
+Total_time: 0.020330429077148438
+Num_bucket_contractions: 392
+Mean_time_for_contraction: 5.186333948252152e-05
+
+problem_graph_size: 30
+peo_processing: 0.0012738704681396484
+graph_nodes: 360
+max_treewidth: 11
+Total_time: 0.020288705825805664
+Num_bucket_contractions: 420
+Mean_time_for_contraction: 4.8306442442394436e-05
+
+problem_graph_size: 32
+peo_processing: 0.0014739036560058594
+graph_nodes: 384
+max_treewidth: 13
+Total_time: 0.02170586585998535
+Num_bucket_contractions: 448
+Mean_time_for_contraction: 4.8450593437467304e-05
+
+problem_graph_size: 34
+peo_processing: 0.0014750957489013672
+graph_nodes: 408
+max_treewidth: 15
+Total_time: 0.028070688247680664
+Num_bucket_contractions: 476
+Mean_time_for_contraction: 5.897203413378291e-05
+
+problem_graph_size: 36
+peo_processing: 0.0016388893127441406
+graph_nodes: 432
+max_treewidth: 17
+Total_time: 0.035834550857543945
+Num_bucket_contractions: 504
+Mean_time_for_contraction: 7.11002993205237e-05
+
+problem_graph_size: 38
+peo_processing: 0.0014410018920898438
+graph_nodes: 456
+max_treewidth: 20
+Total_time: 0.12322998046875
+Num_bucket_contractions: 532
+Mean_time_for_contraction: 0.00023163530163298871
+
+problem_graph_size: 40
+peo_processing: 0.001402139663696289
+graph_nodes: 480
+max_treewidth: 21
+Total_time: 0.1999495029449463
+Num_bucket_contractions: 560
+Mean_time_for_contraction: 0.00035705268383026125
+
+problem_graph_size: 42
+peo_processing: 0.001798868179321289
+graph_nodes: 504
+max_treewidth: 19
+Total_time: 0.07359433174133301
+Num_bucket_contractions: 588
+Mean_time_for_contraction: 0.0001251604281315187
+
+problem_graph_size: 44
+peo_processing: 0.001734018325805664
+graph_nodes: 528
+max_treewidth: 19
+Total_time: 0.0671989917755127
+Num_bucket_contractions: 616
+Mean_time_for_contraction: 0.00010908927236284529
+
+problem_graph_size: 46
+peo_processing: 0.0016200542449951172
+graph_nodes: 552
+max_treewidth: 21
+Total_time: 0.21002817153930664
+Num_bucket_contractions: 644
+Mean_time_for_contraction: 0.00032613070114799166
+
+problem_graph_size: 48
+peo_processing: 0.001905202865600586
+graph_nodes: 576
+max_treewidth: 16
+Total_time: 0.039792537689208984
+Num_bucket_contractions: 672
+Mean_time_for_contraction: 5.9215085847037176e-05
+
+problem_graph_size: 50
+peo_processing: 0.0017688274383544922
+graph_nodes: 600
+max_treewidth: 21
+Total_time: 0.24480319023132324
+Num_bucket_contractions: 700
+Mean_time_for_contraction: 0.00034971884318760465
+
+problem_graph_size: 52
+peo_processing: 0.0019180774688720703
+graph_nodes: 624
+max_treewidth: 24
+Total_time: 1.7481420040130615
+Num_bucket_contractions: 728
+Mean_time_for_contraction: 0.002401293961556403
+
+problem_graph_size: 54
+peo_processing: 0.0019078254699707031
+graph_nodes: 648
+max_treewidth: 21
+Total_time: 0.21724653244018555
+Num_bucket_contractions: 756
+Mean_time_for_contraction: 0.00028736313814839356
