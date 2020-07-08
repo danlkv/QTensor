@@ -16,6 +16,11 @@ import copy
 #--from skopt import gp_minimize
 np.random.seed(42)
 
+from functools import partial
+from qiskit.optimization.ising.max_cut import get_operator as get_maxcut_operator
+from variationaltoolkit.objectivewrapper import ObjectiveWrapper
+from variationaltoolkit.objectives import maxcut_obj
+
 ##Following steps for QAOA:
 # 1. Create the driver and cost hamiltonians
 # 2. swap runs of each for a fixed iteration (p)
@@ -472,7 +477,7 @@ def main(file=None,p=5,shots=1,g=[],b=[],lang='ibm',opt_iters=50,ER=[]):
     gamma, beta = np.pi/8, np.pi/6
     qiskit_profs = []
     qensor_profs = []
-    graphs = [networkx.random_regular_graph(2, n) for n in range(6, 9, 2)]
+    graphs = [networkx.random_regular_graph(3, n) for n in range(4, 11, 2)]
     for n in range(4, 8, 1):
         G = networkx.complete_graph(n)
         graphs.append(G)
@@ -489,18 +494,31 @@ def main(file=None,p=5,shots=1,g=[],b=[],lang='ibm',opt_iters=50,ER=[]):
     G.add_edges_from(zip(range(n), range(1,n)))
     G.add_edges_from([[0,n-1]])
     graphs.append(G)
+    graphs = []
 
-    G = networkx.Graph()
-    G.add_nodes_from(range(n))
-    G.add_edges_from(zip(range(n), range(1,n)))
-    G.add_edges_from([[0,n-1]])
-    G.add_edges_from([[1,3]])
+    elist = [[0, 1], [1, 2], [2, 3], [3, 4], [4, 0], [0, 5], [1, 6], [2, 7], [3, 8], [4, 9], [5, 7], [5, 8], [6, 8], [6, 9], [7, 9]]
+    G = networkx.OrderedGraph()
+    G.add_edges_from(elist)
     graphs.append(G)
+
     for G in graphs:
         #G.add_edges_from([[1,n-1]])
+
+        parameters = np.array([5.192253984583296, 5.144373231492732, 5.9438949617723775, 5.807748946652058, 3.533458907810596, 6.006206583282401, 6.122313961527631, 6.218468942101044, 6.227704753217614, 0.3895570099244132, -0.1809282325810937, 0.8844522327007089, 0.7916086532373585, 0.21294534589417236, 0.4328896243354414, 0.8327451563500539, 0.7694639329585451, 0.4727893829336214])
+        beta = parameters[:9]
+        gamma = parameters[9:]
         qiskit_time, qensor_time = profile_graph(G, gamma, beta)
         qiskit_profs.append(qiskit_time)
         qensor_profs.append(qensor_time)
+        w = networkx.adjacency_matrix(G, nodelist=range(10)).toarray()
+        obj = partial(maxcut_obj,w=w)
+        C, _ = get_maxcut_operator(w)
+        obj_sv = ObjectiveWrapper(obj, 
+                varform_description={'name':'QAOA', 'p':9, 'num_qubits':10, 'cost_operator':C}, 
+                backend_description={'package':'qiskit', 'provider':'Aer', 'name':'statevector_simulator'}, 
+                objective_parameters={'save_resstrs':True},
+                execute_parameters={})
+        print(f"QAOA objective {obj_sv.get_obj()(parameters)} has to be close to optimal cut -12")
 
         #print((G.number_of_edges()-E)/2)
     tostr = lambda x: [str(a) for a in x]

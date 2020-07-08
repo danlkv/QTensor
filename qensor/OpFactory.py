@@ -1,6 +1,6 @@
 import cirq
 import qtree
-import qiskit.circuit.library as qiskit_lib
+#import qiskit.circuit.library as qiskit_lib
 import numpy as np
 
 class OpFactory:
@@ -32,6 +32,7 @@ class CC(qtree.operators.Gate):
 
 QtreeFactory.CC = CC
 
+"""
 class QiskitFactory:
     H=qiskit_lib.HGate
     cX=qiskit_lib.CXGate
@@ -42,7 +43,7 @@ class QiskitFactory:
 
     cZ=qiskit_lib.CZGate
 
-
+"""
 class CircuitCreator:
     operators = OpFactory
 
