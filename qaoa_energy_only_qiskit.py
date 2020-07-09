@@ -79,7 +79,7 @@ def simulate_qiskit_amps(G, gamma, beta):
     w = nx.adjacency_matrix(G, nodelist=list(G.nodes())).toarray()
     obj = partial(maxcut_obj,w=w)
     C, _ = get_maxcut_operator(w)
-    parameters = np.concatenate([beta, -gamma])
+    parameters = np.concatenate([beta, -np.array(gamma)])
 
     varform = QAOAVarForm(p=p,cost_operator=C)
     circuit = varform.construct_circuit(parameters)
@@ -88,7 +88,7 @@ def simulate_qiskit_amps(G, gamma, beta):
     #print(circuit_qiskit)
     sv = execute(circuit, backend=Aer.get_backend("statevector_simulator")).result().get_statevector()
 
-    res = obj_from_statevector(sv, obj)
+    res = - obj_from_statevector(sv, obj)
     return res
 
 def test_simulate_qiskit_amps():
