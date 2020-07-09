@@ -74,13 +74,14 @@ def maxcut_obj(x,w):
 
 def simulate_qiskit_amps(G, gamma, beta):
     assert len(gamma) == len(beta)
+    p = len(gamma)
 
     w = nx.adjacency_matrix(G, nodelist=list(G.nodes())).toarray()
     obj = partial(maxcut_obj,w=w)
     C, _ = get_maxcut_operator(w)
     parameters = np.concatenate([beta, -gamma])
 
-    varform = QAOAVarForm(p=9,cost_operator=C)
+    varform = QAOAVarForm(p=p,cost_operator=C)
     circuit = varform.construct_circuit(parameters)
 
     circuit_qiskit = transpile(circuit, optimization_level=0,basis_gates=['u1', 'u2', 'u3', 'cx'])
