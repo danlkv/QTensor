@@ -16,10 +16,8 @@ import copy
 #--from skopt import gp_minimize
 np.random.seed(42)
 
-from functools import partial
-from qiskit.optimization.ising.max_cut import get_operator as get_maxcut_operator
-from variationaltoolkit.objectivewrapper import ObjectiveWrapper
-from variationaltoolkit.objectives import maxcut_obj
+
+from qaoa_energy_only_qiskit import simulate_qiskit_amps
 
 ##Following steps for QAOA:
 # 1. Create the driver and cost hamiltonians
@@ -412,14 +410,15 @@ def main(file=None,p=5,shots=1,g=[],b=[],lang='ibm',opt_iters=50,ER=[]):
         #print(G)
         meta_adj_mat = networkx.to_numpy_array(G)
         print(meta_adj_mat)
+        gamma, beta = np.array(gamma), np.array(beta)
         #print(meta_adj_mat)
 
         start = time.time()
-        def simulate_qiskit(meta_adj_mat):
-            meta_circ_str, nqbits = circuit_gen(meta_adj_mat,[gamma],[beta],p,'ibm')
+        def simulate_qiskit(meta_adj_mat, gamma, beta):
+            meta_circ_str, nqbits = circuit_gen(meta_adj_mat,gamma,beta,p,'ibm')
+            print('qiskit cirq\n', meta_circ_str)
             meta_run = IBM_run(meta_circ_str,nqbits,shots)
             print('qiskit sim time', time.time()-start)
-            print('qiskit cirq\n', meta_circ_str)
 
             #print(meta_run)
             avr_C=0
@@ -447,8 +446,6 @@ def main(file=None,p=5,shots=1,g=[],b=[],lang='ibm',opt_iters=50,ER=[]):
             print(hist)
 
             qiskit_time = time.time() - start
-            print('qiskit energy time', qiskit_time)
-            print('Qiskit:',avr_C/shots)
             label = '0'*G.number_of_nodes()
             try:
                 print('Qiskit first prob: ',meta_run[label]/shots)
@@ -457,30 +454,43 @@ def main(file=None,p=5,shots=1,g=[],b=[],lang='ibm',opt_iters=50,ER=[]):
             return qiskit_time, avr_C/shots
         try:
             qiskit_time, qiskit_e = 0, 0
-            qiskit_time, qiskit_e = simulate_qiskit(meta_adj_mat)
+            qiskit_time, qiskit_e = simulate_qiskit(meta_adj_mat, gamma, beta)
         except Exception as e:
             print('Qiskit error', e)
 
         #gamma, beta = [-gamma/2/np.pi, gamma, gamma], [beta/1/np.pi, beta, beta]
-        gamma, beta = [-gamma/2/np.pi ], [beta/1/np.pi]
+        qiskit_result = simulate_qiskit_amps(G, gamma, beta)
 
+
+        gamma, beta = -gamma/2/np.pi, beta/1/np.pi
 
         start = time.time()
+        print(gamma, beta)
         E = QAOA_energy(G, gamma, beta, profile=False)
-        print('Qensor:', E)
-        print('Delta:',E-qiskit_e)
         #assert E-E_no_lightcones<1e-6
+
         qensor_time = time.time() - start
+        print('\n Qensor:', E)
+
+        print('####== Qiskit:', qiskit_e)
+        print('Delta with qensor:',E-qiskit_e)
+
+        print('####== Qiskit amps result', qiskit_result)
+        print('Delta with qensor:',E-qiskit_result)
+
+        print('qiskit energy time', qiskit_time)
         print('Qensor full time', qensor_time)
+        assert abs(E-qiskit_result) < 1e-6, 'Results of qensor do not match with qiskit'
+
         return qiskit_time, qensor_time
 
-    gamma, beta = np.pi/8, np.pi/6
+    gamma, beta = [np.pi/8], [np.pi/6]
     qiskit_profs = []
     qensor_profs = []
-    graphs = [networkx.random_regular_graph(3, n) for n in range(4, 11, 2)]
+    graphs = [networkx.random_regular_graph(3, n) for n in range(4, 16, 2)]
     for n in range(4, 8, 1):
         G = networkx.complete_graph(n)
-        graphs.append(G)
+        #graphs.append(G)
 
         continue
         G = networkx.Graph()
@@ -488,37 +498,26 @@ def main(file=None,p=5,shots=1,g=[],b=[],lang='ibm',opt_iters=50,ER=[]):
         G.add_edges_from(zip(range(n), range(1,n)))
         G.add_edges_from([[0,n-1]])
         graphs.append(G)
-    n= 4
-    G = networkx.Graph()
-    G.add_nodes_from(range(n))
-    G.add_edges_from(zip(range(n), range(1,n)))
-    G.add_edges_from([[0,n-1]])
-    graphs.append(G)
-    graphs = []
+    if False:
+        n= 4
+        G = networkx.Graph()
+        G.add_nodes_from(range(n))
+        G.add_edges_from(zip(range(n), range(1,n)))
+        G.add_edges_from([[0,n-1]])
+        graphs.append(G)
+        #graphs = []
 
-    elist = [[0, 1], [1, 2], [2, 3], [3, 4], [4, 0], [0, 5], [1, 6], [2, 7], [3, 8], [4, 9], [5, 7], [5, 8], [6, 8], [6, 9], [7, 9]]
-    G = networkx.OrderedGraph()
-    G.add_edges_from(elist)
-    graphs.append(G)
+        elist = [[0, 1], [1, 2], [2, 3], [3, 4], [4, 0], [0, 5], [1, 6], [2, 7], [3, 8], [4, 9], [5, 7], [5, 8], [6, 8], [6, 9], [7, 9]]
+        G = networkx.OrderedGraph()
+        G.add_edges_from(elist)
+        graphs.append(G)
 
     for G in graphs:
         #G.add_edges_from([[1,n-1]])
 
-        parameters = np.array([5.192253984583296, 5.144373231492732, 5.9438949617723775, 5.807748946652058, 3.533458907810596, 6.006206583282401, 6.122313961527631, 6.218468942101044, 6.227704753217614, 0.3895570099244132, -0.1809282325810937, 0.8844522327007089, 0.7916086532373585, 0.21294534589417236, 0.4328896243354414, 0.8327451563500539, 0.7694639329585451, 0.4727893829336214])
-        beta = parameters[:9]
-        gamma = parameters[9:]
         qiskit_time, qensor_time = profile_graph(G, gamma, beta)
         qiskit_profs.append(qiskit_time)
         qensor_profs.append(qensor_time)
-        w = networkx.adjacency_matrix(G, nodelist=range(10)).toarray()
-        obj = partial(maxcut_obj,w=w)
-        C, _ = get_maxcut_operator(w)
-        obj_sv = ObjectiveWrapper(obj, 
-                varform_description={'name':'QAOA', 'p':9, 'num_qubits':10, 'cost_operator':C}, 
-                backend_description={'package':'qiskit', 'provider':'Aer', 'name':'statevector_simulator'}, 
-                objective_parameters={'save_resstrs':True},
-                execute_parameters={})
-        print(f"QAOA objective {obj_sv.get_obj()(parameters)} has to be close to optimal cut -12")
 
         #print((G.number_of_edges()-E)/2)
     tostr = lambda x: [str(a) for a in x]
