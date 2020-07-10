@@ -22,8 +22,8 @@ def test_qtree():
     print(composer.circuit)
     sim = QtreeSimulator()
     result = sim.simulate(composer.circuit)
-    print(result.data)
-    qtree_amp = result.data
+    print(result)
+    qtree_amp = result
 
     composer = CirqQAOAComposer(
         graph=G, gamma=[np.pi/3], beta=[np.pi/4])
