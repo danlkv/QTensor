@@ -26,7 +26,8 @@ class QtreeSimulator(Simulator):
         if fixed_vars:
             graph = gm.make_clique_on(graph, fixed_vars)
 
-        peo_ints, treewidth = utils.get_locale_peo(graph, utils.n_neighbors)
+        peo_ints, step_nghs = utils.get_locale_peo(graph, utils.n_neighbors)
+        self.treewidth = max(step_nghs)
 
         if fixed_vars:
             peo = gm.get_equivalent_peo(graph, peo_initial, free_bra_vars)
