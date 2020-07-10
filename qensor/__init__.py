@@ -47,14 +47,13 @@ def QAOA_energy_no_lightcones(G, gamma, beta, profile=False):
         peo=None
 
         result = sim.simulate_state(composer.circuit, peo=peo)
-        E = result.data
+        E = result
         if profile:
             print(backend.gen_report())
             print(E)
         total_E += E
 
     E = total_E
-    #print(result.data)
     #print(composer.circuit)
     if np.imag(E)>1e-6:
         print(f"Warning: Energy result imaginary part was: {np.imag(E)}")
@@ -104,14 +103,13 @@ def QAOA_energy(G, gamma, beta, profile=False):
         peo=None
 
         result = sim.simulate_state(composer.circuit, peo=peo)
-        E = result.data
+        E = result
         if profile:
             print(backend.gen_report())
         print(E)
         total_E += E
 
     E = total_E
-    #print(result.data)
     #print(composer.circuit)
     if np.imag(E)>1e-6:
         print(f"Warning: Energy result imaginary part was: {np.imag(E)}")
