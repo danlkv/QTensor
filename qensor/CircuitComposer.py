@@ -23,9 +23,9 @@ class QAOAComposer(CircuitComposer):
         self.graph = graph
 
     def x_term(self, u, beta):
-        self.circuit.append(self.operators.H(u))
-        self.circuit.append(self.operators.ZPhase(u, alpha=2*beta))
-        self.circuit.append(self.operators.H(u))
+        #self.circuit.append(self.operators.H(u))
+        self.circuit.append(self.operators.XPhase(u, alpha=2*beta))
+        #self.circuit.append(self.operators.H(u))
     def mixer_operator(self, beta):
         G = self.graph
         for n in G:
@@ -54,6 +54,9 @@ class QAOAComposer(CircuitComposer):
             self.mixer_operator(beta[i])
         return self.circuit
 
-    def energy_edge(self, u, v):
-        self.circuit.append(self.operators.cZ(u, v))
+    def energy_edge(self, i, j):
+        #self.circuit.append(self.operators.CC(u, v))
+        u, v = self.qubits[i], self.qubits[j]
+        self.circuit.append(self.operators.Z(u))
+        self.circuit.append(self.operators.Z(v))
 

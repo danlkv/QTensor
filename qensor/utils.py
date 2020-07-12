@@ -92,3 +92,17 @@ def get_neighbours_path(old_graph, peo=None):
         ngh.append(n_neighbors(graph, node))
         qtree.graph_model.eliminate_node(graph, node)
     return nodes, ngh
+
+def nodes_at_distance(G, nodes, dist):
+    nodes = list(nodes)
+    for d in range(dist):
+        range_d_nodes = []
+        for n in nodes:
+            neigh = list(G[n].keys())
+            range_d_nodes += neigh
+        nodes += range_d_nodes
+    return set(nodes)
+
+def get_edge_subgraph(G, edge, dist):
+    nodes = nodes_at_distance(G, edge, dist)
+    return G.subgraph(set(nodes))
