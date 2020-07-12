@@ -21,3 +21,12 @@ class QtreeQAOAComposer(QAOAComposer, QtreeCreator):
         self.circuit = self.circuit + list(reversed(conjugate))
         return self.circuit
 
+def QAOA_energy(G, gamma, beta, n_processes=0):
+    sim = QAOAQtreeSimulator(QtreeQAOAComposer)
+    if n_processes:
+        res = sim.energy_expectation_parallel(G, gamma=gamma, beta=beta
+            ,n_processes=n_processes
+        )
+    else:
+        res = sim.energy_expectation(G, gamma=gamma, beta=beta)
+    return res
