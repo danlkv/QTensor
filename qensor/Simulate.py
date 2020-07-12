@@ -41,9 +41,9 @@ class QtreeSimulator(Simulator):
         if fixed_vars:
             graph = qtree.graph_model.make_clique_on(graph, fixed_vars)
 
-        #peo_ints, step_nghs = utils.get_locale_peo(graph, utils.n_neighbors)
-        peo_ints, _ = utils.get_locale_peo(graph, utils.degree)
-        nodes, path = utils.get_neighbours_path(graph, peo=peo_ints)
+        peo_ints, path = utils.get_locale_peo(graph, utils.n_neighbors)
+        #peo_ints, _ = utils.get_locale_peo(graph, utils.degree)
+        #nodes, path = utils.get_neighbours_path(graph, peo=peo_ints)
 
         self.treewidth = max(path)
         log.info('tw {}', self.treewidth)

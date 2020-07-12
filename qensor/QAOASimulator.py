@@ -66,6 +66,7 @@ class QAOASimulator(Simulator):
 
     def _parallel_unit(self, args):
         return self._get_edge_energy(*args)
+
     def energy_expectation_parallel(self, G, gamma, beta, n_processes=4):
         """
         Arguments:
