@@ -124,13 +124,15 @@ class FeynmanSimulator(QtreeSimulator):
         searcher = GreedyParvars(graph)
         max_tw = self._get_max_tw()
         log.info('Maximum treewidth: {}', max_tw)
+        max_tw = max_tw - self.tw_bias
+        log.info('Adjusted max treewidth: {}', max_tw)
         peo_cl, path = utils.get_locale_peo(graph, utils.n_neighbors)
         peo_ints = peo_cl
         while True:
             #nodes, path = utils.get_neighbours_path(graph, peo=peo_ints)
             tw = max(path)
             log.info('Treewidth: {}', tw)
-            if tw < max_tw - 3:
+            if tw < max_tw:
                 log.info('Found parvars: {}', searcher.result)
                 break
             error = searcher.step()
@@ -172,11 +174,12 @@ class FeynmanSimulator(QtreeSimulator):
         , n_var_nosum=len(self.free_bra_vars))
         return result.data.flatten()
 
-    def simulate(self, qc, batch_vars=0):
-        return self.simulate_batch_adaptive(qc, batch_vars)
+    def simulate(self, qc, batch_vars=0, tw_bias=2):
+        return self.simulate_batch_adaptive(qc, batch_vars, tw_bias=tw_bias)
 
 
-    def simulate_batch_adaptive(self, qc, batch_vars=0):
+    def simulate_batch_adaptive(self, qc, batch_vars=0, tw_bias=2):
+        self.tw_bias = tw_bias
         self._new_circuit(qc)
         self._create_buckets()
         # Collect free qubit variables

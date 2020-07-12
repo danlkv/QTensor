@@ -6,6 +6,8 @@ from qensor.FeynmanSimulator import FeynmanSimulator
 import numpy as np
 import networkx as nx
 
+np.random.seed(42)
+
 
 def get_test_problem(n=14, p=2, d=3):
     w = np.array([[0,1,1,0],[1,0,1,1],[1,1,0,1],[0,1,1,0]])
@@ -43,7 +45,7 @@ def test_qtree():
 
 
 def test_parallel_batched():
-    G, gamma, beta = get_test_problem(42, 3, 3)
+    G, gamma, beta = get_test_problem(19, 3, d=4)
     batch_vars = 2
 
     composer = QtreeQAOAComposer(
@@ -51,7 +53,7 @@ def test_parallel_batched():
     composer.ansatz_state()
 
     sim = FeynmanSimulator()
-    result = sim.simulate(composer.circuit, batch_vars=batch_vars)
+    result = sim.simulate(composer.circuit, batch_vars=batch_vars, tw_bias=5)
     print(result)
 
     total_amps = 2**G.number_of_nodes()
