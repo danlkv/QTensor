@@ -67,7 +67,7 @@ def test_parallel_batched():
 
 
 def test_qtree_energy():
-    G, gamma, beta = get_test_problem()
+    G, gamma, beta = get_test_problem(16, 3, d=3)
 
     sim = QAOAQtreeSimulator(QtreeQAOAComposer)
     E = sim.energy_expectation(
@@ -86,5 +86,5 @@ def test_qtree_energy():
     assert E
 
 if __name__ == "__main__":
-    #test_qtree_energy()
-    test_parallel_batched()
+    test_qtree_energy()
+    #test_parallel_batched()
