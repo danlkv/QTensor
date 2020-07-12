@@ -70,6 +70,9 @@ def nodes_to_vars(old_graph, peo):
 def n_neighbors(graph, node):
     return len(list(graph[node].values()))
 
+def degree(graph, node):
+    return graph.degree(node)
+
 
 def edges_to_clique(graph, node):
     N = graph.degree(node)
@@ -83,7 +86,7 @@ def _neighbors(graph, node):
 
 def get_neighbours_path(old_graph, peo=None):
     if peo is not None:
-        graph = reorder_graph(old_graph, peo)
+        graph, _ = reorder_graph(old_graph, peo)
     else:
         graph = copy.deepcopy(old_graph)
     ngh = []
