@@ -25,17 +25,28 @@ class QtreeSimulator(Simulator):
     def optimize_buckets(self, buckets, ignored_vars=[], fixed_vars: list=None):
         graph = qtree.graph_model.buckets2graph(buckets,
                                                ignore_variables=ignored_vars)
-        if hasattr(self, 'peo'):
+        if True and hasattr(self, 'peo'):
             if graph.number_of_nodes() + len(ignored_vars) == len(self.peo):
-                #log.info("NOTE: reusing peo")
-                return self.peo
-        #log.debug('Computing peo...')
+                log.info("NOTE: reusing peo")
+                peo = [int(i) for i in self.peo]
+                nodes, path = utils.get_neighbours_path(graph, peo=[(i) for i in peo if i in graph.nodes()])
+
+                log.info('tw {}', max(path))
+                if (self.treewidth - max(path))>-1:
+                    return self.peo
+                else:
+                    log.info('tw {} canceled', max(path))
+        log.debug('Computing peo...')
 
         if fixed_vars:
             graph = qtree.graph_model.make_clique_on(graph, fixed_vars)
 
-        peo_ints, step_nghs = utils.get_locale_peo(graph, utils.n_neighbors)
-        self.treewidth = max(step_nghs)
+        #peo_ints, step_nghs = utils.get_locale_peo(graph, utils.n_neighbors)
+        peo_ints, _ = utils.get_locale_peo(graph, utils.degree)
+        nodes, path = utils.get_neighbours_path(graph, peo=peo_ints)
+
+        self.treewidth = max(path)
+        log.info('tw {}', self.treewidth)
 
         if fixed_vars:
             peo = qtree.graph_model.get_equivalent_peo(graph, peo_ints, fixed_vars)

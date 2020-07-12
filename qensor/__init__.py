@@ -1,12 +1,8 @@
-import numpy as np
-import networkx as nx 
-
 from .CircuitComposer import QAOAComposer
 from .OpFactory import CirqCreator, QtreeCreator
 from qensor.Simulate import CirqSimulator, QtreeSimulator
 from qensor.QAOASimulator import QAOAQtreeSimulator
 from qensor.ProcessingFrameworks import PerfNumpyBackend, NumpyBackend
-from qensor.utils import get_edge_subgraph
 
 class CirqQAOAComposer(QAOAComposer, CirqCreator):
     pass
