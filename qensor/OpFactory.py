@@ -15,6 +15,10 @@ class CirqFactory:
     def ZPhase(x, alpha):
         return cirq.ZPowGate(exponent=float(alpha)).on(x)
 
+    @staticmethod
+    def XPhase(x, alpha):
+        return cirq.XPowGate(exponent=float(alpha)).on(x)
+
     cZ=cirq.CZ
 
 QtreeFactory = qtree.operators
