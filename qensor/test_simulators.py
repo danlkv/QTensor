@@ -1,4 +1,6 @@
+import qensor
 from qensor import CirqQAOAComposer, QtreeQAOAComposer
+from qensor import QAOAQtreeSimulator
 from qensor.Simulate import CirqSimulator, QtreeSimulator
 import numpy as np
 import networkx as nx
@@ -42,15 +44,10 @@ def test_qtree():
 def test_qtree_energy():
     G, gamma, beta = get_test_problem()
 
-    composer = QtreeQAOAComposer(
-        graph=G, gamma=[np.pi/3], beta=[np.pi/4])
-    composer.energy_expectation(*list(G.edges())[0])
+    sim = QAOAQtreeSimulator(QtreeQAOAComposer)
+    E = sim.energy_expectation(
+        G, gamma=[np.pi/3], beta=[np.pi/4])
 
-    print(composer.circuit)
-    sim = QtreeSimulator()
-    result = sim.simulate(composer.circuit)
-    print(result.data)
-    E = result.data
     print('Energy', E)
     assert np.imag(E)<1e-6
 
@@ -62,3 +59,6 @@ def test_qtree_energy():
     print("Edges", Ed)
     print("Cost", C)
     assert E
+
+if __name__ == "__main__":
+    test_qtree_energy()

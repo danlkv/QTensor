@@ -2,6 +2,8 @@ import qtree
 from qensor.ProcessingFrameworks import NumpyBackend
 import cirq
 
+from loguru import logger as log
+
 from qensor import utils
 
 class Simulator:
@@ -23,6 +25,12 @@ class QtreeSimulator(Simulator):
     def optimize_buckets(self, buckets, ignored_vars=[], fixed_vars: list=None):
         graph = qtree.graph_model.buckets2graph(buckets,
                                                ignore_variables=ignored_vars)
+        if hasattr(self, 'peo'):
+            if graph.number_of_nodes() + len(ignored_vars) == len(self.peo):
+                #log.info("NOTE: reusing peo")
+                return self.peo
+        #log.debug('Computing peo...')
+
         if fixed_vars:
             graph = qtree.graph_model.make_clique_on(graph, fixed_vars)
 
@@ -98,51 +106,6 @@ class QtreeSimulator(Simulator):
 
     def simulate_state(self, qc, peo=None):
         return self.simulate_batch(qc, peo=peo, batch_vars=0)
-
-
-
-
-
-    def simulate_batch_old(self, qc, peo=None, batch_vars=1):
-        all_gates = qc
-        n_qubits = len(set(sum([g.qubits for g in all_gates], tuple())))
-        self.n_qubits = n_qubits
-        circuit = [[g] for g in qc]
-
-        # Collect free qubit variables
-        free_final_qubits = list(range(batch_vars))
-
-        buckets, data_dict, bra_vars, ket_vars = qtree.optimizer.circ2buckets(
-            n_qubits, circuit)
-
-        assert len(free_final_qubits)<=self.n_qubits, 'Batch size should be no larger than n_qubits'
-
-        free_bra_vars = [bra_vars[i] for i in free_final_qubits]
-        bra_vars = [var for var in bra_vars if var not in free_bra_vars]
-
-        if peo is None:
-            peo = self.optimize_buckets(buckets, ignored_vars=bra_vars+ket_vars, fixed_vars=free_bra_vars)
-
-        return self._slice_simulate(buckets, peo, data_dict, bra_vars, ket_vars, free_bra_vars)
-
-
-    def _slice_simulate(self, buckets, peo, data_dict, bra_vars, ket_vars, free_bra_vars):
-        perm_buckets, perm_dict = qtree.optimizer.reorder_buckets(buckets, peo)
-        ket_vars = sorted([perm_dict[idx] for idx in ket_vars], key=str)
-        bra_vars = sorted([perm_dict[idx] for idx in bra_vars], key=str)
-
-        initial_state = target_state = 0
-        slice_dict = qtree.utils.slice_from_bits(initial_state, ket_vars)
-        slice_dict.update(
-            qtree.utils.slice_from_bits(target_state, bra_vars)
-        )
-        slice_dict.update({var: slice(None) for var in free_bra_vars})
-
-        sliced_buckets = self.bucket_backend.get_sliced_buckets(
-            perm_buckets, data_dict, slice_dict)
-        result = qtree.optimizer.bucket_elimination(
-            sliced_buckets, self.bucket_backend.process_bucket)
-        return result.data.flatten()
 
 class CirqSimulator(Simulator):
 
