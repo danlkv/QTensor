@@ -12,7 +12,7 @@ class QAOASimulator(Simulator):
 
     def energy_expectation(self, G, gamma, beta):
         """
-        Argiments:
+        Arguments:
             G: MaxCut graph, Networkx
             gamma, beta: list[float]
 
