@@ -45,7 +45,7 @@ def test_qtree():
 
 
 def test_parallel_batched():
-    G, gamma, beta = get_test_problem(19, 3, d=4)
+    G, gamma, beta = get_test_problem(20, 3, d=4)
     batch_vars = 2
 
     composer = QtreeQAOAComposer(
@@ -86,5 +86,5 @@ def test_qtree_energy():
     assert E
 
 if __name__ == "__main__":
-    test_qtree_energy()
-    #test_parallel_batched()
+    #test_qtree_energy()
+    test_parallel_batched()

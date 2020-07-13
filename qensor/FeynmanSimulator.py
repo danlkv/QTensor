@@ -5,163 +5,23 @@ from tqdm import tqdm
 
 from qensor.ProcessingFrameworks import NumpyBackend
 from qensor.Simulate import Simulator, QtreeSimulator
+from qensor.optimisation.Optimizer import SlicesOptimizer
+from qensor.optimisation.TensorNet import QtreeTensorNet
 import psutil
 
 from loguru import logger as log
 
 from qensor import utils
 
-class GreedyOpt:
-    """
-    iterable:
-        the items to pick from
-
-    size:
-        size of subset of items to search
-
-    target:
-        Function to minimize
-    """
-
-    def __init__(self, iterable=[], target=lambda x: 1):
-        self.iterable = iterable
-        self._target = target
-        self.result = []
-        self.min_vals = []
-        self.min_items = []
-
-    def set_target(self, target):
-        self._target = target
-
-    def target(self, item):
-        """
-        Called every search len(iterable) times.
-
-        Total number of calls: size*items
-        """
-        return self._target(item)
-
-    def add(self, item):
-        """
-        called every time a minimum found
-
-        Total number of calls: size
-        """
-
-        self.result.append(item)
-
-    def run(self, size):
-        return self.run_size(size)
-
-    def items(self):
-        return self.iterable
-
-    def step(self):
-        items = np.array(self.items())
-        costs = np.array([self.target(i) for i in items])
-        if len(costs) == 0:
-            return 1
-
-        min_idx = np.argmin(costs)
-        min_item = items[min_idx]
-        min_val = costs[min_idx]
-
-        self.min_items.append(min_item)
-        self.min_vals.append(min_val)
-        self.add(min_item)
-
-
-    def run_cost(self, cost):
-        while True:
-            error_code = self.step()
-            if error_code==1:
-                print('Greedy search failed to find desired cost')
-                raise Exception('Failed to optimize')
-            if self.min_vals[-1] < cost:
-                break
-
-    def run_size(self, size):
-        for i in range(size):
-            self.step()
-
-        return self.result
-
-class GreedyParvars(GreedyOpt):
-    def __init__(self, graph, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.graph = graph
-
-    def items(self):
-        return self.graph.nodes
-
-    def target(self, item):
-        return - self.graph.degree(item)
-
-    def add(self, item):
-        super().add(item)
-        self.graph.remove_node(item)
-        #qtree.graph_model.eliminate_node(self.graph, item)
-
 
 class FeynmanSimulator(QtreeSimulator):
 
-    def _get_max_tw(self):
-        mem = psutil.virtual_memory()
-        avail = mem.available
-        log.info('Memory available: {}', avail)
-        # Cost = 16*2**tw
-        # tw = log(cost/16) = log(cost) - 4
-        return np.int(np.log2(avail)) - 4
-
 
     def optimize_buckets(self, buckets, ignored_vars=[], fixed_vars: list=None):
-        orig_graph = qtree.graph_model.buckets2graph(buckets,
-                                               ignore_variables=ignored_vars)
-        if fixed_vars:
-            cl_graph = qtree.graph_model.make_clique_on(orig_graph, fixed_vars)
-
-        graph = cl_graph.copy()
-        searcher = GreedyParvars(graph)
-        max_tw = self._get_max_tw()
-        log.info('Maximum treewidth: {}', max_tw)
-        max_tw = max_tw - self.tw_bias
-        log.info('Adjusted max treewidth: {}', max_tw)
-        peo_cl, path = utils.get_locale_peo(graph, utils.n_neighbors)
-        peo_ints = peo_cl
-        while True:
-            #nodes, path = utils.get_neighbours_path(graph, peo=peo_ints)
-            tw = max(path)
-            log.info('Treewidth: {}', tw)
-            if tw < max_tw:
-                log.info('Found parvars: {}', searcher.result)
-                break
-            error = searcher.step()
-            pv_cnt = len(searcher.result)
-            log.debug('Parvars count: {}. Amps count: {}', pv_cnt, 2**pv_cnt)
-            if error:
-                log.error('Memory is not enough. Max tw: {}', max_tw)
-                raise Exception('Estimated OOM')
-
-            peo_ints, path = utils.get_locale_peo(graph, utils.n_neighbors)
-            peo_cl =  peo_ints + searcher.result
-
-
-        self.treewidth = max(path)
-
-        graph = cl_graph
-        self.parallel_vars = [
-            qtree.optimizer.Var(var,
-                                size=graph.nodes[var]['size'],
-                                name=graph.nodes[var]['name'])
-                              for var in searcher.result]
-        peo = [qtree.optimizer.Var(var, size=graph.nodes[var]['size'],
-                        name=graph.nodes[var]['name'])
-                    for var in peo_cl]
-        if fixed_vars:
-            peo = qtree.graph_model.get_equivalent_peo(graph, peo, fixed_vars)
-
-        peo = ignored_vars + peo
-        self.peo = peo
+        tn = QtreeTensorNet(buckets, self.data_dict, self.bra_vars, self.ket_vars, fixed_vars)
+        opt = SlicesOptimizer(tw_bias=2)
+        peo, par_vars, tn = opt.optimize(tn)
+        self.parallel_vars = par_vars
         return peo
 
     def _parallel_unit(self, par_idx):
@@ -171,7 +31,7 @@ class FeynmanSimulator(QtreeSimulator):
             self.buckets, self.data_dict, slice_dict)
         result = qtree.optimizer.bucket_elimination(
             sliced_buckets, self.bucket_backend.process_bucket
-        , n_var_nosum=len(self.free_bra_vars))
+        , n_var_nosum=len(self.free_bra_vars + self.parallel_vars))
         return result.data.flatten()
 
     def simulate(self, qc, batch_vars=0, tw_bias=2):
@@ -202,16 +62,28 @@ class FeynmanSimulator(QtreeSimulator):
         return result
 
     def _reorder_buckets(self):
+        pvl = len(self.parallel_vars)
+
+        #perm_buckets, perm_dict = qtree.optimizer.reorder_buckets(self.buckets[:-pvl], self.peo)
         perm_buckets, perm_dict = qtree.optimizer.reorder_buckets(self.buckets, self.peo)
+
         self.ket_vars = sorted([perm_dict[idx] for idx in self.ket_vars], key=str)
         self.bra_vars = sorted([perm_dict[idx] for idx in self.bra_vars], key=str)
         self.parallel_vars = sorted([perm_dict[idx] for idx in self.parallel_vars], key=str)
         self.buckets = perm_buckets
 
     def _get_slice_dict(self, initial_state=0, target_state=0, par_state=0):
+        def int_slice(value, vars_to_slice):
+            dimensions = [var.size for var in vars_to_slice]
+            multiindex = qtree.utils.unravel_index(value, dimensions)
+
+            return {var: at for var, at in zip(vars_to_slice, multiindex)}
+
         slice_dict = qtree.utils.slice_from_bits(initial_state, self.ket_vars)
         slice_dict.update( qtree.utils.slice_from_bits(target_state, self.bra_vars))
         slice_dict.update({var: slice(None) for var in self.free_bra_vars})
         slice_dict.update( qtree.utils.slice_from_bits(par_state, self.parallel_vars))
+        slice_dict.update( int_slice(par_state, self.parallel_vars))
+        #log.debug("SliceDict: {}", slice_dict)
         return slice_dict
 
