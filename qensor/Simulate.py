@@ -1,6 +1,8 @@
 import qtree
 from qensor.ProcessingFrameworks import NumpyBackend
 import cirq
+from qensor.optimisation.TensorNet import QtreeTensorNet
+from qensor.optimisation.Optimizer import OrderingOptimizer
 
 from loguru import logger as log
 
@@ -23,40 +25,9 @@ class QtreeSimulator(Simulator):
         return self.simulate_state(qc)
 
     def optimize_buckets(self, buckets, ignored_vars=[], fixed_vars: list=None):
-        graph = qtree.graph_model.buckets2graph(buckets,
-                                               ignore_variables=ignored_vars)
-        if True and hasattr(self, 'peo'):
-            if graph.number_of_nodes() + len(ignored_vars) == len(self.peo):
-                log.info("NOTE: reusing peo")
-                peo = [int(i) for i in self.peo]
-                nodes, path = utils.get_neighbours_path(graph, peo=[(i) for i in peo if i in graph.nodes()])
-
-                log.info('tw {}', max(path))
-                if (self.treewidth - max(path))>-1:
-                    return self.peo
-                else:
-                    log.info('tw {} canceled', max(path))
-        log.debug('Computing peo...')
-
-        if fixed_vars:
-            graph = qtree.graph_model.make_clique_on(graph, fixed_vars)
-
-        #peo_ints, step_nghs = utils.get_locale_peo(graph, utils.n_neighbors)
-        peo_ints, _ = utils.get_locale_peo(graph, utils.degree)
-        nodes, path = utils.get_neighbours_path(graph, peo=peo_ints)
-
-        self.treewidth = max(path)
-        log.info('tw {}', self.treewidth)
-
-        if fixed_vars:
-            peo = qtree.graph_model.get_equivalent_peo(graph, peo_ints, fixed_vars)
-
-        peo = [qtree.optimizer.Var(var, size=graph.nodes[var]['size'],
-                        name=graph.nodes[var]['name'])
-                    for var in peo_ints]
-
-        peo = ignored_vars + peo
-        self.peo = peo
+        tn = QtreeTensorNet(buckets, self.data_dict, self.bra_vars, self.ket_vars, fixed_vars)
+        opt = OrderingOptimizer()
+        peo, tn = opt.optimize(tn)
         return peo
 
     def _new_circuit(self, qc):
@@ -81,20 +52,6 @@ class QtreeSimulator(Simulator):
         self.peo = self.optimize_buckets(
             self.buckets, ignored_vars=self.bra_vars+self.ket_vars, fixed_vars=self.free_bra_vars)
 
-    def _reorder_buckets(self):
-        perm_buckets, perm_dict = qtree.optimizer.reorder_buckets(self.buckets, self.peo)
-        self.ket_vars = sorted([perm_dict[idx] for idx in self.ket_vars], key=str)
-        self.bra_vars = sorted([perm_dict[idx] for idx in self.bra_vars], key=str)
-        self.buckets = perm_buckets
-
-    def _get_slice_dict(self, initial_state=0, target_state=0):
-        slice_dict = qtree.utils.slice_from_bits(initial_state, self.ket_vars)
-        slice_dict.update(
-            qtree.utils.slice_from_bits(target_state, self.bra_vars)
-        )
-        slice_dict.update({var: slice(None) for var in self.free_bra_vars})
-        return slice_dict
-
     def simulate_batch(self, qc, batch_vars=0, peo=None):
         self._new_circuit(qc)
         self._create_buckets()
@@ -117,6 +74,21 @@ class QtreeSimulator(Simulator):
 
     def simulate_state(self, qc, peo=None):
         return self.simulate_batch(qc, peo=peo, batch_vars=0)
+
+    def _reorder_buckets(self):
+        perm_buckets, perm_dict = qtree.optimizer.reorder_buckets(self.buckets, self.peo)
+        self.ket_vars = sorted([perm_dict[idx] for idx in self.ket_vars], key=str)
+        self.bra_vars = sorted([perm_dict[idx] for idx in self.bra_vars], key=str)
+        self.buckets = perm_buckets
+        return perm_dict
+
+    def _get_slice_dict(self, initial_state=0, target_state=0):
+        slice_dict = qtree.utils.slice_from_bits(initial_state, self.ket_vars)
+        slice_dict.update(
+            qtree.utils.slice_from_bits(target_state, self.bra_vars)
+        )
+        slice_dict.update({var: slice(None) for var in self.free_bra_vars})
+        return slice_dict
 
 class CirqSimulator(Simulator):
 

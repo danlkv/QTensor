@@ -31,7 +31,7 @@ def test_qtree():
     qtree_amp = result
 
     composer = CirqQAOAComposer(
-        graph=G, gamma=[np.pi/3], beta=[np.pi/4])
+        graph=G, gamma=gamma, beta=beta)
     composer.ansatz_state()
 
     print(composer.circuit)
@@ -67,7 +67,7 @@ def test_parallel_batched():
 
 
 def test_qtree_energy():
-    G, gamma, beta = get_test_problem(16, 3, d=3)
+    G, gamma, beta = get_test_problem(16, 2, d=3)
 
     sim = QAOAQtreeSimulator(QtreeQAOAComposer)
     E = sim.energy_expectation(

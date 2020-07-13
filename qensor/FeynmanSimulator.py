@@ -13,6 +13,11 @@ from loguru import logger as log
 
 from qensor import utils
 
+def int_slice(value, vars_to_slice):
+    dimensions = [var.size for var in vars_to_slice]
+    multiindex = qtree.utils.unravel_index(value, dimensions)
+
+    return {var: at for var, at in zip(vars_to_slice, multiindex)}
 
 class FeynmanSimulator(QtreeSimulator):
 
@@ -62,27 +67,12 @@ class FeynmanSimulator(QtreeSimulator):
         return result
 
     def _reorder_buckets(self):
-        pvl = len(self.parallel_vars)
-
-        #perm_buckets, perm_dict = qtree.optimizer.reorder_buckets(self.buckets[:-pvl], self.peo)
         perm_buckets, perm_dict = qtree.optimizer.reorder_buckets(self.buckets, self.peo)
-
-        self.ket_vars = sorted([perm_dict[idx] for idx in self.ket_vars], key=str)
-        self.bra_vars = sorted([perm_dict[idx] for idx in self.bra_vars], key=str)
+        perm_dict = super()._reorder_buckets()
         self.parallel_vars = sorted([perm_dict[idx] for idx in self.parallel_vars], key=str)
-        self.buckets = perm_buckets
 
     def _get_slice_dict(self, initial_state=0, target_state=0, par_state=0):
-        def int_slice(value, vars_to_slice):
-            dimensions = [var.size for var in vars_to_slice]
-            multiindex = qtree.utils.unravel_index(value, dimensions)
-
-            return {var: at for var, at in zip(vars_to_slice, multiindex)}
-
-        slice_dict = qtree.utils.slice_from_bits(initial_state, self.ket_vars)
-        slice_dict.update( qtree.utils.slice_from_bits(target_state, self.bra_vars))
-        slice_dict.update({var: slice(None) for var in self.free_bra_vars})
-        slice_dict.update( qtree.utils.slice_from_bits(par_state, self.parallel_vars))
+        slice_dict = super()._get_slice_dict(initial_state, target_state)
         slice_dict.update( int_slice(par_state, self.parallel_vars))
         #log.debug("SliceDict: {}", slice_dict)
         return slice_dict
