@@ -99,5 +99,5 @@ class SlicesOptimizer(OrderingOptimizer):
                     for var in peo]
 
         self.peo = self.ignored_vars + peo + self.parallel_vars 
-        log.info('peo {}', self.peo)
+        #log.info('peo {}', self.peo)
         return self.peo, self.parallel_vars, tensor_net

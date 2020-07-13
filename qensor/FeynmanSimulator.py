@@ -24,7 +24,7 @@ class FeynmanSimulator(QtreeSimulator):
 
     def optimize_buckets(self, buckets, ignored_vars=[], fixed_vars: list=None):
         tn = QtreeTensorNet(buckets, self.data_dict, self.bra_vars, self.ket_vars, fixed_vars)
-        opt = SlicesOptimizer(tw_bias=2)
+        opt = SlicesOptimizer(tw_bias=self.tw_bias)
         peo, par_vars, tn = opt.optimize(tn)
         self.parallel_vars = par_vars
         return peo

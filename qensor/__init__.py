@@ -2,6 +2,7 @@ from .CircuitComposer import QAOAComposer
 from .OpFactory import CirqCreator, QtreeCreator
 from qensor.Simulate import CirqSimulator, QtreeSimulator
 from qensor.QAOASimulator import QAOAQtreeSimulator
+from qensor.FeynmanSimulator import FeynmanSimulator
 from qensor.ProcessingFrameworks import PerfNumpyBackend, NumpyBackend
 
 class CirqQAOAComposer(QAOAComposer, CirqCreator):
