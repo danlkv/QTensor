@@ -23,7 +23,6 @@ class FeynmanSimulator(QtreeSimulator):
 
 
     def optimize_buckets(self, fixed_vars: list=None):
-        self.tn.fixed_vars=fixed_vars
         opt = SlicesOptimizer(tw_bias=self.tw_bias)
         peo, par_vars, self.tn = opt.optimize(self.tn)
         self.parallel_vars = par_vars
@@ -35,7 +34,7 @@ class FeynmanSimulator(QtreeSimulator):
         sliced_buckets = self.tn.slice(slice_dict)
         result = qtree.optimizer.bucket_elimination(
             sliced_buckets, self.bucket_backend.process_bucket
-        , n_var_nosum=len(self.free_bra_vars + self.parallel_vars))
+        , n_var_nosum=len(self.tn.free_vars + self.parallel_vars))
         return result.data.flatten()
 
     def simulate(self, qc, batch_vars=0, tw_bias=2):

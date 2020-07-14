@@ -18,13 +18,13 @@ class TensorNet:
 
 class QtreeTensorNet:
     def __init__(self, buckets, data_dict
-                 , bra_vars, ket_vars, fixed_vars=[]
+                 , bra_vars, ket_vars, free_vars=[]
                  , bucket_backend=NumpyBackend):
         self.buckets = buckets
         self.data_dict = data_dict
         self.bra_vars = bra_vars
         self.ket_vars = ket_vars
-        self.fixed_vars = fixed_vars
+        self.free_vars = free_vars
         self.bucket_backend = bucket_backend()
 
     @property

@@ -12,19 +12,19 @@ class Optimizer:
         raise NotImplementedError
 
 class OrderingOptimizer(Optimizer):
-    def _get_ordering_ints(self, graph, fixed_vars=[]):
+    def _get_ordering_ints(self, graph, free_vars=[]):
         peo_ints, path = utils.get_locale_peo(graph, utils.n_neighbors)
 
         return peo_ints, path
 
     def optimize(self, tensor_net):
         line_graph = tensor_net.get_line_graph()
-        fixed_vars = tensor_net.fixed_vars
+        free_vars = tensor_net.free_vars
         ignored_vars = tensor_net.ket_vars + tensor_net. bra_vars
         graph = line_graph
 
-        if fixed_vars:
-            graph = qtree.graph_model.make_clique_on(graph, fixed_vars)
+        if free_vars:
+            graph = qtree.graph_model.make_clique_on(graph, free_vars)
 
         peo, path = self._get_ordering_ints(graph)
         self.treewidth = max(path)
@@ -32,11 +32,12 @@ class OrderingOptimizer(Optimizer):
         peo = [qtree.optimizer.Var(var, size=graph.nodes[var]['size'],
                         name=graph.nodes[var]['name'])
                     for var in peo]
-        if fixed_vars:
-            peo = qtree.graph_model.get_equivalent_peo(graph, peo, fixed_vars)
+        if free_vars:
+            peo = qtree.graph_model.get_equivalent_peo(graph, peo, free_vars)
 
         peo = ignored_vars + peo
         self.peo = peo
+        self.graph = graph
         self.ignored_vars = ignored_vars
         return peo, tensor_net
 
@@ -79,7 +80,7 @@ class SlicesOptimizer(OrderingOptimizer):
 
     def optimize(self, tensor_net):
         peo, tensor_net = super().optimize(tensor_net)
-        graph = tensor_net.get_line_graph()
+        graph = self.graph
 
         p_graph = graph.copy()
         max_tw = self._get_max_tw()
@@ -97,6 +98,8 @@ class SlicesOptimizer(OrderingOptimizer):
         peo = [qtree.optimizer.Var(var, size=graph.nodes[var]['size'],
                         name=graph.nodes[var]['name'])
                     for var in peo]
+        if tensor_net.free_vars:
+            peo = qtree.graph_model.get_equivalent_peo(p_graph, peo, tensor_net.free_vars)
 
         self.peo = self.ignored_vars + peo + self.parallel_vars 
         #log.info('peo {}', self.peo)

@@ -26,7 +26,7 @@ class QtreeSimulator(Simulator):
 
     def optimize_buckets(self):
         opt = OrderingOptimizer()
-        peo, tn = opt.optimize(self.tn)
+        peo, self.tn = opt.optimize(self.tn)
         return peo
 
     def _new_circuit(self, qc):
@@ -36,8 +36,8 @@ class QtreeSimulator(Simulator):
         self.tn = QtreeTensorNet.from_qtree_gates(self.all_gates)
 
     def _set_free_qubits(self, free_final_qubits):
-        self.free_bra_vars = [self.tn.bra_vars[i] for i in free_final_qubits]
-        self.tn.bra_vars = [var for var in self.tn.bra_vars if var not in self.free_bra_vars]
+        self.tn.free_vars = [self.tn.bra_vars[i] for i in free_final_qubits]
+        self.tn.bra_vars = [var for var in self.tn.bra_vars if var not in self.tn.free_vars]
 
     def _optimize_buckets(self):
         self.peo = self.optimize_buckets()
@@ -61,7 +61,7 @@ class QtreeSimulator(Simulator):
 
         result = qtree.optimizer.bucket_elimination(
             sliced_buckets, self.bucket_backend.process_bucket,
-            n_var_nosum=len(self.free_bra_vars)
+            n_var_nosum=len(self.tn.free_vars)
         )
         print(result, result.data)
         return result.data.flatten()
@@ -79,7 +79,7 @@ class QtreeSimulator(Simulator):
     def _get_slice_dict(self, initial_state=0, target_state=0):
         slice_dict = qtree.utils.slice_from_bits(initial_state, self.tn.ket_vars)
         slice_dict.update(qtree.utils.slice_from_bits(target_state, self.tn.bra_vars))
-        slice_dict.update({var: slice(None) for var in self.free_bra_vars})
+        slice_dict.update({var: slice(None) for var in self.tn.free_vars})
         return slice_dict
 
 class CirqSimulator(Simulator):

@@ -46,7 +46,7 @@ def test_qtree():
 
 def test_parallel_batched():
     G, gamma, beta = get_test_problem(14, 3, d=4)
-    batch_vars = 2
+    batch_vars = 3
 
     composer = QtreeQAOAComposer(
         graph=G, gamma=gamma, beta=beta)
@@ -60,12 +60,12 @@ def test_parallel_batched():
     assert abs( amp - amps[0]) < 1e-6
 
     sim = FeynmanSimulator()
-    result = sim.simulate(composer.circuit, batch_vars=batch_vars, tw_bias=5)
+    result = sim.simulate(composer.circuit, batch_vars=batch_vars, tw_bias=7)
     print(result)
 
     batch_amps = 2**batch_vars
     assert len(result) == batch_amps
-    assert sum( amp - result[0]) < 1e-6
+    assert abs( amp - result[0]) < 1e-6
 
 
 def test_qtree_energy():
