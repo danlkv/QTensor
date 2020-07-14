@@ -20,3 +20,23 @@ gamma, beta = [np.pi/3], [np.pi/2]
 
 E = QAOA_energy(G, gamma, beta)
 ```
+
+## Get treewidth
+
+```python
+from qensor.optimisation.Optimizer import OrderingOptimizer
+from qensor.optimisation.TensorNet import QtreeTensorNet
+from qensor import QtreeQAOAComposer
+
+composer = QtreeQAOAComposer(
+	graph=G, gamma=gamma, beta=beta)
+composer.ansatz_state()
+
+
+tn = QtreeTensorNet.from_qtree_gates(composer.circuit)
+
+opt = OrderingOptimizer()
+peo, tn = opt.optimize(self.tn)
+treewidth = opt.treewidth
+
+```
