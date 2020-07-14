@@ -24,16 +24,16 @@ class QtreeSimulator(Simulator):
     def simulate(self, qc):
         return self.simulate_state(qc)
 
-    def optimize_buckets(self):
-        opt = OrderingOptimizer()
-        peo, self.tn = opt.optimize(self.tn)
-        return peo
+    def _create_buckets(self):
+        self.tn = QtreeTensorNet.from_qtree_gates(self.all_gates)
 
     def _new_circuit(self, qc):
         self.all_gates = qc
 
-    def _create_buckets(self):
-        self.tn = QtreeTensorNet.from_qtree_gates(self.all_gates)
+    def optimize_buckets(self):
+        opt = OrderingOptimizer()
+        peo, self.tn = opt.optimize(self.tn)
+        return peo
 
     def _set_free_qubits(self, free_final_qubits):
         self.tn.free_vars = [self.tn.bra_vars[i] for i in free_final_qubits]
