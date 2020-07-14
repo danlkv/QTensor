@@ -36,7 +36,7 @@ composer.ansatz_state()
 tn = QtreeTensorNet.from_qtree_gates(composer.circuit)
 
 opt = OrderingOptimizer()
-peo, tn = opt.optimize(self.tn)
+peo, tn = opt.optimize(tn)
 treewidth = opt.treewidth
 
 ```
