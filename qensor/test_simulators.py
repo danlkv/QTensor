@@ -45,25 +45,27 @@ def test_qtree():
 
 
 def test_parallel_batched():
-    G, gamma, beta = get_test_problem(20, 3, d=4)
+    G, gamma, beta = get_test_problem(14, 3, d=4)
     batch_vars = 2
 
     composer = QtreeQAOAComposer(
         graph=G, gamma=gamma, beta=beta)
     composer.ansatz_state()
 
+    sim = QtreeSimulator()
+    amp = sim.simulate(composer.circuit)
+    amps = sim.simulate_batch(composer.circuit, batch_vars=2)
+    print('ordinary qtree amp', amp)
+    print('ordinary qtree 2 amps', amps)
+    assert sum( amp - amps[0]) < 1e-6
+
     sim = FeynmanSimulator()
     result = sim.simulate(composer.circuit, batch_vars=batch_vars, tw_bias=5)
     print(result)
 
-    total_amps = 2**G.number_of_nodes()
     batch_amps = 2**batch_vars
     assert len(result) == batch_amps
-    sum_amps = np.sum(np.abs(np.square(result)))
-    print('Sum amps', sum_amps)
-    print('Amp ratio', batch_amps/total_amps )
-    print('Total amps cnt', total_amps )
-    #assert abs(sum_amps - batch_amps/total_amps ) < 1e-6
+    assert sum( amp - result[0]) < 1e-6
 
 
 def test_qtree_energy():

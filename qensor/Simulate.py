@@ -65,11 +65,15 @@ class QtreeSimulator(Simulator):
 
         self._reorder_buckets()
         slice_dict = self._get_slice_dict()
+        log.info('batch slice {}', slice_dict)
 
         sliced_buckets = self.bucket_backend.get_sliced_buckets(
             self.buckets, self.data_dict, slice_dict)
         result = qtree.optimizer.bucket_elimination(
-            sliced_buckets, self.bucket_backend.process_bucket)
+            sliced_buckets, self.bucket_backend.process_bucket,
+            n_var_nosum=len(self.free_bra_vars)
+        )
+        print(result, result.data)
         return result.data.flatten()
 
     def simulate_state(self, qc, peo=None):

@@ -4,12 +4,12 @@ from qensor.Simulate import CirqSimulator, QtreeSimulator
 import numpy as np
 import networkx as nx
 
-def get_test_problem():
+def get_test_problem(n=14, p=2, d=3):
     w = np.array([[0,1,1,0],[1,0,1,1],[1,1,0,1],[0,1,1,0]])
     G = nx.from_numpy_matrix(w)
 
-    G = nx.random_regular_graph(5, 24)
-    gamma, beta = [np.pi/3], [np.pi/2]
+    G = nx.random_regular_graph(d, n)
+    gamma, beta = [np.pi/3]*p, [np.pi/2]*p
     return G, gamma, beta
 
 def test_qaoa_energy():
