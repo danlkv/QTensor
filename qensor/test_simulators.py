@@ -57,7 +57,7 @@ def test_parallel_batched():
     amps = sim.simulate_batch(composer.circuit, batch_vars=2)
     print('ordinary qtree amp', amp)
     print('ordinary qtree 2 amps', amps)
-    assert sum( amp - amps[0]) < 1e-6
+    assert abs( amp - amps[0]) < 1e-6
 
     sim = FeynmanSimulator()
     result = sim.simulate(composer.circuit, batch_vars=batch_vars, tw_bias=5)

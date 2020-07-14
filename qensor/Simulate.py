@@ -24,33 +24,23 @@ class QtreeSimulator(Simulator):
     def simulate(self, qc):
         return self.simulate_state(qc)
 
-    def optimize_buckets(self, buckets, ignored_vars=[], fixed_vars: list=None):
-        tn = QtreeTensorNet(buckets, self.data_dict, self.bra_vars, self.ket_vars, fixed_vars)
+    def optimize_buckets(self):
         opt = OrderingOptimizer()
-        peo, tn = opt.optimize(tn)
+        peo, tn = opt.optimize(self.tn)
         return peo
 
     def _new_circuit(self, qc):
-        all_gates = qc
-        n_qubits = len(set(sum([g.qubits for g in all_gates], tuple())))
-        self.n_qubits = n_qubits
-        self.qtree_circuit = [[g] for g in qc]
+        self.all_gates = qc
 
     def _create_buckets(self):
-        buckets, data_dict, bra_vars, ket_vars = qtree.optimizer.circ2buckets(
-            self.n_qubits, self.qtree_circuit)
-        self.buckets = buckets
-        self.data_dict = data_dict
-        self.bra_vars = bra_vars
-        self.ket_vars = ket_vars
+        self.tn = QtreeTensorNet.from_qtree_gates(self.all_gates)
 
     def _set_free_qubits(self, free_final_qubits):
-        self.free_bra_vars = [self.bra_vars[i] for i in free_final_qubits]
-        self.bra_vars = [var for var in self.bra_vars if var not in self.free_bra_vars]
+        self.free_bra_vars = [self.tn.bra_vars[i] for i in free_final_qubits]
+        self.tn.bra_vars = [var for var in self.tn.bra_vars if var not in self.free_bra_vars]
 
     def _optimize_buckets(self):
-        self.peo = self.optimize_buckets(
-            self.buckets, ignored_vars=self.bra_vars+self.ket_vars, fixed_vars=self.free_bra_vars)
+        self.peo = self.optimize_buckets()
 
     def simulate_batch(self, qc, batch_vars=0, peo=None):
         self._new_circuit(qc)
@@ -67,8 +57,8 @@ class QtreeSimulator(Simulator):
         slice_dict = self._get_slice_dict()
         log.info('batch slice {}', slice_dict)
 
-        sliced_buckets = self.bucket_backend.get_sliced_buckets(
-            self.buckets, self.data_dict, slice_dict)
+        sliced_buckets = self.tn.slice(slice_dict)
+
         result = qtree.optimizer.bucket_elimination(
             sliced_buckets, self.bucket_backend.process_bucket,
             n_var_nosum=len(self.free_bra_vars)
@@ -80,17 +70,15 @@ class QtreeSimulator(Simulator):
         return self.simulate_batch(qc, peo=peo, batch_vars=0)
 
     def _reorder_buckets(self):
-        perm_buckets, perm_dict = qtree.optimizer.reorder_buckets(self.buckets, self.peo)
-        self.ket_vars = sorted([perm_dict[idx] for idx in self.ket_vars], key=str)
-        self.bra_vars = sorted([perm_dict[idx] for idx in self.bra_vars], key=str)
-        self.buckets = perm_buckets
+        perm_buckets, perm_dict = qtree.optimizer.reorder_buckets(self.tn.buckets, self.peo)
+        self.tn.ket_vars = sorted([perm_dict[idx] for idx in self.tn.ket_vars], key=str)
+        self.tn.bra_vars = sorted([perm_dict[idx] for idx in self.tn.bra_vars], key=str)
+        self.tn.buckets = perm_buckets
         return perm_dict
 
     def _get_slice_dict(self, initial_state=0, target_state=0):
-        slice_dict = qtree.utils.slice_from_bits(initial_state, self.ket_vars)
-        slice_dict.update(
-            qtree.utils.slice_from_bits(target_state, self.bra_vars)
-        )
+        slice_dict = qtree.utils.slice_from_bits(initial_state, self.tn.ket_vars)
+        slice_dict.update(qtree.utils.slice_from_bits(target_state, self.tn.bra_vars))
         slice_dict.update({var: slice(None) for var in self.free_bra_vars})
         return slice_dict
 

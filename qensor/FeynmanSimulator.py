@@ -22,18 +22,17 @@ def int_slice(value, vars_to_slice):
 class FeynmanSimulator(QtreeSimulator):
 
 
-    def optimize_buckets(self, buckets, ignored_vars=[], fixed_vars: list=None):
-        tn = QtreeTensorNet(buckets, self.data_dict, self.bra_vars, self.ket_vars, fixed_vars)
+    def optimize_buckets(self, fixed_vars: list=None):
+        self.tn.fixed_vars=fixed_vars
         opt = SlicesOptimizer(tw_bias=self.tw_bias)
-        peo, par_vars, tn = opt.optimize(tn)
+        peo, par_vars, self.tn = opt.optimize(self.tn)
         self.parallel_vars = par_vars
         return peo
 
     def _parallel_unit(self, par_idx):
         slice_dict = self._get_slice_dict(par_state=par_idx)
 
-        sliced_buckets = self.bucket_backend.get_sliced_buckets(
-            self.buckets, self.data_dict, slice_dict)
+        sliced_buckets = self.tn.slice(slice_dict)
         result = qtree.optimizer.bucket_elimination(
             sliced_buckets, self.bucket_backend.process_bucket
         , n_var_nosum=len(self.free_bra_vars + self.parallel_vars))
@@ -67,7 +66,6 @@ class FeynmanSimulator(QtreeSimulator):
         return result
 
     def _reorder_buckets(self):
-        perm_buckets, perm_dict = qtree.optimizer.reorder_buckets(self.buckets, self.peo)
         perm_dict = super()._reorder_buckets()
         self.parallel_vars = sorted([perm_dict[idx] for idx in self.parallel_vars], key=str)
 
