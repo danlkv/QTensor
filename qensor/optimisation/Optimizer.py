@@ -41,8 +41,6 @@ class OrderingOptimizer(Optimizer):
         self.ignored_vars = ignored_vars
         return peo, tensor_net
 
-
-
 class SlicesOptimizer(OrderingOptimizer):
 
     def __init__(self, tw_bias=2):
@@ -115,3 +113,28 @@ class TamakiOptimizer(OrderingOptimizer):
                 graph, method="tamaki", wait_time=self.wait_time)
 
         return peo, [tw]
+
+class TreeTrimSplitter(SlicesOptimizer):
+    def _split_graph(self, p_graph, max_tw):
+        peo_ints, path = self._get_ordering_ints(p_graph)
+        graph, _ = utils.reorder_graph(p_graph, peo_ints)
+        tw = max(path)
+        result = []
+        delta = tw - max_tw
+        while delta > 0:
+            var_target = int((delta + 1)*.8)
+            # var_target(1) = 1
+            # var_target(2) = 2
+            # var_target(15) = 12
+            par_vars, p_graph = qtree.graph_model.splitters.split_graph_by_tree_trimming(p_graph, var_target)
+            result += par_vars
+            peo_ints, path = self._get_ordering_ints(p_graph)
+            tw = max(path)
+            log.info('Treewidth: {}', tw)
+            self.treewidth = tw
+
+            graph, _ = utils.reorder_graph(p_graph, peo_ints)
+
+
+class TamakiTrimSlicing(TamakiOptimizer, TreeTrimSplitter):
+    pass
