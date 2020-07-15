@@ -82,7 +82,7 @@ class QAOASimulator(Simulator):
 
         with Pool(n_processes) as p:
 
-           r = list(tqdm(p.map(self._parallel_unit_edge, *args), total=G.number_of_edges()))
+           r = list(tqdm(p.imap(self._parallel_unit_edge, args), total=G.number_of_edges()))
            total_E = sum(r)
         C = self._post_process_energy(G, total_E)
 
