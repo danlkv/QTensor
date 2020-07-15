@@ -17,7 +17,7 @@ class CirqFactory:
 
     @staticmethod
     def XPhase(x, alpha):
-        return cirq.XPowGate(exponent=2*float(alpha)).on(x)
+        return cirq.XPowGate(exponent=float(alpha)).on(x)
 
     cZ=cirq.CZ
 
