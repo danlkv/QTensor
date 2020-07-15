@@ -23,13 +23,16 @@ class CirqFactory:
 
 QtreeFactory = qtree.operators
 
-class CC(qtree.operators.Gate):
+class CC(qtree.operators.ParametricGate):
     name = 'CC'
     _changes_qubits=tuple()
     def gen_tensor(self):
+        alpha = self.parameters['alpha']
+        ep = np.exp(1j*np.pi*alpha)
+        em = np.exp(-1j*np.pi*alpha)
         tensor = np.array([
-            [0,1]
-            ,[1,1]
+            [ep,em]
+            ,[em,ep]
         ])
         return tensor
 

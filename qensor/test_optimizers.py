@@ -36,3 +36,6 @@ def test_tamaki_trimming_opt():
     result_tam = sim.simulate(composer.circuit, batch_vars=3, tw_bias=7)
     print(result_tam)
     assert np.allclose(result_tam , result)
+
+if __name__ == '__main__':
+    test_tamaki_trimming_opt()

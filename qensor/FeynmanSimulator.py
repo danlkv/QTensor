@@ -25,8 +25,9 @@ class FeynmanSimulator(QtreeSimulator):
 
 
     def optimize_buckets(self, fixed_vars: list=None):
-        self.opt_args['tw_bias'] = self.tw_bias
-        opt = self.optimizer(**self.opt_args)
+        opt_args = {'tw_bias': self.tw_bias}
+        opt_args.update(self.opt_args)
+        opt = self.optimizer(**opt_args)
         peo, par_vars, self.tn = opt.optimize(self.tn)
         self.parallel_vars = par_vars
         return peo
