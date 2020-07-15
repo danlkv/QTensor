@@ -20,10 +20,13 @@ def int_slice(value, vars_to_slice):
     return {var: at for var, at in zip(vars_to_slice, multiindex)}
 
 class FeynmanSimulator(QtreeSimulator):
+    optimizer = SlicesOptimizer
+    opt_args = {}
 
 
     def optimize_buckets(self, fixed_vars: list=None):
-        opt = SlicesOptimizer(tw_bias=self.tw_bias)
+        self.opt_args['tw_bias'] = self.tw_bias
+        opt = self.optimizer(**self.opt_args)
         peo, par_vars, self.tn = opt.optimize(self.tn)
         self.parallel_vars = par_vars
         return peo
