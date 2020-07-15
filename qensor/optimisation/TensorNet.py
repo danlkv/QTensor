@@ -1,5 +1,6 @@
 import qtree
 from qensor.ProcessingFrameworks import NumpyBackend
+from loguru import logger as log
 
 class TensorNet:
     @property
@@ -39,8 +40,10 @@ class QtreeTensorNet:
 
     def get_line_graph(self):
         ignored_vars = self.bra_vars + self.ket_vars
-        return qtree.graph_model.buckets2graph(self.buckets,
+        graph =  qtree.graph_model.buckets2graph(self.buckets,
                                                ignore_variables=ignored_vars)
+        log.info('Line graph nodes: {}, edges: {}', graph.number_of_nodes(), graph.number_of_edges())
+        return graph
 
     @classmethod
     def from_qtree_gates(cls, qc):

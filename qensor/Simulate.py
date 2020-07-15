@@ -55,7 +55,7 @@ class QtreeSimulator(Simulator):
 
         self._reorder_buckets()
         slice_dict = self._get_slice_dict()
-        log.info('batch slice {}', slice_dict)
+        #log.info('batch slice {}', slice_dict)
 
         sliced_buckets = self.tn.slice(slice_dict)
 

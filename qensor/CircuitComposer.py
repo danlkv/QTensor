@@ -33,6 +33,10 @@ class QAOAComposer(CircuitComposer):
             self.x_term(qubit, beta)
 
     def append_zz_term(self, q1, q2, gamma):
+        try:
+            self.circuit.append(self.operators.CC(q1, q2, alpha=2*gamma))
+        except AttributeError:
+            pass
         self.circuit.append(self.operators.cX(q1, q2))
         self.circuit.append(self.operators.ZPhase(q2, alpha=2*gamma))
         self.circuit.append(self.operators.cX(q1, q2))
