@@ -2,7 +2,7 @@ from qensor import CirqQAOAComposer, QtreeQAOAComposer
 from qensor import QAOAQtreeSimulator
 from qensor.Simulate import CirqSimulator, QtreeSimulator
 from qensor.FeynmanSimulator import FeynmanSimulator
-from qensor.optimisation.Optimizer import TamakiTrimSlicing
+from qensor.optimisation.Optimizer import TamakiTrimSlicing, TreeTrimSplitter
 import numpy as np
 import networkx as nx
 
@@ -40,13 +40,19 @@ class FeynmanQAOASimulator(QAOAQtreeSimulator, FeynmanSimulator):
     pass
 
 def test_qaoa_energy_feynman():
-    G, gamma, beta = get_test_problem(30, 4, 3)
+    G, gamma, beta = get_test_problem(14, 3, 3)
+    sim = QAOAQtreeSimulator(QtreeQAOAComposer)
+    res = sim.energy_expectation(
+        G, gamma=gamma, beta=beta)
+    print('result', res)
+
     sim = FeynmanQAOASimulator(QtreeQAOAComposer)
-    sim.opt_args['tw_bias'] = 5
-    sim.optimizer = TamakiTrimSlicing
+    sim.opt_args['tw_bias'] = 6
+    sim.optimizer = TreeTrimSplitter
     res_1 = sim.energy_expectation(
         G, gamma=gamma, beta=beta)
     print('result', res_1)
+    assert np.isclose(res, res_1)
 
 if __name__ == '__main__':
     test_qaoa_energy_multithread()

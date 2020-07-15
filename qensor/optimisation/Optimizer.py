@@ -147,7 +147,7 @@ class TreeTrimSplitter(SlicesOptimizer):
 
             peo_ints, path = self._get_ordering_ints(p_graph)
             tw = max(path)
-            log.info('Treewidth: {}', tw)
+            log.debug('Treewidth: {}', tw)
             delta = tw - max_tw
             self.treewidth = tw
 
