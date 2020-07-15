@@ -104,3 +104,14 @@ class SlicesOptimizer(OrderingOptimizer):
         self.peo = self.ignored_vars + peo + self.parallel_vars 
         #log.info('peo {}', self.peo)
         return self.peo, self.parallel_vars, tensor_net
+
+class TamakiOptimizer(OrderingOptimizer):
+    def __init__(self, *args, wait_time=5, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.wait_time = wait_time
+
+    def _get_ordering_ints(self, graph):
+        peo, tw = qtree.graph_model.peo_calculation.get_upper_bound_peo_pace2017(
+                graph, method="tamaki", wait_time=self.wait_time)
+
+        return peo, [tw]
