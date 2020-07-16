@@ -22,11 +22,13 @@ def sim_file(filename):
 @click.option('-t', '--tamaki-time', default=15)
 @click.option('-T', '--max-tw', default=32)
 @click.option('-s', '--slice-step', default=None, type=int)
-def opt_file(filename, tamaki_time, max_tw, slice_step):
+@click.option('-C', '--cost-type', default='length')
+def opt_file(filename, tamaki_time, max_tw, slice_step, cost_type):
     tn = qop.TensorNet.QtreeTensorNet.from_qsim_file(filename)
     fopt = qop.Optimizer.TreeTrimSplitter()
     fopt.max_tw = max_tw
     fopt.par_var_step = slice_step
+    fopt.cost_type = cost_type
     fopt.tw_bias = 0
     try:
         peo, par_vars, tn = fopt.optimize(tn)
