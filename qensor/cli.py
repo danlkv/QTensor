@@ -25,7 +25,7 @@ def sim_file(filename):
 @click.option('-C', '--cost-type', default='length')
 def opt_file(filename, tamaki_time, max_tw, slice_step, cost_type):
     tn = qop.TensorNet.QtreeTensorNet.from_qsim_file(filename)
-    fopt = qop.Optimizer.TreeTrimSplitter()
+    fopt = qop.Optimizer.TamakiTrimSlicing()
     fopt.max_tw = max_tw
     fopt.par_var_step = slice_step
     fopt.cost_type = cost_type
