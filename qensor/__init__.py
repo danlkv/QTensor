@@ -3,11 +3,19 @@ import numpy as np
 from .CircuitComposer import QAOAComposer
 from .OpFactory import CirqCreator, QtreeCreator
 from qensor.Simulate import CirqSimulator, QtreeSimulator
+import qtree
 
 class CirqQAOAComposer(QAOAComposer, CirqCreator):
     pass
 
+
 class QtreeQAOAComposer(QAOAComposer, QtreeCreator):
+    def set_operators(self, operators):
+        if operators == "diagonal":
+            self.operators = qtree.operators
+        elif operators == "full_matrix":
+            self.operators = qtree.operators_full_matrix
+
     def energy_expectation(self):
         G = self.graph
         self.ansatz_state()

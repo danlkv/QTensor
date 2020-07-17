@@ -1,0 +1,7 @@
+method: tamaki_heuristic | heuristic_runtime: 15 | maxNodes51 | graph_connectivity: 6 | p: 100 | operators: diagonal | seed: 25
+
+problem_graph_size: 50
+peo_processing: 26.04103708267212
+graph_nodes: 40100
+max_treewidth: 39484
+

@@ -42,7 +42,7 @@ class QAOAComposer(CircuitComposer):
             self.append_zz_term(u, v, gamma)
 
 
-    def ansatz_state(self):
+    def ansatz_state(self, operators="diagonal"):
         beta, gamma = self.params['beta'], self.params['gamma']
 
         assert(len(beta) == len(gamma))

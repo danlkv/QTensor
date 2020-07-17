@@ -1,0 +1,17 @@
+method: quickbb | heuristic_runtime: 15 | maxNodes31 | graph_connectivity: 3 | p: 2 | operators: diagonal | seed: 25
+
+problem_graph_size: 10
+peo_processing: 2.397691011428833
+graph_nodes: 120
+max_treewidth: 6
+
+problem_graph_size: 20
+peo_processing: 16.380308866500854
+graph_nodes: 240
+max_treewidth: 12
+
+problem_graph_size: 30
+peo_processing: 16.185148000717163
+graph_nodes: 360
+max_treewidth: 11
+
