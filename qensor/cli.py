@@ -1,5 +1,6 @@
 import sys
 import click
+import qtree
 import qtree.operators as ops
 from qensor.FeynmanSimulator import FeynmanSimulator
 import qensor.optimisation as qop
@@ -42,6 +43,16 @@ def opt_file(filename, tamaki_time, max_tw, slice_step, cost_type):
     print(sep.join(['p_vars','tw']))
     for x in hist:
         print(sep.join(str(n) for n in x))
+
+
+@cli.command()
+@click.argument('filename')
+def tw_exact(filename):
+    tn = qop.TensorNet.QtreeTensorNet.from_qsim_file(filename)
+    graph = tn.get_line_graph()
+    peo, tw = qtree.graph_model.peo_calculation.get_peo(graph)
+    print(peo)
+    print(tw)
 
 
 cli()
