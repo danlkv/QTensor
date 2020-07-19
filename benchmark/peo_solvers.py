@@ -4,6 +4,12 @@ multiple options and types of solvers
 """
 
 import sys
+sys.path.insert(0, "../")
+sys.path.insert(1, "../../PACE2017-TrackA")
+sys.path.insert(2, "../../quickbb")
+sys.path.insert(3, "../qtree")
+sys.path.insert(4, "../../flow-cutter-pace17")
+
 import numpy as np
 import networkx as nx
 from qensor import QtreeQAOAComposer
@@ -11,10 +17,6 @@ import qtree
 from qtree.graph_model import get_upper_bound_peo, get_peo
 from time import time
 from qensor import utils
-
-sys.path.insert(0, "../")
-sys.path.insert(1, "../../PACE2017-TrackA")
-sys.path.insert(2, "../../quickbb")
 
 def peo_benchmark(
         method,
@@ -143,11 +145,11 @@ def run_treewidth_dependency_benchmarks():
         #                       p_values[:2], p_values[:2])
         # peo_benchmark_wrapper("treewidth_dependency_data/", "tamaki_heuristic", 20, 21, 1, d_i, 15, "diagonal", 25,
         #                       p_values[:3], p_values[:3])
-        peo_benchmark_wrapper("treewidth_dependency_data/", "greedy", 20, 21, 1, d_i, 15, "diagonal", 25,
+        peo_benchmark_wrapper("treewidth_dependency_data/", "greedy", 20, 21, 1, d_i, 60, "diagonal", 25,
                               p_values[:1], p_values[:1])
-        peo_benchmark_wrapper("treewidth_dependency_data/", "greedy", 20, 21, 1, d_i, 15, "diagonal", 25,
+        peo_benchmark_wrapper("treewidth_dependency_data/", "greedy", 20, 21, 1, d_i, 60, "diagonal", 25,
                               p_values[:2], p_values[:2])
-        peo_benchmark_wrapper("treewidth_dependency_data/", "greedy", 20, 21, 1, d_i, 15, "diagonal", 25,
+        peo_benchmark_wrapper("treewidth_dependency_data/", "greedy", 20, 21, 1, d_i, 60, "diagonal", 25,
                               p_values[:3], p_values[:3])
 
     # run increasing p for several d
@@ -162,21 +164,29 @@ def run_treewidth_dependency_benchmarks():
 
 
 def run_peo_benchmarks():
-    peo_benchmark_wrapper("peo_bench_data/", "greedy", 10, 501, 10, 3, 1)
-    peo_benchmark_wrapper("peo_bench_data/", "tamaki_heuristic", 10, 501, 10, 3, 1)
-    peo_benchmark_wrapper("peo_bench_data/", "tamaki_heuristic", 10, 501, 10, 3, 2)
-    peo_benchmark_wrapper("peo_bench_data/", "tamaki_heuristic", 10, 501, 10, 3, 5)
-    peo_benchmark_wrapper("peo_bench_data/", "tamaki_heuristic", 10, 501, 10, 3, 15)
-    peo_benchmark_wrapper("peo_bench_data/", "tamaki_heuristic", 10, 501, 10, 3, 1, "full_matrix")
-    peo_benchmark_wrapper("peo_bench_data/", "tamaki_heuristic", 10, 501, 10, 3, 2, "full_matrix")
-    peo_benchmark_wrapper("peo_bench_data/", "tamaki_heuristic", 10, 501, 10, 3, 5, "full_matrix")
-    peo_benchmark_wrapper("peo_bench_data/", "tamaki_heuristic", 10, 501, 10, 3, 15, "full_matrix")
-    peo_benchmark_wrapper("peo_bench_data/", "quickbb", 10, 31, 10, 3, 1)
-    peo_benchmark_wrapper("peo_bench_data/", "quickbb", 10, 31, 10, 3, 2)
-    peo_benchmark_wrapper("peo_bench_data/", "quickbb", 10, 31, 10, 3, 5)
-    peo_benchmark_wrapper("peo_bench_data/", "quickbb", 10, 31, 10, 3, 15)
+    # peo_benchmark_wrapper("peo_bench_data/", "greedy", 10, 151, 10, 3, 1)
+    peo_running_times = [1, 5, 15, 60]
+    seeds = [23, 24, 25]
+    methods = ["tamaki_heuristic", "flow_cutter"]
+
+    for method in methods:
+        for seed in seeds:
+            for peo_run_time in peo_running_times:
+                peo_benchmark_wrapper("peo_bench_data/", method, 10, 11, 10, 3, peo_run_time, "diagonal", seed)
+
+
+    # peo_benchmark_wrapper("peo_bench_data/", "tamaki_heuristic", 10, 151, 10, 3, 1, "full_matrix")
+    # peo_benchmark_wrapper("peo_bench_data/", "tamaki_heuristic", 10, 151, 10, 3, 2, "full_matrix")
+    # peo_benchmark_wrapper("peo_bench_data/", "tamaki_heuristic", 10, 151, 10, 3, 5, "full_matrix")
+    # peo_benchmark_wrapper("peo_bench_data/", "tamaki_heuristic", 10, 151, 10, 3, 15, "full_matrix")
+    # peo_benchmark_wrapper("peo_bench_data/", "tamaki_heuristic", 10, 151, 10, 3, 60, "full_matrix")
+
+    # peo_benchmark_wrapper("peo_bench_data/", "quickbb", 10, 31, 10, 3, 1)
+    # peo_benchmark_wrapper("peo_bench_data/", "quickbb", 10, 31, 10, 3, 2)
+    # peo_benchmark_wrapper("peo_bench_data/", "quickbb", 10, 31, 10, 3, 5)
+    # peo_benchmark_wrapper("peo_bench_data/", "quickbb", 10, 31, 10, 3, 15)
 
 
 # peo_benchmark_wrapper("peo_bench_data/", "greedy", 10, 501, 10, 3, 1)
-# run_peo_benchmarks()
-run_treewidth_dependency_benchmarks()
+run_peo_benchmarks()
+# run_treewidth_dependency_benchmarks()

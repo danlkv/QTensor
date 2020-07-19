@@ -48,16 +48,16 @@ def tw_reliance_p():
     p_values = np.arange(1, 15)
 
     for p_i in p_values:
-        _, _, tw = read_peo_file("treewidth_dependency_data/peo_tamaki_heuristic_heuristicRun15_maxNodes21_d3_p" + str(p_i) + "_operators-diagonal_seed25.txt")
+        _, _, tw = read_peo_file("treewidth_dependency_data/peo_tamaki_heuristic_heuristicRun15_maxNodes51_d3_p" + str(p_i) + "_operators-diagonal_seed25.txt")
         d_3_max_treewidth.append(tw)
 
     for p_i in p_values:
-        _, _, tw = read_peo_file("treewidth_dependency_data/peo_tamaki_heuristic_heuristicRun15_maxNodes21_d4_p" + str(p_i) + "_operators-diagonal_seed25.txt")
+        _, _, tw = read_peo_file("treewidth_dependency_data/peo_tamaki_heuristic_heuristicRun15_maxNodes51_d4_p" + str(p_i) + "_operators-diagonal_seed25.txt")
         d_4_max_treewidth.append(tw)
 
-    for p_i in p_values:
-        _, _, tw = read_peo_file("treewidth_dependency_data/peo_tamaki_heuristic_heuristicRun15_maxNodes21_d5_p" + str(p_i) + "_operators-diagonal_seed25.txt")
-        d_5_max_treewidth.append(tw)
+    # for p_i in p_values:
+    #     _, _, tw = read_peo_file("treewidth_dependency_data/peo_tamaki_heuristic_heuristicRun15_maxNodes51_d5_p" + str(p_i) + "_operators-diagonal_seed25.txt")
+    #     d_5_max_treewidth.append(tw)
 
     plt.figure()
 
@@ -132,6 +132,6 @@ def read_peo_file(filename):
 
 
 # compare_tamaki_heuristic_runtimes_treewidths()
-compare_diagonal_to_full_matrix_operators()
+# compare_diagonal_to_full_matrix_operators()
 # tw_reliance_connectivity()
-# tw_reliance_p()
+tw_reliance_p()

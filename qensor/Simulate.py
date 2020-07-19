@@ -20,7 +20,7 @@ class QtreeSimulator(Simulator):
     def simulate(self, qc):
         return self.simulate_state(qc)
 
-    def simulate_state(self, qc):
+    def simulate_state(self, qc, peo_solver="tamaki", peo_only=False):
         from time import time
 
         all_gates = qc
@@ -37,31 +37,31 @@ class QtreeSimulator(Simulator):
         ###########################################
         peo_ints, treewidth = utils.get_locale_peo(graph, utils.n_neighbors)
 
-        # TODO: Get max of treewidth here, and graph.numberOfNodes()
-        start = time()
-        peo = [qtree.optimizer.Var(var, size=graph.nodes[var]['size'],
-                        name=graph.nodes[var]['name'])
-                    for var in peo_ints]
+        if peo_solver == "greedy":
+            start = time()
+            peo = [qtree.optimizer.Var(var, size=graph.nodes[var]['size'],
+                            name=graph.nodes[var]['name'])
+                        for var in peo_ints]
 
-        peo = ket_vars + bra_vars + peo
-        elapsed = time() - start
-        print("peo_processing:", elapsed)
-        print("graph_nodes:", graph.number_of_nodes())
-        print("max_treewidth:", max(treewidth))
-        # print("OLD PEO", peo)
+            peo = ket_vars + bra_vars + peo
+            elapsed = time() - start
+            print("peo_processing:", elapsed)
+            print("graph_nodes:", graph.number_of_nodes())
+            print("max_treewidth:", max(treewidth))
         ###########################################
-        # TODO: Using the Tamaki solver. Put this in a separate part
-        # import qtree.graph_model as gm
-        # start = time()
-        # peo, tw = gm.get_peo(graph)
-        # peo = ket_vars + bra_vars + peo
-        # # print("NEW PEO", peo)
-        # elapsed = time() - start
-        # print("peo_processing:", elapsed)
-        # print("graph_nodes:", graph.number_of_nodes())
-        # print("max_treewidth:", tw)
-        # TODO: end Tamaki solver
+        if peo_solver == "tamaki":
+            import qtree.graph_model as gm
+            start = time()
+            peo, tw = gm.get_upper_bound_peo(graph)
+            peo = ket_vars + bra_vars + peo
+            elapsed = time() - start
+            print("peo_processing:", elapsed)
+            print("graph_nodes:", graph.number_of_nodes())
+            print("max_treewidth:", tw)
         ###########################################
+        if peo_only:
+            return peo
+        ##########################################
         perm_buckets, perm_dict = qtree.optimizer.reorder_buckets(buckets, peo)
         ket_vars = sorted([perm_dict[idx] for idx in ket_vars], key=str)
         bra_vars = sorted([perm_dict[idx] for idx in bra_vars], key=str)
