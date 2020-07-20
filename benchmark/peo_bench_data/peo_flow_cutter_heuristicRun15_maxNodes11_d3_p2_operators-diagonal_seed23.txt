@@ -1,0 +1,7 @@
+method: flow_cutter | heuristic_runtime: 15 | maxNodes11 | graph_connectivity: 3 | p: 2 | operators: diagonal | seed: 23
+
+problem_graph_size: 10
+peo_processing: 15.041028261184692
+graph_nodes: 120
+max_treewidth: 6
+
