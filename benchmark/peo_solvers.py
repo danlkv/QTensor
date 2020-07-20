@@ -135,32 +135,28 @@ def peo_benchmark_wrapper(
 
 def run_treewidth_dependency_benchmarks():
     p_values = np.ones(100) * 0.5
-    d = np.arange(1, 16)
+    seeds = [23, 24, 25]
 
-    # run increasing d for several p
-    for d_i in d:
-        # peo_benchmark_wrapper("treewidth_dependency_data/", "tamaki_heuristic", 20, 21, 1, d_i, 15, "diagonal", 25,
-        #                       p_values[:1], p_values[:1])
-        # peo_benchmark_wrapper("treewidth_dependency_data/", "tamaki_heuristic", 20, 21, 1, d_i, 15, "diagonal", 25,
-        #                       p_values[:2], p_values[:2])
-        # peo_benchmark_wrapper("treewidth_dependency_data/", "tamaki_heuristic", 20, 21, 1, d_i, 15, "diagonal", 25,
-        #                       p_values[:3], p_values[:3])
-        peo_benchmark_wrapper("treewidth_dependency_data/", "greedy", 20, 21, 1, d_i, 60, "diagonal", 25,
-                              p_values[:1], p_values[:1])
-        peo_benchmark_wrapper("treewidth_dependency_data/", "greedy", 20, 21, 1, d_i, 60, "diagonal", 25,
-                              p_values[:2], p_values[:2])
-        peo_benchmark_wrapper("treewidth_dependency_data/", "greedy", 20, 21, 1, d_i, 60, "diagonal", 25,
-                              p_values[:3], p_values[:3])
+    for seed in seeds:
+        # run increasing d for several p
+        d = np.arange(1, 11)
+        for d_i in d:
+            peo_benchmark_wrapper("treewidth_dependency_data/", "greedy", 20, 21, 1, d_i, 120, "diagonal", seed,
+                                  p_values[:1], p_values[:1])
+            peo_benchmark_wrapper("treewidth_dependency_data/", "greedy", 20, 21, 1, d_i, 120, "diagonal", seed,
+                                  p_values[:2], p_values[:2])
+            peo_benchmark_wrapper("treewidth_dependency_data/", "greedy", 20, 21, 1, d_i, 120, "diagonal", seed,
+                                  p_values[:3], p_values[:3])
 
-    # run increasing p for several d
-    p_options = np.arange(1, 16)
-    for i in p_options:
-        peo_benchmark_wrapper("treewidth_dependency_data/", "tamaki_heuristic", 20, 21, 1, 3, 15, "diagonal", 25,
-                              p_values[:i], p_values[:i])
-        peo_benchmark_wrapper("treewidth_dependency_data/", "tamaki_heuristic", 20, 21, 1, 4, 15, "diagonal", 25,
-                              p_values[:i], p_values[:i])
-        peo_benchmark_wrapper("treewidth_dependency_data/", "tamaki_heuristic", 20, 21, 1, 5, 15, "diagonal", 25,
-                              p_values[:i], p_values[:i])
+        # run increasing p for several d
+        p_options = np.arange(1, 11)
+        for i in p_options:
+            peo_benchmark_wrapper("treewidth_dependency_data/", "tamaki_heuristic", 20, 21, 1, 3, 120, "diagonal", seed,
+                                  p_values[:i], p_values[:i])
+            peo_benchmark_wrapper("treewidth_dependency_data/", "tamaki_heuristic", 20, 21, 1, 4, 120, "diagonal", seed,
+                                  p_values[:i], p_values[:i])
+            peo_benchmark_wrapper("treewidth_dependency_data/", "tamaki_heuristic", 20, 21, 1, 5, 120, "diagonal", seed,
+                                  p_values[:i], p_values[:i])
 
 
 def run_peo_benchmarks():
@@ -188,5 +184,5 @@ def run_peo_benchmarks():
 
 
 # peo_benchmark_wrapper("peo_bench_data/", "greedy", 10, 501, 10, 3, 1)
-run_peo_benchmarks()
-# run_treewidth_dependency_benchmarks()
+# run_peo_benchmarks()
+run_treewidth_dependency_benchmarks()
