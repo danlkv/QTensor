@@ -1,0 +1,77 @@
+method: flow_cutter | heuristic_runtime: 1 | maxNodes151 | graph_connectivity: 3 | p: 2 | operators: diagonal | seed: 24
+
+problem_graph_size: 10
+peo_processing: 1.0454566478729248
+graph_nodes: 120
+max_treewidth: 6
+
+problem_graph_size: 20
+peo_processing: 1.0779345035552979
+graph_nodes: 240
+max_treewidth: 12
+
+problem_graph_size: 30
+peo_processing: 1.1163599491119385
+graph_nodes: 360
+max_treewidth: 13
+
+problem_graph_size: 40
+peo_processing: 1.1468770503997803
+graph_nodes: 480
+max_treewidth: 13
+
+problem_graph_size: 50
+peo_processing: 1.2878973484039307
+graph_nodes: 600
+max_treewidth: 21
+
+problem_graph_size: 60
+peo_processing: 1.185474157333374
+graph_nodes: 720
+max_treewidth: 25
+
+problem_graph_size: 70
+peo_processing: 1.3173694610595703
+graph_nodes: 840
+max_treewidth: 25
+
+problem_graph_size: 80
+peo_processing: 1.279839277267456
+graph_nodes: 960
+max_treewidth: 29
+
+problem_graph_size: 90
+peo_processing: 1.3118059635162354
+graph_nodes: 1080
+max_treewidth: 37
+
+problem_graph_size: 100
+peo_processing: 1.3645670413970947
+graph_nodes: 1200
+max_treewidth: 34
+
+problem_graph_size: 110
+peo_processing: 1.3239428997039795
+graph_nodes: 1320
+max_treewidth: 43
+
+problem_graph_size: 120
+peo_processing: 1.4480364322662354
+graph_nodes: 1440
+max_treewidth: 40
+
+problem_graph_size: 130
+peo_processing: 1.3896448612213135
+graph_nodes: 1560
+max_treewidth: 46
+
+problem_graph_size: 140
+peo_processing: 1.404714822769165
+graph_nodes: 1680
+max_treewidth: 53
+
+problem_graph_size: 150
+peo_processing: 1.5447413921356201
+graph_nodes: 1800
+max_treewidth: 55
+

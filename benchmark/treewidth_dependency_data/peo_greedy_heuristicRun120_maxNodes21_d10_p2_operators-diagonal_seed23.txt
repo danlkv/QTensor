@@ -1,0 +1,7 @@
+method: greedy | heuristic_runtime: 120 | maxNodes21 | graph_connectivity: 10 | p: 2 | operators: diagonal | seed: 23
+
+problem_graph_size: 20
+peo_processing: 1.0790913105010986
+graph_nodes: 520
+max_treewidth: 28
+

@@ -1,0 +1,77 @@
+method: tamaki_heuristic | heuristic_runtime: 1 | maxNodes151 | graph_connectivity: 3 | p: 2 | operators: diagonal | seed: 24
+
+problem_graph_size: 10
+peo_processing: 1.153576135635376
+graph_nodes: 120
+max_treewidth: 6
+
+problem_graph_size: 20
+peo_processing: 1.169001817703247
+graph_nodes: 240
+max_treewidth: 12
+
+problem_graph_size: 30
+peo_processing: 1.191145420074463
+graph_nodes: 360
+max_treewidth: 13
+
+problem_graph_size: 40
+peo_processing: 1.2519145011901855
+graph_nodes: 480
+max_treewidth: 13
+
+problem_graph_size: 50
+peo_processing: 1.2930469512939453
+graph_nodes: 600
+max_treewidth: 21
+
+problem_graph_size: 60
+peo_processing: 1.4433047771453857
+graph_nodes: 720
+max_treewidth: 28
+
+problem_graph_size: 70
+peo_processing: 1.3663456439971924
+graph_nodes: 840
+max_treewidth: 25
+
+problem_graph_size: 80
+peo_processing: 1.377021312713623
+graph_nodes: 960
+max_treewidth: 196
+
+problem_graph_size: 90
+peo_processing: 1.5411598682403564
+graph_nodes: 1080
+max_treewidth: 223
+
+problem_graph_size: 100
+peo_processing: 1.5177967548370361
+graph_nodes: 1200
+max_treewidth: 1199
+
+problem_graph_size: 110
+peo_processing: 1.5010364055633545
+graph_nodes: 1320
+max_treewidth: 1319
+
+problem_graph_size: 120
+peo_processing: 1.5441184043884277
+graph_nodes: 1440
+max_treewidth: 1439
+
+problem_graph_size: 130
+peo_processing: 1.556365728378296
+graph_nodes: 1560
+max_treewidth: 1559
+
+problem_graph_size: 140
+peo_processing: 1.589449405670166
+graph_nodes: 1680
+max_treewidth: 1679
+
+problem_graph_size: 150
+peo_processing: 1.6089468002319336
+graph_nodes: 1800
+max_treewidth: 1799
+

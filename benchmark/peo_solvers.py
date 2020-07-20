@@ -168,7 +168,7 @@ def run_peo_benchmarks():
     for method in methods:
         for seed in seeds:
             for peo_run_time in peo_running_times:
-                peo_benchmark_wrapper("peo_bench_data/", method, 10, 11, 10, 3, peo_run_time, "diagonal", seed)
+                peo_benchmark_wrapper("peo_bench_data/", method, 10, 151, 10, 3, peo_run_time, "diagonal", seed)
 
 
     # peo_benchmark_wrapper("peo_bench_data/", "tamaki_heuristic", 10, 151, 10, 3, 1, "full_matrix")
@@ -184,5 +184,5 @@ def run_peo_benchmarks():
 
 
 # peo_benchmark_wrapper("peo_bench_data/", "greedy", 10, 501, 10, 3, 1)
-# run_peo_benchmarks()
+run_peo_benchmarks()
 run_treewidth_dependency_benchmarks()
