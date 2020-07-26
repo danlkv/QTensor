@@ -49,6 +49,8 @@ class SlicesOptimizer(OrderingOptimizer):
         self.tw_bias = tw_bias
 
     def _get_max_tw(self):
+        if hasattr(self, 'max_tw'):
+            return self.max_tw
         mem = psutil.virtual_memory()
         avail = mem.available
         log.info('Memory available: {}', avail)
@@ -117,28 +119,36 @@ class TamakiOptimizer(OrderingOptimizer):
         return peo, [tw]
 
 class TreeTrimSplitter(SlicesOptimizer):
+    cost_type = 'length'
     def _split_graph(self, p_graph, max_tw):
         peo_ints = self.peo_ints
         tw = self.treewidth
+        self._slice_hist = []
+        self._slice_hist.append([0, tw])
         log.info('Treewidth: {}', tw)
         log.info('Target treewidth: {}', max_tw)
         result = []
         delta = tw - max_tw
         while delta > 0:
-            var_target = int((delta)*.2) + 1
-            # var_target = 1 # expensive
+            if hasattr(self, 'par_var_step') and self.par_var_step:
+                var_target = self.par_var_step
+            else:
+                var_target = int((delta)*.2) + 1
             # var_target(1) = 1
             # var_target(2) = 2
             # var_target(15) = 12
-            
             # -- relabel
+
             graph, label_dict = qtree.graph_model.relabel_graph_nodes(
                 p_graph, dict(zip(peo_ints, range(len(p_graph.nodes()))))
             )
-            par_vars, _ = qtree.graph_model.splitters.split_graph_by_tree_trimming(graph, var_target)
+            if self.cost_type == 'width':
+                par_vars, _ = qtree.graph_model.splitters.split_graph_by_tree_trimming_width(graph, var_target)
+            else:
+                par_vars, _ = qtree.graph_model.splitters.split_graph_by_tree_trimming(graph, var_target)
             par_vars = [label_dict[i] for i in par_vars]
             for var in  par_vars:
-                print('remove', var)
+                log.debug('Remove node {}. Hood size {}', var, utils.n_neighbors(p_graph, var))
                 qtree.graph_model.base.remove_node(p_graph, var)
             result += par_vars
             # -- dislabel
@@ -148,6 +158,8 @@ class TreeTrimSplitter(SlicesOptimizer):
             peo_ints, path = self._get_ordering_ints(p_graph)
             tw = max(path)
             log.debug('Treewidth: {}', tw)
+            self._slice_hist.append([pv_cnt, tw])
+
             delta = tw - max_tw
             self.treewidth = tw
 
