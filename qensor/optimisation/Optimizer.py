@@ -7,6 +7,13 @@ from qensor import utils
 from qensor.optimisation.Greedy import GreedyParvars
 from loguru import logger as log
 
+def strip_graph(g):
+    gc = g.copy()
+    gc = qtree.graph_model.splitters.get_simple_graph(gc)
+    for n in g.nodes():
+        if len(gc[n]) < 3:
+            qtree.graph_model.eliminate_node(gc, n)
+    return gc
 
 class Optimizer:
     def optimize(self, tensor_net):
@@ -120,6 +127,17 @@ class TamakiOptimizer(OrderingOptimizer):
 
 class TreeTrimSplitter(SlicesOptimizer):
     cost_type = 'length'
+    def _get_par_vars(self, p_graph, peo, n_vars):
+        graph, label_dict = qtree.graph_model.relabel_graph_nodes(
+            p_graph, dict(zip(peo, range(len(p_graph.nodes()))))
+        )
+        if self.cost_type == 'width':
+            par_vars, _ = qtree.graph_model.splitters.split_graph_by_tree_trimming_width(graph, n_vars)
+        else:
+            par_vars, _ = qtree.graph_model.splitters.split_graph_by_tree_trimming(graph, n_vars)
+        par_vars = [label_dict[i] for i in par_vars]
+        return par_vars
+
     def _split_graph(self, p_graph, max_tw):
         peo_ints = self.peo_ints
         tw = self.treewidth
@@ -134,19 +152,11 @@ class TreeTrimSplitter(SlicesOptimizer):
                 var_target = self.par_var_step
             else:
                 var_target = int((delta)*.2) + 1
-            # var_target(1) = 1
-            # var_target(2) = 2
-            # var_target(15) = 12
-            # -- relabel
+                # var_target(1) = 1
+                # var_target(2) = 2
+                # var_target(15) = 12
+            par_vars = self._get_par_vars(p_graph, peo_ints, var_target)
 
-            graph, label_dict = qtree.graph_model.relabel_graph_nodes(
-                p_graph, dict(zip(peo_ints, range(len(p_graph.nodes()))))
-            )
-            if self.cost_type == 'width':
-                par_vars, _ = qtree.graph_model.splitters.split_graph_by_tree_trimming_width(graph, var_target)
-            else:
-                par_vars, _ = qtree.graph_model.splitters.split_graph_by_tree_trimming(graph, var_target)
-            par_vars = [label_dict[i] for i in par_vars]
             for var in  par_vars:
                 log.debug('Remove node {}. Hood size {}', var, utils.n_neighbors(p_graph, var))
                 qtree.graph_model.base.remove_node(p_graph, var)
