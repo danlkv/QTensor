@@ -12,11 +12,12 @@ sys.path.insert(4, "../../flow-cutter-pace17")
 
 import numpy as np
 import networkx as nx
-from qensor import QtreeQAOAComposer
+from qensor import QtreeQAOAComposer, CirqQAOAComposer
 import qtree
 from qtree.graph_model import get_upper_bound_peo, get_peo
 from time import time
 from qensor import utils
+from .convert_data_to_mongodb import print_mongodb_info
 
 def peo_benchmark(
         method,
@@ -36,16 +37,16 @@ def peo_benchmark(
 
     # print all output data to a file
 
-    print("method: " + str(method)
-          + " | heuristic_runtime: " + str(heuristic_runtime)
-          + " | maxNodes" + str(problem_graph_end)
-          + " | graph_connectivity: " + str(graph_connectivity)
-          + " | p: " + str(len(beta))
-          + " | operators: " + operators
-          + " | seed: " + str(seed) + "\n")
+    # print("method: " + str(method)
+    #       + " | heuristic_runtime: " + str(heuristic_runtime)
+    #       + " | maxNodes" + str(problem_graph_end)
+    #       + " | graph_connectivity: " + str(graph_connectivity)
+    #       + " | p: " + str(len(beta))
+    #       + " | operators: " + operators
+    #       + " | seed: " + str(seed) + "\n")
 
     for num_nodes in range(problem_graph_start, problem_graph_end, problem_graph_jumps):
-        print("problem_graph_size:", num_nodes)
+        # print("problem_graph_size:", num_nodes)
         graph = nx.random_regular_graph(d=graph_connectivity, n=num_nodes, seed=seed)
         composer = QtreeQAOAComposer(graph, beta=beta, gamma=gamma)
         # for using the non-optimal full operators
@@ -87,11 +88,16 @@ def peo_benchmark(
 
         elapsed = time() - start
 
+        # print all information in a mongodb-friendly format
+
+        print_mongodb_info(method, str(num_nodes), str(graph_connectivity), str(len(beta)),
+                           str(heuristic_runtime), operators, str(seed), str(graph.number_of_nodes()), str(treewidth))
+
         # print all relevant information
-        print("peo_processing:", elapsed)
-        print("graph_nodes:", graph.number_of_nodes())
-        print("max_treewidth:", treewidth)
-        print()
+        # print("peo_processing:", elapsed)
+        # print("graph_nodes:", graph.number_of_nodes())
+        # print("max_treewidth:", treewidth)
+        # print()
 
 
 
@@ -112,14 +118,14 @@ def peo_benchmark_wrapper(
     if gamma is None:
         gamma = [.5, 1]
 
-    sys.stdout = open(folder + "peo_" + str(method)
-                      + "_heuristicRun" + str(heuristic_runtime)
-                      + "_maxNodes" + str(problem_graph_end)
-                      + "_d" + str(graph_connectivity)
-                      + "_p" + str(len(beta))
-                      + "_operators-" + operators
-                      + "_seed" + str(seed)
-                      + ".txt", 'w')
+    # sys.stdout = open(folder + "peo_" + str(method)
+    #                   + "_heuristicRun" + str(heuristic_runtime)
+    #                   + "_maxNodes" + str(problem_graph_end)
+    #                   + "_d" + str(graph_connectivity)
+    #                   + "_p" + str(len(beta))
+    #                   + "_operators-" + operators
+    #                   + "_seed" + str(seed)
+    #                   + ".txt", 'w')
 
     peo_benchmark(method,
                   problem_graph_start,
