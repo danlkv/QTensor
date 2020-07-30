@@ -62,6 +62,19 @@ class CircuitCreator:
         self.circuit.append(gate(**params), *qubits)
 
 
+class QiskitCreator(CircuitCreator):
+    operators = QiskitFactory
+
+    def get_qubits(self):
+        pass
+    def get_circuit(self):
+        pass
+
+    def apply_gate(self, gate, *qubits, **params):
+        pass
+
+
+
 class CirqCreator(CircuitCreator):
     operators = CirqFactory
 

@@ -1,7 +1,8 @@
 import numpy as np
 
+
 def read_text_data_file():
-    folders = ["treewidth_dependency_data"] #, "peo_bench_data"]
+    folders = ["treewidth_dependency_data", "peo_bench_data"]
     methods = ["flow_cutter", "tamaki_heuristic", "greedy"]
     runtimes = [1, 2, 5, 15, 60, 120, 1800]
     max_nodes_list = [11, 21, 31, 36, 37, 51, 101, 151, 501]
@@ -49,12 +50,31 @@ def read_text_data_file():
                                         continue
 
 
-def print_info(method, problem_graph_size, d_i, p_i, runtime, operator, seed, nodes, max_treewidth):
-    print("{'method': '" + method + "', 'problem_graph_size': " + str(problem_graph_size) +
-          ", 'problem_graph_connectivity': " + str(d_i) + ", 'qaoa_p_value': " + str(p_i) +
-          ", 'heuristic_method_runtime': " + str(runtime) + ", 'operators': '" + operator +
-          "', 'seed': " + str(seed) + ", 'graph_nodes': " + str(nodes) + ", 'max_treewidth': " +
-          str(max_treewidth) + "}")
+def print_info(method, problem_graph_size, d_i, p_i, runtime, operator, seed, nodes, treewidth):
+    if method == "greedy":
+        id_string = "method" + method + "_problemSize" + str(problem_graph_size) + "_problemConnectivity" + str(d_i) + \
+                    "_qaoaP" + str(p_i) + "_operators" + operator + \
+                    "_seed" + str(seed) + "_graphNodes" + str(nodes) + "_treewidth" + str(treewidth)
+        print("{'_id': '" + id_string + "', 'method': '" + method +
+              ", 'problem_args: " +
+              "{'problem_graph_size': " + str(problem_graph_size) +
+              ", 'problem_graph_connectivity': " + str(d_i) + ", 'qaoa_p_value': " + str(p_i) +
+              "', 'seed': " + str(seed) +
+              "}" +
+              ", 'operators': '" + operator + ", 'graph_nodes': " + str(nodes) +
+              ", 'treewidth': " + str(treewidth) + "}")
+
+    elif method == "flow_cutter" or method == "tamaki_heuristic":
+        id_string = "method" + method + "_problemSize" + str(problem_graph_size) + "_problemConnectivity" + str(d_i) + \
+                    "_qaoaP" + str(p_i) + "_heuristic_method_runtime" + str(runtime) + "_operators" + operator +\
+                    "_seed" + str(seed) + "_graphNodes" + str(nodes) + "_treewidth" + str(treewidth)
+        print("{'_id': '" + id_string + "', 'method': '" + method +
+              ", 'method_args: {'heuristic_method_runtime': " + str(runtime) + "}" +
+              ", 'problem_args: " +
+              "{'problem_graph_size': " + str(problem_graph_size) +
+              ", 'problem_graph_connectivity': " + str(d_i) + ", 'qaoa_p_value': " + str(p_i) + "', 'seed': " + str(seed) +
+              "}" +
+              ", 'operators': '" + operator + ", 'graph_nodes': " + str(nodes) + ", 'treewidth': " + str(treewidth) + "}")
 
 
 read_text_data_file()
