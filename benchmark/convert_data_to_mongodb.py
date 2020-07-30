@@ -56,12 +56,12 @@ def print_mongodb_info(method, problem_graph_size, d_i, p_i, runtime, operator, 
                     "_qaoaP" + str(p_i) + "_operators" + operator + \
                     "_seed" + str(seed) + "_graphNodes" + str(nodes) + "_treewidth" + str(treewidth)
         print("{'_id': '" + id_string + "', 'method': '" + method +
-              ", 'problem_args: " +
+              ", 'problem_args': " +
               "{'problem_graph_size': " + str(problem_graph_size) +
               ", 'problem_graph_connectivity': " + str(d_i) + ", 'qaoa_p_value': " + str(p_i) +
-              "', 'seed': " + str(seed) +
+              ", 'seed': " + str(seed) +
               "}" +
-              ", 'operators': '" + operator + ", 'graph_nodes': " + str(nodes) +
+              ", 'operators': '" + operator + "', 'graph_nodes': " + str(nodes) +
               ", 'treewidth': " + str(treewidth) + "}")
 
     elif method == "flow_cutter" or method == "tamaki_heuristic":
@@ -69,13 +69,13 @@ def print_mongodb_info(method, problem_graph_size, d_i, p_i, runtime, operator, 
                     "_qaoaP" + str(p_i) + "_heuristic_method_runtime" + str(runtime) + "_operators" + operator + \
                     "_seed" + str(seed) + "_graphNodes" + str(nodes) + "_treewidth" + str(treewidth)
         print("{'_id': '" + id_string + "', 'method': '" + method +
-              ", 'method_args: {'heuristic_method_runtime': " + str(runtime) + "}" +
-              ", 'problem_args: " +
+              "', 'method_args': {'heuristic_method_runtime': " + str(runtime) + "}" +
+              ", 'problem_args': " +
               "{'problem_graph_size': " + str(problem_graph_size) +
               ", 'problem_graph_connectivity': " + str(d_i) + ", 'qaoa_p_value': " + str(p_i) +
-              "', 'seed': " + str(seed) +
+              ", 'seed': " + str(seed) +
               "}" +
-              ", 'operators': '" + operator + ", 'graph_nodes': " + str(nodes) +
+              ", 'operators': '" + operator + "', 'graph_nodes': " + str(nodes) +
               ", 'treewidth': " + str(treewidth) + "}")
 
 
