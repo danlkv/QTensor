@@ -9,6 +9,8 @@ REQUIRED_PACKAGES = [
     'cirq'
     ,'qiskit'
     ,'pyrofiler'
+    ,'loguru'
+    ,'tqdm'
 
 ]
 

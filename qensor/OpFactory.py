@@ -1,6 +1,6 @@
 import cirq
 import qtree
-import qiskit.circuit.library as qiskit_lib
+#import qiskit.circuit.library as qiskit_lib
 import numpy as np
 
 class OpFactory:
@@ -15,24 +15,32 @@ class CirqFactory:
     def ZPhase(x, alpha):
         return cirq.ZPowGate(exponent=float(alpha)).on(x)
 
+    @staticmethod
+    def XPhase(x, alpha):
+        return cirq.XPowGate(exponent=float(alpha)).on(x)
+
     cZ=cirq.CZ
 
 QtreeFactory = qtree.operators
 # QtreeFactory = qtree.operators_full_matrix
 
-class CC(qtree.operators.Gate):
+class CC(qtree.operators.ParametricGate):
     name = 'CC'
     _changes_qubits=tuple()
     def gen_tensor(self):
+        alpha = self.parameters['alpha']
+        ep = np.exp(1j*np.pi*alpha)
+        em = np.exp(-1j*np.pi*alpha)
         tensor = np.array([
-            [0,1]
-            ,[1,1]
+            [ep,em]
+            ,[em,ep]
         ])
         return tensor
 
 
 QtreeFactory.CC = CC
 
+"""
 class QiskitFactory:
     H=qiskit_lib.HGate
     cX=qiskit_lib.CXGate
@@ -43,7 +51,7 @@ class QiskitFactory:
 
     cZ=qiskit_lib.CZGate
 
-
+"""
 class CircuitCreator:
     operators = OpFactory
 

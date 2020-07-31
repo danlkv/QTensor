@@ -23,7 +23,8 @@ class BucketBackend:
 
 class NumpyBackend(BucketBackend):
     def process_bucket(self, bucket, no_sum=False):
-        return np_framework.process_bucket_np(bucket, no_sum=no_sum)
+        res =  np_framework.process_bucket_np(bucket, no_sum=no_sum)
+        return res
 
     def get_sliced_buckets(self, buckets, data_dict, slice_dict):
         return np_framework.get_sliced_np_buckets(buckets, data_dict, slice_dict)
@@ -31,9 +32,10 @@ class NumpyBackend(BucketBackend):
 class PerfBackend(BucketBackend):
     Backend = BucketBackend
 
-    def __init__(self, *args, print=False, **kwargs):
+    def __init__(self, *args, print=False, num_lines=10, **kwargs):
         self.backend = self.Backend(*args, **kwargs)
         self._print = print
+        self.max_lines = num_lines
         self._profile_results = {}
 
     def _profile_callback(self, elapsed_time, label, indices):
@@ -55,7 +57,7 @@ class PerfBackend(BucketBackend):
         data = self._profile_results.values()
         data = sorted(data, key= lambda pair: pair[1], reverse=True)
         report_lines =  [str([ d[1], d[0] ]) for d in data]
-        max_lines = 25
+        max_lines = self.max_lines
         total_data = len(data)
         total_time = sum(d[1] for d in data)
         rep = ""

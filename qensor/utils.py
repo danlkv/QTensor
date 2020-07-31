@@ -70,6 +70,9 @@ def nodes_to_vars(old_graph, peo):
 def n_neighbors(graph, node):
     return len(list(graph[node].values()))
 
+def degree(graph, node):
+    return graph.degree(node)
+
 
 def edges_to_clique(graph, node):
     N = graph.degree(node)
@@ -83,7 +86,7 @@ def _neighbors(graph, node):
 
 def get_neighbours_path(old_graph, peo=None):
     if peo is not None:
-        graph = reorder_graph(old_graph, peo)
+        graph, _ = reorder_graph(old_graph, peo)
     else:
         graph = copy.deepcopy(old_graph)
     ngh = []
@@ -92,3 +95,17 @@ def get_neighbours_path(old_graph, peo=None):
         ngh.append(n_neighbors(graph, node))
         qtree.graph_model.eliminate_node(graph, node)
     return nodes, ngh
+
+def nodes_at_distance(G, nodes, dist):
+    nodes = list(nodes)
+    for d in range(dist):
+        range_d_nodes = []
+        for n in nodes:
+            neigh = list(G[n].keys())
+            range_d_nodes += neigh
+        nodes += range_d_nodes
+    return set(nodes)
+
+def get_edge_subgraph(G, edge, dist):
+    nodes = nodes_at_distance(G, edge, dist)
+    return G.subgraph(set(nodes))
