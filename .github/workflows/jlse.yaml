@@ -23,17 +23,6 @@ jobs:
       with:
           submodules: recursive
 
-    - name: Setup Python
-      uses: actions/setup-python@v2
-      with:
-        python-version: 3.x
-
-    - name: Setup dependencies
-      run: |
-        pip install ../../
-        pip install pytest mock
-        cd ../../qtree && pip install .
-
     - name: Checks
       run: |
           echo $PATH
