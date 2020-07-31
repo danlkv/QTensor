@@ -17,7 +17,20 @@ import qtree
 from qtree.graph_model import get_upper_bound_peo, get_peo
 from time import time
 from qensor import utils
-from .convert_data_to_mongodb import print_mongodb_info
+from convert_data_to_mongodb import print_mongodb_info
+
+
+def create_qaoa_circuit_from_problem_graph(num_nodes, graph_connectivity, seed, beta, gamma, operators):
+    graph = nx.random_regular_graph(d=graph_connectivity, n=num_nodes, seed=seed)
+    composer = QtreeQAOAComposer(graph, beta=beta, gamma=gamma)
+    # for using the non-optimal full operators
+    if operators == "full_matrix":
+        composer.set_operators(operators)
+    composer.ansatz_state()  # creates the QAOA circuit
+
+    # create the tensor network graph based on the problem circuit
+    return composer.circuit
+
 
 def peo_benchmark(
         method,
@@ -35,34 +48,16 @@ def peo_benchmark(
     if gamma is None:
         gamma = [.5, 1]
 
-    # print all output data to a file
-
-    # print("method: " + str(method)
-    #       + " | heuristic_runtime: " + str(heuristic_runtime)
-    #       + " | maxNodes" + str(problem_graph_end)
-    #       + " | graph_connectivity: " + str(graph_connectivity)
-    #       + " | p: " + str(len(beta))
-    #       + " | operators: " + operators
-    #       + " | seed: " + str(seed) + "\n")
-
     for num_nodes in range(problem_graph_start, problem_graph_end, problem_graph_jumps):
         # print("problem_graph_size:", num_nodes)
-        graph = nx.random_regular_graph(d=graph_connectivity, n=num_nodes, seed=seed)
-        composer = QtreeQAOAComposer(graph, beta=beta, gamma=gamma)
-        # for using the non-optimal full operators
-        if operators == "full_matrix":
-            composer.set_operators(operators)
-        composer.ansatz_state()  # creates the QAOA circuit
+        qc = create_qaoa_circuit_from_problem_graph(num_nodes, graph_connectivity, seed, beta, gamma, operators)
 
-        # create the tensor network graph based on the problem circuit
-        qc = composer.circuit
         all_gates = qc
         n_qubits = len(set(sum([g.qubits for g in all_gates], tuple())))
         circuit = [[g] for g in qc]
         buckets, data_dict, bra_vars, ket_vars = qtree.optimizer.circ2buckets(
             n_qubits, circuit)
-        graph = qtree.graph_model.buckets2graph(buckets,
-                                                ignore_variables=ket_vars + bra_vars)
+        graph = qtree.graph_model.buckets2graph(buckets, ignore_variables=ket_vars + bra_vars)
 
         # find the perfect elimination order (peo) for the tensor network
         peo = []
@@ -89,16 +84,8 @@ def peo_benchmark(
         elapsed = time() - start
 
         # print all information in a mongodb-friendly format
-
         print_mongodb_info(method, str(num_nodes), str(graph_connectivity), str(len(beta)),
                            str(heuristic_runtime), operators, str(seed), str(graph.number_of_nodes()), str(treewidth))
-
-        # print all relevant information
-        # print("peo_processing:", elapsed)
-        # print("graph_nodes:", graph.number_of_nodes())
-        # print("max_treewidth:", treewidth)
-        # print()
-
 
 
 def peo_benchmark_wrapper(
@@ -137,6 +124,58 @@ def peo_benchmark_wrapper(
                   seed,
                   beta,
                   gamma)
+
+
+def cotengra_test():
+    sys.path.insert(5, "../../cotengra")
+    import quimb.tensor as qtn
+    import cotengra as ctg
+    import math
+
+    num_nodes = 30
+    graph_connectivity = 3
+    seed = 24
+    beta = [0.5, 0.5]
+    gamma = beta
+    operators = "diagonal"
+
+    qc = create_qaoa_circuit_from_problem_graph(num_nodes, graph_connectivity, seed, beta, gamma, operators)
+
+    ########
+    # Create circuit in the quimb representation
+    ########
+    gates_to_apply = []
+    # for layer in qc:
+    for gate in qc:
+        if gate.name == "ZPhase":
+            gates_to_apply.append(["RZ", *gate.qubits, gate.parameters["alpha"]])
+        else:
+            gates_to_apply.append([gate.name, *gate.qubits])
+
+    quimb = qtn.Circuit(num_nodes)
+    quimb.apply_gates(gates_to_apply)
+
+    print(quimb)
+
+    circ = quimb
+    psi_f = qtn.MPS_computational_state('0' * (circ.N))
+    tn = quimb.psi & psi_f
+
+    output_inds = []
+    # tn.full_simplify_(output_inds=output_inds)
+    tn.astype_('complex64')
+
+    opt = ctg.HyperOptimizer(
+        # methods=['kahypar', 'greedy', 'walktrap'],
+        methods=['kahypar'],
+        max_repeats=128,
+        progbar=True,
+        minimize='size',
+        score_compression=0.  # deliberately make the optimizer try many methods
+    )
+
+    info = tn.contract(all, optimize=opt, get='path-info')
+    print(math.log2(info.largest_intermediate))
 
 
 def run_treewidth_dependency_benchmarks(seeds):
@@ -196,3 +235,4 @@ def run_peo_benchmarks(seeds):
 # test_seeds = [23, 24, 25]
 # run_treewidth_dependency_benchmarks(test_seeds)
 # run_peo_benchmarks(test_seeds)
+cotengra_test()

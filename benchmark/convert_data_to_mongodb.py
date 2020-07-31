@@ -79,4 +79,4 @@ def print_mongodb_info(method, problem_graph_size, d_i, p_i, runtime, operator, 
               ", 'treewidth': " + str(treewidth) + "}")
 
 
-read_text_data_file()
+# read_text_data_file()
