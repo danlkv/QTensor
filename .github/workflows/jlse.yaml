@@ -24,10 +24,11 @@ jobs:
       with:
           submodules: recursive
 
-    - name: test
-      run: |
-          whoami
-          lscpu
+    - name: whoami
+      run: whoami
+
+    - name: lscpu
+      run: lscpu
 
     - name: 
       run: make
