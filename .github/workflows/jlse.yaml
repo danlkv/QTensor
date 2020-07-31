@@ -42,7 +42,6 @@ jobs:
 
     - name: Run run/automake/run.sh
       run: ./run.sh
-      	
     - name: Commit results
       uses: EndBug/add-and-commit@v4 # You can change this to use a specific version
       env:
