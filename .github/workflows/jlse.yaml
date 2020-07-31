@@ -14,19 +14,45 @@ jobs:
     runs-on: [self-hosted, linux, jlse]
 
     # Steps represent a sequence of tasks that will be executed as part of the job
+    defaults:
+      run:
+        working-directory: run/automake
     steps:
     # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
     - uses: actions/checkout@v2
       with:
           submodules: recursive
 
-    - name: whoami
+    - name: Setup Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: 3.x
+
+    - name: Setup dependencies
+      run: |
+        pip install ../../
+        pip install pytest mock
+        cd ../../qtree && pip install .
+
+    - name: Checks
       run: |
           echo $PATH
+          pwd
           /usr/bin/whoami
 
-    - name: lscpu
-      run: lscpu
+    - name: Run run/automake/run.sh
+      run: run.sh
 
-    - name: 
-      run: make
+    - name: Commit results
+	- uses: EndBug/add-and-commit@v4 # You can change this to use a specific version
+	  with:
+		add: 'results'
+		author_name: Actions Runner
+		author_email: mail@example.com
+
+		message: "jlse-results for `$(git show -s --format=%s)`"
+
+	  env:
+		# This is necessary in order to push a commit to the repo
+		GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # Leave this line unchanged
+		  run: run.sh
