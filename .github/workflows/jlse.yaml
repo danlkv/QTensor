@@ -16,7 +16,6 @@ jobs:
     # Steps represent a sequence of tasks that will be executed as part of the job
     defaults:
       run:
-        shell: bash
         working-directory: run/automake
     steps:
     # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
