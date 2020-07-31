@@ -24,7 +24,9 @@ jobs:
           submodules: recursive
 
     - name: whoami
-      run: whoami
+      run: |
+          echo $PATH
+          /usr/bin/whoami
 
     - name: lscpu
       run: lscpu
