@@ -31,7 +31,6 @@ jobs:
           tail -f tmp &
           /usr/bin/whoami
 
-    steps:
       - name: cml_run
         env:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
