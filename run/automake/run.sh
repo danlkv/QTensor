@@ -6,7 +6,7 @@ job_id=$(qsub -t300 -n1 -q $queue qsub_entry.sh)
 echo "Qsub Job: $job_id"
 logfile=$job_id.output
 
-sleep 3
+sleep 5
 tail -f $logfile &
 tail_pid=$!
 
