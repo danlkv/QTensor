@@ -1,4 +1,4 @@
 #!/bin/bash
-echo 'Hello world!'
+echo "Dear God, I am $(hostname)!"
 lscpu
-lscpu > results/proc_data_jlse
+python -c "import matplotlib.pyplot as plt; plt.plot(range(55)); plt.savefig('results/image.png')"
