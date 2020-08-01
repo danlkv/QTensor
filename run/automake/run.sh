@@ -1,7 +1,8 @@
 #!/bin/bash
 pwd
-echo "Starting session to qsub..."
-job_id=$(qsub -I -x qsub_entry.sh)
+queue=skylake_8180
+echo "Starting session to queue `$queue`..."
+job_id=$(qsub -t300 -n1 -q $queue qsub_entry.sh)
 echo "Qsub Job: $job_id"
 logfile=$job_id.output
 
