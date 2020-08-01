@@ -28,8 +28,8 @@ class CC(qtree.operators.ParametricGate):
     _changes_qubits=tuple()
     def gen_tensor(self):
         alpha = self.parameters['alpha']
-        ep = np.exp(1j*np.pi*alpha)
-        em = np.exp(-1j*np.pi*alpha)
+        ep = np.exp(1j*np.pi*alpha/2)
+        em = np.exp(-1j*np.pi*alpha/2)
         tensor = np.array([
             [ep,em]
             ,[em,ep]
@@ -37,7 +37,7 @@ class CC(qtree.operators.ParametricGate):
         return tensor
 
 
-QtreeFactory.CC = CC
+#QtreeFactory.CC = CC
 
 """
 class QiskitFactory:
