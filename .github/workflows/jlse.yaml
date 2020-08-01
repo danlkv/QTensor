@@ -31,15 +31,15 @@ jobs:
           tail -f tmp &
           /usr/bin/whoami
 
-      - name: cml_run
-        env:
-          repo_token: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          # Write your CML report
-          echo '# Machine spec'>results.txt
-          lscpu>results.txt
-          cat results.txt >> report.md
-          cml-send-comment report.md
+    - name: cml_run
+      env:
+        repo_token: ${{ secrets.GITHUB_TOKEN }}
+      run: |
+        # Write your CML report
+        echo '# Machine spec'>results.txt
+        lscpu>results.txt
+        cat results.txt >> report.md
+        cml-send-comment report.md
 
     - name: Run run/automake/run.sh
       run: ./run.sh
