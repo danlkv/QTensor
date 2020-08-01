@@ -7,7 +7,7 @@ echo "Qsub Job: $job_id"
 logfile=$job_id.output
 
 sleep 3
-tail -F $logfile &
+tail --retry -f $logfile &
 tail_pid=$!
 
 ./job_wait.sh $job_id &
