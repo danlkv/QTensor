@@ -12,6 +12,7 @@ jobs:
   build:
     # The type of runner that the job will run on
     runs-on: [self-hosted, linux, jlse]
+    container: docker://dvcorg/cml-py3:latest
 
     # Steps represent a sequence of tasks that will be executed as part of the job
     defaults:
@@ -30,6 +31,17 @@ jobs:
           tail -f tmp &
           /usr/bin/whoami
 
+    steps:
+      - name: cml_run
+        env:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # Write your CML report
+          echo '# Machine spec'>results.txt
+          lscpu>results.txt
+          cat results.txt >> report.md
+          cml-send-comment report.md
+
     - name: Run run/automake/run.sh
       run: ./run.sh
     - name: Commit results
@@ -41,3 +53,4 @@ jobs:
         author_name: Actions Runner
         author_email: mail@example.com
         message: 'jlse-results for `$(git show -s --format=%s)`'
+
