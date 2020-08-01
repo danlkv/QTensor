@@ -4,7 +4,7 @@ name: Run job on JLSE
 # events but only for the master branch
 on:
   push:
-    branches: [ 'jlse-run/*' ]
+    branches: ['jlse-run/*']
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
@@ -12,44 +12,38 @@ jobs:
   build:
     # The type of runner that the job will run on
     runs-on: [self-hosted, linux, jlse]
-    container: docker://dvcorg/cml-py3:latest
 
     # Steps represent a sequence of tasks that will be executed as part of the job
     defaults:
       run:
         working-directory: run/automake
     steps:
-    # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
-    - uses: actions/checkout@v2
-      with:
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - uses: actions/checkout@v2
+        with:
           submodules: recursive
 
-    - name: Checks
-      run: |
-          echo $PATH
-          pwd
-          tail -f tmp &
-          /usr/bin/whoami
+      - name: Checks
+        run: |
+            echo $PATH
+            pwd
+            tail -f tmp &
+            /usr/bin/whoami
 
-    - name: cml_run
-      env:
-        repo_token: ${{ secrets.GITHUB_TOKEN }}
-      run: |
-        # Write your CML report
-        echo '# Machine spec'>results.txt
-        lscpu>results.txt
-        cat results.txt >> report.md
-        cml-send-comment report.md
+      - name: Run run/automake/run.sh
+        run: ./run.sh
 
-    - name: Run run/automake/run.sh
-      run: ./run.sh
-    - name: Commit results
-      uses: EndBug/add-and-commit@v4 # You can change this to use a specific version
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # Leave this line unchanged
-      with:
-        add: 'results'
-        author_name: Actions Runner
-        author_email: mail@example.com
-        message: 'jlse-results for `$(git show -s --format=%s)`'
+      - name: Publish a summary
+        env:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+        run: ./publish.sh
 
+      - name: Commit results
+        uses: EndBug/add-and-commit@v4  # You can change this to use a specific version
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Leave this line unchanged
+        with:
+          add: 'results'
+          author_name: Actions Runner
+          author_email: mail@example.com
+          message: 'jlse-results for `$(git show -s --format=%s)`'
