@@ -13,6 +13,16 @@ tail_pid=$!
 
 ./job_wait.sh $job_id &
 wait $!
-echo "Errors:"
-cat $errfile
 kill $tail_pid
+
+if cat $job_id.cobaltlog | grep norbally with an exit code of 0; then
+    echo "Job returned with exit code 0"
+    exit 0
+else
+    echo "########################"
+    echo "Errors:"
+    cat $errfile
+    echo "########################"
+    echo "Debug log:"
+    cat $job_id.cobaltlog
+fi
