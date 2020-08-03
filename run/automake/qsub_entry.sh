@@ -10,7 +10,8 @@ lscpu
 echo $PYTHONPATH
 echo $PATH
 echo $SHELL
+
+# Run the payload job
 python ./profile.py > results/profile.txt
-python -c "import matplotlib.pyplot as plt; plt.plot(range(55)); plt.savefig('results/image.png')"
 echo 'test'>test.txt
 python -c "print('Hello from python')"

@@ -1,7 +1,7 @@
 #!/bin/bash
 
 echo "## Automake run result" >> results/result.md
-cml-publish results/image.png >> results/result.md
+cml-publish results/figure.png >> results/result.md
 echo "\n" >> results/result.md
 
 echo "## Profile" >> results/result.md
