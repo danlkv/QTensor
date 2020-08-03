@@ -43,7 +43,8 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Leave this line unchanged
         with:
-          add: 'results'
+          add: '.'
+          ref: 'jlse-results'
           author_name: Actions Runner
           author_email: mail@example.com
-          message: 'jlse-results for `$(git show -s --format=%s)`'
+          essage: 'jlse-results for `$(git show -s --format=%s)`'
