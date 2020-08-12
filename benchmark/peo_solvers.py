@@ -126,6 +126,35 @@ def peo_benchmark_wrapper(
                   gamma)
 
 
+def kahypar_test():
+    import kahypar
+
+    num_nodes = 30
+    graph_connectivity = 3
+    seed = 24
+    beta = [0.5, 0.5]
+    gamma = beta
+    operators = "diagonal"
+
+    qc = create_qaoa_circuit_from_problem_graph(num_nodes, graph_connectivity, seed, beta, gamma, operators)
+    all_gates = qc
+    n_qubits = len(set(sum([g.qubits for g in all_gates], tuple())))
+    circuit = [[g] for g in qc]
+    buckets, data_dict, bra_vars, ket_vars = qtree.optimizer.circ2buckets(
+        n_qubits, circuit)
+    hypergraph = qtree.graph_model.buckets2hypergraph(buckets)
+
+    context = kahypar.Context()
+    context.loadINIconfiguration("/Users/filipmazurek/Documents/Simulator_Argonne/kahypar/config/cut_kKaHyPar_sea20.ini")
+
+    k = 2
+
+    context.setK(k)
+    context.setEpsilon(0.03)
+
+    kahypar.partition(hypergraph, context)
+
+
 def cotengra_test():
     sys.path.insert(5, "../../cotengra")
     import quimb.tensor as qtn
@@ -229,10 +258,11 @@ def run_peo_benchmarks(seeds):
 
 
 
-# peo_benchmark_wrapper("peo_bench_data/", "tamaki_heuristic", 20, 21, 10, 3, 500, "diagonal", 25, [.5, .5, .5, .5], [.5, .5, .5, .5])
+# peo_benchmark_wrapper("peo_bench_data/", "tamaki_heuristic", 6, 7, 10, 3, 1, "diagonal", 25, [.5], [.5])
 
 # peo_benchmark_wrapper("peo_bench_data/", "greedy", 10, 501, 10, 3, 1)
 # test_seeds = [23, 24, 25]
 # run_treewidth_dependency_benchmarks(test_seeds)
 # run_peo_benchmarks(test_seeds)
-cotengra_test()
+# cotengra_test()
+kahypar_test()

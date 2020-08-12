@@ -15,7 +15,7 @@ k=2
 hypergraph = kahypar.Hypergraph(num_nodes, num_nets, hyperedge_indices, hyperedges, k, edge_weights, node_weights)
 
 context = kahypar.Context()
-context.loadINIconfiguration("<path/to/config>/km1_kKaHyPar_dissertation.ini")
+context.loadINIconfiguration("/Users/filipmazurek/Documents/Simulator_Argonne/kahypar/config/cut_kKaHyPar_sea20.ini")
 
 context.setK(k)
 context.setEpsilon(0.03)
