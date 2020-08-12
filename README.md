@@ -65,3 +65,20 @@ peo, tn = opt.optimize(tn)
 treewidth = opt.treewidth
 
 ```
+#### Use tamaki for QAOA energy
+
+
+    from qensor.optimisation.Optimizer import TamakiOptimizer
+    from qensor import QAOAQtreeSimulator
+    
+    sim = QAOAQtreeSimulator(QtreeQAOAComposer)
+    sim.optimizer = TamakiOptimizer
+
+    if n_processes:
+        res = sim.energy_expectation_parallel(G, gamma=gamma, beta=beta
+            ,n_processes=n_processes
+        )
+    else:
+        res = sim.energy_expectation(G, gamma=gamma, beta=beta)
+    return res
+
