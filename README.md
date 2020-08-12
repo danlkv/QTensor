@@ -67,12 +67,21 @@ treewidth = opt.treewidth
 ```
 #### Use tamaki for QAOA energy
 
+and also raise an error when treewidth is large.
 
+```python
     from qensor.optimisation.Optimizer import TamakiOptimizer
     from qensor import QAOAQtreeSimulator
     
-    sim = QAOAQtreeSimulator(QtreeQAOAComposer)
-    sim.optimizer = TamakiOptimizer
+    class TamakiQAOASimulator(QAOAQtreeSimsulator):
+        def optimize_buckets(self):
+	    opt = TamakiOptimizer()
+	    peo, self.tn = opt.optimize(self.tn)
+	    if opt.treewidth > 30:
+	        raise Exception('Treewidth is too large!')
+	    return peo
+    
+    sim = TamakiQAOASimulator(QtreeQAOAComposer)
 
     if n_processes:
         res = sim.energy_expectation_parallel(G, gamma=gamma, beta=beta
@@ -82,3 +91,4 @@ treewidth = opt.treewidth
         res = sim.energy_expectation(G, gamma=gamma, beta=beta)
     return res
 
+```
