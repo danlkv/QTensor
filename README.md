@@ -74,21 +74,21 @@ from qensor.optimisation.Optimizer import TamakiOptimizer
 from qensor import QAOAQtreeSimulator
 
 class TamakiQAOASimulator(QAOAQtreeSimsulator):
-def optimize_buckets(self):
-    opt = TamakiOptimizer()
-    peo, self.tn = opt.optimize(self.tn)
-    if opt.treewidth > 30:
-	raise Exception('Treewidth is too large!')
-    return peo
+    def optimize_buckets(self):
+        opt = TamakiOptimizer()
+        peo, self.tn = opt.optimize(self.tn)
+        if opt.treewidth > 30:
+            raise Exception('Treewidth is too large!')
+        return peo
 
 sim = TamakiQAOASimulator(QtreeQAOAComposer)
 
 if n_processes:
-res = sim.energy_expectation_parallel(G, gamma=gamma, beta=beta
-    ,n_processes=n_processes
-)
+    res = sim.energy_expectation_parallel(G, gamma=gamma, beta=beta
+        ,n_processes=n_processes
+    )
 else:
-res = sim.energy_expectation(G, gamma=gamma, beta=beta)
+    res = sim.energy_expectation(G, gamma=gamma, beta=beta)
 return res
 
 ```
