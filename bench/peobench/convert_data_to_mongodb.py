@@ -1,3 +1,7 @@
+"""
+Used for converting data from the previously .txt printed data in the data/ directory into mongodb
+"""
+
 import numpy as np
 
 

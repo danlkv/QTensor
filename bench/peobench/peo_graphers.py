@@ -2,6 +2,11 @@ import matplotlib.pyplot as plt
 import numpy as np
 from statistics import median
 
+"""
+This file is for graphing using matplotlib for range/std range. Otherwise, use included graphing capability
+provided by mongodb (or wherever the data may be stored)
+"""
+
 def get_min_max_median_per_index(zipped_list):
     """
     Parameters
