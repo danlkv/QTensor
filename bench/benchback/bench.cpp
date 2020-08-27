@@ -27,7 +27,6 @@
 #include "mkl.h"
 
 #include "timer.h"
-#include "time.h"
 
 enum Trans {do_trans, no_trans};
 typedef long dim_t;
@@ -70,15 +69,19 @@ void gemm(enum Trans ta, enum Trans tb, dim_t m, dim_t n, dim_t k, T alpha,
                (float *) c, ldc);
     }
 }
+    static inline int ld_fix(int m, int size_elt)
 
-static inline int ld_fix(int m, int size_elt)
-{
-    int ld, offset = 64 / size_elt;
-    ld = (m + offset - 1) / offset * offset;
-    ld = (((ld * size_elt) % 256) == 0) ? ld + offset : ld;
-    return m + 0; 
-}
+              {
 
+                  int ld, offset = 64 / size_elt;
+
+                  ld = (m + offset - 1) / offset * offset;
+
+                  ld = (((ld * size_elt) % 256) == 0) ? ld + offset : ld;
+
+                 return ld;
+
+              }
 template <typename T>
 void bench(enum Trans ta, enum Trans tb, dim_t m, dim_t n, dim_t k,
         double *perf_max, double *perf_avg)
@@ -89,21 +92,13 @@ void bench(enum Trans ta, enum Trans tb, dim_t m, dim_t n, dim_t k,
     dim_t b_nrows = tb == no_trans ? k : n;
 
     // Using tight leading dimensions.
-   dim_t lda = ld_fix(a_nrows, sizeof(T));
-   dim_t ldb = ld_fix(b_nrows, sizeof(T));
-   dim_t ldc = ld_fix(m, sizeof(T));
-//  dim_t lda = a_nrows;
-//  dim_t ldb = b_nrows;
-//  dim_t ldc = m;
+    dim_t lda = ld_fix(a_nrows, sizeof(T));
+    dim_t ldb = ld_fix(b_nrows, sizeof(T));
+    dim_t ldc = ld_fix(m, sizeof(T));
 
-
-    T *a = (T *) mkl_malloc(sizeof(*a) * lda * a_ncols, 64);
-    T *b = (T *) mkl_malloc(sizeof(*b) * ldb * b_ncols, 64);
-    T *c = (T *) mkl_malloc(sizeof(*c) * ldc * n, 64);
-//    T *a = (T *) malloc(sizeof(*a) * lda * a_ncols);
-//    T *b = (T *) malloc(sizeof(*b) * ldb * b_ncols);
-//    T *c = (T *) malloc(sizeof(*c) * ldc * n);
-
+    T *a = (T *) malloc(sizeof(*a) * lda * a_ncols);
+    T *b = (T *) malloc(sizeof(*b) * ldb * b_ncols);
+    T *c = (T *) malloc(sizeof(*c) * ldc * n);
 
     fill_array(a, a_nrows, a_ncols, lda);
     fill_array(b, b_nrows, b_ncols, ldb);
@@ -118,7 +113,7 @@ void bench(enum Trans ta, enum Trans tb, dim_t m, dim_t n, dim_t k,
     double time = 0.0;
     double ctime = 0.0;
     double time_min = HUGE_VAL;
-    struct timespec start_time;
+    double start_time;
     tic(&start_time);
     do {
         gemm<T>(ta, tb, m, n, k, alpha, a, lda, b, ldb, beta, c, ldc);
@@ -135,19 +130,23 @@ void bench(enum Trans ta, enum Trans tb, dim_t m, dim_t n, dim_t k,
     *perf_avg = (double) nops / time_avg * 1e-9;
     *perf_max = (double) nops / time_min * 1e-9;
 
-    mkl_free(a);
-    mkl_free(b);
-    mkl_free(c);
+    free(a);
+    free(b);
+    free(c);
 }
 
 template <typename T>
-void run_size(enum Trans ta, enum Trans tb, dim_t m)
+void run_size(enum Trans ta, enum Trans tb, dim_t m, dim_t n, dim_t k)
 {
     double perf_avg, perf_max;
-    dim_t n = m, k = m;
     bench<T>(ta, tb, m, n, k, &perf_max, &perf_avg);
-    //printf("%4ld, %4ld, %12.6f\n", m, ld_fix(m, sizeof(T))-m, perf_avg);
-    printf("%12.6f\n", perf_avg);
+    printf("%s : %c%c : m = %4ld, n = %4ld, k = %4ld : "
+            "perf_avg = %12.6f [GFlop/s], perf_max = %12.6f [GFlop/s]\n",
+            sizeof(T) == 8 ? "dgemm" : "sgemm",
+            ta == no_trans ? 'N' : 'T',
+            tb == no_trans ? 'N' : 'T',
+            m, n, k,
+            perf_avg, perf_max);
     return;
 }
 
@@ -155,31 +154,7 @@ int main(void)
 {
     // Modify problem size here if needed.
     //               transa    transb    M     N     K
-    
-    int i;
-    run_size<double>(do_trans, no_trans, 4096);
-
-//    for (i = 10; i >= -10; i--)
-//        run_size<double>(do_trans, no_trans, 4096 + i);
-//    for (i = 10; i >= -10; i--)
-//        run_size<double>(do_trans, no_trans, 2048 + i);
-//    for (i = 10; i >= -10; i--)
-//        run_size<double>(do_trans, no_trans, 1024 + i);
-//    for (i = 10; i >= -10; i--)
-//        run_size<double>(do_trans, no_trans, 256 + i);
-//    for (i = 10; i >= -10; i--)
-//        run_size<double>(do_trans, no_trans, 128 + i);
-//    for (i = 10; i >= -10; i--)
-//        run_size<double>(do_trans, no_trans, 32 + i);
-//
-//  for (i = 4096; i >= 512; i -= 256)
-//      run_size<double>(no_trans, no_trans, i, i, i);
-//
-//  for (i = 512; i >= 64; i -= 32)
-//      run_size<double>(no_trans, no_trans, i, i, i);   
-
-//  for (i = 64; i >= 16; i -= 1)
-//      run_size<double>(no_trans, no_trans, i, i, i);
+    run_size<double> (do_trans, no_trans, 4096, 4096, 4096);
 
     return EXIT_SUCCESS;
 }

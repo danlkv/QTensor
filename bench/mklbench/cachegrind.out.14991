@@ -1,0 +1,5195 @@
+desc: I1 cache:         32768 B, 64 B, 8-way associative
+desc: D1 cache:         32768 B, 64 B, 8-way associative
+desc: LL cache:         1048576 B, 64 B, 16-way associative
+cmd: ./bench
+events: Ir I1mr ILmr Dr D1mr DLmr Dw D1mw DLmw 
+fl=/gpfs/jlse-fs0/users/yeluo/opt/gcc/build-host-gcc/gcc/include/cpuid.h
+fn=__cpu_indicator_init@GCC_4.8.0
+264 4 0 0 0 0 0 0 0 0
+285 4 0 0 0 0 0 0 0 0
+288 8 1 1 0 0 0 0 0 0
+fl=/gpfs/jlse-fs0/users/yeluo/opt/gcc/build-host-gcc/x86_64-pc-linux-gnu/libgcc/../../../gcc/libgcc/config/i386/cpuinfo.c
+fn=__cpu_indicator_init@GCC_4.8.0
+125 2 0 0 0 0 0 0 0 0
+133 7 1 1 1 1 1 0 0 0
+197 2 1 1 0 0 0 1 0 0
+199 1 0 0 0 0 0 0 0 0
+425 2 1 1 0 0 0 2 0 0
+434 4 0 0 2 1 1 0 0 0
+435 1 0 0 0 0 0 0 0 0
+447 2 0 0 0 0 0 0 0 0
+459 3 0 0 0 0 0 0 0 0
+460 3 0 0 0 0 0 0 0 0
+462 3 0 0 0 0 0 0 0 0
+465 2 0 0 0 0 0 0 0 0
+473 2 1 1 0 0 0 0 0 0
+474 2 1 1 0 0 0 0 0 0
+479 2 0 0 0 0 0 1 0 0
+480 1 0 0 0 0 0 1 0 0
+504 2 0 0 0 0 0 0 0 0
+505 4 0 0 3 0 0 0 0 0
+fn=get_available_features
+258 2 1 1 0 0 0 1 0 0
+282 2 0 0 0 0 0 0 0 0
+288 2 0 0 0 0 0 0 0 0
+291 4 0 0 0 0 0 0 0 0
+293 1 0 0 0 0 0 0 0 0
+294 1 1 1 0 0 0 0 0 0
+295 4 0 0 0 0 0 0 0 0
+309 3 0 0 0 0 0 0 0 0
+312 4 1 1 0 0 0 0 0 0
+314 4 0 0 0 0 0 0 0 0
+316 4 0 0 0 0 0 0 0 0
+318 4 0 0 0 0 0 0 0 0
+320 4 1 1 0 0 0 0 0 0
+322 4 0 0 0 0 0 0 0 0
+324 4 0 0 0 0 0 0 0 0
+326 4 0 0 0 0 0 0 0 0
+328 4 1 1 0 0 0 0 0 0
+330 4 0 0 0 0 0 0 0 0
+331 2 0 0 0 0 0 0 0 0
+333 2 0 0 0 0 0 0 0 0
+334 1 0 0 0 0 0 0 0 0
+335 2 0 0 0 0 0 0 0 0
+336 2 1 1 0 0 0 0 0 0
+340 2 1 1 0 0 0 0 0 0
+342 3 0 0 0 0 0 0 0 0
+343 2 0 0 0 0 0 0 0 0
+344 1 0 0 0 0 0 0 0 0
+345 2 0 0 0 0 0 0 0 0
+347 2 0 0 0 0 0 0 0 0
+348 1 0 0 0 0 0 0 0 0
+350 2 0 0 0 0 0 0 0 0
+351 1 0 0 0 0 0 0 0 0
+352 2 0 0 0 0 0 0 0 0
+392 2 1 1 0 0 0 0 0 0
+394 2 0 0 0 0 0 0 0 0
+396 2 0 0 0 0 0 0 0 0
+398 2 0 0 0 0 0 0 0 0
+400 2 0 0 0 0 0 0 0 0
+402 2 0 0 0 0 0 0 0 0
+404 2 0 0 0 0 0 0 0 0
+409 2 0 0 1 0 0 1 0 0
+415 2 0 0 2 0 0 0 0 0
+fl=/gpfs/jlse-fs0/users/yeluo/opt/gcc/build-host-gcc/x86_64-pc-linux-gnu/libstdc++-v3/include/bits/locale_classes.h
+fn=_GLOBAL__sub_I_cxx11_locale_inst.cc
+793 4 1 1 2 1 1 1 0 0
+fn=_GLOBAL__sub_I_cxx11_wlocale_inst.cc
+793 4 1 1 2 1 1 1 0 0
+fn=_GLOBAL__sub_I_locale_inst.cc
+793 4 1 1 2 1 1 1 0 0
+fn=_GLOBAL__sub_I_wlocale_inst.cc
+793 4 1 1 2 1 1 1 0 0
+fl=/gpfs/jlse-fs0/users/yeluo/opt/gcc/build-host-gcc/x86_64-pc-linux-gnu/libstdc++-v3/include/bits/locale_facets.h
+fn=_GLOBAL__sub_I_cxx11_locale_inst.cc
+1883 4 0 0 2 1 1 1 0 0
+fn=_GLOBAL__sub_I_cxx11_wlocale_inst.cc
+1883 4 0 0 2 1 1 1 0 0
+fn=_GLOBAL__sub_I_locale_inst.cc
+1883 4 0 0 2 2 2 1 0 0
+2277 4 0 0 2 1 1 1 0 0
+2557 4 0 0 2 1 1 1 0 0
+fn=_GLOBAL__sub_I_wlocale_inst.cc
+1883 4 0 0 2 2 2 1 0 0
+2277 4 0 0 2 1 1 1 0 0
+2557 4 0 0 2 0 0 1 0 0
+fl=/gpfs/jlse-fs0/users/yeluo/opt/gcc/build-host-gcc/x86_64-pc-linux-gnu/libstdc++-v3/include/bits/locale_facets_nonio.h
+fn=_GLOBAL__sub_I_cxx11_locale_inst.cc
+756 4 0 0 2 0 0 1 0 0
+1375 8 0 0 4 3 3 2 0 0
+1605 4 0 0 2 1 1 1 0 0
+1762 4 1 1 2 1 1 1 0 0
+1968 4 0 0 2 1 1 1 0 0
+fn=_GLOBAL__sub_I_cxx11_wlocale_inst.cc
+756 4 0 0 2 1 1 1 0 0
+1375 8 0 0 4 3 3 2 0 0
+1605 4 0 0 2 1 1 1 0 0
+1762 4 1 1 2 0 0 1 0 0
+1968 4 0 0 2 0 0 1 0 0
+fn=_GLOBAL__sub_I_locale_inst.cc
+320 4 1 1 2 1 1 1 0 0
+756 4 0 0 2 1 1 1 0 0
+889 4 0 0 2 1 1 1 0 0
+1375 8 0 0 4 2 2 2 0 0
+1605 4 0 0 2 1 1 1 0 0
+1762 4 1 1 2 1 1 1 0 0
+1968 4 0 0 2 1 0 1 0 0
+fn=_GLOBAL__sub_I_wlocale_inst.cc
+320 4 1 1 2 1 1 1 0 0
+756 4 0 0 2 0 0 1 0 0
+889 4 0 0 2 1 1 1 0 0
+1375 8 0 0 4 3 3 2 0 0
+1605 4 0 0 2 1 1 1 0 0
+1762 4 1 1 2 0 0 1 0 0
+1968 4 0 0 2 1 1 1 0 0
+fl=/gpfs/jlse-fs0/users/yeluo/opt/gcc/build-host-gcc/x86_64-pc-linux-gnu/libstdc++-v3/include/ext/bitmap_allocator.h
+fn=_GLOBAL__sub_I_bitmap_allocator.cc
+107 8 1 1 0 0 0 6 2 2
+413 6 0 0 0 0 0 2 0 0
+421 2 1 1 0 0 0 2 0 0
+422 2 0 0 0 0 0 2 0 0
+423 2 0 0 0 0 0 0 0 0
+1109 8 1 1 2 1 1 2 0 0
+1122 8 2 2 2 0 0 2 0 0
+1127 8 0 0 2 0 0 2 0 0
+fl=/gpfs/jlse-fs0/users/yeluo/opt/gcc/build-host-gcc/x86_64-pc-linux-gnu/libstdc++-v3/include/ext/concurrence.h
+fn=_GLOBAL__sub_I_bitmap_allocator.cc
+129 28 0 0 0 0 0 20 2 2
+fn=_GLOBAL__sub_I_eh_alloc.cc
+129 4 1 1 0 0 0 3 1 1
+fl=/gpfs/jlse-fs0/users/yeluo/opt/gcc/build-host-gcc/x86_64-pc-linux-gnu/libstdc++-v3/include/parallel/settings.h
+fn=_GLOBAL__sub_I_parallel_settings.cc
+338 50 8 8 1 1 1 44 6 6
+fl=/gpfs/jlse-fs0/users/yeluo/opt/gcc/build-host-gcc/x86_64-pc-linux-gnu/libstdc++-v3/libsupc++/../../../../gcc/libstdc++-v3/libsupc++/eh_alloc.cc
+fn=_GLOBAL__sub_I_eh_alloc.cc
+121 1 0 0 0 0 0 1 0 0
+123 3 0 0 0 0 0 2 1 0
+124 2 0 0 0 0 0 0 0 0
+133 1 0 0 0 0 0 1 0 0
+135 1 0 0 0 0 0 1 0 0
+136 1 0 0 0 0 0 1 0 0
+338 3 0 0 1 0 0 0 0 0
+fl=/gpfs/jlse-fs0/users/yeluo/opt/gcc/build-host-gcc/x86_64-pc-linux-gnu/libstdc++-v3/libsupc++/../../../../gcc/libstdc++-v3/libsupc++/guard.cc
+fn=__cxa_guard_acquire
+120 1 1 1 1 0 0 0 0 0
+202 2 0 0 0 0 0 0 0 0
+239 1 0 0 0 0 0 0 0 0
+244 6 0 0 0 0 0 5 0 0
+249 2 0 0 0 0 0 0 0 0
+255 2 0 0 1 1 1 0 0 0
+265 4 0 0 1 0 0 0 0 0
+346 6 1 1 6 0 0 0 0 0
+fn=__cxa_guard_release
+200 1 0 0 0 0 0 0 0 0
+393 2 1 1 1 0 0 0 0 0
+398 1 0 0 2 0 0 0 0 0
+400 2 0 0 0 0 0 0 0 0
+426 1 0 0 1 0 0 0 0 0
+fl=/gpfs/jlse-fs0/users/yeluo/opt/gcc/build-host-gcc/x86_64-pc-linux-gnu/libstdc++-v3/src/../../../../gcc/libstdc++-v3/src/c++11/compatibility-c++0x.cc
+fn=_GLOBAL__sub_I_compatibility_c__0x.cc
+184 4 0 0 0 0 0 2 0 0
+199 4 0 0 0 0 0 2 0 0
+214 6 1 1 0 0 0 2 1 1
+215 6 1 1 0 0 0 1 0 0
+256 2 1 1 1 0 0 1 0 0
+fn=std::error_category::error_category()
+136 8 1 1 4 1 1 2 0 0
+fl=/gpfs/jlse-fs0/users/yeluo/opt/gcc/build-host-gcc/x86_64-pc-linux-gnu/libstdc++-v3/src/../../../../gcc/libstdc++-v3/src/c++11/compatibility-thread-c++0x.cc
+fn=_GLOBAL__sub_I_compatibility_thread_c__0x.cc
+50 3 1 1 1 1 1 2 1 1
+124 3 0 0 1 0 0 0 0 0
+fl=/gpfs/jlse-fs0/users/yeluo/opt/gcc/build-host-gcc/x86_64-pc-linux-gnu/libstdc++-v3/src/c++11/../../../../../gcc/libstdc++-v3/src/c++11/future.cc
+fn=std::future_category()
+65 13 2 2 1 1 1 3 0 0
+79 4 1 1 1 0 0 0 0 0
+fl=/gpfs/jlse-fs0/users/yeluo/opt/gcc/build-host-gcc/x86_64-pc-linux-gnu/libstdc++-v3/src/c++11/../../../../../gcc/libstdc++-v3/src/c++11/locale-inst.cc
+fn=_GLOBAL__sub_I_cxx11_locale_inst.cc
+380 1 0 0 1 0 0 0 0 0
+fn=_GLOBAL__sub_I_cxx11_wlocale_inst.cc
+380 1 0 0 1 0 0 0 0 0
+fn=_GLOBAL__sub_I_locale_inst.cc
+380 1 0 0 1 0 0 0 0 0
+fn=_GLOBAL__sub_I_wlocale_inst.cc
+380 1 0 0 1 0 0 0 0 0
+fl=/gpfs/jlse-fs0/users/yeluo/opt/gcc/build-host-gcc/x86_64-pc-linux-gnu/libstdc++-v3/src/c++11/../../../../../gcc/libstdc++-v3/src/c++11/system_error.cc
+fn=_GLOBAL__sub_I_system_error.cc
+326 4 0 0 0 0 0 1 0 0
+327 4 1 1 0 0 0 0 0 0
+378 2 0 0 0 0 0 0 0 0
+fl=/gpfs/jlse-fs0/users/yeluo/opt/gcc/build-host-gcc/x86_64-pc-linux-gnu/libstdc++-v3/src/c++17/../../../../../gcc/libstdc++-v3/src/c++17/memory_resource.cc
+fn=_GLOBAL__sub_I_memory_resource.cc
+88 4 0 0 0 0 0 1 0 0
+89 4 1 1 0 0 0 1 0 0
+142 4 0 0 0 0 0 0 0 0
+1394 2 0 0 0 0 0 0 0 0
+fl=/gpfs/jlse-fs0/users/yeluo/opt/gcc/build-host-gcc/x86_64-pc-linux-gnu/libstdc++-v3/src/c++98/../../../../../gcc/libstdc++-v3/src/c++98/bitmap_allocator.cc
+fn=_GLOBAL__sub_I_bitmap_allocator.cc
+125 1 0 0 1 0 0 0 0 0
+fl=/gpfs/jlse-fs0/users/yeluo/opt/gcc/build-host-gcc/x86_64-pc-linux-gnu/libstdc++-v3/src/c++98/../../../../../gcc/libstdc++-v3/src/c++98/parallel_settings.cc
+fn=_GLOBAL__sub_I_parallel_settings.cc
+42 1 0 0 1 0 0 0 0 0
+fl=/nfs/site/proj/openmp/compilers/intel/16.0/Linux/install/update4/compilers_and_libraries_2016.4.258/linux/compiler/include/atomicint.h
+fn=__kmp_acquire_ticket_lock
+42 12 0 0 6 0 0 0 0 0
+118 24 0 0 12 6 5 0 0 0
+fn=__kmp_allocate_team
+276 201 0 0 134 2 1 0 0 0
+fn=__kmp_allocate_thread
+276 189 0 0 126 0 0 0 0 0
+fn=__kmp_fork_call
+118 4 0 0 3 0 0 0 0 0
+285 5 0 0 3 1 0 0 0 0
+fn=__kmp_init_implicit_task
+34 768 0 0 0 0 0 256 0 0
+fn=__kmp_init_ticket_lock
+276 81 3 2 54 0 0 0 0 0
+fn=__kmp_internal_fork
+276 3 1 1 2 1 0 0 0 0
+fn=__kmp_register_root
+276 3 0 0 2 0 0 0 0 0
+fn=__kmp_release_ticket_lock
+34 12 0 0 0 0 0 6 0 0
+42 48 0 0 12 3 1 0 0 0
+fn=__kmp_task_team_setup
+34 4 1 1 0 0 0 2 0 0
+fn=__sti__$E
+240 17 16 16 0 0 0 0 0 0
+fn=bool _INTERNAL_25_______src_kmp_barrier_cpp_ddfed41b::__kmp_wait_template<kmp_flag_64, 1, false, true>(kmp_info*, kmp_flag_64*, void*)
+34 756 2 2 189 63 22 252 102 0
+fn=omp_in_parallel@@VERSION
+285 3 1 1 2 1 1 0 0 0
+fl=/nfs/site/proj/openmp/promo/20190218-tbbmalloc/tbbmalloc/bld/build/linux_intel64_icc_cc4.4.6_libc2.12_kernel2.6.32_release/../../include/tbb/internal/_aggregator_impl.h
+fn=rml::internal::LargeObjectCache::get(unsigned long)
+86 14 1 1 0 0 0 0 0 0
+87 14 0 0 0 0 0 0 0 0
+140 14 0 0 0 0 0 7 0 0
+fl=/nfs/site/proj/openmp/promo/20190218-tbbmalloc/tbbmalloc/bld/build/linux_intel64_icc_cc4.4.6_libc2.12_kernel2.6.32_release/../../include/tbb/machine/gcc_ia32_common.h
+fn=rml::internal::Backend::IndexedBins::findBlock(int, rml::internal::BackendSync*, unsigned long, bool, bool, int*)
+32 108 0 0 0 0 0 0 0 0
+fn=rml::internal::LargeObjectCache::doCleanup(unsigned long, bool)
+32 6 0 0 0 0 0 0 0 0
+fl=/nfs/site/proj/openmp/promo/20190218-tbbmalloc/tbbmalloc/bld/build/linux_intel64_icc_cc4.4.6_libc2.12_kernel2.6.32_release/../../include/tbb/machine/linux_intel64.h
+fn=rml::internal::AllLocalCaches::markUnused()
+74 3 1 1 1 0 0 0 0 0
+fn=rml::internal::AllLocalCaches::registerThread(rml::internal::TLSRemote*)
+74 192 0 0 64 35 1 0 0 0
+fn=rml::internal::BackRefIdx::newBackRef(bool)
+74 621 0 0 207 0 0 0 0 0
+fn=rml::internal::Backend::IndexedBins::addBlock(int, rml::internal::FreeBlock*, unsigned long, bool)
+74 12 0 0 4 2 2 0 0 0
+82 8 0 0 8 1 1 0 0 0
+fn=rml::internal::Backend::IndexedBins::getFromBin(int, rml::internal::BackendSync*, unsigned long, bool, bool, bool, int*)
+74 324 3 2 108 9 0 0 0 0
+77 864 0 0 432 0 0 0 0 0
+86 106 0 0 212 0 0 0 0 0
+fn=rml::internal::Backend::IndexedBins::tryAddBlock(int, rml::internal::FreeBlock*, bool)
+74 324 0 0 108 105 50 0 0 0
+82 216 0 0 216 2 0 0 0 0
+fn=rml::internal::Backend::UsedAddressRange::registerAlloc(unsigned long, unsigned long)
+74 15 2 2 5 0 0 0 0 0
+fn=rml::internal::Backend::addNewRegion(unsigned long, rml::internal::MemRegionType, bool)
+77 10 0 0 10 0 0 0 0 0
+fn=rml::internal::Backend::allocRawMem(unsigned long&)
+77 5 0 0 10 0 0 0 0 0
+fn=rml::internal::Backend::askMemFromOS(unsigned long, long, int*, int, bool*)
+77 4 0 0 3 0 0 0 0 0
+fn=rml::internal::Backend::genericGetBlock(int, unsigned long, bool)
+77 444 0 0 440 0 0 0 0 0
+fn=rml::internal::Backend::requestBootstrapMem()
+74 3 0 0 1 0 0 0 0 0
+fn=rml::internal::Backend::startUseBlock(rml::internal::MemRegion*, rml::internal::FreeBlock*, bool)
+77 8 1 1 4 0 0 0 0 0
+82 4 0 0 8 2 2 0 0 0
+fn=rml::internal::BootStrapBlocks::allocate(rml::internal::MemoryPool*, unsigned long)
+74 192 0 0 64 0 0 0 0 0
+fn=rml::internal::CacheBinFunctor<rml::internal::LargeObjectCacheProps<8192ul, 8388608ul, 8192u, 2, 2, 16> >::operator()(rml::internal::CacheBinOperation*)
+77 14 0 0 14 0 0 0 0 0
+82 6 0 0 12 5 1 0 0 0
+86 7 2 1 7 0 0 0 0 0
+fn=rml::internal::FreeBlockPool::getBlock()
+77 390 5 2 390 49 1 0 0 0
+fn=rml::internal::FreeBlockPool::returnBlock(rml::internal::Block*)
+77 196 0 0 196 2 0 0 0 0
+fn=rml::internal::LargeObjectCache::get(unsigned long)
+77 28 1 1 21 0 0 0 0 0
+fn=rml::internal::MemRegionList::add(rml::internal::MemRegion*)
+74 15 0 0 5 0 0 0 0 0
+fn=rml::internal::MemoryPool::getFromLLOCache(rml::internal::TLSData*, unsigned long, unsigned long)
+77 8 0 0 8 0 0 0 0 0
+fn=rml::internal::MemoryPool::initDefaultPool()
+74 3 0 0 1 0 0 0 0 0
+fn=rml::internal::MemoryPool::putToLLOCache(rml::internal::TLSData*, void*)
+77 6 0 0 6 1 0 0 0 0
+fn=rml::internal::TLSKey::createTLS(rml::internal::MemoryPool*, rml::internal::Backend*)
+74 192 0 0 64 12 0 0 0 0
+fn=rml::internal::doInitialization()
+74 6 0 0 2 1 1 0 0 0
+fl=/nfs/site/proj/openmp/promo/20190218-tbbmalloc/tbbmalloc/bld/build/linux_intel64_icc_cc4.4.6_libc2.12_kernel2.6.32_release/../../include/tbb/tbb_machine.h
+fn=rml::internal::AllLocalCaches::markUnused()
+617 1 0 0 0 0 0 1 0 0
+fn=rml::internal::AllLocalCaches::registerThread(rml::internal::TLSRemote*)
+359 64 0 0 0 0 0 0 0 0
+617 64 0 0 0 0 0 64 0 0
+918 128 0 0 0 0 0 0 0 0
+fn=rml::internal::BackRefIdx::newBackRef(bool)
+359 207 0 0 0 0 0 0 0 0
+617 207 0 0 0 0 0 207 0 0
+918 414 0 0 0 0 0 0 0 0
+fn=rml::internal::BackRefMaster::initEmptyBackRefBlock(rml::internal::BackRefBlock*)
+617 4 0 0 0 0 0 4 0 0
+fn=rml::internal::Backend::IndexedBins::addBlock(int, rml::internal::FreeBlock*, unsigned long, bool)
+359 4 0 0 0 0 0 0 0 0
+617 4 0 0 0 0 0 4 0 0
+918 8 0 0 0 0 0 0 0 0
+fn=rml::internal::Backend::IndexedBins::getFromBin(int, rml::internal::BackendSync*, unsigned long, bool, bool, bool, int*)
+611 216 41 2 216 144 4 0 0 0
+617 108 0 0 0 0 0 108 0 0
+fn=rml::internal::Backend::IndexedBins::tryAddBlock(int, rml::internal::FreeBlock*, bool)
+617 108 11 1 0 0 0 108 0 0
+fn=rml::internal::Backend::UsedAddressRange::registerAlloc(unsigned long, unsigned long)
+359 5 0 0 0 0 0 0 0 0
+617 5 0 0 0 0 0 5 0 0
+918 10 0 0 0 0 0 0 0 0
+fn=rml::internal::Backend::askMemFromOS(unsigned long, long, int*, int, bool*)
+359 1 0 0 0 0 0 0 0 0
+397 1 1 1 1 0 0 0 0 0
+611 7 0 0 7 0 0 0 0 0
+612 11 0 0 0 0 0 7 0 0
+fn=rml::internal::Backend::coalescAndPutList(rml::internal::FreeBlock*, bool, bool)
+617 327 19 2 0 0 0 218 0 0
+fn=rml::internal::Backend::doCoalesc(rml::internal::FreeBlock*, rml::internal::MemRegion**)
+611 218 34 2 218 0 0 0 0 0
+fn=rml::internal::Backend::genericGetBlock(int, unsigned long, bool)
+611 109 0 0 109 0 0 0 0 0
+612 545 0 0 327 0 0 218 0 0
+fn=rml::internal::Backend::requestBootstrapMem()
+359 1 0 0 0 0 0 0 0 0
+611 109 0 0 109 27 1 0 0 0
+617 1 0 0 0 0 0 1 0 0
+918 2 0 0 0 0 0 0 0 0
+fn=rml::internal::Backend::startUseBlock(rml::internal::MemRegion*, rml::internal::FreeBlock*, bool)
+611 2 0 0 2 0 0 0 0 0
+617 15 0 0 0 0 0 15 0 0
+fn=rml::internal::Bin::getPublicFreeListBlock()
+611 195 0 0 195 2 0 0 0 0
+fn=rml::internal::BootStrapBlocks::allocate(rml::internal::MemoryPool*, unsigned long)
+359 64 0 0 0 0 0 0 0 0
+617 64 0 0 0 0 0 64 0 0
+918 128 0 0 0 0 0 0 0 0
+fn=rml::internal::CacheBinFunctor<rml::internal::LargeObjectCacheProps<8192ul, 8388608ul, 8192u, 2, 2, 16> >::operator()(rml::internal::CacheBinOperation*)
+617 7 0 0 0 0 0 7 0 0
+fn=rml::internal::CoalRequestQ::getAll()
+611 110 2 1 110 32 1 0 0 0
+fn=rml::internal::FreeBlockPool::getBlock()
+617 97 0 0 0 0 0 97 0 0
+fn=rml::internal::FreeBlockPool::returnBlock(rml::internal::Block*)
+617 98 0 0 0 0 0 98 0 0
+fn=rml::internal::LargeObjectCache::get(unsigned long)
+359 7 0 0 0 0 0 0 0 0
+405 21 1 1 7 0 0 0 0 0
+611 7 0 0 7 6 5 0 0 0
+617 21 0 0 0 0 0 14 0 0
+fn=rml::internal::LargeObjectCache::regularCleanup()
+611 1 0 0 1 0 0 0 0 0
+fn=rml::internal::MemRegionList::add(rml::internal::MemRegion*)
+359 5 0 0 0 0 0 0 0 0
+617 5 0 0 0 0 0 5 0 0
+918 10 0 0 0 0 0 0 0 0
+fn=rml::internal::MemoryPool::getFromLLOCache(rml::internal::TLSData*, unsigned long, unsigned long)
+617 4 0 0 0 0 0 4 0 0
+fn=rml::internal::MemoryPool::initDefaultPool()
+359 1 0 0 0 0 0 0 0 0
+617 1 0 0 0 0 0 1 0 0
+918 2 0 0 0 0 0 0 0 0
+fn=rml::internal::MemoryPool::putToLLOCache(rml::internal::TLSData*, void*)
+617 3 1 1 0 0 0 3 0 0
+fn=rml::internal::TLSKey::createTLS(rml::internal::MemoryPool*, rml::internal::Backend*)
+359 64 0 0 0 0 0 0 0 0
+617 64 0 0 0 0 0 64 0 0
+918 128 0 0 0 0 0 0 0 0
+fn=rml::internal::doInitialization()
+359 2 0 0 0 0 0 0 0 0
+617 4 1 1 0 0 0 3 0 0
+918 4 0 0 0 0 0 0 0 0
+fn=rml::internal::getBackRef(rml::internal::BackRefIdx)
+611 6 0 0 6 2 0 0 0 0
+fn=rml::internal::initBackRefMaster(rml::internal::Backend*)
+617 1 0 0 0 0 0 1 1 0
+fn=scalable_aligned_malloc
+611 2092 0 0 2092 25 2 0 0 0
+fn=scalable_malloc
+611 10 0 0 10 3 1 0 0 0
+fl=/nfs/site/proj/openmp/promo/20190218-tbbmalloc/tbbmalloc/bld/build/linux_intel64_icc_cc4.4.6_libc2.12_kernel2.6.32_release/../../include/tbb/tbb_stddef.h
+fn=rml::internal::Backend::IndexedBins::addBlock(int, rml::internal::FreeBlock*, unsigned long, bool)
+354 8 0 0 0 0 0 0 0 0
+fn=rml::internal::Backend::IndexedBins::tryAddBlock(int, rml::internal::FreeBlock*, bool)
+354 216 0 0 0 0 0 0 0 0
+fn=rml::internal::Backend::coalescAndPutList(rml::internal::FreeBlock*, bool, bool)
+354 218 0 0 0 0 0 0 0 0
+fn=rml::internal::Backend::genericGetBlock(int, unsigned long, bool)
+354 218 23 2 0 0 0 0 0 0
+fn=rml::internal::Backend::startUseBlock(rml::internal::MemRegion*, rml::internal::FreeBlock*, bool)
+354 8 0 0 0 0 0 0 0 0
+fn=scalable_aligned_free
+354 2600 0 0 0 0 0 0 0 0
+fn=scalable_aligned_malloc
+360 10460 0 0 0 0 0 0 0 0
+fn=scalable_free
+354 14 0 0 0 0 0 0 0 0
+fl=/nfs/site/proj/openmp/promo/20190218-tbbmalloc/tbbmalloc/bld/build/linux_intel64_icc_cc4.4.6_libc2.12_kernel2.6.32_release/../../src/tbb/itt_notify.cpp
+fn=tbb::internal::__TBB_load_ittnotify()
+55 2 1 1 1 1 0 0 0 0
+58 3 0 0 0 0 0 0 0 0
+fl=/nfs/site/proj/openmp/promo/20190218-tbbmalloc/tbbmalloc/bld/build/linux_intel64_icc_cc4.4.6_libc2.12_kernel2.6.32_release/../../src/tbb/tools_api/ittnotify_config.h
+fn=__itt_init_ittlib
+324 2 0 0 2 0 0 0 0 0
+fl=/nfs/site/proj/openmp/promo/20190218-tbbmalloc/tbbmalloc/bld/build/linux_intel64_icc_cc4.4.6_libc2.12_kernel2.6.32_release/../../src/tbb/tools_api/ittnotify_static.c
+fn=__itt_init_ittlib
+619 4 0 0 0 0 0 0 0 0
+645 12 2 2 0 0 0 4 0 0
+646 8 0 0 0 0 0 0 0 0
+666 2 0 0 0 0 0 0 0 0
+790 1 0 0 0 0 0 0 0 0
+825 15 3 3 7 1 1 0 0 0
+826 9 1 1 2 0 0 4 0 0
+859 680 1 1 272 34 34 0 0 0
+860 406 1 1 270 51 51 135 17 17
+907 9 1 1 0 0 0 6 0 0
+915 4 0 0 2 2 2 0 0 0
+918 31 3 3 4 0 0 6 0 0
+921 3 0 0 1 0 0 0 0 0
+923 3 1 1 1 1 1 0 0 0
+925 2 0 0 0 0 0 2 0 0
+926 2 0 0 0 0 0 0 0 0
+930 2 0 0 0 0 0 0 0 0
+931 4 2 2 0 0 0 0 0 0
+1009 1 0 0 0 0 0 1 0 0
+1010 2 1 1 0 0 0 1 0 0
+1012 1 0 0 0 0 0 1 0 0
+1017 2 1 1 0 0 0 1 0 0
+1022 544 0 0 137 0 0 0 0 0
+1024 541 0 0 405 0 0 0 0 0
+1030 9 1 1 7 0 0 0 0 0
+fl=/nfs/site/proj/openmp/promo/20190218-tbbmalloc/tbbmalloc/bld/build/linux_intel64_icc_cc4.4.6_libc2.12_kernel2.6.32_release/../../src/tbbmalloc/../tbb/tbb_environment.h
+fn=rml::internal::doInitialization()
+37 5 0 0 0 0 0 1 0 0
+fl=/nfs/site/proj/openmp/promo/20190218-tbbmalloc/tbbmalloc/bld/build/linux_intel64_icc_cc4.4.6_libc2.12_kernel2.6.32_release/../../src/tbbmalloc/Customize.h
+fn=rml::internal::Backend::IndexedBins::findBlock(int, rml::internal::BackendSync*, unsigned long, bool, bool, int*)
+51 677 0 0 0 0 0 0 0 0
+fn=rml::internal::LargeObjectCache::doCleanup(unsigned long, bool)
+51 86 1 1 0 0 0 0 0 0
+fl=/nfs/site/proj/openmp/promo/20190218-tbbmalloc/tbbmalloc/bld/build/linux_intel64_icc_cc4.4.6_libc2.12_kernel2.6.32_release/../../src/tbbmalloc/MapMemory.h
+fn=rml::internal::MapMemory(unsigned long, rml::internal::PageType)
+65 48 2 2 0 0 0 6 0 0
+128 54 0 0 0 0 0 42 0 0
+129 6 0 0 0 0 0 0 0 0
+130 18 0 0 6 0 0 6 0 0
+132 12 3 2 0 0 0 0 0 0
+156 12 0 0 0 0 0 0 0 0
+161 54 2 2 48 0 0 0 0 0
+fl=/nfs/site/proj/openmp/promo/20190218-tbbmalloc/tbbmalloc/bld/build/linux_intel64_icc_cc4.4.6_libc2.12_kernel2.6.32_release/../../src/tbbmalloc/Synchronize.h
+fn=rml::internal::Backend::IndexedBins::getFromBin(int, rml::internal::BackendSync*, unsigned long, bool, bool, bool, int*)
+45 216 0 0 0 0 0 0 0 0
+49 432 9 2 0 0 0 0 0 0
+fn=rml::internal::MemoryPool::initDefaultPool()
+43 1 1 1 1 0 0 0 0 0
+fn=rml::internal::TLSKey::createTLS(rml::internal::MemoryPool*, rml::internal::Backend*)
+43 128 0 0 0 0 0 128 0 0
+54 192 0 0 128 0 0 0 0 0
+fn=rml::internal::doInitialization()
+43 3 0 0 0 0 0 2 0 0
+54 3 1 1 2 0 0 0 0 0
+fl=/nfs/site/proj/openmp/promo/20190218-tbbmalloc/tbbmalloc/bld/build/linux_intel64_icc_cc4.4.6_libc2.12_kernel2.6.32_release/../../src/tbbmalloc/backend.cpp
+fn=rml::internal::Backend::Bin::removeBlock(rml::internal::FreeBlock*)
+494 216 0 0 108 0 0 0 0 0
+495 216 3 2 108 95 1 108 0 0
+496 216 91 2 108 0 0 0 0 0
+497 214 0 0 108 0 0 106 0 0
+498 216 0 0 0 0 0 0 0 0
+500 216 0 0 0 0 0 0 0 0
+501 2 0 0 0 0 0 2 2 0
+502 108 0 0 108 0 0 0 0 0
+fn=rml::internal::Backend::IndexedBins::addBlock(int, rml::internal::FreeBlock*, unsigned long, bool)
+505 12 2 2 0 0 0 0 0 0
+506 4 0 0 0 0 0 0 0 0
+508 4 0 0 0 0 0 4 4 4
+509 4 0 0 0 0 0 4 0 0
+510 12 0 0 0 0 0 8 0 0
+513 8 2 2 0 0 0 0 0 0
+521 8 0 0 4 1 1 4 0 0
+522 4 0 0 0 0 0 4 0 0
+523 8 2 2 0 0 0 0 0 0
+524 2 0 0 0 0 0 2 0 0
+525 8 0 0 4 0 0 0 0 0
+526 2 0 0 0 0 0 2 0 0
+530 8 0 0 4 0 0 0 0 0
+fn=rml::internal::Backend::IndexedBins::findBlock(int, rml::internal::BackendSync*, unsigned long, bool, bool, int*)
+783 1278 91 4 108 0 0 702 71 60
+784 216 0 0 0 0 0 0 0 0
+785 2268 8 2 216 0 0 540 15 0
+787 864 0 0 756 0 0 0 0 0
+789 81 0 0 63 0 0 0 0 0
+fn=rml::internal::Backend::IndexedBins::getFromBin(int, rml::internal::BackendSync*, unsigned long, bool, bool, bool, int*)
+183 432 0 0 0 0 0 0 0 0
+187 432 0 0 0 0 0 0 0 0
+233 108 0 0 0 0 0 0 0 0
+387 1512 15 3 108 0 0 648 11 2
+388 324 0 0 0 0 0 0 0 0
+390 108 0 0 0 0 0 0 0 0
+391 216 0 0 108 45 1 0 0 0
+393 108 0 0 0 0 0 0 0 0
+395 216 0 0 0 0 0 0 0 0
+400 432 0 0 108 0 0 108 0 0
+408 216 0 0 0 0 0 0 0 0
+409 216 0 0 0 0 0 0 0 0
+412 432 0 0 0 0 0 0 0 0
+425 108 4 2 0 0 0 108 11 0
+428 108 0 0 0 0 0 0 0 0
+432 540 0 0 0 0 0 0 0 0
+433 1212 91 2 0 0 0 0 0 0
+447 324 1 0 0 0 0 108 9 1
+450 324 40 2 108 0 0 108 0 0
+459 972 0 0 756 0 0 0 0 0
+fn=rml::internal::Backend::IndexedBins::tryAddBlock(int, rml::internal::FreeBlock*, bool)
+533 216 41 2 0 0 0 0 0 0
+535 216 0 0 0 0 0 0 0 0
+537 108 0 0 0 0 0 108 0 0
+538 216 0 0 108 0 0 108 0 0
+539 216 0 0 0 0 0 0 0 0
+553 108 8 2 0 0 0 108 0 0
+556 216 0 0 0 0 0 0 0 0
+558 216 0 0 108 15 8 108 0 0
+559 108 0 0 0 0 0 108 0 0
+560 216 0 0 0 0 0 0 0 0
+561 1 0 0 0 0 0 1 1 1
+562 216 0 0 108 0 0 0 0 0
+563 107 0 0 0 0 0 107 0 0
+567 216 0 0 108 0 0 0 0 0
+fn=rml::internal::Backend::UsedAddressRange::registerAlloc(unsigned long, unsigned long)
+57 5 0 0 0 0 0 0 0 0
+59 15 4 4 5 0 0 0 0 0
+60 5 0 0 0 0 0 5 0 0
+61 15 0 0 5 0 0 0 0 0
+62 5 0 0 0 0 0 5 0 0
+66 10 0 0 5 0 0 0 0 0
+fn=rml::internal::Backend::addNewRegion(unsigned long, rml::internal::MemRegionType, bool)
+1340 55 3 3 0 0 0 35 0 0
+1349 5 0 0 0 0 0 0 0 0
+1351 15 0 0 0 0 0 5 0 0
+1352 15 0 0 0 0 0 5 0 0
+1353 10 0 0 0 0 0 0 0 0
+1357 15 0 0 5 0 0 0 0 0
+1363 5 0 0 0 0 0 5 5 5
+1364 5 0 0 0 0 0 5 0 0
+1365 25 2 2 0 0 0 5 0 0
+1366 10 0 0 0 0 0 0 0 0
+1371 15 2 2 0 0 0 5 0 0
+1372 25 0 0 0 0 0 5 0 0
+1374 60 0 0 40 0 0 0 0 0
+fn=rml::internal::Backend::allocRawMem(unsigned long&)
+88 35 2 2 0 0 0 25 0 0
+92 5 2 2 5 1 0 0 0 0
+103 30 2 2 15 0 0 0 0 0
+105 15 2 2 5 0 0 5 0 0
+109 10 0 0 0 0 0 0 0 0
+119 15 2 2 0 0 0 5 0 0
+123 10 0 0 0 0 0 0 0 0
+125 10 2 2 5 0 0 5 0 0
+126 5 0 0 5 0 0 0 0 0
+127 20 0 0 0 0 0 5 0 0
+132 5 0 0 5 0 0 0 0 0
+135 35 0 0 30 0 0 0 0 0
+fn=rml::internal::Backend::askMemFromOS(unsigned long, long, int*, int, bool*)
+306 1 0 0 1 0 0 0 0 0
+310 1 1 1 1 0 0 0 0 0
+315 2 0 0 0 0 0 0 0 0
+317 2 0 0 0 0 0 0 0 0
+323 2 0 0 0 0 0 0 0 0
+326 4 0 0 0 0 0 0 0 0
+685 13 1 1 0 0 0 6 0 0
+700 2 0 0 0 0 0 1 0 0
+701 1 0 0 0 0 0 0 0 0
+704 2 0 0 0 0 0 0 0 0
+712 1 1 1 1 0 0 0 0 0
+716 12 2 2 6 0 0 0 0 0
+721 2 0 0 0 0 0 0 0 0
+726 2 0 0 0 0 0 0 0 0
+733 7 1 1 1 0 0 2 0 0
+734 2 0 0 0 0 0 0 0 0
+735 17 1 1 2 0 0 2 0 0
+736 21 0 0 0 0 0 3 0 0
+744 4 0 0 0 0 0 0 0 0
+747 2 0 0 0 0 0 1 0 0
+750 2 0 0 0 0 0 1 0 0
+752 9 0 0 7 0 0 0 0 0
+fn=rml::internal::Backend::coalescAndPut(rml::internal::FreeBlock*, unsigned long)
+1216 109 8 4 0 0 0 109 7 7
+1217 109 0 0 0 0 0 109 0 0
+1219 327 0 0 0 0 0 0 0 0
+fn=rml::internal::Backend::coalescAndPutList(rml::internal::FreeBlock*, bool, bool)
+1140 327 1 0 0 0 0 0 0 0
+1141 109 0 0 0 0 0 0 0 0
+1143 1199 40 2 763 0 0 0 0 0
+1144 109 0 0 0 0 0 0 0 0
+1146 1744 3 2 0 0 0 1199 0 0
+1148 109 0 0 0 0 0 0 0 0
+1150 109 0 0 109 0 0 0 0 0
+1151 436 0 0 0 0 0 109 0 0
+1152 218 0 0 0 0 0 0 0 0
+1155 436 0 0 218 0 0 0 0 0
+1168 436 0 0 0 0 0 0 0 0
+1172 218 0 0 109 0 0 0 0 0
+1184 436 8 2 0 0 0 327 0 0
+1185 109 0 0 0 0 0 109 0 0
+1189 218 0 0 0 0 0 0 0 0
+1190 108 0 0 0 0 0 108 0 0
+1191 542 3 2 216 0 0 0 0 0
+1192 216 0 0 108 0 0 0 0 0
+1194 648 0 0 0 0 0 108 0 0
+1199 109 0 0 0 0 0 109 0 0
+1209 218 0 0 109 0 0 0 0 0
+fn=rml::internal::Backend::doCoalesc(rml::internal::FreeBlock*, rml::internal::MemRegion**)
+176 327 48 2 0 0 0 218 1 0
+183 436 0 0 0 0 0 0 0 0
+233 109 0 0 0 0 0 0 0 0
+265 109 0 0 0 0 0 109 0 0
+1053 981 87 2 0 0 0 763 0 0
+1054 109 0 0 0 0 0 0 0 0
+1055 109 0 0 109 0 0 0 0 0
+1056 109 0 0 0 0 0 0 0 0
+1059 109 0 0 0 0 0 109 0 0
+1063 218 7 2 0 0 0 0 0 0
+1084 109 21 2 109 0 0 0 0 0
+1086 218 3 2 0 0 0 0 0 0
+1133 109 8 2 0 0 0 109 0 0
+1134 109 0 0 0 0 0 109 0 0
+1135 981 0 0 872 0 0 0 0 0
+fn=rml::internal::Backend::findBlockInRegion(rml::internal::MemRegion*, unsigned long)
+1241 10 2 2 5 0 0 0 0 0
+1247 10 0 0 5 0 0 0 0 0
+1257 10 2 2 0 0 0 0 0 0
+1259 5 0 0 0 0 0 0 0 0
+1263 10 0 0 0 0 0 0 0 0
+1266 5 0 0 0 0 0 5 0 0
+1267 5 0 0 5 0 0 0 0 0
+fn=rml::internal::Backend::genericGetBlock(int, unsigned long, bool)
+662 260 1 1 9 0 0 14 0 0
+810 1308 27 2 0 0 0 654 3 0
+812 109 0 0 0 0 0 0 0 0
+814 436 4 2 0 0 0 0 0 0
+816 218 0 0 0 0 0 109 68 60
+820 764 3 2 218 30 1 109 64 63
+824 327 2 1 0 0 0 109 0 0
+826 109 0 0 0 0 0 109 0 0
+828 109 0 0 0 0 0 0 0 0
+832 109 0 0 0 0 0 109 0 0
+835 218 0 0 0 0 0 0 0 0
+836 2110 67 4 102 0 0 858 0 0
+839 305 0 0 0 0 0 0 0 0
+840 660 3 2 324 0 0 2 0 0
+844 70 2 0 0 0 0 14 0 0
+847 14 0 0 0 0 0 0 0 0
+848 77 1 0 7 0 0 14 0 0
+852 222 2 2 3 0 0 0 0 0
+857 8 1 1 1 0 0 3 0 0
+858 5 0 0 1 0 0 1 0 0
+862 7 0 0 1 0 0 1 0 0
+864 2 0 0 0 0 0 0 0 0
+866 6 0 0 4 0 0 0 0 0
+876 218 5 2 109 0 0 0 0 0
+877 218 0 0 109 0 0 0 0 0
+879 109 8 2 109 0 0 0 0 0
+883 872 0 0 763 0 0 0 0 0
+fn=rml::internal::Backend::getBackRefSpace(unsigned long, bool*)
+899 6 2 2 0 0 0 3 0 0
+903 5 0 0 0 0 0 1 0 0
+904 1 0 0 0 0 0 1 0 0
+905 4 0 0 4 0 0 0 0 0
+fn=rml::internal::Backend::getLargeBlock(unsigned long)
+887 35 1 0 0 0 0 21 0 0
+889 35 0 0 0 0 0 7 0 0
+890 14 1 1 0 0 0 0 0 0
+891 7 0 0 0 0 0 7 0 0
+892 7 0 0 7 0 0 0 0 0
+895 35 0 0 28 0 0 0 0 0
+fn=rml::internal::Backend::getMaxBinnedSize() const
+655 30 4 3 18 2 0 0 0 0
+fn=rml::internal::Backend::init(rml::internal::ExtMemoryPool*)
+1379 1 0 0 0 0 0 1 1 1
+1381 1 1 1 0 0 0 0 0 0
+1383 1 0 0 1 0 0 0 0 0
+fn=rml::internal::Backend::releaseCachesToLimit()
+756 3 0 0 0 0 0 1 0 0
+757 3 1 1 1 0 0 0 0 0
+765 3 0 0 2 0 0 0 0 0
+fn=rml::internal::Backend::requestBootstrapMem()
+793 327 47 2 0 0 0 109 0 0
+794 218 0 0 0 0 0 0 0 0
+795 324 33 1 216 0 0 0 0 0
+797 2 2 2 1 0 0 0 0 0
+800 1 0 0 0 0 0 1 0 0
+803 5 0 0 0 0 0 1 0 0
+804 1 0 0 0 0 0 1 0 0
+805 3 0 0 2 0 0 0 0 0
+fn=rml::internal::Backend::scanCoalescQ(bool)
+1223 550 3 2 0 0 0 330 0 0
+1224 330 0 0 0 0 0 110 3 0
+1226 220 0 0 0 0 0 0 0 0
+1233 770 0 0 440 0 0 0 0 0
+fn=rml::internal::Backend::splitAlignedBlock(rml::internal::FreeBlock*, int, unsigned long, bool)
+173 621 78 2 0 0 0 414 207 207
+273 1394 6 3 0 0 0 0 0 0
+628 654 83 2 0 0 0 327 0 0
+629 545 0 0 109 0 0 0 0 0
+633 218 0 0 0 0 0 0 0 0
+634 102 0 0 0 0 0 0 0 0
+635 204 0 0 0 0 0 0 0 0
+639 306 0 0 102 0 0 0 0 0
+641 7 0 0 0 0 0 0 0 0
+642 7 1 0 0 0 0 0 0 0
+645 109 0 0 0 0 0 109 0 0
+649 109 0 0 0 0 0 0 0 0
+650 545 5 3 436 0 0 0 0 0
+fn=rml::internal::Backend::startUseBlock(rml::internal::MemRegion*, rml::internal::FreeBlock*, bool)
+173 25 0 0 0 0 0 20 5 5
+183 4 0 0 0 0 0 0 0 0
+187 4 0 0 0 0 0 0 0 0
+1273 5 2 2 0 0 0 0 0 0
+1274 5 0 0 5 0 0 0 0 0
+1284 5 0 0 0 0 0 5 0 0
+1285 5 0 0 0 0 0 5 0 0
+1287 10 0 0 0 0 0 0 0 0
+1288 16 0 0 0 0 0 0 0 0
+1291 8 0 0 4 0 0 0 0 0
+1292 16 0 0 0 0 0 0 0 0
+1299 1 0 0 0 0 0 1 1 1
+1303 1 0 0 1 0 0 0 0 0
+fn=rml::internal::CoalRequestQ::getAll()
+359 220 0 0 0 0 0 0 0 0
+360 220 0 0 110 0 0 0 0 0
+fn=rml::internal::MemRegionList::add(rml::internal::MemRegion*)
+1306 5 2 2 0 0 0 0 0 0
+1307 5 0 0 0 0 0 5 0 0
+1309 10 2 2 5 1 0 5 0 0
+1310 5 0 0 0 0 0 5 0 0
+1311 10 0 0 0 0 0 0 0 0
+1312 4 0 0 0 0 0 4 1 1
+1313 10 0 0 5 0 0 0 0 0
+fn=rml::internal::getRawMemory(unsigned long, rml::internal::PageType)
+47 6 2 2 0 0 0 0 0 0
+fl=/nfs/site/proj/openmp/promo/20190218-tbbmalloc/tbbmalloc/bld/build/linux_intel64_icc_cc4.4.6_libc2.12_kernel2.6.32_release/../../src/tbbmalloc/backref.cpp
+fn=__sti__$E
+97 1 1 1 1 0 0 0 0 0
+fn=rml::internal::BackRefIdx::newBackRef(bool)
+252 1656 83 2 0 0 0 1449 0 0
+255 621 0 0 207 0 0 414 0 0
+256 621 0 0 0 0 0 0 0 0
+260 621 0 0 207 12 1 207 0 0
+261 414 79 2 0 0 0 0 0 0
+263 207 0 0 0 0 0 0 0 0
+267 621 8 2 207 0 0 0 0 0
+274 621 4 2 207 0 0 0 0 0
+275 207 20 2 207 0 0 0 0 0
+277 207 0 0 0 0 0 0 0 0
+278 414 0 0 0 0 0 0 0 0
+282 414 0 0 0 0 0 207 0 0
+285 414 0 0 0 0 0 0 0 0
+286 622 0 0 208 0 0 0 0 0
+287 3 1 1 1 0 0 0 0 0
+288 414 3 1 0 0 0 207 0 0
+291 828 0 0 0 0 0 0 0 0
+294 414 0 0 0 0 0 0 0 0
+297 414 0 0 207 0 0 207 0 0
+299 621 0 0 0 0 0 0 0 0
+302 1035 0 0 207 0 0 207 0 0
+303 442 0 0 0 0 0 7 0 0
+305 1863 0 0 1863 0 0 0 0 0
+fn=rml::internal::BackRefMaster::addToForUseList(rml::internal::BackRefBlock*)
+144 6 1 1 3 0 0 3 0 0
+145 3 0 0 0 0 0 3 0 0
+146 3 0 0 0 0 0 3 0 0
+147 3 1 1 3 0 0 0 0 0
+fn=rml::internal::BackRefMaster::findFreeBlock()
+212 621 2 2 0 0 0 207 0 0
+213 621 0 0 414 198 2 0 0 0
+214 621 3 2 414 0 0 0 0 0
+fn=rml::internal::BackRefMaster::initEmptyBackRefBlock(rml::internal::BackRefBlock*)
+45 28 1 1 0 0 0 20 4 4
+46 8 0 0 0 0 0 4 0 0
+47 4 0 0 0 0 0 4 0 0
+49 4 0 0 0 0 0 4 0 0
+150 4 1 1 0 0 0 0 0 0
+151 8 0 0 4 0 0 0 0 0
+154 4 0 0 0 0 0 4 1 0
+158 4 0 0 4 0 0 0 0 0
+fn=rml::internal::getBackRef(rml::internal::BackRefIdx)
+232 3 0 0 0 0 0 3 0 0
+235 9 2 1 0 0 0 0 0 0
+236 12 0 0 6 0 0 0 0 0
+237 9 0 0 3 0 0 0 0 0
+239 6 0 0 6 0 0 0 0 0
+240 6 0 0 6 2 0 0 0 0
+fn=rml::internal::initBackRefMaster(rml::internal::Backend*)
+55 16 0 0 0 0 0 4 0 0
+101 3 1 1 0 0 0 1 0 0
+104 3 0 0 0 0 0 1 0 0
+106 2 0 0 0 0 0 0 0 0
+108 1 0 0 0 0 0 1 1 0
+109 3 1 1 0 0 0 2 0 0
+110 2 0 0 1 0 0 1 0 0
+111 1 0 0 0 0 0 1 0 0
+112 1 0 0 0 0 0 1 0 0
+113 17 0 0 0 0 0 0 0 0
+114 6 0 0 0 0 0 2 0 0
+116 12 1 1 0 0 0 4 0 0
+117 8 0 0 0 0 0 0 0 0
+118 9 0 0 0 0 0 3 0 0
+120 2 0 0 0 0 0 1 0 0
+123 4 0 0 2 0 0 0 0 0
+124 4 0 0 2 0 0 0 0 0
+fn=rml::internal::setBackRef(rml::internal::BackRefIdx, void*)
+244 207 87 2 0 0 0 0 0 0
+247 414 0 0 414 0 0 0 0 0
+248 414 0 0 0 0 0 207 58 24
+249 207 0 0 207 0 0 0 0 0
+fl=/nfs/site/proj/openmp/promo/20190218-tbbmalloc/tbbmalloc/bld/build/linux_intel64_icc_cc4.4.6_libc2.12_kernel2.6.32_release/../../src/tbbmalloc/frontend.cpp
+fn=MallocInitializeITT
+1955 2 0 0 1 0 0 0 0 0
+1956 1 0 0 0 0 0 0 0 0
+fn=_ZN3rml8internal18internalPoolMallocEPNS0_10MemoryPoolEm..0
+243 40 0 0 10 0 0 10 0 0
+452 8 0 0 8 3 0 0 0 0
+590 8 0 0 0 0 0 8 1 0
+754 4 0 0 0 0 0 0 0 0
+800 16 2 1 0 0 0 0 0 0
+801 6 0 0 0 0 0 3 0 0
+805 10 0 0 0 0 0 0 0 0
+806 4 1 1 0 0 0 0 0 0
+809 12 0 0 0 0 0 0 0 0
+817 2 0 0 0 0 0 0 0 0
+818 2 0 0 0 0 0 0 0 0
+841 11 0 0 0 0 0 0 0 0
+970 20 0 0 0 0 0 0 0 0
+971 6 1 1 0 0 0 1 0 0
+980 24 1 0 0 0 0 0 0 0
+1656 5 0 0 0 0 0 5 0 0
+2047 24 2 1 8 1 0 0 0 0
+2052 2 0 0 1 1 0 1 0 0
+2054 1 0 0 1 0 0 0 0 0
+2062 7 4 2 7 0 0 0 0 0
+2063 14 0 0 0 0 0 0 0 0
+2064 21 0 0 7 0 0 0 0 0
+2065 21 0 0 0 0 0 0 0 0
+2066 7 3 2 0 0 0 7 0 0
+2069 14 0 0 7 0 0 0 0 0
+2485 60 2 1 0 0 0 50 0 0
+2491 30 1 1 0 0 0 0 0 0
+2496 20 0 0 0 0 0 0 0 0
+2497 20 2 0 10 0 0 0 0 0
+2499 16 0 0 0 0 0 0 0 0
+2507 16 2 1 0 0 0 0 0 0
+2510 16 0 0 0 0 0 0 0 0
+2513 6 0 0 0 0 0 0 0 0
+2520 15 0 0 0 0 0 5 0 0
+2521 10 0 0 0 0 0 0 0 0
+2536 25 0 0 0 0 0 5 0 0
+2537 10 2 1 0 0 0 0 0 0
+2548 20 2 1 0 0 0 5 0 0
+2549 10 0 0 0 0 0 0 0 0
+2550 15 0 0 0 0 0 5 0 0
+2552 10 2 1 0 0 0 0 0 0
+2553 48 0 0 48 0 0 0 0 0
+fn=__sti__$E
+305 1 1 1 1 0 0 0 0 0
+fn=rml::internal::AllLocalCaches::markUnused()
+591 10 0 0 0 0 0 10 7 0
+682 2 0 0 0 0 0 0 0 0
+685 33 0 0 11 6 0 0 0 0
+687 1 0 0 1 0 0 0 0 0
+fn=rml::internal::AllLocalCaches::registerThread(rml::internal::TLSRemote*)
+641 64 4 2 0 0 0 0 0 0
+642 64 0 0 0 0 0 64 0 0
+645 128 63 2 64 0 0 64 0 0
+646 192 0 0 64 0 0 0 0 0
+647 63 0 0 0 0 0 63 29 1
+648 64 0 0 0 0 0 64 0 0
+650 128 0 0 64 0 0 0 0 0
+fn=rml::internal::AllocControlledMode::initReadEnv(char const*, long)
+1882 5 1 1 0 0 0 3 0 0
+1883 2 0 0 1 0 0 0 0 0
+1886 2 0 0 0 0 0 1 0 0
+1887 2 0 0 0 0 0 0 0 0
+1891 1 0 0 0 0 0 1 0 0
+1892 1 0 0 0 0 0 1 0 0
+1894 4 0 0 4 0 0 0 0 0
+fn=rml::internal::Bin::getPublicFreeListBlock()
+1245 390 49 2 0 0 0 195 0 0
+1252 390 0 0 0 0 0 0 0 0
+1253 780 3 2 390 0 0 0 0 0
+fn=rml::internal::Bin::moveBlockToFront(rml::internal::Block*)
+2114 5 0 0 0 0 0 3 0 0
+2116 2 0 0 1 1 0 0 0 0
+2117 3 0 0 0 0 0 1 0 0
+2118 6 0 0 2 0 0 0 0 0
+fn=rml::internal::Bin::outofTLSBin(rml::internal::Block*)
+1226 2 0 0 1 0 0 0 0 0
+1227 1 1 1 1 0 0 0 0 0
+1230 2 1 1 0 0 0 0 0 0
+1232 2 0 0 1 0 0 1 0 0
+1234 3 0 0 1 0 0 0 0 0
+1238 2 0 0 0 0 0 1 0 0
+1239 1 0 0 0 0 0 1 0 0
+1242 1 0 0 1 0 0 0 0 0
+fn=rml::internal::Bin::processLessUsedBlock(rml::internal::MemoryPool*, rml::internal::Block*)
+2122 30 1 1 0 0 0 18 1 0
+2123 12 0 0 6 1 0 0 0 0
+2129 30 3 1 12 0 0 0 0 0
+fn=rml::internal::Bin::pushTLSBin(rml::internal::Block*)
+1200 392 1 1 196 0 0 196 0 0
+1201 392 0 0 0 0 0 0 0 0
+1202 112 9 1 56 0 0 56 0 0
+1203 56 0 0 0 0 0 56 0 0
+1204 168 0 0 56 0 0 0 0 0
+1207 280 4 1 140 0 0 140 0 0
+1211 56 0 0 56 0 0 0 0 0
+fn=rml::internal::Block::cleanBlockHeader()
+1490 398 3 1 0 0 0 199 0 0
+1491 199 0 0 0 0 0 199 0 0
+1492 199 0 0 0 0 0 199 0 0
+1493 398 0 0 0 0 0 199 0 0
+1494 199 0 0 0 0 0 199 0 0
+1495 199 0 0 0 0 0 199 0 0
+1497 199 0 0 0 0 0 199 18 0
+1498 199 0 0 199 0 0 0 0 0
+fn=rml::internal::Block::initEmptyBlock(rml::internal::TLSData*, unsigned long)
+202 199 0 0 0 0 0 199 0 0
+427 199 0 0 0 0 0 199 0 0
+428 199 0 0 0 0 0 199 0 0
+754 150 0 0 0 0 0 0 0 0
+800 398 0 0 0 0 0 0 0 0
+801 340 60 0 0 0 0 136 1 0
+803 136 64 2 0 0 0 0 0 0
+805 262 0 0 0 0 0 0 0 0
+806 75 0 0 0 0 0 0 0 0
+809 300 0 0 0 0 0 0 0 0
+811 300 3 1 0 0 0 0 0 0
+817 112 0 0 0 0 0 0 0 0
+818 66 0 0 0 0 0 0 0 0
+826 46 3 1 0 0 0 0 0 0
+841 224 0 0 0 0 0 0 0 0
+846 224 3 2 0 0 0 0 0 0
+1501 1393 41 3 0 0 0 995 0 0
+1504 199 0 0 0 0 0 0 0 0
+1507 398 2 1 0 0 0 199 3 0
+1508 199 0 0 0 0 0 199 0 0
+1511 995 0 0 0 0 0 199 0 0
+1515 2157 32 2 1170 0 0 199 0 0
+1518 24 0 0 24 0 0 0 0 0
+fn=rml::internal::Block::restoreBumpPtr()
+1300 30 0 0 6 0 0 6 0 0
+1301 6 0 0 0 0 0 6 0 0
+1302 6 0 0 0 0 0 6 0 0
+1303 6 0 0 6 0 0 0 0 0
+fn=rml::internal::BootStrapBlocks::allocate(rml::internal::MemoryPool*, unsigned long)
+851 384 3 2 0 0 0 192 0 0
+859 192 30 2 64 0 0 0 0 0
+863 192 30 2 64 0 0 0 0 0
+864 16 4 1 0 0 0 8 3 3
+865 8 0 0 0 0 0 0 0 0
+867 64 0 0 64 0 0 0 0 0
+868 192 0 0 64 60 1 0 0 0
+869 192 0 0 0 0 0 0 0 0
+870 67 0 0 0 0 0 64 0 0
+871 6 0 0 3 0 0 3 0 0
+872 3 0 0 0 0 0 3 0 0
+873 6 0 0 0 0 0 3 0 0
+878 256 59 1 0 0 0 64 60 60
+879 384 0 0 256 0 0 0 0 0
+fn=rml::internal::ExtMemoryPool::init(long, void* (*)(long, unsigned long&), int (*)(long, void*, unsigned long), unsigned long, bool, bool)
+1054 3 1 1 1 0 0 1 0 0
+1055 1 0 0 0 0 0 1 1 1
+1056 1 0 0 0 0 0 1 0 0
+1057 1 0 0 0 0 0 1 0 0
+1058 1 0 0 0 0 0 1 0 0
+1059 1 0 0 0 0 0 1 0 0
+1060 1 1 1 0 0 0 1 0 0
+1061 1 0 0 0 0 0 1 0 0
+1062 3 0 0 0 0 0 1 0 0
+1065 3 0 0 0 0 0 1 0 0
+1067 3 0 0 2 0 0 0 0 0
+fn=rml::internal::ExtMemoryPool::initTLS()
+1070 2 0 0 0 0 0 0 0 0
+fn=rml::internal::FreeBlockPool::getBlock()
+1576 390 0 0 0 0 0 0 0 0
+1577 97 0 0 97 0 0 0 0 0
+1578 97 0 0 97 28 0 0 0 0
+1579 97 0 0 0 0 0 97 0 0
+1582 196 0 0 0 0 0 98 0 0
+1584 974 0 0 487 0 0 390 1 0
+fn=rml::internal::FreeBlockPool::returnBlock(rml::internal::Block*)
+1588 98 75 1 0 0 0 0 0 0
+1592 196 8 2 0 0 0 0 0 0
+1593 196 0 0 0 0 0 0 0 0
+1612 196 0 0 0 0 0 98 0 0
+1613 98 0 0 0 0 0 98 0 0
+1615 196 0 0 98 0 0 0 0 0
+fn=rml::internal::MemoryPool::getEmptyBlock(unsigned long)
+243 597 3 2 199 0 0 199 9 3
+537 8 1 1 0 0 0 0 0 0
+985 1791 24 2 0 0 0 1194 3 3
+988 1178 0 0 0 0 0 195 0 0
+992 390 0 0 0 0 0 0 0 0
+993 408 0 0 0 0 0 0 0 0
+994 306 4 2 102 0 0 204 0 0
+996 102 0 0 0 0 0 0 0 0
+997 204 0 0 0 0 0 0 0 0
+1000 2330 31 4 306 0 0 306 0 0
+1001 1400 0 0 400 0 0 800 0 0
+1013 102 0 0 0 0 0 0 0 0
+1014 1816 0 0 404 0 0 408 0 0
+1019 600 4 2 200 0 0 200 0 0
+1020 800 0 0 400 0 0 400 200 200
+1022 200 0 0 0 0 0 200 0 0
+1023 200 0 0 0 0 0 200 0 0
+1025 400 4 2 0 0 0 0 0 0
+1027 396 0 0 98 0 0 98 0 0
+1032 796 0 0 0 0 0 199 0 0
+1034 1791 80 2 1393 0 0 0 0 0
+fn=rml::internal::MemoryPool::getFromLLOCache(rml::internal::TLSData*, unsigned long, unsigned long)
+590 7 0 0 0 0 0 7 2 0
+2176 7 0 0 0 0 0 0 0 0
+2178 14 0 0 0 0 0 0 0 0
+2181 22 0 0 7 3 0 0 0 0
+2187 28 0 0 8 0 0 0 0 0
+2188 16 0 0 8 6 0 0 0 0
+2218 63 1 1 0 0 0 35 0 0
+2222 7 0 0 0 0 0 0 0 0
+2223 14 1 1 0 0 0 0 0 0
+2227 14 0 0 0 0 0 0 0 0
+2231 8 0 0 0 0 0 0 0 0
+2232 21 1 1 0 0 0 7 0 0
+2234 14 0 0 0 0 0 0 0 0
+2241 28 0 0 7 0 0 0 0 0
+2244 7 0 0 0 0 0 0 0 0
+2245 28 0 0 0 0 0 0 0 0
+2249 21 0 0 0 0 0 0 0 0
+2250 14 0 0 0 0 0 0 0 0
+2252 21 0 0 7 0 0 7 0 0
+2253 21 2 1 0 0 0 0 0 0
+2258 14 0 0 0 0 0 0 0 0
+2262 7 0 0 0 0 0 0 0 0
+2263 7 0 0 0 0 0 7 7 7
+2264 28 0 0 14 0 0 14 0 0
+2265 14 0 0 7 0 0 7 0 0
+2267 7 0 0 0 0 0 7 0 0
+2272 49 0 0 42 0 0 0 0 0
+fn=rml::internal::MemoryPool::initDefaultPool()
+1960 5 1 1 0 0 0 4 0 0
+1961 7 0 0 3 1 0 4 1 0
+1962 6 0 0 5 0 0 0 0 0
+fn=rml::internal::MemoryPool::putToLLOCache(rml::internal::TLSData*, void*)
+590 3 0 0 0 0 0 3 0 0
+2136 3 0 0 3 2 0 0 0 0
+2138 6 1 1 0 0 0 0 0 0
+2142 3 0 0 0 0 0 3 0 0
+2143 3 0 0 0 0 0 3 0 0
+2144 6 0 0 0 0 0 0 0 0
+2145 2 0 0 0 0 0 2 1 0
+2148 1 0 0 0 0 0 0 0 0
+2149 2 0 0 0 0 0 0 0 0
+2150 1 1 1 0 0 0 1 0 0
+2153 5 1 1 2 0 0 0 0 0
+2154 5 0 0 2 0 0 0 0 0
+2156 12 0 0 0 0 0 0 0 0
+2159 6 0 0 0 0 0 3 0 0
+2160 3 0 0 0 0 0 3 0 0
+2278 12 2 1 0 0 0 9 0 0
+2281 21 1 1 9 0 0 12 0 0
+2283 6 0 0 0 0 0 0 0 0
+2285 6 0 0 3 0 0 0 0 0
+2286 12 0 0 12 0 0 0 0 0
+fn=rml::internal::OrphanedBlocks::get(rml::internal::TLSData*, unsigned int)
+754 71 0 0 0 0 0 0 0 0
+800 390 0 0 0 0 0 0 0 0
+801 136 6 2 0 0 0 68 1 0
+805 254 2 2 0 0 0 0 0 0
+806 71 1 1 0 0 0 0 0 0
+809 213 0 0 0 0 0 0 0 0
+817 112 0 0 0 0 0 0 0 0
+818 66 0 0 0 0 0 0 0 0
+826 46 0 0 0 0 0 0 0 0
+841 416 1 1 0 0 0 0 0 0
+924 195 0 0 0 0 0 0 0 0
+925 390 0 0 195 126 12 0 0 0
+1521 1365 3 2 0 0 0 780 3 0
+1524 585 1 0 0 0 0 0 0 0
+1529 1365 4 2 975 0 0 0 0 0
+fn=rml::internal::TLSKey::createTLS(rml::internal::MemoryPool*, rml::internal::Backend*)
+247 128 30 2 0 0 0 128 0 0
+248 256 0 0 128 0 0 64 0 0
+541 64 0 0 0 0 0 64 0 0
+580 64 0 0 0 0 0 64 0 0
+595 576 30 2 0 0 0 320 0 0
+597 256 30 2 0 0 0 64 63 63
+598 128 0 0 0 0 0 0 0 0
+607 256 0 0 0 0 0 64 0 0
+608 512 0 0 384 0 0 0 0 0
+fn=rml::internal::TLSKey::init()
+217 1 1 1 0 0 0 1 0 0
+223 2 0 0 0 0 0 1 0 0
+225 7 1 1 2 0 0 0 0 0
+fn=rml::internal::doInitialization()
+1981 2 1 1 0 0 0 1 0 0
+1984 10 0 0 0 0 0 2 0 0
+1987 6 1 1 0 0 0 1 0 0
+1989 1 0 0 0 0 0 1 0 0
+1992 1 0 0 0 0 0 1 1 0
+2007 5 1 1 0 0 0 4 0 0
+2009 2 1 1 1 0 0 0 0 0
+2011 1 0 0 0 0 0 1 0 0
+2012 2 0 0 0 0 0 2 0 0
+2018 1 0 0 0 0 0 1 0 0
+2027 1 0 0 0 0 0 0 0 0
+2032 1 0 0 1 1 0 0 0 0
+2035 7 1 0 5 1 0 0 0 0
+fn=rml::internal::internalPoolMalloc(rml::internal::MemoryPool*, unsigned long)
+243 6261 3 3 2087 0 0 2087 72 64
+452 2087 0 0 2087 133 6 0 0 0
+590 2087 2 2 0 0 0 2087 34 2
+754 716 3 2 0 0 0 0 0 0
+800 4174 0 0 0 0 0 0 0 0
+801 4180 2 2 1045 0 0 2090 0 0
+805 2084 0 0 0 0 0 0 0 0
+806 2087 0 0 0 0 0 0 0 0
+809 2864 0 0 0 0 0 0 0 0
+817 652 0 0 0 0 0 0 0 0
+818 520 0 0 0 0 0 0 0 0
+826 132 0 0 0 0 0 0 0 0
+841 3720 0 0 0 0 0 0 0 0
+969 2087 0 0 0 0 0 0 0 0
+970 4174 0 0 0 0 0 0 0 0
+971 29596 29 1 63 0 0 14672 79 63
+980 6261 2 2 0 0 0 0 0 0
+1656 190 0 0 0 0 0 190 0 0
+1662 55 1 1 55 0 0 0 0 0
+1663 165 0 0 0 0 0 0 0 0
+2047 6426 3 3 2142 374 7 0 0 0
+2052 2068 0 0 1034 6 2 1034 0 0
+2054 1034 0 0 1034 0 0 0 0 0
+2062 1108 4 3 1108 0 0 0 0 0
+2063 2216 0 0 0 0 0 0 0 0
+2064 3159 0 0 1053 0 0 0 0 0
+2065 3159 0 0 0 0 0 0 0 0
+2066 1109 0 0 0 0 0 1053 0 0
+2069 2106 3 2 1053 0 0 0 0 0
+2092 110 0 0 0 0 0 55 0 0
+2485 4174 2 2 0 0 0 0 0 0
+2489 4174 0 0 0 0 0 0 0 0
+2491 6261 0 0 0 0 0 0 0 0
+2496 4174 0 0 0 0 0 0 0 0
+2499 4174 0 0 0 0 0 0 0 0
+2507 4174 0 0 0 0 0 0 0 0
+2510 4174 0 0 0 0 0 0 0 0
+2513 3794 0 0 0 0 0 0 0 0
+2520 1140 41 2 380 0 0 570 0 0
+2521 380 0 0 0 0 0 0 0 0
+2536 3417 2 2 380 0 0 570 0 0
+2537 380 0 0 0 0 0 0 0 0
+2548 1140 17 4 190 2 0 380 0 0
+2549 380 0 0 0 0 0 0 0 0
+2550 1140 0 0 380 0 0 570 0 0
+2552 12902 4 2 12522 0 0 0 0 0
+2553 4174 0 0 2087 0 0 0 0 0
+fn=scalable_aligned_free
+88 9 0 0 0 0 0 0 0 0
+204 1298 0 0 0 0 0 1298 0 0
+243 3 0 0 1 0 0 1 0 0
+361 3897 0 0 3 0 0 0 0 0
+380 3894 0 0 1298 7 1 0 0 0
+590 1298 0 0 0 0 0 1298 1 0
+754 1 0 0 0 0 0 0 0 0
+800 8 2 2 0 0 0 0 0 0
+801 4 1 1 0 0 0 2 0 0
+805 4 0 0 0 0 0 0 0 0
+806 1 0 0 0 0 0 0 0 0
+809 3 0 0 0 0 0 0 0 0
+817 2 0 0 0 0 0 0 0 0
+826 2 1 1 0 0 0 0 0 0
+841 9 0 0 0 0 0 0 0 0
+1273 64 0 0 64 1 1 0 0 0
+1275 128 0 0 64 0 0 0 0 0
+1284 512 1 1 0 0 0 64 0 0
+1308 3894 0 0 1298 0 0 1298 0 0
+1323 33 1 0 21 0 0 3 0 0
+1326 2590 0 0 1295 0 0 1295 3 1
+1327 1295 0 0 0 0 0 1295 0 0
+1329 2973 3 2 1295 0 0 0 0 0
+1330 10 0 0 6 0 0 1 0 0
+1671 3894 0 0 1298 0 0 0 0 0
+1680 2590 3 2 0 0 0 0 0 0
+1691 3 0 0 0 0 0 0 0 0
+2400 3 0 0 0 0 0 0 0 0
+2403 4 1 1 0 0 0 0 0 0
+2405 4 0 0 0 0 0 0 0 0
+2433 1299 0 0 0 0 0 0 0 0
+2434 2598 0 0 1299 11 9 1299 0 0
+2439 3 0 0 1 0 0 0 0 0
+2442 2 0 0 0 0 0 0 0 0
+2443 4 0 0 1 0 0 1 0 0
+2571 2598 0 0 0 0 0 0 0 0
+2580 9 0 0 4 0 0 0 0 0
+3136 7794 3 2 0 0 0 6495 0 0
+3138 7764 2 2 7764 0 0 0 0 0
+fn=scalable_aligned_malloc
+243 15 0 0 5 0 0 5 1 0
+970 10 0 0 0 0 0 0 0 0
+1945 6276 2 2 0 0 0 0 0 0
+2312 7706 0 0 0 0 0 0 0 0
+2313 12327 2 2 0 0 0 1761 2 0
+2314 662 0 0 0 0 0 0 0 0
+2315 652 0 0 0 0 0 0 0 0
+2316 1630 34 3 0 0 0 326 0 0
+2328 45 1 1 0 0 0 5 0 0
+3053 10460 2 2 0 0 0 6276 63 63
+3054 4184 0 0 0 0 0 0 0 0
+3059 4184 3 3 0 0 0 0 0 0
+3060 10460 0 0 8368 1 0 0 0 0
+fn=scalable_free
+88 9 0 0 0 0 0 0 0 0
+204 5 0 0 0 0 0 5 0 0
+243 6 0 0 2 0 0 2 0 0
+361 18 0 0 3 1 0 0 0 0
+380 15 0 0 5 1 0 0 0 0
+590 5 0 0 0 0 0 5 0 0
+800 6 2 1 0 0 0 0 0 0
+801 4 2 1 0 0 0 2 0 0
+805 2 0 0 0 0 0 0 0 0
+817 2 0 0 0 0 0 0 0 0
+818 2 0 0 0 0 0 0 0 0
+841 9 0 0 0 0 0 0 0 0
+1308 15 0 0 5 0 0 5 0 0
+1323 33 3 2 21 0 0 3 0 0
+1326 4 0 0 2 0 0 2 0 0
+1327 2 0 0 0 0 0 2 0 0
+1329 4 2 1 2 0 0 0 0 0
+1671 15 0 0 5 0 0 0 0 0
+1680 4 0 0 0 0 0 0 0 0
+2433 5 0 0 0 0 0 0 0 0
+2434 10 0 0 5 4 2 5 0 0
+2439 6 0 0 2 0 0 0 0 0
+2442 4 0 0 0 0 0 0 0 0
+2443 8 0 0 2 0 0 2 0 0
+2571 14 0 0 0 0 0 0 0 0
+2580 18 0 0 8 0 0 0 0 0
+2892 42 1 1 0 0 0 35 0 0
+2894 12 2 1 12 0 0 0 0 0
+fn=scalable_malloc
+1945 30 2 1 0 0 0 0 0 0
+2588 30 0 0 0 0 0 0 0 0
+2598 3 2 1 0 0 0 1 0 0
+2600 40 0 0 0 0 0 10 0 0
+2885 20 1 1 0 0 0 10 0 0
+2887 20 0 0 0 0 0 0 0 0
+2888 30 1 0 20 0 0 0 0 0
+fn=unsigned int rml::internal::getSmallObjectIndex<false>(unsigned int)
+789 2512 3 2 0 0 0 0 0 0
+790 5024 0 0 0 0 0 0 0 0
+791 1256 0 0 1256 0 0 0 0 0
+fl=/nfs/site/proj/openmp/promo/20190218-tbbmalloc/tbbmalloc/bld/build/linux_intel64_icc_cc4.4.6_libc2.12_kernel2.6.32_release/../../src/tbbmalloc/large_objects.cpp
+fn=rml::internal::CacheBinFunctor<rml::internal::LargeObjectCacheProps<8192ul, 8388608ul, 8192u, 2, 2, 16> >::operator()(rml::internal::CacheBinOperation*)
+84 42 0 0 0 0 0 0 0 0
+88 7 0 0 0 0 0 0 0 0
+188 7 0 0 0 0 0 0 0 0
+214 14 1 1 7 0 0 7 0 0
+215 7 0 0 0 0 0 7 0 0
+221 14 0 0 0 0 0 0 0 0
+256 70 0 0 21 0 0 0 0 0
+257 35 1 1 7 0 0 28 1 0
+258 63 0 0 14 4 1 0 0 0
+261 7 2 1 0 0 0 0 0 0
+262 14 0 0 7 0 0 0 0 0
+263 7 0 0 0 0 0 7 0 0
+264 14 0 0 0 0 0 0 0 0
+268 7 0 0 0 0 0 7 0 0
+337 49 1 1 0 0 0 42 3 0
+340 7 0 0 7 0 0 0 0 0
+343 7 0 0 0 0 0 0 0 0
+344 7 1 1 7 0 0 0 0 0
+346 7 0 0 0 0 0 0 0 0
+348 28 1 1 0 0 0 0 0 0
+350 14 0 0 0 0 0 0 0 0
+351 7 0 0 0 0 0 0 0 0
+358 7 0 0 7 0 0 0 0 0
+365 7 0 0 0 0 0 0 0 0
+366 7 0 0 0 0 0 0 0 0
+367 14 2 1 0 0 0 0 0 0
+372 7 0 0 7 0 0 0 0 0
+373 28 0 0 21 0 0 0 0 0
+375 7 0 0 0 0 0 0 0 0
+376 14 0 0 0 0 0 0 0 0
+377 56 3 1 42 0 0 0 0 0
+378 7 0 0 7 0 0 0 0 0
+391 7 0 0 0 0 0 7 0 0
+392 21 0 0 0 0 0 7 0 0
+395 14 1 1 0 0 0 0 0 0
+410 14 1 1 0 0 0 0 0 0
+412 49 0 0 49 0 0 0 0 0
+549 7 0 0 7 6 6 0 0 0
+550 14 0 0 0 0 0 0 0 0
+573 7 0 0 7 0 0 0 0 0
+576 21 0 0 7 0 0 0 0 0
+578 14 2 1 0 0 0 0 0 0
+738 14 0 0 0 0 0 0 0 0
+739 14 0 0 0 0 0 0 0 0
+741 21 2 1 0 0 0 0 0 0
+fn=rml::internal::ExtMemoryPool::mallocLargeObject(rml::internal::MemoryPool*, unsigned long)
+903 56 1 1 0 0 0 35 1 0
+908 28 2 1 0 0 0 7 0 0
+909 14 0 0 0 0 0 0 0 0
+910 21 0 0 0 0 0 14 0 0
+915 21 0 0 0 0 0 7 0 0
+916 14 0 0 0 0 0 0 0 0
+921 28 1 1 14 0 0 14 0 0
+922 49 0 0 42 0 0 7 0 0
+fn=rml::internal::ExtMemoryPool::softCachesCleanup()
+945 2 1 1 0 0 0 0 0 0
+fn=rml::internal::LargeObjectCache::doCleanup(unsigned long, bool)
+425 13 1 1 0 0 0 3 0 0
+451 12 1 1 0 0 0 6 0 0
+455 12 0 0 6 3 3 0 0 0
+460 18 1 1 0 0 0 0 0 0
+463 6 0 0 0 0 0 0 0 0
+663 2 0 0 0 0 0 0 0 0
+666 15 0 0 1 0 0 0 0 0
+667 12 0 0 0 0 0 0 0 0
+668 12 0 0 0 0 0 0 0 0
+669 24 0 0 6 0 0 0 0 0
+684 12 1 1 0 0 0 0 0 0
+693 4 0 0 0 0 0 2 0 0
+745 10 1 1 0 0 0 6 0 0
+746 2 0 0 0 0 0 0 0 0
+747 3 1 1 1 0 0 1 0 0
+748 2 0 0 1 0 0 0 0 0
+749 13 2 2 8 0 0 0 0 0
+fn=rml::internal::LargeObjectCache::get(unsigned long)
+169 28 2 1 7 0 0 21 0 0
+418 42 0 0 0 0 0 42 1 0
+421 21 1 1 7 0 0 0 0 0
+424 14 1 1 7 0 0 0 0 0
+431 14 0 0 0 0 0 7 0 0
+432 21 0 0 0 0 0 14 0 0
+433 42 2 1 0 0 0 35 3 0
+434 14 0 0 0 0 0 7 0 0
+435 7 0 0 7 0 0 0 0 0
+773 28 0 0 0 0 0 0 0 0
+775 14 0 0 0 0 0 0 0 0
+891 21 1 1 0 0 0 14 0 0
+895 14 0 0 0 0 0 0 0 0
+896 49 0 0 21 0 0 0 0 0
+897 7 0 0 7 4 0 0 0 0
+fn=rml::internal::LargeObjectCache::regularCleanup()
+759 2 1 1 0 0 0 0 0 0
+fl=/nfs/site/proj/openmp/promo/20190218-tbbmalloc/tbbmalloc/bld/build/linux_intel64_icc_cc4.4.6_libc2.12_kernel2.6.32_release/../../src/tbbmalloc/shared_utils.h
+fn=rml::internal::Backend::allocRawMem(unsigned long&)
+52 15 0 0 0 0 0 0 0 0
+53 15 0 0 0 0 0 0 0 0
+fn=rml::internal::Backend::askMemFromOS(unsigned long, long, int*, int, bool*)
+47 2 1 1 0 0 0 0 0 0
+fn=rml::internal::Backend::findBlockInRegion(rml::internal::MemRegion*, unsigned long)
+43 5 0 0 0 0 0 0 0 0
+47 15 0 0 0 0 0 0 0 0
+fn=rml::internal::Block::initEmptyBlock(rml::internal::TLSData*, unsigned long)
+47 300 1 1 0 0 0 0 0 0
+fn=rml::internal::CacheBinFunctor<rml::internal::LargeObjectCacheProps<8192ul, 8388608ul, 8192u, 2, 2, 16> >::operator()(rml::internal::CacheBinOperation*)
+47 14 0 0 0 0 0 0 0 0
+fn=rml::internal::MemoryPool::getFromLLOCache(rml::internal::TLSData*, unsigned long, unsigned long)
+43 7 0 0 0 0 0 0 0 0
+47 56 1 1 0 0 0 0 0 0
+fn=rml::internal::MemoryPool::initDefaultPool()
+97 3 0 0 0 0 0 3 1 0
+99 1 0 0 0 0 0 0 0 0
+103 19 1 1 0 0 0 3 1 0
+104 357 2 2 0 0 0 45 0 0
+106 764 2 2 256 0 0 84 0 0
+107 2 0 0 0 0 0 0 0 0
+108 4 0 0 0 0 0 4 0 0
+112 6 2 2 0 0 0 3 0 0
+fn=scalable_aligned_free
+43 2596 2 2 0 0 0 0 0 0
+fn=scalable_free
+43 10 2 1 0 0 0 0 0 0
+fl=/nfs/site/proj/openmp/promo/20190218-tbbmalloc/tbbmalloc/bld/build/linux_intel64_icc_cc4.4.6_libc2.12_kernel2.6.32_release/../../src/tbbmalloc/tbbmalloc.cpp
+fn=rml::internal::init_tbbmalloc()
+58 1 0 0 0 0 0 0 0 0
+fl=/nfs/site/proj/openmp/promo/20190218-tbbmalloc/tbbmalloc/bld/build/linux_intel64_icc_cc4.4.6_libc2.12_kernel2.6.32_release/../../src/tbbmalloc/tbbmalloc_internal.h
+fn=rml::internal::BackRefIdx::newBackRef(bool)
+523 414 0 0 207 0 0 0 0 0
+fn=rml::internal::Backend::IndexedBins::addBlock(int, rml::internal::FreeBlock*, unsigned long, bool)
+188 8 0 0 0 0 0 0 0 0
+189 8 0 0 0 0 0 0 0 0
+191 8 0 0 0 0 0 0 0 0
+877 20 2 2 0 0 0 0 0 0
+fn=rml::internal::Backend::IndexedBins::findBlock(int, rml::internal::BackendSync*, unsigned long, bool, bool, int*)
+196 234 0 0 0 0 0 0 0 0
+199 234 0 0 0 0 0 0 0 0
+201 115 0 0 0 0 0 0 0 0
+202 575 0 0 115 39 3 0 0 0
+203 115 0 0 0 0 0 0 0 0
+204 230 79 2 0 0 0 0 0 0
+205 324 0 0 0 0 0 0 0 0
+208 292 7 1 0 0 0 0 0 0
+209 548 3 2 137 0 0 0 0 0
+706 216 0 0 0 0 0 0 0 0
+fn=rml::internal::Backend::IndexedBins::getFromBin(int, rml::internal::BackendSync*, unsigned long, bool, bool, bool, int*)
+188 212 0 0 0 0 0 0 0 0
+189 212 0 0 0 0 0 0 0 0
+193 424 0 0 0 0 0 0 0 0
+681 216 0 0 108 0 0 0 0 0
+859 404 0 0 101 0 0 0 0 0
+864 404 3 2 0 0 0 0 0 0
+fn=rml::internal::Backend::IndexedBins::tryAddBlock(int, rml::internal::FreeBlock*, bool)
+188 216 0 0 0 0 0 0 0 0
+189 216 0 0 0 0 0 0 0 0
+191 216 0 0 0 0 0 0 0 0
+877 540 0 0 0 0 0 0 0 0
+fn=rml::internal::Backend::allocRawMem(unsigned long&)
+1083 20 0 0 10 2 0 0 0 0
+fn=rml::internal::Backend::askMemFromOS(unsigned long, long, int*, int, bool*)
+603 2 1 1 0 0 0 0 0 0
+604 1 0 0 0 0 0 0 0 0
+605 2 0 0 0 0 0 0 0 0
+fn=rml::internal::Backend::coalescAndPutList(rml::internal::FreeBlock*, bool, bool)
+859 218 18 2 0 0 0 0 0 0
+864 327 0 0 0 0 0 0 0 0
+877 545 20 2 0 0 0 0 0 0
+fn=rml::internal::Backend::genericGetBlock(int, unsigned long, bool)
+168 109 0 0 109 0 0 0 0 0
+170 8 0 0 0 0 0 0 0 0
+859 218 0 0 0 0 0 0 0 0
+864 218 0 0 0 0 0 0 0 0
+878 1090 0 0 0 0 0 218 0 0
+fn=rml::internal::Backend::getLargeBlock(unsigned long)
+1083 14 0 0 7 6 0 0 0 0
+fn=rml::internal::Backend::init(rml::internal::ExtMemoryPool*)
+562 1 0 0 0 0 0 1 0 0
+587 1 0 0 0 0 0 1 1 1
+741 1 0 0 0 0 0 1 1 1
+fn=rml::internal::Backend::startUseBlock(rml::internal::MemRegion*, rml::internal::FreeBlock*, bool)
+188 8 0 0 0 0 0 0 0 0
+189 8 0 0 0 0 0 0 0 0
+191 8 2 2 0 0 0 0 0 0
+717 4 0 0 0 0 0 0 0 0
+859 8 2 2 0 0 0 0 0 0
+864 8 0 0 0 0 0 0 0 0
+877 4 0 0 0 0 0 0 0 0
+878 8 0 0 0 0 0 0 0 0
+fn=rml::internal::CacheBinFunctor<rml::internal::LargeObjectCacheProps<8192ul, 8388608ul, 8192u, 2, 2, 16> >::operator()(rml::internal::CacheBinOperation*)
+188 12 0 0 0 0 0 0 0 0
+189 12 0 0 0 0 0 0 0 0
+191 12 0 0 0 0 0 0 0 0
+230 18 0 0 0 0 0 0 0 0
+384 21 1 1 7 0 0 0 0 0
+385 20 3 1 6 0 0 7 0 0
+386 7 0 0 0 0 0 0 0 0
+393 7 0 0 7 0 0 0 0 0
+394 63 1 1 0 0 0 49 0 0
+397 7 0 0 0 0 0 7 0 0
+fn=rml::internal::ExtMemoryPool::init(long, void* (*)(long, unsigned long&), int (*)(long, void*, unsigned long), unsigned long, bool, bool)
+471 1 0 0 0 0 0 1 1 1
+fn=rml::internal::ExtMemoryPool::mallocLargeObject(rml::internal::MemoryPool*, unsigned long)
+524 14 0 0 0 0 0 0 0 0
+fn=rml::internal::LargeObjectCache::doCleanup(unsigned long, bool)
+196 12 0 0 0 0 0 0 0 0
+199 12 0 0 0 0 0 0 0 0
+201 6 0 0 0 0 0 0 0 0
+202 42 1 1 12 0 0 0 0 0
+203 6 0 0 0 0 0 0 0 0
+204 12 0 0 0 0 0 0 0 0
+205 15 0 0 0 0 0 0 0 0
+208 43 1 1 1 0 0 0 0 0
+209 80 1 1 20 4 4 0 0 0
+210 3 1 1 0 0 0 0 0 0
+233 6 0 0 0 0 0 0 0 0
+234 24 1 1 0 0 0 0 0 0
+314 4 0 0 0 0 0 0 0 0
+316 5 0 0 0 0 0 0 0 0
+318 6 0 0 6 6 6 0 0 0
+319 6 0 0 6 0 0 0 0 0
+fn=rml::internal::LargeObjectCache::get(unsigned long)
+411 14 0 0 0 0 0 0 0 0
+fn=rml::internal::MemoryPool::getEmptyBlock(unsigned long)
+523 816 4 2 306 0 0 204 0 0
+524 400 0 0 200 0 0 0 0 0
+829 612 0 0 0 0 0 102 0 0
+1083 604 0 0 302 94 1 0 0 0
+fn=rml::internal::MemoryPool::getFromLLOCache(rml::internal::TLSData*, unsigned long, unsigned long)
+494 14 0 0 0 0 0 0 0 0
+fn=rml::internal::MemoryPool::initDefaultPool()
+944 1 0 0 0 0 0 0 0 0
+945 1 0 0 0 0 0 0 0 0
+946 2 0 0 0 0 0 1 1 0
+950 1 0 0 0 0 0 1 0 0
+954 4 1 1 0 0 0 2 1 0
+957 4 0 0 0 0 0 2 0 0
+963 1 0 0 0 0 0 1 0 0
+965 4 0 0 0 0 0 2 1 0
+970 4 0 0 2 0 0 0 0 0
+979 1 1 1 0 0 0 1 0 0
+980 4 0 0 0 0 0 2 0 0
+983 2 0 0 1 0 0 0 0 0
+985 2 1 1 0 0 0 0 0 0
+991 2 0 0 1 0 0 0 0 0
+1008 5 1 1 1 0 0 1 0 0
+1009 6 0 0 1 0 0 0 0 0
+fn=rml::internal::MemoryPool::putToLLOCache(rml::internal::TLSData*, void*)
+523 6 0 0 3 0 0 0 0 0
+fn=rml::internal::TLSKey::createTLS(rml::internal::MemoryPool*, rml::internal::Backend*)
+1175 128 3 2 64 30 0 0 0 0
+1177 192 0 0 64 26 1 128 28 1
+1178 128 0 0 64 1 0 64 0 0
+1181 128 0 0 0 0 0 0 0 0
+1182 64 2 2 0 0 0 64 0 0
+fn=rml::internal::doInitialization()
+1175 2 2 2 1 1 1 0 0 0
+1177 3 0 0 1 1 1 2 0 0
+1178 2 0 0 1 0 0 1 0 0
+1181 2 0 0 0 0 0 0 0 0
+1182 2 0 0 1 1 0 1 0 0
+1207 2 0 0 1 1 1 0 0 0
+1216 5 2 2 0 0 0 2 0 0
+fn=rml::internal::getBackRef(rml::internal::BackRefIdx)
+527 6 0 0 0 0 0 0 0 0
+fn=rml::internal::setBackRef(rml::internal::BackRefIdx, void*)
+527 414 0 0 0 0 0 0 0 0
+fn=scalable_aligned_free
+525 2598 0 0 1299 0 0 0 0 0
+fn=scalable_free
+525 10 0 0 5 0 0 0 0 0
+fn=scalable_malloc
+1187 30 0 0 20 7 2 0 0 0
+fl=/nfs/site/proj/openmp/promo/20190312/tmp/lin_32e-rtl_int_5_nor_dyn.rel.50.c0.s0.t1..h1.w1-fxe16lin03/../../src/kmp.h
+fn=_INTERNAL_25_______src_kmp_barrier_cpp_ddfed41b::__kmp_hyper_barrier_release(barrier_type, kmp_info*, int, int, int, void*)
+1882 2029 1 1 1203 143 40 762 127 27
+3210 63 0 0 63 48 0 0 0 0
+fn=_INTERNAL_25_______src_kmp_runtime_cpp_ddfed41b::__kmp_check_mic_type()
+1203 7 0 0 0 0 0 4 0 0
+fn=_INTERNAL_26_______src_z_Linux_util_cpp_20354e55::__kmp_launch_worker(void*)
+1209 126 0 0 126 22 0 0 0 0
+1233 63 0 0 0 0 0 0 0 0
+3204 315 0 0 189 18 0 0 0 0
+3210 252 0 0 252 26 0 0 0 0
+fn=__kmp_acquire_queuing_lock
+3225 232 0 0 174 0 0 58 36 34
+fn=__kmp_allocate_team
+1882 805 31 3 403 1 0 402 2 1
+fn=__kmp_allocate_thread
+1882 630 29 1 315 28 0 315 15 0
+fn=__kmp_check_stack_overlap
+3220 64 0 0 64 0 0 0 0 0
+fn=__kmp_create_worker
+3204 459 30 2 197 40 7 0 0 0
+3205 4 0 0 2 0 0 0 0 0
+fn=__kmp_fork_barrier(int, int)
+3210 192 2 1 192 17 0 0 0 0
+fn=__kmp_fork_call
+1213 2 1 1 0 0 0 1 0 0
+1266 2 0 0 1 0 0 1 0 0
+fn=__kmp_internal_fork
+3210 1 0 0 1 0 0 0 0 0
+fn=__kmp_invoke_task_func
+3210 320 0 0 256 0 0 64 0 0
+fn=__kmp_launch_thread
+1213 126 0 0 0 0 0 63 0 0
+1266 126 0 0 63 0 0 63 0 0
+fn=__kmp_middle_initialize
+3204 11 1 0 6 1 0 0 0 0
+3205 4 1 1 3 0 0 0 0 0
+fn=__kmp_parallel_initialize
+1213 3 1 1 1 0 0 1 0 0
+1266 2 0 0 1 0 0 1 0 0
+3204 11 1 1 6 2 2 0 0 0
+3205 4 0 0 3 0 0 0 0 0
+4111 3 0 0 2 2 2 0 0 0
+fn=__kmp_register_root
+3210 4 0 0 4 0 0 0 0 0
+fn=__kmp_release_ticket_lock
+1279 6 0 0 0 0 0 0 0 0
+fn=__kmp_x86_cpuid
+1202 3096 2 2 0 0 0 1548 0 0
+1203 10836 0 0 0 0 0 6192 2 1
+1206 3096 0 0 3096 0 0 0 0 0
+fn=__kmpc_bound_num_threads
+3299 64 0 0 0 0 0 64 0 0
+3301 256 0 0 192 0 0 0 0 0
+fn=bool _INTERNAL_25_______src_kmp_barrier_cpp_ddfed41b::__kmp_wait_template<kmp_flag_64, 1, false, true>(kmp_info*, kmp_flag_64*, void*)
+1279 63 0 0 0 0 0 0 0 0
+fn=omp_get_thread_num@@VERSION
+3210 256 0 0 256 0 0 0 0 0
+fn=omp_in_parallel@@VERSION
+3299 1 0 0 0 0 0 1 0 0
+3301 4 0 0 3 2 2 0 0 0
+fl=/nfs/site/proj/openmp/promo/20190312/tmp/lin_32e-rtl_int_5_nor_dyn.rel.50.c0.s0.t1..h1.w1-fxe16lin03/../../src/kmp_affinity.cpp
+fn=KMPAffinity::Mask::operator delete(void*)
+89 515 0 0 0 0 0 0 0 0
+fn=KMPAffinity::Mask::operator new(unsigned long)
+87 580 31 2 0 0 0 0 0 0
+fn=KMPAffinity::Mask::operator new[](unsigned long)
+88 1 1 0 0 0 0 0 0 0
+fn=KMPAffinity::operator new(unsigned long)
+91 1 1 1 0 0 0 0 0 0
+fn=KMPAffinity::pick_api()
+94 1 1 1 0 0 0 1 0 0
+96 3 0 0 2 2 1 0 0 0
+101 3 1 1 2 0 0 0 0 0
+107 3 1 1 0 0 0 1 0 0
+109 2 0 0 1 1 0 1 1 1
+110 1 0 0 0 0 0 1 0 0
+111 2 0 0 2 0 0 0 0 0
+fn=_INTERNAL_26_______src_kmp_affinity_cpp_662c446f::__kmp_affinity_cmp_ProcCpuInfo_phys_id(void const*, void const*)
+1991 1276 1 1 1276 1 0 0 0 0
+1992 1276 0 0 1276 0 0 0 0 0
+1993 4340 0 0 1276 0 0 0 0 0
+1994 9192 1 0 6128 7 0 0 0 0
+1995 2048 0 0 1024 0 0 0 0 0
+1996 2040 0 0 0 0 0 0 0 0
+1997 504 0 0 252 0 0 0 0 0
+1998 5364 0 0 0 0 0 0 0 0
+fn=_INTERNAL_26_______src_kmp_affinity_cpp_662c446f::__kmp_affinity_cmp_apicThreadInfo_phys_id(void const*, void const*)
+1091 3072 1 1 2048 1 0 0 0 0
+1093 1024 0 0 0 0 0 0 0 0
+1095 3072 0 0 2048 0 0 0 0 0
+1097 1024 0 0 0 0 0 0 0 0
+1099 3072 0 0 2048 0 0 0 0 0
+1102 3072 1 1 1024 0 0 0 0 0
+fn=_INTERNAL_26_______src_kmp_affinity_cpp_662c446f::__kmp_affinity_create_apicid_map(AddrUnsPair**, kmp_i18n_id*)
+1069 512 0 0 0 0 0 0 0 0
+1071 9984 1 1 0 0 0 0 0 0
+1072 1792 0 0 0 0 0 0 0 0
+1111 12 2 2 1 0 0 7 0 0
+1113 1 0 0 0 0 0 1 1 0
+1114 1 0 0 0 0 0 1 0 0
+1117 4 0 0 0 0 0 1 0 0
+1118 2 1 1 1 0 0 0 0 0
+1120 9 1 1 7 0 0 0 0 0
+1128 3 0 0 2 1 0 0 0 0
+1159 1 0 0 0 0 0 1 0 0
+1176 1 0 0 0 0 0 1 0 0
+1177 1 1 1 0 0 0 1 0 0
+1198 5 1 1 4 1 0 1 0 0
+1199 2 0 0 0 0 0 0 0 0
+1200 4 0 0 2 1 0 1 0 0
+1228 8 1 1 2 2 0 2 0 0
+1230 1 0 0 0 0 0 0 0 0
+1231 2580 2 2 1550 4 0 519 2 0
+1233 1536 0 0 768 0 0 256 0 0
+1238 1024 1 1 768 0 0 256 0 0
+1239 1280 0 0 0 0 0 256 0 0
+1242 1024 0 0 0 0 0 256 0 0
+1243 512 1 1 256 0 0 0 0 0
+1250 1024 0 0 256 0 0 256 0 0
+1251 512 0 0 0 0 0 0 0 0
+1252 512 0 0 0 0 0 0 0 0
+1253 256 0 0 0 0 0 256 0 0
+1262 1024 0 0 0 0 0 256 0 0
+1263 512 1 1 256 0 0 0 0 0
+1264 1024 0 0 0 0 0 256 0 0
+1265 1024 1 1 256 0 0 256 0 0
+1271 512 0 0 256 0 0 0 0 0
+1272 1280 0 0 256 0 0 256 0 0
+1276 256 0 0 0 0 0 0 0 0
+1287 1024 0 0 0 0 0 0 0 0
+1288 1280 0 0 0 0 0 256 0 0
+1290 1024 0 0 0 0 0 0 0 0
+1291 512 1 1 0 0 0 256 0 0
+1293 256 0 0 0 0 0 0 0 0
+1298 4 0 0 2 0 0 1 0 0
+1307 2 0 0 0 0 0 0 0 0
+1308 2 0 0 0 0 0 0 0 0
+1352 6 2 2 0 0 0 2 0 0
+1369 1 0 0 0 0 0 0 0 0
+1370 1 0 0 0 0 0 0 0 0
+1371 1 0 0 0 0 0 0 0 0
+1373 1 0 0 0 0 0 0 0 0
+1374 1 0 0 1 0 0 0 0 0
+1375 1 0 0 0 0 0 0 0 0
+1376 1 0 0 1 0 0 0 0 0
+1377 1 1 1 0 0 0 0 0 0
+1378 2 0 0 1 0 0 1 0 0
+1381 2 0 0 1 0 0 1 0 0
+1382 1 0 0 1 0 0 0 0 0
+1384 12 1 1 3 0 0 6 1 0
+1385 7 0 0 1 0 0 0 0 0
+1405 3 1 1 1 0 0 0 0 0
+1413 3 1 1 1 0 0 0 0 0
+1417 5 1 1 3 0 0 1 0 0
+1418 4 0 0 3 1 0 1 0 0
+1419 1 0 0 0 0 0 1 0 0
+1420 5 1 1 2 0 0 0 0 0
+fn=_INTERNAL_26_______src_kmp_affinity_cpp_662c446f::__kmp_affinity_create_cpuinfo_map(AddrUnsPair**, int*, kmp_i18n_id*, _IO_FILE*)
+2079 14 1 1 1 0 0 7 0 0
+2080 1 0 0 0 0 0 1 0 0
+2081 1 1 1 0 0 0 1 0 0
+2086 1 0 0 0 0 0 0 0 0
+2087 28676 1 1 0 0 0 7169 0 0
+2088 7169 0 0 0 0 0 7169 0 0
+2089 14338 0 0 0 0 0 0 0 0
+2094 35840 1 1 14336 1 0 14336 0 0
+2095 43008 0 0 0 0 0 7168 0 0
+2096 512 0 0 0 0 0 0 0 0
+2102 48384 0 0 0 0 0 6912 0 0
+2112 2 1 1 0 0 0 0 0 0
+2117 3 0 0 2 1 0 0 0 0
+2128 6 1 1 0 0 0 1 0 0
+2137 5 1 1 0 0 0 2 0 0
+2139 774 0 0 0 0 0 1 0 0
+2140 257 0 0 0 0 0 257 0 0
+2141 1028 1 1 257 1 1 257 0 0
+2158 1033 1 1 2 0 0 0 0 0
+2159 6170 2 2 515 1 0 257 8 0
+2162 1 0 0 0 0 0 1 1 0
+2163 1 0 0 0 0 0 1 1 0
+2164 26631 2 2 2 0 0 6658 0 0
+2169 6657 0 0 0 0 0 6657 0 0
+2170 6657 0 0 0 0 0 0 0 0
+2171 13314 0 0 0 0 0 0 0 0
+2175 7 0 0 0 0 0 0 0 0
+2176 26 3 3 1 0 0 0 0 0
+2177 10 2 2 3 0 0 2 0 0
+2178 3 0 0 0 0 0 0 0 0
+2181 2 1 1 0 0 0 0 0 0
+2188 19968 0 0 6656 0 0 0 0 0
+2197 6656 0 0 6656 0 0 0 0 0
+2199 33280 1 1 13312 0 0 13312 0 0
+2200 39936 0 0 0 0 0 6656 0 0
+2201 512 0 0 0 0 0 0 0 0
+2204 2560 1 1 0 0 0 256 0 0
+2206 1024 0 0 512 0 0 0 0 0
+2216 512 0 0 256 0 0 256 0 0
+2232 33280 1 1 13312 0 0 13312 0 0
+2233 39936 0 0 0 0 0 6656 0 0
+2234 512 0 0 0 0 0 0 0 0
+2237 2560 0 0 0 0 0 256 0 0
+2239 1024 0 0 512 0 0 0 0 0
+2241 768 0 0 256 0 0 256 0 0
+2244 12800 0 0 0 0 0 6400 0 0
+2245 38400 1 1 0 0 0 6400 0 0
+2246 512 0 0 0 0 0 0 0 0
+2249 2560 0 0 0 0 0 256 0 0
+2251 1024 0 0 512 0 0 0 0 0
+2253 768 0 0 256 0 0 256 0 0
+2257 30720 2 2 12288 1 1 12288 0 0
+2258 36864 0 0 0 0 0 6144 0 0
+2270 43008 1 1 0 0 0 6144 0 0
+2286 30720 0 0 6144 0 0 0 0 0
+2289 11776 0 0 0 0 0 0 0 0
+2291 471808 1 1 0 0 0 78592 0 0
+2299 768 0 0 512 0 0 0 0 0
+2307 1280 0 0 512 0 0 0 0 0
+2312 768 1 1 512 0 0 0 0 0
+2319 1536 0 0 1024 4 0 256 0 0
+2327 259 1 1 1 0 0 0 0 0
+2328 512 0 0 0 0 0 0 0 0
+2329 7168 2 2 512 0 0 256 0 0
+2343 1 0 0 0 0 0 1 0 0
+2358 2 0 0 1 0 0 0 0 0
+2359 2 1 1 1 0 0 0 0 0
+2360 2 0 0 1 0 0 0 0 0
+2366 1 0 0 1 1 0 0 0 0
+2415 6 1 1 1 0 0 2 0 0
+2428 5 1 1 1 0 0 2 1 0
+2430 5 0 0 1 0 0 1 0 0
+2432 5 0 0 1 0 0 2 0 0
+2434 5 1 1 1 0 0 2 1 0
+2436 1 0 0 0 0 0 0 0 0
+2441 2 0 0 0 0 0 0 0 0
+2444 4 1 1 0 0 0 0 0 0
+2445 5 0 0 2 0 0 0 0 0
+2446 3 0 0 0 0 0 1 0 0
+2451 38 1 1 1 0 0 0 0 0
+2452 16 1 1 0 0 0 8 0 0
+2453 8 0 0 0 0 0 8 0 0
+2454 8 0 0 0 0 0 8 0 0
+2455 16 0 0 8 0 0 8 0 0
+2460 787 1 1 261 0 0 10 0 0
+2463 2586 2 2 265 0 0 6 0 0
+2464 3070 0 0 0 0 0 0 0 0
+2466 1088 1 1 448 0 0 0 0 0
+2467 576 0 0 0 0 0 192 0 0
+2475 2115 0 0 1410 1 0 0 0 0
+2480 1644 4 4 126 0 0 63 0 0
+2481 126 0 0 63 0 0 0 0 0
+2482 252 0 0 126 0 0 0 0 0
+2483 63 0 0 0 0 0 63 0 0
+2485 63 0 0 0 0 0 63 0 0
+2486 126 0 0 63 0 0 63 0 0
+2488 255 0 0 255 0 0 0 0 0
+2489 255 0 0 255 0 0 0 0 0
+2490 765 1 1 510 0 0 255 0 0
+2492 1020 0 0 0 0 0 0 0 0
+2504 189 0 0 63 0 0 0 0 0
+2505 189 0 0 0 0 0 63 0 0
+2518 384 1 1 0 0 0 0 0 0
+2522 5 0 0 2 0 0 0 0 0
+2534 1 0 0 0 0 0 0 0 0
+2545 14 0 0 1 0 0 0 0 0
+2546 17 0 0 7 0 0 0 0 0
+2547 4 1 1 0 0 0 3 0 0
+2551 2 0 0 1 0 0 1 1 0
+2552 2 0 0 1 0 0 1 0 0
+2553 3 1 1 2 0 0 1 0 0
+2556 3 1 1 1 0 0 0 0 0
+2557 13 4 4 0 0 0 0 0 0
+2558 4 0 0 2 0 0 0 0 0
+2560 6 1 1 2 0 0 1 0 0
+2566 2 0 0 1 0 0 1 0 0
+2568 4 0 0 2 1 0 1 0 0
+2619 5 0 0 1 0 0 2 0 0
+2620 392 1 1 2 0 0 0 0 0
+2621 1026 1 1 512 9 0 256 0 0
+2624 3 0 0 2 2 0 0 0 0
+2625 2 0 0 1 0 0 1 0 0
+2626 2 0 0 1 0 0 1 0 0
+2627 2 1 1 0 0 0 1 0 0
+2628 2 0 0 1 0 0 1 0 0
+2629 1288 0 0 257 1 0 258 0 0
+2630 13 1 1 9 0 0 0 0 0
+fn=_INTERNAL_26_______src_kmp_affinity_cpp_662c446f::__kmp_affinity_create_x2apicid_map(AddrUnsPair**, kmp_i18n_id*)
+1533 12 1 1 1 0 0 7 0 0
+1535 1 0 0 0 0 0 1 1 1
+1536 1 0 0 0 0 0 1 0 0
+1539 4 1 1 0 0 0 1 1 0
+1540 2 0 0 1 0 0 0 0 0
+1542 9 0 0 7 1 0 0 0 0
+1544 4 1 1 0 0 0 1 0 0
+1545 2 1 1 1 0 0 0 0 0
+1555 1 1 1 0 0 0 0 0 0
+1556 1 0 0 0 0 0 0 0 0
+1557 1 0 0 0 0 0 0 0 0
+1558 4 0 0 0 0 0 3 0 0
+1560 4 1 1 0 0 0 0 0 0
+1561 4 1 1 0 0 0 0 0 0
+1574 12 0 0 0 0 0 3 0 0
+1575 9 1 1 3 0 0 0 0 0
+1578 3 0 0 0 0 0 0 0 0
+1579 2 0 0 0 0 0 0 0 0
+1583 2 0 0 2 0 0 0 0 0
+1584 6 0 0 0 0 0 0 0 0
+1586 1 0 0 0 0 0 0 0 0
+1587 1 0 0 0 0 0 0 0 0
+1588 1 0 0 0 0 0 0 0 0
+1589 2 0 0 0 0 0 1 0 0
+1590 3 0 0 0 0 0 0 0 0
+1596 1 0 0 0 0 0 0 0 0
+1597 1 0 0 0 0 0 0 0 0
+1598 2 0 0 0 0 0 1 0 0
+1599 3 0 0 0 0 0 0 0 0
+1606 1 1 1 0 0 0 0 0 0
+1619 2 0 0 0 0 0 0 0 0
+1626 5 0 0 0 0 0 0 0 0
+1629 5 1 1 0 0 0 0 0 0
+1632 3 0 0 0 0 0 0 0 0
+1639 3 0 0 2 0 0 0 0 0
+1666 8 2 2 5 0 0 4 0 0
+1667 5 0 0 2 0 0 2 0 0
+1671 6 1 1 3 1 0 2 1 0
+1676 1 0 0 0 0 0 1 0 0
+1677 2584 3 3 1553 5 0 520 1 0
+1679 1536 0 0 768 0 0 256 0 0
+1684 1024 0 0 768 2 0 256 0 0
+1687 512 1 1 0 0 0 512 1 0
+1688 256 0 0 0 0 0 0 0 0
+1690 4352 0 0 256 0 0 512 0 0
+1691 3072 0 0 0 0 0 768 0 0
+1692 768 1 1 768 0 0 0 0 0
+1693 1536 0 0 768 0 0 0 0 0
+1694 526 2 2 261 0 0 8 0 0
+1699 769 0 0 0 0 0 256 0 0
+1700 256 0 0 0 0 0 0 0 0
+1703 512 0 0 512 0 0 0 0 0
+1704 2048 0 0 0 0 0 0 0 0
+1705 2048 0 0 0 0 0 512 1 0
+1706 512 0 0 0 0 0 0 0 0
+1708 512 1 1 0 0 0 0 0 0
+1711 1280 2 2 768 0 0 0 0 0
+1714 12032 2 2 4608 3 0 4352 4 0
+1715 768 0 0 512 0 0 0 0 0
+1720 6 0 0 4 1 0 2 0 0
+1723 2 0 0 1 0 0 0 0 0
+1724 2 1 1 1 0 0 0 0 0
+1768 7 1 1 2 0 0 3 1 0
+1771 7 1 1 1 0 0 4 1 0
+1772 5 0 0 2 0 0 3 0 0
+1773 5 1 1 2 0 0 3 0 0
+1774 5 0 0 2 0 0 3 0 0
+1775 21 2 2 5 0 0 2 0 0
+1776 10 0 0 2 0 0 3 0 0
+1777 4 0 0 1 0 0 3 0 0
+1778 4 0 0 1 0 0 3 0 0
+1779 9 2 2 5 0 0 3 0 0
+1786 2 0 0 1 0 0 0 0 0
+1788 9 0 0 0 0 0 0 0 0
+1789 13 1 1 8 0 0 0 0 0
+1811 19 2 2 5 0 0 7 0 0
+1812 3 2 2 2 0 0 1 0 0
+1813 2 0 0 1 0 0 1 0 0
+1814 2 0 0 1 0 0 1 0 0
+1815 2 0 0 1 0 0 1 0 0
+1816 2 0 0 1 0 0 1 0 0
+1817 5 1 1 5 3 0 1 0 0
+1818 1 0 0 0 0 0 1 1 0
+1819 5 0 0 2 0 0 0 0 0
+1899 1 0 0 0 0 0 0 0 0
+fn=_INTERNAL_26_______src_kmp_affinity_cpp_662c446f::__kmp_apply_thread_places(AddrUnsPair**, int)
+3442 12 2 2 1 0 0 7 0 0
+3444 3 0 0 2 2 1 0 0 0
+4034 3 1 1 1 0 0 0 0 0
+4035 1 0 0 0 0 0 1 0 0
+4036 1 1 1 0 0 0 1 0 0
+4038 12 0 0 9 0 0 0 0 0
+fn=_INTERNAL_26_______src_kmp_affinity_cpp_662c446f::__kmp_aux_affinity_initialize()
+4174 7 0 0 0 0 0 6 0 0
+4175 3 0 0 2 0 0 0 0 0
+4184 4 1 1 2 1 1 0 0 0
+4185 7 1 1 4 2 0 2 0 0
+4187 3 0 0 2 0 0 0 0 0
+4188 3 0 0 2 0 0 0 0 0
+4189 3 0 0 2 1 1 1 0 0
+4193 2 1 1 1 0 0 1 0 0
+4194 2569 1 1 1542 1 1 514 0 0
+4195 1536 0 0 768 0 0 256 0 0
+4198 256 0 0 256 0 0 0 0 0
+4200 4 0 0 3 0 0 0 0 0
+4216 3 0 0 2 0 0 0 0 0
+4223 1 0 0 0 0 0 0 0 0
+4224 1 0 0 0 0 0 1 1 0
+4228 4 1 1 2 1 1 0 0 0
+4229 2 0 0 2 0 0 0 0 0
+4233 7 1 1 1 1 1 0 0 0
+4238 1 0 0 0 0 0 1 0 0
+4241 7 1 1 4 0 0 2 1 0
+4261 5 1 1 2 2 0 1 0 0
+4266 4 1 1 0 0 0 1 0 0
+4267 2 0 0 0 0 0 0 0 0
+4271 1 0 0 0 0 0 0 0 0
+4272 3 1 1 2 2 0 0 0 0
+4284 4 1 1 0 0 0 1 0 0
+4285 2 0 0 0 0 0 0 0 0
+4295 2 0 0 0 0 0 0 0 0
+4296 3 1 1 2 0 0 0 0 0
+4305 4 1 1 0 0 0 1 0 0
+4306 2 1 1 0 0 0 0 0 0
+4309 1 0 0 0 0 0 0 0 0
+4311 7 2 2 1 0 0 2 0 0
+4312 2 0 0 0 0 0 1 0 0
+4313 2 0 0 0 0 0 0 0 0
+4314 18 3 2 10 1 0 3 0 0
+fn=_INTERNAL_26_______src_kmp_affinity_cpp_662c446f::__kmp_create_affinity_none_places()
+4140 3 1 1 0 0 0 3 0 0
+4141 3 0 0 2 1 0 0 0 0
+4142 3 0 0 2 0 0 0 0 0
+4143 2 1 1 1 1 0 1 0 0
+4144 8 1 1 5 4 0 2 1 0
+4145 4 0 0 3 0 0 1 0 0
+4146 8 0 0 5 1 0 0 0 0
+fn=_INTERNAL_26_______src_kmp_affinity_cpp_662c446f::__kmp_dispatch_set_hierarchy_values()
+2012 2 0 0 1 1 0 1 1 0
+2013 6 1 1 3 0 0 0 0 0
+2014 2 1 1 1 0 0 1 0 0
+2016 4 0 0 2 2 0 0 0 0
+2020 1 0 0 0 0 0 1 0 0
+2021 1 0 0 0 0 0 1 0 0
+2022 1 0 0 0 0 0 1 0 0
+2023 2 0 0 0 0 0 1 0 0
+2026 2 0 0 1 1 0 1 0 0
+2027 1 0 0 0 0 0 1 0 0
+2030 1 0 0 0 0 0 0 0 0
+2035 1 0 0 0 0 0 1 0 0
+2037 1 0 0 0 0 0 1 0 0
+2038 1 0 0 0 0 0 0 0 0
+2039 1 0 0 0 0 0 1 0 0
+2041 1 0 0 0 0 0 1 0 0
+2043 1 0 0 1 0 0 0 0 0
+fn=__kmp_affinity_initialize
+4688 3 1 1 0 0 0 3 0 0
+4697 5 1 1 2 0 0 0 0 0
+4698 3 0 0 2 1 0 0 0 0
+4701 2 0 0 0 0 0 0 0 0
+4704 1 1 1 0 0 0 1 0 0
+4705 2 1 0 0 0 0 0 0 0
+4708 4 0 0 4 1 0 0 0 0
+fn=__kmp_affinity_set_init_mask
+4747 704 5 2 64 0 0 384 0 0
+4748 192 0 0 128 26 0 0 0 0
+4752 256 2 2 192 0 0 0 0 0
+4753 192 0 0 64 48 0 0 0 0
+4754 384 93 4 256 121 0 128 63 63
+4766 576 0 0 320 147 4 0 0 0
+4767 256 3 2 128 57 0 0 0 0
+4774 256 0 0 128 24 0 0 0 0
+4775 128 0 0 0 0 0 0 0 0
+4802 64 30 2 0 0 0 64 50 0
+4803 128 0 0 0 0 0 0 0 0
+4804 1 0 0 0 0 0 1 0 0
+4805 1 0 0 0 0 0 1 0 0
+4806 5 0 0 2 0 0 1 0 0
+4807 504 62 1 252 0 0 0 0 0
+4810 63 0 0 0 0 0 63 0 0
+4811 189 0 0 0 0 0 63 0 0
+4822 256 3 2 192 56 0 64 0 0
+4824 192 0 0 128 26 1 0 0 0
+4843 256 4 2 192 0 0 64 0 0
+4844 704 0 0 512 3 0 0 0 0
+fn=__sti__$E
+50 3 1 1 0 0 0 2 1 1
+fl=/nfs/site/proj/openmp/promo/20190312/tmp/lin_32e-rtl_int_5_nor_dyn.rel.50.c0.s0.t1..h1.w1-fxe16lin03/../../src/kmp_affinity.h
+fn=KMPAffinity::pick_api()
+264 3 0 0 1 1 0 1 0 0
+fn=KMPNativeAffinity::Mask::begin() const
+308 12 1 1 0 0 0 9 0 0
+309 3 0 0 0 0 0 0 0 0
+310 30 0 0 12 2 1 6 0 0
+312 15 1 1 12 0 0 0 0 0
+fn=KMPNativeAffinity::Mask::copy(KMPAffinity::Mask const*)
+291 125060 59 3 41730 0 0 0 0 0
+292 166400 0 0 124800 431 10 41600 0 0
+293 65 0 0 65 0 0 0 0 0
+fn=KMPNativeAffinity::Mask::end() const
+314 64536 0 0 48402 2 0 0 0 0
+fn=KMPNativeAffinity::Mask::get_system_affinity(bool)
+321 24 2 2 0 0 0 12 0 0
+322 16 2 2 8 0 0 0 0 0
+325 20 0 0 4 0 0 4 0 0
+326 8 0 0 0 0 0 0 0 0
+327 24 2 2 16 0 0 0 0 0
+fn=KMPNativeAffinity::Mask::is_set(int) const
+280 294912 3 2 49152 21 0 0 0 0
+fn=KMPNativeAffinity::Mask::next(int) const
+315 3840 1 1 0 0 0 2304 0 0
+316 768 0 0 0 0 0 0 0 0
+317 168174 1 1 61434 0 0 30717 0 0
+318 14592 0 0 0 0 0 0 0 0
+319 3840 0 0 3072 0 0 0 0 0
+fn=KMPNativeAffinity::Mask::set(int)
+277 7680 1 1 1024 0 0 512 0 0
+278 512 0 0 512 0 0 0 0 0
+fn=KMPNativeAffinity::Mask::set_system_affinity(bool) const
+335 3480 2 2 0 0 0 1740 0 0
+336 2320 3 2 1160 0 0 0 0 0
+339 2900 0 0 580 0 0 580 1 0
+340 1160 0 0 0 0 0 0 0 0
+341 3480 32 2 2320 0 0 0 0 0
+fn=KMPNativeAffinity::Mask::zero()
+286 985088 1 1 328704 0 0 0 0 0
+287 655360 0 0 327680 0 0 327680 0 0
+288 512 0 0 512 0 0 0 0 0
+fn=KMPNativeAffinity::Mask::~Mask()
+272 4120 3 3 1030 0 0 1030 0 0
+273 1545 0 0 515 0 0 0 0 0
+274 515 0 0 0 0 0 515 0 0
+fn=KMPNativeAffinity::allocate_mask()
+271 4060 0 0 1740 3 1 1740 0 0
+354 580 5 2 0 0 0 580 0 0
+355 1740 0 0 0 0 0 580 2 0
+356 1740 31 1 1160 0 0 0 0 0
+fn=KMPNativeAffinity::allocate_mask_array(int)
+271 18 1 1 3 1 0 8 0 0
+363 3 1 1 0 0 0 1 0 0
+364 27 2 1 7 0 0 2 0 0
+fn=KMPNativeAffinity::bind_thread(int)
+353 1024 0 0 0 0 0 0 0 0
+fn=KMPNativeAffinity::deallocate_mask(KMPAffinity::Mask*)
+361 3090 2 2 1030 2 1 0 0 0
+fn=KMPNativeAffinity::determine_capable(char const*)
+351 2 1 1 0 0 0 0 0 0
+fn=KMPNativeAffinity::get_api_type() const
+375 2 1 1 1 0 0 0 0 0
+fn=KMPNativeAffinity::index_mask_array(KMPAffinity::Mask*, int)
+371 1 1 0 0 0 0 0 0 0
+373 4 0 0 1 0 0 0 0 0
+fn=_INTERNAL_26_______src_kmp_affinity_cpp_662c446f::__kmp_affinity_cmp_Address_labels(void const*, void const*)
+638 1024 0 0 1024 109 0 0 0 0
+641 12288 1 1 0 0 0 0 0 0
+642 9216 0 0 6144 129 0 0 0 0
+644 3072 0 0 0 0 0 0 0 0
+647 2048 0 0 1024 0 0 0 0 0
+fn=_INTERNAL_26_______src_kmp_affinity_cpp_662c446f::__kmp_affinity_create_x2apicid_map(AddrUnsPair**, kmp_i18n_id*)
+573 256 0 0 0 0 0 256 256 0
+574 5376 2 2 0 0 0 0 0 0
+575 1536 0 0 768 0 0 768 48 0
+576 1536 1 1 768 0 0 768 288 0
+578 256 0 0 0 0 0 256 16 0
+617 256 0 0 0 0 0 256 16 0
+fn=__sti__$E
+702 3 0 0 0 0 0 2 0 0
+fl=/nfs/site/proj/openmp/promo/20190312/tmp/lin_32e-rtl_int_5_nor_dyn.rel.50.c0.s0.t1..h1.w1-fxe16lin03/../../src/kmp_alloc.cpp
+fn=___kmp_allocate
+1832 8368 2 2 0 0 0 6276 0 0
+1837 10460 0 0 8368 72 9 2092 1 0
+1845 10460 0 0 8368 0 0 0 0 0
+fn=___kmp_free
+1899 2598 2 2 0 0 0 1299 0 0
+1903 2598 0 0 0 0 0 0 0 0
+1907 6495 0 0 3897 2 0 0 0 0
+fn=__kmp_init_memkind
+1333 14 1 1 0 0 0 0 0 0
+1334 28 2 1 14 2 0 7 0 0
+1344 1 1 1 0 0 0 1 0 0
+1348 2 0 0 0 0 0 1 1 1
+1350 2 0 0 0 0 0 0 0 0
+1355 4 2 1 0 0 0 2 1 1
+1356 2 0 0 0 0 0 0 0 0
+1357 4 0 0 0 0 0 2 0 0
+1358 1 0 0 0 0 0 1 0 0
+1359 3 1 1 1 0 0 1 0 0
+1360 4 0 0 1 0 0 2 0 0
+1361 4 0 0 1 0 0 2 0 0
+1362 9 1 1 3 0 0 0 0 0
+1363 4 1 1 1 1 0 1 0 0
+1364 2 0 0 1 1 1 1 1 1
+1365 4 0 0 1 0 0 2 0 0
+1367 4 1 1 1 0 0 2 0 0
+1368 1 0 0 0 0 0 1 0 0
+1369 4 1 1 1 0 0 2 1 0
+1370 1 0 0 0 0 0 1 0 0
+1371 4 1 1 1 0 0 2 0 0
+1372 1 0 0 0 0 0 1 0 0
+1373 4 1 1 1 0 0 2 0 0
+1375 4 0 0 1 0 0 2 0 0
+1376 1 0 0 0 0 0 1 0 0
+1377 1 0 0 0 0 0 1 0 0
+1378 3 0 0 1 0 0 1 0 0
+1379 1 0 0 0 0 0 1 0 0
+1381 2 0 0 2 0 0 0 0 0
+fn=__kmp_initialize_bget
+268 192 0 0 64 11 0 0 0 0
+269 256 44 2 0 0 0 64 0 0
+275 5120 180 12 64 26 2 1280 0 0
+276 1280 7 4 0 0 0 1280 0 0
+279 64 0 0 0 0 0 64 0 0
+280 128 0 0 0 0 0 64 0 0
+909 64 0 0 0 0 0 64 0 0
+910 64 0 0 0 0 0 64 0 0
+911 64 0 0 0 0 0 64 0 0
+912 64 0 0 0 0 0 64 0 0
+1031 256 4 2 0 0 0 192 0 0
+1036 128 30 2 128 1 0 0 0 0
+1037 128 30 2 128 15 1 0 0 0
+1038 256 0 0 256 0 0 0 0 0
+fn=__kmp_initialize_fast_memory
+2188 64 0 0 64 0 0 0 0 0
+fl=/nfs/site/proj/openmp/promo/20190312/tmp/lin_32e-rtl_int_5_nor_dyn.rel.50.c0.s0.t1..h1.w1-fxe16lin03/../../src/kmp_atomic.h
+fn=__kmp_middle_initialize
+424 26 3 3 13 12 9 13 0 0
+fl=/nfs/site/proj/openmp/promo/20190312/tmp/lin_32e-rtl_int_5_nor_dyn.rel.50.c0.s0.t1..h1.w1-fxe16lin03/../../src/kmp_barrier.cpp
+fn=_INTERNAL_25_______src_kmp_barrier_cpp_ddfed41b::__kmp_hyper_barrier_release(barrier_type, kmp_info*, int, int, int, void*)
+881 832 1 1 0 0 0 384 0 0
+884 192 0 0 0 0 0 0 0 0
+887 128 2 1 128 0 0 0 0 0
+888 192 0 0 0 0 0 0 0 0
+898 128 0 0 0 0 0 0 0 0
+899 4 0 0 4 0 0 0 0 0
+905 2 1 1 0 0 0 0 0 0
+907 4 0 0 1 0 0 0 0 0
+914 315 0 0 0 0 0 252 0 0
+917 378 0 0 315 0 0 0 0 0
+933 378 0 0 126 0 0 0 0 0
+934 8 0 0 7 1 0 0 0 0
+937 315 0 0 252 25 0 0 0 0
+941 63 0 0 0 0 0 63 0 0
+947 64 1 1 64 0 0 0 0 0
+948 64 0 0 64 1 0 0 0 0
+952 128 1 1 0 0 0 0 0 0
+953 654 0 0 0 0 0 0 0 0
+954 63 0 0 0 0 0 0 0 0
+958 378 0 0 16 0 0 0 0 0
+959 63 0 0 0 0 0 0 0 0
+969 63 0 0 0 0 0 0 0 0
+970 164 1 1 0 0 0 16 0 0
+971 84 0 0 0 0 0 0 0 0
+972 630 2 1 189 26 0 147 30 13
+984 126 0 0 63 0 0 0 0 0
+987 63 1 1 63 13 0 0 0 0
+988 63 0 0 0 0 0 0 0 0
+1002 126 0 0 0 0 0 0 0 0
+1014 252 0 0 0 0 0 189 0 0
+1015 189 1 0 189 21 0 0 0 0
+1020 128 3 1 0 0 0 0 0 0
+1021 128 0 0 0 0 0 0 0 0
+1022 567 1 1 252 19 0 126 0 0
+1024 189 0 0 63 0 0 0 0 0
+fn=__kmp_fork_barrier(int, int)
+2219 640 29 1 0 0 0 448 0 0
+2222 192 0 0 192 2 0 0 0 0
+2223 193 0 0 1 0 0 0 0 0
+2225 64 0 0 0 0 0 0 0 0
+2232 64 61 1 0 0 0 0 0 0
+2234 67 29 1 65 2 1 0 0 0
+2266 3 1 1 2 0 0 0 0 0
+2268 6 0 0 1 0 0 2 0 0
+2277 4 0 0 2 2 0 0 0 0
+2284 10 0 0 6 1 1 1 0 0
+2289 256 0 0 128 2 0 0 0 0
+2291 192 29 1 128 57 0 0 0 0
+2292 384 62 1 64 0 0 64 0 0
+2314 192 1 0 128 0 0 0 0 0
+2346 256 2 1 128 2 0 0 0 0
+2366 64 0 0 64 14 0 0 0 0
+2394 192 0 0 128 0 0 0 0 0
+2395 192 2 1 0 0 0 64 0 0
+2399 64 0 0 64 0 0 0 0 0
+2400 128 0 0 0 0 0 0 0 0
+2405 128 0 0 0 0 0 0 0 0
+2416 192 1 1 128 4 0 0 0 0
+2428 128 0 0 0 0 0 0 0 0
+2429 189 0 0 126 63 18 0 0 0
+2432 128 0 0 64 0 0 0 0 0
+2442 512 1 1 448 64 25 0 0 0
+fn=__kmp_setup_icv_copy(kmp_team*, int, kmp_internal_control*, ident*)
+2487 1 1 1 1 0 0 0 0 0
+fl=/nfs/site/proj/openmp/promo/20190312/tmp/lin_32e-rtl_int_5_nor_dyn.rel.50.c0.s0.t1..h1.w1-fxe16lin03/../../src/kmp_csupport.cpp
+fn=__kmpc_bound_num_threads
+172 64 1 1 0 0 0 64 0 0
+175 256 0 0 256 1 0 0 0 0
+fn=__kmpc_critical
+1230 174 1 1 116 71 29 0 0 0
+1232 116 0 0 0 0 0 0 0 0
+fn=__kmpc_critical_with_hint
+1032 8 1 1 1 0 0 2 0 0
+1033 5 0 0 4 2 2 2 0 0
+1034 11 1 1 6 2 2 2 0 0
+1035 10 1 1 5 2 2 2 0 0
+1039 1 0 0 1 0 0 0 0 0
+1041 5 1 1 1 0 0 0 0 0
+1042 2 0 0 0 0 0 0 0 0
+1336 2 1 1 0 0 0 0 0 0
+1338 2 0 0 0 0 0 0 0 0
+1340 2 0 0 0 0 0 0 0 0
+1344 3 1 1 0 0 0 0 0 0
+1345 3 0 0 2 2 2 0 0 0
+1346 3 0 0 0 0 0 0 0 0
+1351 2 0 0 0 0 0 0 0 0
+1355 2 1 1 0 0 0 0 0 0
+1359 3 0 0 0 0 0 0 0 0
+1451 812 2 2 58 36 36 406 0 0
+1459 116 0 0 0 0 0 0 0 0
+1460 174 1 1 58 0 0 0 0 0
+1468 174 0 0 58 36 15 0 0 0
+1470 3 0 0 0 0 0 0 0 0
+1480 291 1 1 1 0 0 0 0 0
+1518 58 0 0 58 0 0 0 0 0
+1519 58 0 0 58 35 13 0 0 0
+1520 174 2 2 116 71 29 0 0 0
+1528 174 0 0 116 0 0 0 0 0
+1543 348 1 1 232 105 39 58 36 34
+1551 116 0 0 58 0 0 0 0 0
+1566 696 1 1 522 0 0 0 0 0
+fn=__kmpc_end_critical
+1580 464 0 0 0 0 0 290 0 0
+1586 290 0 0 116 70 25 0 0 0
+1609 58 1 1 58 0 0 0 0 0
+1610 116 0 0 0 0 0 0 0 0
+1611 58 0 0 58 0 0 0 0 0
+1612 174 0 0 116 0 0 0 0 0
+1618 348 0 0 232 36 15 58 0 0
+1654 174 0 0 116 0 0 0 0 0
+1655 116 1 1 58 0 0 0 0 0
+1663 348 1 1 348 0 0 0 0 0
+fn=__kmpc_fork_call
+291 20 3 3 0 0 0 10 0 0
+292 2 0 0 0 0 0 1 0 0
+314 6 0 0 0 0 0 4 0 0
+318 3 0 0 2 2 2 0 0 0
+319 4 2 2 3 0 0 0 0 0
+336 1 0 0 1 0 0 0 0 0
+339 8 0 0 3 3 3 0 0 0
+340 2 1 1 0 0 0 0 0 0
+359 2 0 0 0 0 0 0 0 0
+361 10 1 1 2 1 1 2 0 0
+fn=__kmpc_global_thread_num
+128 65 2 2 0 0 0 0 0 0
+fn=__kmpc_ok_to_fork
+187 2 1 1 1 0 0 0 0 0
+fn=__kmpc_push_num_threads
+264 1 0 0 0 0 0 0 0 0
+fl=/nfs/site/proj/openmp/promo/20190312/tmp/lin_32e-rtl_int_5_nor_dyn.rel.50.c0.s0.t1..h1.w1-fxe16lin03/../../src/kmp_environment.cpp
+fn=__kmp_env_blk_free
+500 2 1 1 0 0 0 1 0 0
+502 3 0 0 3 0 0 1 0 0
+503 2 0 0 0 0 0 1 0 0
+505 1 0 0 0 0 0 1 0 0
+506 1 0 0 0 0 0 1 0 0
+508 2 0 0 2 0 0 0 0 0
+fn=__kmp_env_blk_init
+103 8 0 0 3 2 0 2 0 0
+104 4 1 1 0 0 0 0 0 0
+417 1 0 0 0 0 0 0 0 0
+418 1 0 0 0 0 0 0 0 0
+419 146 0 0 73 7 0 0 0 0
+420 432 1 1 72 0 0 72 0 0
+421 72 0 0 0 0 0 0 0 0
+436 1 0 0 0 0 0 0 0 0
+437 302 2 2 3 0 0 4 0 0
+439 360 0 0 72 6 0 72 0 0
+440 504 0 0 144 0 0 72 0 0
+442 360 1 1 0 0 0 72 0 0
+443 144 0 0 72 0 0 72 18 18
+444 144 0 0 72 0 0 72 0 0
+446 72 0 0 0 0 0 0 0 0
+451 1 0 0 0 0 0 1 1 0
+452 1 0 0 0 0 0 1 0 0
+453 9 0 0 7 1 0 1 0 0
+458 8 1 1 0 0 0 6 0 0
+460 2 0 0 0 0 0 0 0 0
+464 2 1 1 2 0 0 0 0 0
+fn=__kmp_env_blk_var
+517 1180 1 1 12 0 0 0 0 0
+518 2612 1 1 868 0 0 8 0 0
+522 8 0 0 4 0 0 0 0 0
+fn=__kmp_env_get
+110 8 2 1 0 0 0 6 0 0
+112 2 0 0 0 0 0 0 0 0
+115 4 1 1 0 0 0 2 1 0
+116 4 0 0 0 0 0 0 0 0
+117 12 0 0 0 0 0 2 0 0
+118 8 0 0 4 0 0 2 0 0
+119 4 0 0 0 0 0 0 0 0
+122 14 2 1 0 0 0 2 0 0
+163 12 0 0 8 0 0 0 0 0
+fn=__kmp_env_set
+199 3 1 1 0 0 0 1 0 0
+202 1 0 0 0 0 0 1 0 0
+203 2 0 0 0 0 0 0 0 0
+234 3 0 0 2 0 0 0 0 0
+fl=/nfs/site/proj/openmp/promo/20190312/tmp/lin_32e-rtl_int_5_nor_dyn.rel.50.c0.s0.t1..h1.w1-fxe16lin03/../../src/kmp_ftn_entry.h
+fn=omp_get_max_threads@@VERSION
+359 1 1 1 0 0 0 1 0 0
+365 4 0 0 2 1 1 0 0 0
+368 1 0 0 0 0 0 1 0 0
+369 4 0 0 3 0 0 0 0 0
+372 4 0 0 4 2 2 0 0 0
+fn=omp_get_num_procs@@VERSION
+606 1 1 1 0 0 0 1 0 0
+610 4 0 0 2 2 2 0 0 0
+611 2 2 2 0 0 0 1 0 0
+613 4 1 1 4 0 0 0 0 0
+fn=omp_get_num_threads@@VERSION
+355 128 1 1 0 0 0 0 0 0
+fn=omp_get_thread_num@@VERSION
+551 64 1 1 0 0 0 64 0 0
+570 256 1 1 128 0 0 0 0 0
+571 256 0 0 64 64 17 64 0 0
+589 192 1 1 128 0 0 0 0 0
+fn=omp_in_parallel@@VERSION
+680 1 1 1 0 0 0 1 0 0
+685 2 0 0 1 1 1 0 0 0
+692 5 0 0 2 0 0 0 0 0
+fl=/nfs/site/proj/openmp/promo/20190312/tmp/lin_32e-rtl_int_5_nor_dyn.rel.50.c0.s0.t1..h1.w1-fxe16lin03/../../src/kmp_global.cpp
+fn=__sti__$E
+88 2 0 0 1 1 1 1 1 1
+89 2 0 0 1 1 1 1 0 0
+195 5 0 0 1 1 1 4 2 2
+458 2 0 0 1 1 1 1 1 1
+519 2 1 1 1 1 1 1 1 1
+575 4 0 0 1 1 1 3 1 1
+576 4 0 0 1 1 1 3 1 1
+587 4 0 0 1 1 1 3 1 1
+590 4 0 0 1 1 1 3 1 1
+597 4 1 1 1 0 0 3 1 1
+600 4 0 0 1 1 1 3 1 1
+604 4 0 0 1 1 1 3 1 1
+fl=/nfs/site/proj/openmp/promo/20190312/tmp/lin_32e-rtl_int_5_nor_dyn.rel.50.c0.s0.t1..h1.w1-fxe16lin03/../../src/kmp_i18n.cpp
+fn=__kmp_i18n_catgets
+213 5 1 1 0 0 0 5 1 0
+215 2 0 0 0 0 0 0 0 0
+216 1 0 0 0 0 0 0 0 0
+219 4 0 0 1 1 1 0 0 0
+220 7 0 0 2 2 2 0 0 0
+221 3 1 1 1 1 0 0 0 0
+222 1 0 0 0 0 0 1 0 0
+224 3 0 0 1 0 0 0 0 0
+226 2 0 0 1 0 0 0 0 0
+229 2 0 0 2 1 1 0 0 0
+233 2 0 0 0 0 0 0 0 0
+236 6 0 0 6 0 0 0 0 0
+fn=__kmp_i18n_catopen
+88 9 2 2 1 0 0 6 1 0
+89 3 0 0 1 0 0 0 0 0
+91 3 0 0 1 0 0 0 0 0
+96 11 0 0 8 0 0 0 0 0
+117 4 0 0 0 0 0 2 1 0
+123 2 0 0 0 0 0 0 0 0
+124 18 2 2 4 1 1 0 0 0
+127 20 2 2 4 1 1 0 0 0
+129 2 0 0 0 0 0 0 0 0
+132 1 0 0 0 0 0 1 0 0
+133 5 0 0 0 0 0 1 0 0
+134 5 1 1 1 0 0 1 0 0
+135 5 0 0 1 0 0 1 0 0
+136 26 1 1 7 0 0 0 0 0
+139 3 0 0 2 1 0 1 0 0
+143 2 0 0 0 0 0 0 0 0
+144 2 1 1 0 0 0 1 0 0
+fn=__kmp_msg_format
+649 18 2 2 1 0 0 7 2 0
+654 6 1 1 0 0 0 4 1 0
+656 6 1 1 0 0 0 4 1 0
+666 6 0 0 0 0 0 2 0 0
+683 1 0 0 0 0 0 0 0 0
+684 2 0 0 0 0 0 1 0 0
+686 3 1 1 0 0 0 1 0 0
+687 2 0 0 0 0 0 1 0 0
+688 2 1 1 1 0 0 1 0 0
+689 2 0 0 1 0 0 1 0 0
+691 17 0 0 6 0 0 3 1 0
+fn=__sti__$E
+83 4 0 0 1 0 0 3 1 1
+fl=/nfs/site/proj/openmp/promo/20190312/tmp/lin_32e-rtl_int_5_nor_dyn.rel.50.c0.s0.t1..h1.w1-fxe16lin03/../../src/kmp_io.cpp
+fn=__sti__$E
+63 5 0 0 2 1 1 3 1 1
+65 4 0 0 1 1 1 3 1 1
+fl=/nfs/site/proj/openmp/promo/20190312/tmp/lin_32e-rtl_int_5_nor_dyn.rel.50.c0.s0.t1..h1.w1-fxe16lin03/../../src/kmp_itt.cpp
+fn=__kmp_itt_initialize()
+88 4 1 1 1 0 0 1 0 0
+96 4 0 0 2 2 1 1 0 0
+101 6 0 0 0 0 0 4 0 0
+102 9 1 1 6 3 2 1 0 0
+104 4 1 1 2 2 1 0 0 0
+107 6 0 0 2 1 0 0 0 0
+108 4 1 1 2 1 1 0 0 0
+109 2 0 0 0 0 0 1 0 0
+112 6 0 0 3 0 0 0 0 0
+fn=__sti__$E
+77 4 0 0 1 0 0 3 1 1
+fl=/nfs/site/proj/openmp/promo/20190312/tmp/lin_32e-rtl_int_5_nor_dyn.rel.50.c0.s0.t1..h1.w1-fxe16lin03/../../src/kmp_itt.inl
+fn=_INTERNAL_26_______src_z_Linux_util_cpp_20354e55::__kmp_launch_worker(void*)
+990 189 0 0 126 15 1 0 0 0
+992 378 3 1 0 0 0 252 0 0
+993 189 0 0 0 0 0 0 0 0
+996 252 0 0 0 0 0 63 0 0
+999 378 2 1 189 0 0 63 0 0
+1001 126 0 0 0 0 0 63 0 0
+fn=__kmp_register_root
+990 3 1 1 2 1 1 0 0 0
+992 6 0 0 0 0 0 4 0 0
+993 2 0 0 0 0 0 0 0 0
+994 6 1 1 0 0 0 1 0 0
+999 6 1 1 3 0 0 1 0 0
+1001 2 0 0 0 0 0 1 0 0
+fn=__kmpc_critical_with_hint
+744 4 0 0 2 2 2 0 0 0
+873 232 1 1 116 70 29 0 0 0
+877 232 0 0 116 36 14 0 0 0
+fn=__kmpc_end_critical
+881 232 1 1 116 35 15 0 0 0
+fn=__sti__$E
+89 45 3 3 0 0 0 45 15 15
+90 15 0 0 15 0 0 0 0 0
+fl=/nfs/site/proj/openmp/promo/20190312/tmp/lin_32e-rtl_int_5_nor_dyn.rel.50.c0.s0.t1..h1.w1-fxe16lin03/../../src/kmp_lock.cpp
+fn=_INTERNAL_22_______src_kmp_lock_cpp_ddfed41b::__kmp_acquire_queuing_lock(kmp_user_lock*, int)
+2985 58 1 1 0 0 0 0 0 0
+fn=_INTERNAL_22_______src_kmp_lock_cpp_ddfed41b::__kmp_init_queuing_lock(kmp_user_lock*)
+2981 1 1 1 0 0 0 0 0 0
+fn=_INTERNAL_22_______src_kmp_lock_cpp_ddfed41b::__kmp_release_queuing_lock(kmp_user_lock*, int)
+2987 58 1 1 0 0 0 0 0 0
+fn=_INTERNAL_22_______src_kmp_lock_cpp_ddfed41b::__kmp_set_queuing_lock_flags(kmp_user_lock*, unsigned int)
+1655 1 1 1 0 0 0 1 0 0
+2991 1 0 0 1 0 0 0 0 0
+fn=_INTERNAL_22_______src_kmp_lock_cpp_ddfed41b::__kmp_set_queuing_lock_location(kmp_user_lock*, ident const*)
+1646 1 1 1 0 0 0 1 0 0
+2992 1 0 0 1 0 0 0 0 0
+fn=__kmp_acquire_queuing_lock
+1054 58 0 0 0 0 0 0 0 0
+1055 58 0 0 0 0 0 0 0 0
+1060 58 0 0 0 0 0 0 0 0
+1066 232 1 1 116 71 27 0 0 0
+1087 58 0 0 0 0 0 58 37 36
+1094 58 0 0 58 35 13 0 0 0
+1096 232 0 0 0 0 0 0 0 0
+1110 638 1 1 58 0 0 116 0 0
+1153 290 1 1 58 0 0 0 0 0
+1155 116 0 0 0 0 0 0 0 0
+1157 58 1 1 0 0 0 58 0 0
+1168 116 0 0 58 0 0 0 0 0
+1175 232 0 0 116 35 16 0 0 0
+1195 58 0 0 0 0 0 0 0 0
+1234 58 1 1 58 0 0 0 0 0
+1244 580 1 1 0 0 0 348 0 0
+1247 522 1 1 406 0 0 0 0 0
+fn=__kmp_acquire_ticket_lock
+656 18 0 0 0 0 0 0 0 0
+657 27 1 1 12 10 6 1 0 0
+666 24 4 3 0 0 0 12 0 0
+667 30 8 6 18 0 0 0 0 0
+fn=__kmp_allocate_indirect_lock
+3131 10 1 1 0 0 0 6 0 0
+3137 4 0 0 1 1 1 0 0 0
+3146 3 1 1 2 2 2 0 0 0
+3148 3 0 0 1 0 0 0 0 0
+3164 2 0 0 0 0 0 1 0 0
+3165 7 1 1 2 1 1 0 0 0
+3167 5 0 0 1 1 1 2 1 1
+3174 1 0 0 0 0 0 1 0 0
+3177 1 0 0 0 0 0 1 0 0
+3178 1 0 0 0 0 0 0 0 0
+3183 9 0 0 7 0 0 0 0 0
+fn=__kmp_init_dynamic_user_locks
+3324 3 1 1 0 0 0 3 0 0
+3326 3 1 1 2 2 1 0 0 0
+3336 3 1 1 1 1 0 1 1 1
+3337 3 0 0 1 1 0 1 0 0
+3338 3 0 0 1 0 0 1 0 0
+3339 3 1 1 1 1 1 1 0 0
+3340 3 0 0 1 1 1 1 0 0
+3341 3 0 0 1 1 1 1 0 0
+3342 3 1 1 1 0 0 1 0 0
+3343 3 0 0 1 1 0 1 0 0
+3348 4 0 0 2 0 0 0 0 0
+3352 2 1 1 1 1 0 1 0 0
+3353 1 0 0 0 0 0 1 0 0
+3354 2 0 0 0 0 0 1 0 0
+3355 4 0 0 1 0 0 2 0 0
+3357 1 0 0 0 0 0 1 0 0
+3360 12 2 2 2 1 1 4 1 1
+3402 11 1 1 1 1 0 7 2 2
+3406 11 1 1 1 0 0 7 1 1
+3410 11 0 0 1 1 0 7 2 2
+3414 11 1 1 1 1 0 7 0 0
+3417 1 0 0 0 0 0 1 0 0
+3418 4 0 0 4 0 0 0 0 0
+fn=__kmp_init_futex_lock
+504 1 1 1 0 0 0 1 1 0
+505 1 0 0 1 0 0 0 0 0
+fn=__kmp_init_queuing_lock
+1482 15 2 2 0 0 0 15 0 0
+1483 30 2 2 0 0 0 15 14 14
+1484 15 0 0 0 0 0 15 0 0
+1485 15 0 0 0 0 0 15 0 0
+1486 15 0 0 0 0 0 15 0 0
+1487 15 0 0 0 0 0 15 0 0
+1488 15 0 0 0 0 0 15 0 0
+1489 15 0 0 0 0 0 15 0 0
+1492 15 0 0 15 0 0 0 0 0
+fn=__kmp_init_ticket_lock
+765 9 0 0 0 0 0 9 6 6
+769 9 0 0 0 0 0 9 0 0
+770 9 0 0 0 0 0 9 0 0
+771 9 0 0 9 0 0 0 0 0
+fn=__kmp_release_queuing_lock
+1319 232 1 1 0 0 0 174 0 0
+1321 58 0 0 0 0 0 0 0 0
+1322 58 0 0 0 0 0 0 0 0
+1340 232 0 0 116 70 26 0 0 0
+1347 58 0 0 58 0 0 0 0 0
+1358 116 0 0 0 0 0 0 0 0
+1360 406 2 2 58 0 0 0 0 0
+1372 290 0 0 232 0 0 0 0 0
+fn=__kmp_release_ticket_lock
+720 12 2 1 0 0 0 6 0 0
+725 24 5 4 12 10 4 0 0 0
+727 6 0 0 0 0 0 0 0 0
+738 54 6 4 24 12 6 0 0 0
+740 18 0 0 12 0 0 0 0 0
+fn=__kmp_validate_locks
+82 1 1 1 1 0 0 0 0 0
+fl=/nfs/site/proj/openmp/promo/20190312/tmp/lin_32e-rtl_int_5_nor_dyn.rel.50.c0.s0.t1..h1.w1-fxe16lin03/../../src/kmp_lock.h
+fn=__kmp_allocate_indirect_lock
+552 4 1 1 1 1 1 1 0 0
+560 3 0 0 0 0 0 1 0 0
+fn=__kmp_fork_call
+520 4 0 0 1 1 1 2 0 0
+528 3 0 0 1 1 1 1 0 0
+fn=__kmp_i18n_catopen
+520 3 1 1 0 0 0 1 1 0
+528 4 1 1 0 0 0 1 0 0
+fn=__kmp_middle_initialize
+520 4 0 0 1 1 1 1 0 0
+528 3 1 1 0 0 0 1 0 0
+532 8 0 0 4 2 1 4 0 0
+564 4 0 0 2 2 1 2 0 0
+fn=__kmp_parallel_initialize
+520 4 0 0 1 1 1 1 0 0
+528 3 0 0 1 0 0 1 0 0
+fn=__kmp_register_root
+520 3 1 1 1 1 0 1 0 0
+528 3 1 1 1 1 0 1 0 0
+564 2 1 1 0 0 0 1 0 0
+fn=__kmp_task_team_setup
+532 6 0 0 0 0 0 2 0 0
+fl=/nfs/site/proj/openmp/promo/20190312/tmp/lin_32e-rtl_int_5_nor_dyn.rel.50.c0.s0.t1..h1.w1-fxe16lin03/../../src/kmp_runtime.cpp
+fn=_INTERNAL_25_______src_kmp_runtime_cpp_ddfed41b::__kmp_check_mic_type()
+6751 5 1 1 1 0 0 2 0 0
+6752 2 1 1 0 0 0 1 0 0
+6753 1 0 0 1 0 0 0 0 0
+6756 4 0 0 0 0 0 0 0 0
+6758 3 1 1 0 0 0 0 0 0
+6761 2 0 0 1 0 0 1 1 1
+6763 7 1 1 4 0 0 0 0 0
+fn=_INTERNAL_25_______src_kmp_runtime_cpp_ddfed41b::__kmp_initialize_info(kmp_info*, kmp_team*, int, int)
+4281 704 1 1 0 0 0 448 0 0
+4285 128 1 1 128 0 0 0 0 0
+4296 64 0 0 0 0 0 64 64 15
+4298 64 0 0 0 0 0 64 0 0
+4299 64 0 0 0 0 0 64 64 16
+4300 192 0 0 128 0 0 0 0 0
+4303 128 0 0 0 0 0 64 64 13
+4306 64 0 0 0 0 0 64 0 0
+4308 128 0 0 64 0 0 64 0 0
+4310 128 1 1 64 0 0 64 0 0
+4313 128 0 0 64 0 0 64 0 0
+4314 64 1 1 0 0 0 64 0 0
+4315 128 0 0 64 0 0 64 0 0
+4316 64 0 0 0 0 0 64 63 13
+4323 384 0 0 64 0 0 64 0 0
+4332 256 0 0 64 0 0 64 0 0
+4334 64 0 0 0 0 0 64 64 20
+4336 128 1 1 64 0 0 0 0 0
+4347 128 0 0 0 0 0 0 0 0
+4348 189 0 0 126 64 13 0 0 0
+4365 64 0 0 64 0 0 0 0 0
+4369 448 1 1 192 2 0 0 0 0
+4372 128 0 0 0 0 0 0 0 0
+4376 128 0 0 0 0 0 64 64 19
+4377 64 0 0 0 0 0 64 0 0
+4378 192 0 0 64 0 0 0 0 0
+4379 1 0 0 0 0 0 1 0 0
+4380 2 1 1 0 0 0 1 0 0
+4382 3 1 1 2 0 0 0 0 0
+4393 63 0 0 63 0 0 0 0 0
+4396 128 1 1 0 0 0 64 0 0
+4397 64 0 0 0 0 0 64 0 0
+4399 64 0 0 0 0 0 64 0 0
+4400 64 0 0 0 0 0 64 0 0
+4403 64 0 0 0 0 0 64 0 0
+4405 128 0 0 64 0 0 0 0 0
+4420 512 0 0 512 0 0 0 0 0
+fn=_INTERNAL_25_______src_kmp_runtime_cpp_ddfed41b::__kmp_partition_places(kmp_team*, int)
+4801 7 1 1 0 0 0 6 0 0
+4803 2 0 0 2 0 0 0 0 0
+4805 1 0 0 1 0 0 0 0 0
+4806 1 0 0 1 1 0 0 0 0
+4807 1 0 0 1 0 0 0 0 0
+4808 1 0 0 1 0 0 0 0 0
+4809 1 0 0 0 0 0 1 0 0
+4810 1 0 0 0 0 0 1 0 0
+4817 8 2 2 0 0 0 0 0 0
+5142 7 1 1 7 0 0 0 0 0
+fn=__kmp_allocate_team
+3211 3 1 1 2 1 0 0 0 0
+3220 132 4 2 66 1 0 0 0 0
+3222 66 0 0 0 0 0 66 0 0
+3226 132 0 0 0 0 0 66 0 0
+3227 132 0 0 66 0 0 0 0 0
+3256 199 0 0 2 1 0 0 0 0
+3260 4 0 0 2 1 0 0 0 0
+3265 66 0 0 0 0 0 66 0 0
+3266 198 41 2 0 0 0 66 0 0
+3267 330 0 0 0 0 0 132 0 0
+3269 66 30 2 0 0 0 66 1 0
+3270 198 0 0 0 0 0 66 0 0
+3271 66 0 0 0 0 0 66 1 0
+3272 264 0 0 0 0 0 66 0 0
+3273 66 0 0 0 0 0 66 1 0
+3276 812 0 0 0 0 0 0 0 0
+3277 274 0 0 137 0 0 137 7 0
+3278 274 30 2 137 0 0 137 0 0
+4709 135 1 1 67 0 0 1 0 0
+4711 799 6 4 267 33 1 66 0 0
+4713 470 1 1 134 2 0 68 0 0
+4714 67 0 0 67 0 0 0 0 0
+4734 68 0 0 0 0 0 67 2 0
+4736 200 0 0 0 0 0 67 1 0
+4737 67 0 0 0 0 0 67 1 0
+4740 134 0 0 0 0 0 67 0 0
+4744 67 0 0 0 0 0 67 0 0
+4745 67 0 0 0 0 0 67 0 0
+4748 134 1 1 67 2 0 67 0 0
+4751 134 31 3 0 0 0 67 2 1
+4752 67 30 2 0 0 0 67 0 0
+4753 67 0 0 0 0 0 67 0 0
+4756 66 0 0 0 0 0 0 0 0
+4758 67 0 0 0 0 0 67 2 1
+4759 67 0 0 0 0 0 67 2 1
+4768 67 0 0 0 0 0 67 0 0
+4780 3 0 0 2 0 0 0 0 0
+4782 2 0 0 1 0 0 0 0 0
+4783 5 1 1 3 1 1 2 0 0
+4784 3 0 0 1 1 1 2 0 0
+4785 2 0 0 1 0 0 0 0 0
+4790 5 0 0 4 4 4 1 0 0
+5155 938 59 3 67 0 0 469 0 0
+5159 199 30 2 67 29 0 0 0 0
+5160 67 0 0 0 0 0 0 0 0
+5169 134 0 0 0 0 0 0 0 0
+5170 1 0 0 1 0 0 0 0 0
+5171 1 0 0 1 0 0 0 0 0
+5172 2 0 0 1 0 0 0 0 0
+5183 1 0 0 1 0 0 0 0 0
+5184 5 1 1 2 0 0 0 0 0
+5185 4 1 1 1 0 0 0 0 0
+5194 134 29 1 0 0 0 0 0 0
+5197 5 0 0 1 0 0 1 0 0
+5212 3 0 0 1 0 0 0 0 0
+5252 1 0 0 0 0 0 0 0 0
+5326 4 1 1 2 1 1 1 0 0
+5327 9 0 0 6 3 3 4 0 0
+5335 1 0 0 0 0 0 1 1 1
+5338 1 0 0 1 0 0 0 0 0
+5339 4 1 1 0 0 0 0 0 0
+5341 1 0 0 1 1 1 0 0 0
+5342 4 0 0 1 0 0 0 0 0
+5355 2 1 1 0 0 0 0 0 0
+5362 1 1 1 0 0 0 1 0 0
+5365 1 0 0 0 0 0 1 0 0
+5367 2 0 0 1 0 0 0 0 0
+5382 265 2 2 4 1 0 3 0 0
+5383 252 0 0 0 0 0 63 0 0
+5385 126 1 0 63 19 0 63 33 7
+5397 882 0 0 0 0 0 0 0 0
+5398 756 30 1 189 80 3 189 35 0
+5402 378 0 0 189 0 0 189 76 0
+5409 3 0 0 2 0 0 0 0 0
+5411 4 0 0 3 1 1 1 0 0
+5412 5 0 0 5 1 0 1 0 0
+5419 1 1 1 1 1 0 0 0 0
+5422 2 0 0 2 2 0 0 0 0
+5426 332 1 1 65 0 0 0 0 0
+5427 384 0 0 192 71 15 64 0 0
+5430 2 1 1 0 0 0 0 0 0
+5441 3 1 1 3 1 0 0 0 0
+5442 106 1 1 0 0 0 0 0 0
+5443 195 0 0 63 4 0 63 63 0
+5454 2 1 1 1 0 0 0 0 0
+5456 3 0 0 0 0 0 1 0 0
+5460 2 0 0 2 0 0 0 0 0
+5461 2 0 0 1 0 0 0 0 0
+5471 2 1 1 0 0 0 0 0 0
+5491 5 1 1 3 0 0 1 0 0
+5506 3 0 0 1 1 0 1 0 0
+5511 9 1 0 7 0 0 0 0 0
+5516 264 30 2 132 19 0 0 0 0
+5577 198 38 2 0 0 0 66 0 0
+5580 66 0 0 0 0 0 66 0 0
+5591 132 0 0 0 0 0 66 0 0
+5593 66 0 0 0 0 0 66 0 0
+5596 198 5 2 132 3 0 0 0 0
+5602 132 2 2 66 0 0 66 0 0
+5610 660 30 2 0 0 0 594 3 0
+5618 66 0 0 0 0 0 66 0 0
+5621 198 0 0 66 1 0 66 0 0
+5622 66 30 2 0 0 0 66 0 0
+5630 594 0 0 462 1 0 0 0 0
+fn=__kmp_allocate_thread
+499 63 0 0 0 0 0 0 0 0
+3367 189 1 1 189 45 1 0 0 0
+3368 126 0 0 0 0 0 63 0 0
+4285 126 0 0 126 0 0 0 0 0
+4296 63 0 0 0 0 0 63 0 0
+4298 63 0 0 0 0 0 63 0 0
+4299 63 29 1 0 0 0 63 0 0
+4300 189 0 0 126 0 0 0 0 0
+4303 126 0 0 0 0 0 63 0 0
+4306 63 0 0 0 0 0 63 0 0
+4308 126 29 1 63 0 0 63 0 0
+4310 126 0 0 63 35 0 63 0 0
+4313 126 0 0 63 22 0 63 0 0
+4314 63 0 0 0 0 0 63 0 0
+4315 126 0 0 63 24 0 63 0 0
+4316 63 0 0 0 0 0 63 0 0
+4323 378 2 1 63 30 0 63 0 0
+4332 252 0 0 63 11 1 63 0 0
+4334 63 0 0 0 0 0 63 0 0
+4336 126 0 0 63 0 0 0 0 0
+4337 63 0 0 0 0 0 63 0 0
+4338 126 36 1 0 0 0 63 0 0
+4339 189 0 0 126 0 0 0 0 0
+4344 126 30 1 0 0 0 63 0 0
+4347 126 0 0 0 0 0 0 0 0
+4348 189 29 1 126 35 0 0 0 0
+4351 63 0 0 0 0 0 63 0 0
+4353 63 0 0 63 29 0 0 0 0
+4359 126 0 0 63 0 0 63 63 63
+4360 63 0 0 63 0 0 0 0 0
+4365 63 0 0 63 0 0 0 0 0
+4369 441 0 0 189 72 2 0 0 0
+4372 126 29 1 0 0 0 0 0 0
+4376 126 0 0 0 0 0 63 63 63
+4377 63 0 0 0 0 0 63 0 0
+4378 189 0 0 63 0 0 0 0 0
+4379 63 0 0 0 0 0 63 0 0
+4380 252 32 2 63 0 0 126 0 0
+4382 189 0 0 126 0 0 0 0 0
+4396 126 0 0 0 0 0 63 0 0
+4397 63 0 0 0 0 0 63 0 0
+4399 63 0 0 0 0 0 63 0 0
+4400 63 0 0 0 0 0 63 0 0
+4403 63 29 1 0 0 0 63 0 0
+4405 126 0 0 63 0 0 0 0 0
+4407 63 0 0 0 0 0 63 0 0
+4408 126 29 1 0 0 0 63 0 0
+4409 63 0 0 0 0 0 63 0 0
+4410 63 0 0 0 0 0 63 0 0
+4411 882 0 0 252 0 0 0 0 0
+4412 252 0 0 0 0 0 0 0 0
+4413 504 0 0 252 0 0 252 0 0
+4428 630 71 1 0 0 0 378 0 0
+4441 252 0 0 126 19 1 0 0 0
+4505 378 3 1 252 15 1 0 0 0
+4506 252 29 1 189 20 0 0 0 0
+4539 8189 29 1 2142 97 7 62 0 0
+4544 189 0 0 0 0 0 63 0 0
+4546 191 1 1 126 0 0 64 0 0
+4581 189 29 1 126 2 1 0 0 0
+4587 378 2 1 189 0 0 189 0 0
+4589 126 2 1 0 0 0 126 0 0
+4590 693 0 0 63 0 0 189 0 0
+4597 126 0 0 0 0 0 0 0 0
+4598 126 0 0 0 0 0 63 0 0
+4600 126 0 0 63 0 0 63 0 0
+4609 126 0 0 0 0 0 63 0 0
+4614 126 0 0 0 0 0 63 0 0
+4617 126 0 0 0 0 0 63 0 0
+4625 189 0 0 0 0 0 63 0 0
+4626 819 30 1 63 0 0 0 0 0
+4627 567 0 0 0 0 0 189 2 0
+4628 189 0 0 0 0 0 189 0 0
+4629 189 0 0 0 0 0 189 0 0
+4630 189 0 0 0 0 0 189 0 0
+4632 189 0 0 0 0 0 189 0 0
+4636 126 0 0 0 0 0 63 0 0
+4637 63 0 0 0 0 0 63 0 0
+4643 126 0 0 63 26 1 63 0 0
+4648 189 2 1 126 2 0 63 0 0
+4649 126 0 0 0 0 0 63 0 0
+4650 126 0 0 0 0 0 63 0 0
+4652 63 0 0 0 0 0 63 0 0
+4653 63 0 0 0 0 0 63 0 0
+4654 63 0 0 0 0 0 63 0 0
+4657 126 0 0 126 0 0 0 0 0
+4658 126 0 0 126 0 0 0 0 0
+4662 189 1 1 126 27 1 0 0 0
+4677 378 4 1 252 29 1 0 0 0
+4678 189 0 0 126 0 0 0 0 0
+4687 315 1 1 126 4 0 63 0 0
+4694 567 29 0 441 33 0 0 0 0
+fn=__kmp_check_stack_overlap
+298 384 30 2 0 0 0 256 0 0
+300 64 0 0 0 0 0 0 0 0
+301 64 0 0 0 0 0 0 0 0
+305 192 0 0 128 3 2 0 0 0
+327 192 3 2 128 21 1 0 0 0
+360 384 0 0 320 0 0 0 0 0
+fn=__kmp_fork_call
+925 4 1 1 3 1 1 1 0 0
+929 1 0 0 0 0 0 1 0 0
+930 3 0 0 2 0 0 0 0 0
+950 2 1 1 1 1 1 1 0 0
+986 4 0 0 3 1 1 0 0 0
+987 7 0 0 4 1 1 0 0 0
+988 4 1 1 2 1 1 0 0 0
+1015 3 1 1 3 2 2 0 0 0
+1016 1 0 0 1 0 0 0 0 0
+1017 3 0 0 1 0 0 0 0 0
+1018 6 1 1 4 0 0 0 0 0
+1019 2 1 1 0 0 0 0 0 0
+1048 4 2 2 2 1 1 2 0 0
+1049 3 0 0 2 0 0 1 0 0
+1050 4 0 0 1 0 0 1 0 0
+1052 4 0 0 3 0 0 0 0 0
+1053 7 1 1 5 0 0 0 0 0
+1054 2 0 0 1 0 0 0 0 0
+1110 2 0 0 0 0 0 1 1 0
+1111 1 0 0 0 0 0 1 0 0
+1112 2 0 0 1 0 0 1 0 0
+1113 1 0 0 0 0 0 1 0 0
+1114 1 0 0 0 0 0 1 0 0
+1115 2 1 1 1 0 0 1 0 0
+1120 1 0 0 1 0 0 0 0 0
+1121 2 0 0 0 0 0 0 0 0
+1123 2 0 0 1 0 0 0 0 0
+1124 2 0 0 1 0 0 0 0 0
+1135 3 1 1 2 1 1 0 0 0
+1136 4 1 1 1 1 1 0 0 0
+1194 3 0 0 2 2 1 0 0 0
+1213 3 0 0 2 2 0 0 0 0
+1220 1 0 0 0 0 0 0 0 0
+1238 5 0 0 2 1 0 1 0 0
+1239 3 1 1 1 0 0 1 0 0
+1242 3 0 0 1 0 0 1 0 0
+1553 17 2 2 1 0 0 12 0 0
+1576 6 0 0 2 2 2 1 0 0
+1588 4 1 1 2 1 1 0 0 0
+1589 2 1 1 0 0 0 1 0 0
+1590 1 0 0 0 0 0 1 0 0
+1593 4 1 1 4 0 0 0 0 0
+1596 2 0 0 1 0 0 1 1 1
+1600 2 1 1 1 1 1 1 0 0
+1601 2 0 0 1 1 1 1 0 0
+1602 2 0 0 1 0 0 1 0 0
+1603 2 0 0 1 0 0 1 0 0
+1604 1 0 0 1 0 0 0 0 0
+1607 1 0 0 0 0 0 1 0 0
+1611 1 0 0 0 0 0 1 0 0
+1613 3 0 0 2 0 0 0 0 0
+1621 2 1 1 1 0 0 1 0 0
+1623 2 0 0 1 1 1 1 0 0
+1625 2 0 0 1 0 0 1 0 0
+1628 6 1 1 3 0 0 0 0 0
+1629 5 0 0 0 0 0 2 0 0
+1631 3 0 0 2 0 0 1 0 0
+1633 3 0 0 1 0 0 1 0 0
+1638 3 1 1 2 2 2 0 0 0
+1647 3 0 0 1 0 0 0 0 0
+1663 4 1 1 2 2 2 1 0 0
+1666 2 0 0 1 0 0 1 1 1
+1668 3 0 0 1 0 0 0 0 0
+1830 1 0 0 1 0 0 0 0 0
+1831 3 1 1 2 1 0 0 0 0
+1834 3 0 0 1 0 0 0 0 0
+1835 2 1 1 1 0 0 0 0 0
+1837 2 0 0 0 0 0 0 0 0
+1846 2 1 1 0 0 0 0 0 0
+1850 4 0 0 1 0 0 0 0 0
+1853 3 1 1 2 1 1 0 0 0
+1867 1 1 1 1 0 0 0 0 0
+1869 2 0 0 0 0 0 0 0 0
+1877 3 0 0 2 0 0 0 0 0
+1889 1 0 0 0 0 0 1 0 0
+1892 2 0 0 0 0 0 0 0 0
+2150 2 1 1 2 1 1 0 0 0
+2152 3 0 0 1 0 0 0 0 0
+2158 1 0 0 1 0 0 0 0 0
+2159 5 1 1 3 2 2 0 0 0
+2163 1 0 0 0 0 0 0 0 0
+2167 1 0 0 1 0 0 0 0 0
+2168 1 0 0 0 0 0 0 0 0
+2170 3 0 0 1 0 0 0 0 0
+2171 2 0 0 0 0 0 0 0 0
+2190 1 1 1 0 0 0 1 0 0
+2192 4 1 1 0 0 0 0 0 0
+2205 2 2 2 0 0 0 0 0 0
+2214 9 3 3 2 0 0 3 0 0
+2223 1 0 0 0 0 0 1 0 0
+2229 3 0 0 2 1 1 0 0 0
+2230 3 0 0 2 0 0 0 0 0
+2231 3 1 1 2 0 0 0 0 0
+2232 2 0 0 1 0 0 0 0 0
+2233 4 0 0 2 1 1 1 0 0
+2235 3 1 1 2 1 0 0 0 0
+2238 4 0 0 2 1 0 1 0 0
+2240 2 0 0 1 0 0 0 0 0
+2241 2 1 1 1 1 1 0 0 0
+2242 3 0 0 1 0 0 1 0 0
+2243 2 0 0 1 1 1 0 0 0
+2244 2 0 0 1 0 0 0 0 0
+2250 1 1 1 0 0 0 1 0 0
+2252 5 0 0 5 2 1 0 0 0
+2254 2 0 0 1 0 0 0 0 0
+2256 3 1 1 0 0 0 0 0 0
+2257 4 0 0 2 1 1 1 0 0
+2262 3 0 0 2 0 0 0 0 0
+2273 4 0 0 2 0 0 0 0 0
+2332 1 1 1 1 0 0 0 0 0
+2333 2 1 1 1 1 1 0 0 0
+2334 25 0 0 1 0 0 0 0 0
+2337 91 0 0 33 4 4 11 0 0
+2341 33 1 1 11 1 1 11 0 0
+2342 11 0 0 0 0 0 0 0 0
+2352 3 0 0 2 0 0 0 0 0
+2353 4 0 0 2 1 0 0 0 0
+2354 1 0 0 0 0 0 1 0 0
+2357 6 1 1 2 0 0 1 0 0
+2361 1 0 0 0 0 0 1 1 1
+2367 2 1 1 1 0 0 0 0 0
+2368 2 0 0 1 0 0 0 0 0
+2370 3 1 1 2 2 2 0 0 0
+2383 4 0 0 2 1 0 0 0 0
+2399 4 0 0 2 2 2 0 0 0
+2408 2 0 0 1 0 0 0 0 0
+2409 4 0 0 2 1 1 1 0 0
+2415 2 1 1 1 1 0 0 0 0
+2433 2 0 0 2 1 0 1 0 0
+fn=__kmp_get_global_thread_id_reg
+255 399 2 2 0 0 0 399 0 0
+258 532 0 0 266 4 4 0 0 0
+262 532 2 2 266 2 2 0 0 0
+264 532 0 0 133 0 0 133 0 0
+277 266 2 1 0 0 0 0 0 0
+294 665 0 0 532 0 0 0 0 0
+fn=__kmp_get_schedule_global
+3183 12 1 1 6 4 0 0 0 0
+3184 3 1 1 0 0 0 0 0 0
+3185 6 0 0 0 0 0 0 0 0
+3187 9 0 0 6 1 0 0 0 0
+3194 3 0 0 0 0 0 0 0 0
+3196 15 0 0 6 3 1 0 0 0
+3203 9 0 0 3 0 0 0 0 0
+fn=__kmp_init_random
+3699 64 0 0 64 0 0 0 0 0
+3701 64 0 0 0 0 0 64 0 0
+3702 256 31 2 64 30 5 0 0 0
+3703 256 0 0 0 0 0 64 0 0
+3706 64 0 0 64 0 0 0 0 0
+fn=__kmp_internal_fork
+7613 6 1 1 0 0 0 3 0 0
+7614 3 0 0 3 3 0 0 0 0
+7622 2 0 0 0 0 0 0 0 0
+7626 1 0 0 0 0 0 1 1 0
+7631 2 0 0 1 0 0 0 0 0
+7633 34 0 0 9 0 0 0 0 0
+7634 14 0 0 7 0 0 7 7 7
+7635 14 1 1 7 0 0 7 0 0
+7643 2 0 0 1 0 0 0 0 0
+7653 6 1 1 3 0 0 0 0 0
+fn=__kmp_invoke_task_func
+7367 512 1 1 0 0 0 384 0 0
+7369 64 0 0 0 0 0 0 0 0
+7371 64 0 0 64 0 0 0 0 0
+7373 320 0 0 0 0 0 64 0 0
+7375 192 1 1 128 8 0 0 0 0
+7382 128 0 0 0 0 0 0 0 0
+7392 128 0 0 128 0 0 0 0 0
+7393 320 1 1 64 0 0 0 0 0
+7396 128 0 0 0 0 0 0 0 0
+7402 128 0 0 64 0 0 0 0 0
+7421 448 1 1 192 0 0 64 0 0
+fn=__kmp_launch_thread
+1253 315 0 0 189 7 0 0 0 0
+1260 63 0 0 0 0 0 0 0 0
+1262 252 1 1 126 0 0 0 0 0
+1267 189 0 0 63 0 0 0 0 0
+5938 567 122 2 0 0 0 378 0 0
+5939 63 0 0 63 0 0 0 0 0
+5946 189 0 0 126 17 1 0 0 0
+5952 315 0 0 189 61 0 0 0 0
+5968 189 1 1 126 54 0 0 0 0
+5972 252 0 0 126 51 0 0 0 0
+5980 189 0 0 0 0 0 63 0 0
+5983 126 0 0 63 0 0 0 0 0
+5988 378 29 1 0 0 0 126 101 60
+5991 378 1 1 189 0 0 0 0 0
+5993 252 0 0 189 0 0 0 0 0
+6000 126 0 0 126 0 0 0 0 0
+6003 126 1 1 63 0 0 0 0 0
+6008 252 0 0 189 0 0 63 0 0
+fn=__kmp_middle_initialize
+627 2 0 0 2 2 1 0 0 0
+632 2 0 0 0 0 0 0 0 0
+633 1 0 0 0 0 0 1 0 0
+635 1 0 0 0 0 0 1 1 1
+636 7 1 1 0 0 0 1 0 0
+638 1 0 0 0 0 0 1 0 0
+639 2 0 0 0 0 0 1 0 0
+6793 3 2 1 2 0 0 0 0 0
+6823 1 1 1 0 0 0 1 0 0
+6826 1 0 0 0 0 0 1 0 0
+6834 1 1 0 0 0 0 1 0 0
+6837 2 1 0 2 2 2 0 0 0
+6841 2 0 0 0 0 0 1 0 0
+6842 1 0 0 0 0 0 1 0 0
+6856 2 1 1 1 1 1 1 0 0
+6864 2 0 0 1 1 0 1 0 0
+6888 1 0 0 0 0 0 1 0 0
+6891 1 0 0 0 0 0 1 0 0
+6898 2 0 0 1 1 1 1 0 0
+6902 2 1 1 2 0 0 0 0 0
+6906 8 1 1 2 0 0 0 0 0
+6907 3 0 0 1 1 1 2 0 0
+6909 3 0 0 1 1 1 2 1 0
+6910 2 0 0 1 1 1 1 0 0
+6912 2 0 0 0 0 0 0 0 0
+6913 2 1 1 1 1 1 1 0 0
+6918 2 0 0 1 1 1 1 0 0
+6926 2 0 0 1 1 1 1 1 1
+6928 2 0 0 1 1 1 1 0 0
+6942 4 1 1 3 0 0 1 0 0
+6943 4 0 0 3 1 0 1 0 0
+6944 2 0 0 2 0 0 0 0 0
+6945 2 0 0 2 1 1 0 0 0
+6949 1 0 0 0 0 0 1 0 0
+6950 1 0 0 0 0 0 1 1 1
+6963 4 0 0 2 0 0 1 0 0
+6965 1 0 0 0 0 0 1 0 0
+6966 1 0 0 0 0 0 1 0 0
+6968 1 0 0 0 0 0 1 0 0
+6969 1 0 0 0 0 0 1 0 0
+6972 1 0 0 0 0 0 1 0 0
+6973 1 0 0 0 0 0 1 0 0
+6978 3 1 1 1 0 0 1 0 0
+6979 2 0 0 1 1 1 1 0 0
+6994 3 0 0 1 1 1 1 1 1
+6998 2 0 0 1 0 0 1 0 0
+7000 1 0 0 0 0 0 1 0 0
+7001 1 0 0 0 0 0 1 0 0
+7003 2 0 0 0 0 0 1 0 0
+7021 2 0 0 1 1 0 1 0 0
+7022 3 0 0 2 1 0 1 0 0
+7024 9 0 0 7 1 0 2 0 0
+7033 3 0 0 1 1 0 1 0 0
+7034 2 0 0 1 0 0 1 1 0
+7035 2 0 0 1 1 0 1 0 0
+7044 9 1 1 2 1 0 3 1 1
+7045 4 0 0 1 1 0 2 0 0
+7046 1 1 1 1 0 0 0 0 0
+7052 2 0 0 1 1 0 1 1 0
+7053 2 0 0 1 1 0 1 1 1
+7056 3 1 1 2 1 0 0 0 0
+7061 2 0 0 0 0 0 1 0 0
+7064 2 0 0 0 0 0 0 0 0
+7068 1 1 1 0 0 0 1 0 0
+7072 1 0 0 0 0 0 1 0 0
+7093 2 0 0 0 0 0 1 0 0
+7101 2 0 0 2 1 0 0 0 0
+7103 1 0 0 0 0 0 1 0 0
+7105 3 0 0 2 1 1 0 0 0
+7109 5 1 1 4 2 0 0 0 0
+7113 3 0 0 2 1 0 0 0 0
+7120 2 0 0 0 0 0 1 0 0
+7145 4 1 1 2 0 0 0 0 0
+7153 3 1 0 2 0 0 1 0 0
+7158 1 0 0 0 0 0 1 0 0
+7162 4103 2 2 1028 0 0 0 0 0
+7163 3081 0 0 2051 129 0 3 1 0
+7164 3 0 0 0 0 0 1 0 0
+7169 2 0 0 1 0 0 0 0 0
+7170 3 0 0 2 1 0 0 0 0
+7176 1 0 0 0 0 0 0 0 0
+7177 3 1 1 2 1 0 0 0 0
+7183 1 0 0 1 0 0 0 0 0
+7202 8 1 1 2 1 0 0 0 0
+7203 1 0 0 0 0 0 1 0 0
+7210 2 0 0 1 0 0 0 0 0
+7215 3076 0 0 2 0 0 0 0 0
+7216 1024 0 0 1024 0 0 0 0 0
+7217 2048 0 0 0 0 0 0 0 0
+7219 3 1 1 2 2 0 0 0 0
+7222 3 0 0 2 0 0 1 0 0
+7232 5 0 0 3 2 0 0 0 0
+7234 4 0 0 3 2 0 0 0 0
+7241 1 0 0 0 0 0 1 1 0
+7246 7 1 1 0 0 0 6 0 0
+7247 4 1 1 2 0 0 0 0 0
+7251 3 0 0 1 0 0 0 0 0
+7257 8 0 0 7 1 1 0 0 0
+fn=__kmp_parallel_initialize
+7259 7 1 1 0 0 0 6 0 0
+7260 2 0 0 0 0 0 1 0 0
+7263 4 0 0 2 0 0 0 0 0
+7266 3 1 1 1 0 0 0 0 0
+7272 4 0 0 2 2 2 0 0 0
+7282 4 0 0 2 0 0 0 0 0
+7296 3 0 0 1 1 1 1 1 1
+7302 2 0 0 0 0 0 1 0 0
+7306 1 0 0 0 0 0 1 0 0
+7310 3 1 1 2 0 0 0 0 0
+7311 1 0 0 0 0 0 1 0 0
+7319 3 0 0 2 1 1 0 0 0
+7324 2 0 0 1 0 0 1 0 0
+7330 8 1 1 7 0 0 0 0 0
+fn=__kmp_push_num_threads
+7534 1 0 0 0 0 0 0 0 0
+7535 3 1 1 3 0 0 0 0 0
+7537 2 0 0 0 0 0 0 0 0
+7538 1 0 0 0 0 0 1 1 1
+7539 1 0 0 1 0 0 0 0 0
+fn=__kmp_register_library_startup()
+6628 6 2 1 0 0 0 2 0 0
+6631 6 1 1 0 0 0 5 0 0
+6634 1 0 0 0 0 0 0 0 0
+6640 1 0 0 0 0 0 1 0 0
+6642 2 0 0 0 0 0 1 0 0
+6643 4 1 1 1 0 0 1 1 0
+6644 1 0 0 0 0 0 1 0 0
+6645 5 0 0 0 0 0 1 0 0
+6651 3 0 0 0 0 0 0 0 0
+6656 4 0 0 1 0 0 1 0 0
+6658 3 0 0 0 0 0 1 0 0
+6659 193 1 1 63 0 0 0 0 0
+6661 3 0 0 1 1 1 0 0 0
+6719 2 1 1 1 0 0 1 0 0
+6721 2 0 0 1 0 0 1 0 0
+6723 7 1 1 6 2 0 0 0 0
+fn=__kmp_register_root
+3327 4 1 1 0 0 0 4 0 0
+3331 8 0 0 0 0 0 6 0 0
+3334 6 0 0 4 3 1 2 0 0
+3337 6 1 1 4 4 0 2 0 0
+3339 6 0 0 4 0 0 2 0 0
+3341 8 0 0 6 2 0 2 0 0
+3346 8 2 2 6 0 0 2 0 0
+3349 8 0 0 6 1 0 2 0 0
+3350 8 1 1 6 2 0 2 0 0
+3352 8 0 0 6 0 0 2 0 0
+3354 10 2 2 8 5 0 2 0 0
+3355 8 0 0 6 3 0 2 0 0
+3379 2 1 1 0 0 0 2 0 0
+3380 16 1 1 4 0 0 3 0 0
+3382 3 0 0 1 0 0 0 0 0
+3386 2 0 0 0 0 0 1 0 0
+3387 1 0 0 0 0 0 1 0 0
+3389 2 0 0 1 0 0 1 0 0
+3391 2 0 0 1 0 0 1 0 0
+3403 1 0 0 0 0 0 1 0 0
+3404 13 1 1 4 0 0 3 0 0
+3417 1 1 1 0 0 0 1 0 0
+3422 1 0 0 0 0 0 1 0 0
+3423 1 0 0 0 0 0 1 0 0
+3426 2 0 0 1 0 0 1 0 0
+3427 2 0 0 0 0 0 1 0 0
+3428 1 0 0 0 0 0 1 0 0
+3430 2 0 0 1 0 0 1 0 0
+3440 1 0 0 0 0 0 1 0 0
+3441 17 1 1 7 0 0 4 0 0
+3453 1 0 0 0 0 0 1 1 0
+3454 1 0 0 0 0 0 1 1 0
+3457 1 0 0 0 0 0 1 0 0
+3460 1 1 1 1 0 0 0 0 0
+3461 4 0 0 0 0 0 0 0 0
+3462 5 0 0 1 0 0 1 0 0
+3464 1 0 0 0 0 0 1 0 0
+3466 2 1 1 1 1 0 1 0 0
+3467 1 0 0 0 0 0 1 0 0
+3833 11 1 1 1 0 0 7 0 0
+3856 3 0 0 2 0 0 0 0 0
+3857 5 1 1 2 0 0 0 0 0
+3862 4 0 0 2 0 0 0 0 0
+3876 8 1 1 2 0 0 0 0 0
+3881 3 1 1 1 0 0 0 0 0
+3884 1 1 1 1 0 0 0 0 0
+3885 2 0 0 2 0 0 0 0 0
+3889 3 0 0 2 1 0 0 0 0
+3904 6 1 1 4 1 0 0 0 0
+3912 4 0 0 2 0 0 0 0 0
+3913 6 2 2 1 0 0 2 0 0
+3927 3 0 0 1 0 0 0 0 0
+3930 3 1 1 0 0 0 1 0 0
+3931 3 0 0 2 0 0 0 0 0
+3934 1 1 1 0 0 0 1 0 0
+3936 3 1 1 1 0 0 2 0 0
+3938 1 0 0 0 0 0 1 0 0
+3939 3 0 0 2 1 0 0 0 0
+3943 2 0 0 0 0 0 1 0 0
+3948 2 0 0 0 0 0 1 0 0
+3950 3 0 0 0 0 0 1 0 0
+3954 2 0 0 1 0 0 0 0 0
+3955 16 1 1 4 0 0 3 0 0
+3957 12 1 1 1 0 0 5 0 0
+3964 2 0 0 0 0 0 0 0 0
+3969 4 0 0 2 2 0 2 1 0
+3971 3 0 0 2 1 0 1 1 0
+3972 3 0 0 2 0 0 1 0 0
+3973 3 0 0 2 0 0 1 0 0
+3975 3 2 2 1 0 0 1 0 0
+3976 1 0 0 0 0 0 1 0 0
+3979 1 0 0 1 0 0 0 0 0
+3980 2 0 0 1 1 0 1 0 0
+3983 2 0 0 0 0 0 1 0 0
+3990 3 0 0 0 0 0 2 1 0
+3992 5 0 0 2 0 0 1 0 0
+4002 15 1 1 0 0 0 0 0 0
+4003 3 0 0 0 0 0 3 0 0
+4005 3 0 0 0 0 0 3 0 0
+4013 2 0 0 1 1 1 1 0 0
+4017 4 1 1 2 1 0 0 0 0
+4021 3 0 0 2 1 0 1 0 0
+4022 1 0 0 0 0 0 1 0 0
+4023 1 0 0 0 0 0 1 0 0
+4025 2 0 0 0 0 0 1 0 0
+4026 1 0 0 0 0 0 1 0 0
+4027 3 0 0 2 0 0 1 0 0
+4028 1 0 0 0 0 0 1 0 0
+4032 1 0 0 0 0 0 1 0 0
+4033 1 0 0 0 0 0 1 0 0
+4035 2 1 1 2 2 0 0 0 0
+4038 2 0 0 0 0 0 0 0 0
+4069 13 0 0 9 2 0 0 0 0
+4285 2 0 0 2 0 0 0 0 0
+4296 1 0 0 0 0 0 1 0 0
+4298 1 0 0 0 0 0 1 0 0
+4299 1 0 0 0 0 0 1 0 0
+4300 3 0 0 2 0 0 0 0 0
+4303 2 0 0 0 0 0 1 0 0
+4306 1 0 0 0 0 0 1 0 0
+4308 2 1 1 1 0 0 1 0 0
+4310 2 0 0 1 0 0 1 0 0
+4313 2 1 1 1 1 0 1 0 0
+4314 1 0 0 0 0 0 1 0 0
+4315 2 0 0 1 1 0 1 0 0
+4316 1 0 0 0 0 0 1 0 0
+4323 6 0 0 1 0 0 1 0 0
+4332 2 0 0 1 1 0 1 0 0
+4334 1 0 0 0 0 0 1 0 0
+4336 2 1 1 1 0 0 0 0 0
+4337 1 0 0 0 0 0 1 0 0
+4338 2 1 1 0 0 0 1 0 0
+4339 3 0 0 2 0 0 0 0 0
+4344 2 0 0 0 0 0 1 0 0
+4347 2 0 0 0 0 0 0 0 0
+4365 1 0 0 1 0 0 0 0 0
+4369 7 1 1 3 1 0 0 0 0
+4372 2 0 0 0 0 0 0 0 0
+4376 2 0 0 0 0 0 1 1 0
+4377 1 0 0 0 0 0 1 0 0
+4378 3 0 0 1 0 0 0 0 0
+4379 1 1 1 0 0 0 1 0 0
+4380 6 1 1 2 0 0 3 0 0
+4382 3 0 0 2 0 0 0 0 0
+4396 2 1 1 0 0 0 1 0 0
+4397 1 0 0 0 0 0 1 0 0
+4399 1 0 0 0 0 0 1 0 0
+4400 1 0 0 0 0 0 1 0 0
+4403 1 0 0 0 0 0 1 0 0
+4405 2 0 0 1 0 0 0 0 0
+4407 1 0 0 0 0 0 1 0 0
+4408 2 1 1 0 0 0 1 0 0
+4409 1 0 0 0 0 0 1 0 0
+4410 1 0 0 0 0 0 1 0 0
+4411 14 0 0 4 0 0 0 0 0
+4412 4 0 0 0 0 0 0 0 0
+4413 8 0 0 4 0 0 4 0 0
+fn=__kmp_resume_if_soft_paused
+8624 1 1 1 0 0 0 0 0 0
+8625 3 0 0 2 0 0 0 0 0
+8650 2 1 1 1 0 0 0 0 0
+fn=__kmp_run_before_invoked_task
+7341 128 1 1 0 0 0 64 64 0
+7345 64 0 0 64 0 0 0 0 0
+7351 64 0 0 0 0 0 64 64 0
+7352 64 0 0 0 0 0 64 0 0
+7353 192 0 0 128 4 0 0 0 0
+7357 64 0 0 64 0 0 0 0 0
+fl=/nfs/site/proj/openmp/promo/20190312/tmp/lin_32e-rtl_int_5_nor_dyn.rel.50.c0.s0.t1..h1.w1-fxe16lin03/../../src/kmp_sched.cpp
+fn=__sti__$E
+68 1 0 0 0 0 0 1 1 1
+fl=/nfs/site/proj/openmp/promo/20190312/tmp/lin_32e-rtl_int_5_nor_dyn.rel.50.c0.s0.t1..h1.w1-fxe16lin03/../../src/kmp_settings.cpp
+fn=_INTERNAL_26_______src_kmp_settings_cpp_20354e55::__kmp_stg_cmp(void const*, void const*)
+5214 402 1 1 0 0 0 0 0 0
+5220 11475 1 1 3696 43 42 0 0 0
+5221 35 0 0 15 0 0 0 0 0
+5222 20 0 0 5 0 0 0 0 0
+5225 11353 1 1 3661 35 34 0 0 0
+5226 399 0 0 397 0 0 0 0 0
+5228 12206 1 1 3960 3 2 0 0 0
+fn=_INTERNAL_26_______src_kmp_settings_cpp_20354e55::__kmp_stg_init()
+5204 2353 5 5 0 0 0 12 0 0
+5205 14136 20 20 4695 0 0 0 0 0
+5231 1 1 1 0 0 0 0 0 0
+5235 2 0 0 1 1 1 0 0 0
+5238 5 1 1 0 0 0 1 0 0
+5265 3 1 1 0 0 0 1 1 1
+5267 2 0 0 0 0 0 0 0 0
+5268 3 0 0 0 0 0 1 0 0
+5271 1 0 0 0 0 0 1 0 0
+5272 1 0 0 0 0 0 1 0 0
+5274 2 0 0 0 0 0 1 0 0
+5276 1 0 0 0 0 0 0 0 0
+5277 2 1 1 0 0 0 1 0 0
+5280 2 0 0 0 0 0 1 0 0
+5295 3 1 1 0 0 0 1 0 0
+5296 2 0 0 0 0 0 0 0 0
+5297 3 0 0 0 0 0 1 0 0
+5299 1 0 0 0 0 0 1 0 0
+5301 2 0 0 0 0 0 1 0 0
+5302 1 0 0 0 0 0 0 0 0
+5303 2 1 1 0 0 0 1 0 0
+5317 2 1 1 0 0 0 1 1 1
+5318 2 0 0 0 0 0 1 0 0
+5319 2 0 0 0 0 0 1 0 0
+5321 1 0 0 0 0 0 1 0 0
+5322 1 0 0 0 0 0 1 0 0
+5335 2 0 0 0 0 0 1 0 0
+5336 2 0 0 0 0 0 1 0 0
+5337 2 0 0 0 0 0 1 0 0
+5339 1 0 0 0 0 0 1 0 0
+5340 1 0 0 0 0 0 1 0 0
+5363 2 0 0 0 0 0 1 0 0
+5366 2 0 0 0 0 0 1 0 0
+5367 1 0 0 0 0 0 1 0 0
+5370 2 1 1 0 0 0 1 1 1
+5371 1 0 0 0 0 0 1 0 0
+5372 2 0 0 0 0 0 1 0 0
+5380 2 0 0 0 0 0 1 0 0
+5382 2 0 0 0 0 0 1 0 0
+5384 2 0 0 0 0 0 1 0 0
+5385 1 1 1 0 0 0 1 0 0
+5386 2 0 0 0 0 0 1 0 0
+5407 3 1 1 0 0 0 1 0 0
+5408 2 0 0 0 0 0 0 0 0
+5409 3 0 0 0 0 0 1 0 0
+5411 1 0 0 0 0 0 1 0 0
+5413 2 0 0 0 0 0 1 0 0
+5414 1 0 0 0 0 0 0 0 0
+5415 2 0 0 0 0 0 1 0 0
+5419 2 0 0 0 0 0 1 0 0
+5424 166 0 0 0 0 0 0 0 0
+5425 85 0 0 0 0 0 82 1 1
+5428 2 0 0 1 0 0 0 0 0
+fn=__kmp_check_stksize
+320 5 1 1 1 0 0 0 0 0
+326 1 0 0 1 0 0 0 0 0
+fn=__kmp_default_tp_capacity(int, int, int)
+540 2 1 1 0 0 0 0 0 0
+541 2 0 0 1 0 0 0 0 0
+544 1 0 0 0 0 0 0 0 0
+546 3 0 0 2 0 0 0 0 0
+549 2 0 0 2 0 0 0 0 0
+552 7 0 0 0 0 0 0 0 0
+fn=__kmp_env_initialize(char const*)
+5204 47664 0 0 0 0 0 0 0 0
+5205 106752 2 2 35616 84 1 0 0 0
+5434 144 1 1 72 3 0 0 0 0
+5438 146 1 1 0 0 0 0 0 0
+5527 7 1 1 0 0 0 5 0 0
+5532 1 0 0 0 0 0 1 0 0
+5535 2 0 0 0 0 0 0 0 0
+5537 3 0 0 1 1 1 1 0 0
+5538 3 1 1 2 0 0 1 0 0
+5540 3 0 0 0 0 0 1 0 0
+5543 364 0 0 1 0 0 0 0 0
+5544 361 1 1 145 26 0 0 0 0
+5547 144 0 0 72 0 0 0 0 0
+5560 4 0 0 0 0 0 2 1 0
+5564 4 1 1 0 0 0 2 0 0
+5569 2 0 0 0 0 0 0 0 0
+5571 4 1 1 0 0 0 1 0 0
+5581 1 0 0 0 0 0 1 0 0
+5582 4 1 1 0 0 0 1 0 0
+5583 2 0 0 0 0 0 0 0 0
+5614 3 1 1 2 1 0 0 0 0
+5615 2 0 0 1 1 0 0 0 0
+5633 3 1 1 2 2 2 0 0 0
+5634 1 0 0 0 0 0 1 0 0
+5635 4 1 1 2 2 0 1 0 0
+5636 2 0 0 0 0 0 0 0 0
+5639 2 0 0 0 0 0 1 0 0
+5640 1 0 0 0 0 0 1 0 0
+5642 2 0 0 0 0 0 1 1 1
+5652 8 1 1 0 0 0 1 0 0
+5655 4 0 0 2 1 1 0 0 0
+5656 2 0 0 0 0 0 1 0 0
+5657 4 1 1 2 0 0 1 0 0
+5659 4 1 1 1 0 0 1 0 0
+5660 2 0 0 0 0 0 1 0 0
+5663 369 0 0 3 0 0 2 0 0
+5664 216 0 0 216 0 0 0 0 0
+5668 4 0 0 2 2 0 0 0 0
+5669 3 1 1 2 2 2 0 0 0
+5670 1 0 0 0 0 0 1 0 0
+5685 1 0 0 0 0 0 1 0 0
+5693 4 0 0 2 2 0 0 0 0
+5697 7 1 1 4 3 1 0 0 0
+5698 3 0 0 2 1 1 0 0 0
+5713 1 1 1 0 0 0 1 0 0
+5718 2 0 0 1 0 0 0 0 0
+5724 4 0 0 2 1 0 0 0 0
+5726 3 0 0 2 1 0 0 0 0
+5727 5 1 1 4 1 1 1 0 0
+5728 3 0 0 1 0 0 0 0 0
+5742 3 1 1 1 0 0 0 0 0
+5744 3 0 0 2 1 0 0 0 0
+5864 2 0 0 1 0 0 0 0 0
+5871 1 0 0 0 0 0 1 0 0
+5874 3 0 0 1 0 0 0 0 0
+5875 2 0 0 0 0 0 0 0 0
+5880 2 1 1 0 0 0 0 0 0
+5882 2 0 0 2 2 0 0 0 0
+5883 4 0 0 0 0 0 1 0 0
+5890 2 0 0 1 0 0 0 0 0
+5895 2 0 0 0 0 0 1 0 0
+5898 2 1 1 1 0 0 0 0 0
+5899 3 0 0 2 1 1 0 0 0
+5901 3 0 0 2 0 0 0 0 0
+5906 2 0 0 0 0 0 1 0 0
+5909 2 0 0 1 0 0 0 0 0
+5910 2 0 0 0 0 0 1 0 0
+5932 3 0 0 2 1 0 0 0 0
+5938 2 1 1 0 0 0 0 0 0
+5942 2 1 1 0 0 0 1 0 0
+5946 7 0 0 6 1 0 0 0 0
+fn=__kmp_initial_threads_capacity(int)
+525 2 0 0 0 0 0 0 0 0
+527 6 0 0 4 0 0 0 0 0
+530 4 0 0 4 1 0 0 0 0
+533 16 2 2 2 0 0 0 0 0
+fl=/nfs/site/proj/openmp/promo/20190312/tmp/lin_32e-rtl_int_5_nor_dyn.rel.50.c0.s0.t1..h1.w1-fxe16lin03/../../src/kmp_str.cpp
+fn=__kmp_str_buf_detach
+136 3 1 1 0 0 0 1 0 0
+140 3 0 0 1 0 0 0 0 0
+141 3 0 0 2 0 0 2 0 0
+142 2 0 0 0 0 0 0 0 0
+145 8 1 1 2 0 0 1 0 0
+147 3 0 0 2 0 0 0 0 0
+fn=__kmp_str_buf_free
+149 130 31 2 0 0 0 65 0 0
+151 195 0 0 65 0 0 0 0 0
+154 130 0 0 0 0 0 65 0 0
+155 65 31 2 0 0 0 65 0 0
+156 65 0 0 0 0 0 65 0 0
+158 130 0 0 130 0 0 0 0 0
+fn=__kmp_str_buf_print
+245 715 62 4 0 0 0 260 62 62
+248 390 3 2 0 0 0 260 0 0
+249 130 0 0 0 0 0 65 62 62
+250 65 0 0 0 0 0 0 0 0
+251 130 0 0 65 0 0 0 0 0
+fn=__kmp_str_buf_vprint
+187 528 4 2 0 0 0 264 0 0
+192 132 0 0 132 0 0 0 0 0
+208 396 0 0 198 0 0 198 0 0
+214 66 0 0 0 0 0 0 0 0
+219 264 0 0 0 0 0 0 0 0
+220 66 0 0 66 0 0 0 0 0
+230 66 0 0 0 0 0 0 0 0
+241 396 6 2 330 0 0 0 0 0
+fn=__kmp_str_format
+428 30 4 2 0 0 0 14 0 0
+430 2 1 1 0 0 0 0 0 0
+435 8 1 0 4 4 2 2 0 0
+436 4 0 0 0 0 0 0 0 0
+442 12 1 1 0 0 0 8 1 0
+444 2 0 0 0 0 0 0 0 0
+447 10 0 0 0 0 0 0 0 0
+458 4 1 1 2 0 0 0 0 0
+468 16 0 0 12 2 0 0 0 0
+fn=__kmp_str_free
+471 4 1 1 0 0 0 2 0 0
+473 6 0 0 6 0 0 2 0 0
+474 2 0 0 0 0 0 2 0 0
+475 4 0 0 4 0 0 0 0 0
+fn=__kmp_str_split
+527 225 1 1 0 0 0 75 0 0
+529 75 0 0 0 0 0 0 0 0
+530 150 0 0 0 0 0 0 0 0
+532 150 1 0 0 0 0 0 0 0
+533 74 0 0 0 0 0 74 0 0
+534 74 0 0 0 0 0 0 0 0
+537 150 0 0 0 0 0 0 0 0
+538 75 0 0 0 0 0 75 0 0
+540 150 0 0 0 0 0 0 0 0
+541 75 0 0 0 0 0 75 0 0
+543 150 0 0 150 0 0 0 0 0
+fl=/nfs/site/proj/openmp/promo/20190312/tmp/lin_32e-rtl_int_5_nor_dyn.rel.50.c0.s0.t1..h1.w1-fxe16lin03/../../src/kmp_tasking.cpp
+fn=__kmp_init_implicit_task
+1073 2322 3 2 0 0 0 1290 0 0
+1074 1290 0 0 258 0 0 0 0 0
+1081 1548 31 2 516 4 0 258 192 73
+1082 258 0 0 0 0 0 258 0 0
+1085 258 0 0 0 0 0 258 0 0
+1086 516 0 0 0 0 0 258 0 0
+1087 516 0 0 0 0 0 258 0 0
+1088 258 0 0 0 0 0 258 0 0
+1090 516 0 0 258 0 0 0 0 0
+1092 516 0 0 0 0 0 258 0 0
+1096 516 0 0 0 0 0 0 0 0
+1097 774 31 2 258 4 0 0 0 0
+1100 258 0 0 0 0 0 0 0 0
+1102 2322 0 0 516 63 2 258 0 0
+1104 258 33 2 0 0 0 258 191 75
+1105 258 0 0 0 0 0 258 0 0
+1106 258 0 0 0 0 0 258 192 78
+1108 516 0 0 0 0 0 0 0 0
+1112 128 0 0 0 0 0 128 0 0
+1113 128 0 0 0 0 0 128 0 0
+1114 512 0 0 0 0 0 128 0 0
+1121 774 34 2 516 73 0 0 0 0
+1127 1806 0 0 1548 0 0 0 0 0
+fn=__kmp_push_current_task_to_thread
+480 128 31 2 0 0 0 0 0 0
+491 256 0 0 0 0 0 0 0 0
+492 134 1 1 130 0 0 0 0 0
+493 2 0 0 0 0 0 2 0 0
+495 4 0 0 2 0 0 2 0 0
+498 504 2 1 0 0 0 126 0 0
+499 126 0 0 126 36 1 0 0 0
+500 126 0 0 0 0 0 126 0 0
+508 126 0 0 126 0 0 0 0 0
+fn=__kmp_task_team_setup
+3442 2 1 1 0 0 0 0 0 0
+3448 4 0 0 2 1 1 0 0 0
+3465 6 0 0 0 0 0 2 0 0
+3484 4 0 0 0 0 0 2 0 0
+3485 2 0 0 0 0 0 2 0 0
+3486 4 1 1 2 0 0 2 0 0
+3489 2 0 0 0 0 0 2 0 0
+3604 7 1 1 0 0 0 5 0 0
+3611 3 1 1 2 0 0 0 0 0
+3612 4 2 2 1 0 0 0 0 0
+3613 3 0 0 1 0 0 1 0 0
+3630 3 0 0 1 0 0 0 0 0
+3631 1 0 0 0 0 0 0 0 0
+3632 3 0 0 1 0 0 0 0 0
+3633 7 0 0 6 0 0 1 0 0
+fn=__kmp_task_team_sync
+3671 256 2 2 64 15 0 64 0 0
+3674 192 0 0 64 0 0 64 0 0
+3681 64 0 0 64 0 0 0 0 0
+fn=__sti__$E
+3260 4 0 0 1 1 1 3 1 1
+fl=/nfs/site/proj/openmp/promo/20190312/tmp/lin_32e-rtl_int_5_nor_dyn.rel.50.c0.s0.t1..h1.w1-fxe16lin03/../../src/kmp_threadprivate.cpp
+fn=__kmp_common_initialize
+156 1 1 1 0 0 0 1 0 0
+157 4 0 0 2 1 0 0 0 0
+163 2 0 0 1 1 1 1 1 0
+179 4 1 0 1 1 1 1 0 0
+181 1 0 0 0 0 0 1 0 0
+183 2 0 0 2 0 0 0 0 0
+fl=/nfs/site/proj/openmp/promo/20190312/tmp/lin_32e-rtl_int_5_nor_dyn.rel.50.c0.s0.t1..h1.w1-fxe16lin03/../../src/kmp_utility.cpp
+fn=__kmp_get_logical_id(int, int)
+99 2 0 0 0 0 0 0 0 0
+102 1 0 0 0 0 0 0 0 0
+104 16 0 0 0 0 0 0 0 0
+105 10 1 1 0 0 0 0 0 0
+106 3 0 0 0 0 0 0 0 0
+107 1 0 0 0 0 0 0 0 0
+113 4 0 0 0 0 0 0 0 0
+116 3 0 0 1 0 0 0 0 0
+fn=__kmp_get_physical_id(int, int)
+64 2 0 0 0 0 0 0 0 0
+65 1 0 0 0 0 0 0 0 0
+66 1 0 0 0 0 0 0 0 0
+68 1 0 0 0 0 0 0 0 0
+69 10 1 1 0 0 0 0 0 0
+70 4 0 0 0 0 0 0 0 0
+71 4 0 0 0 0 0 0 0 0
+75 56 0 0 0 0 0 0 0 0
+76 27 0 0 0 0 0 0 0 0
+77 27 0 0 0 0 0 0 0 0
+82 3 0 0 0 0 0 0 0 0
+84 3 0 0 1 0 0 0 0 0
+fn=__kmp_query_cpuid
+124 1 0 0 0 0 0 1 0 0
+125 1 0 0 0 0 0 0 0 0
+127 2 0 0 0 0 0 0 0 0
+130 4 0 0 0 0 0 1 0 0
+131 3 0 0 0 0 0 0 0 0
+132 3 1 1 1 1 1 0 0 0
+133 10 1 1 3 1 1 0 0 0
+135 30 0 0 8 0 0 0 0 0
+136 3 1 1 1 0 0 0 0 0
+142 13 1 1 1 0 0 0 0 0
+148 9 2 2 1 0 0 5 0 0
+156 2 0 0 0 0 0 1 0 0
+158 1 0 0 0 0 0 1 0 0
+160 4 0 0 0 0 0 1 0 0
+166 1 0 0 1 0 0 0 0 0
+168 1 0 0 0 0 0 1 0 0
+170 2 0 0 0 0 0 0 0 0
+174 4 0 0 0 0 0 1 0 0
+182 2 0 0 1 0 0 1 0 0
+183 8 0 0 0 0 0 1 0 0
+184 1 0 0 0 0 0 1 0 0
+185 8 1 1 0 0 0 0 0 0
+186 2 0 0 0 0 0 1 0 0
+194 2 0 0 1 0 0 0 0 0
+195 1 0 0 0 0 0 0 0 0
+198 5 1 1 1 0 0 1 0 0
+254 2 0 0 0 0 0 0 0 0
+257 1 0 0 0 0 0 1 0 0
+260 2 0 0 0 0 0 0 0 0
+265 1 0 0 0 0 0 1 0 0
+269 4 0 0 0 0 0 2 0 0
+270 4 1 1 0 0 0 2 0 0
+287 1 0 0 0 0 0 1 0 0
+288 2 0 0 0 0 0 0 0 0
+290 4 0 0 0 0 0 1 0 0
+291 4 0 0 1 0 0 1 0 0
+299 1 0 0 0 0 0 0 0 0
+302 14 1 1 0 0 0 0 0 0
+303 12 0 0 0 0 0 3 0 0
+305 1 0 0 0 0 0 1 0 0
+309 1 0 0 0 0 0 1 0 0
+314 10 0 0 7 0 0 0 0 0
+fl=/nfs/site/proj/openmp/promo/20190312/tmp/lin_32e-rtl_int_5_nor_dyn.rel.50.c0.s0.t1..h1.w1-fxe16lin03/../../src/kmp_wait_release.h
+fn=_INTERNAL_25_______src_kmp_barrier_cpp_ddfed41b::__kmp_hyper_barrier_release(barrier_type, kmp_info*, int, int, int, void*)
+590 252 1 1 126 3 0 0 0 0
+597 189 1 1 126 1 0 0 0 0
+601 819 0 0 126 16 0 126 0 0
+604 126 0 0 0 0 0 0 0 0
+639 126 0 0 126 0 0 0 0 0
+664 63 0 0 0 0 0 63 0 0
+675 63 0 0 63 0 0 0 0 0
+746 126 0 0 0 0 0 0 0 0
+752 63 0 0 63 0 0 0 0 0
+894 189 1 1 63 60 0 63 0 0
+905 441 30 2 0 0 0 252 0 0
+fn=__kmp_resume_64
+645 441 0 0 189 0 0 0 0 0
+746 126 0 0 0 0 0 0 0 0
+fn=__kmp_suspend_64
+87 126 0 0 126 63 21 0 0 0
+642 504 61 1 189 0 0 0 0 0
+707 126 0 0 63 0 0 0 0 0
+746 378 1 1 126 63 16 0 0 0
+751 126 0 0 126 42 0 0 0 0
+fn=bool _INTERNAL_25_______src_kmp_barrier_cpp_ddfed41b::__kmp_wait_template<kmp_flag_64, 1, false, true>(kmp_info*, kmp_flag_64*, void*)
+87 189 0 0 189 11 0 0 0 0
+200 630 61 1 0 0 0 378 45 42
+202 63 0 0 0 0 0 0 0 0
+206 63 0 0 0 0 0 63 0 0
+215 378 29 1 126 51 1 0 0 0
+217 882 2 1 189 56 0 504 0 0
+220 126 1 1 63 0 0 63 48 43
+228 126 0 0 0 0 0 63 0 0
+290 252 1 1 126 0 0 63 0 0
+312 189 29 1 126 48 2 63 0 0
+314 189 0 0 126 79 1 0 0 0
+344 315 0 0 126 23 0 63 0 0
+348 378 1 1 63 1 0 0 0 0
+353 126 0 0 63 2 2 0 0 0
+359 126 0 0 63 0 0 0 0 0
+360 63 0 0 63 43 0 0 0 0
+368 126 29 1 0 0 0 0 0 0
+387 126 0 0 0 0 0 63 0 0
+391 189 0 0 63 0 0 0 0 0
+392 189 61 1 63 0 0 0 0 0
+400 1197 31 2 567 31 1 0 0 0
+419 252 0 0 126 0 0 0 0 0
+424 126 0 0 0 0 0 0 0 0
+432 315 2 1 63 0 0 0 0 0
+440 126 0 0 0 0 0 0 0 0
+445 189 0 0 126 0 0 0 0 0
+464 189 0 0 63 3 0 0 0 0
+468 126 0 0 63 2 0 0 0 0
+469 126 0 0 63 14 0 0 0 0
+476 63 0 0 63 63 21 0 0 0
+477 189 0 0 126 2 0 0 0 0
+502 567 0 0 252 5 1 0 0 0
+517 567 1 1 441 0 0 0 0 0
+693 189 0 0 126 52 0 0 0 0
+715 504 1 1 378 148 42 0 0 0
+892 189 0 0 63 0 0 63 44 43
+fl=/nfs/site/proj/openmp/promo/20190312/tmp/lin_32e-rtl_int_5_nor_dyn.rel.50.c0.s0.t1..h1.w1-fxe16lin03/../../src/ompt-general.cpp
+fn=ompt_post_init
+360 3 1 1 0 0 0 3 0 0
+366 2 0 0 1 1 1 0 0 0
+369 1 1 1 0 0 0 1 0 0
+374 2 0 0 1 0 0 0 0 0
+409 4 1 0 4 0 0 0 0 0
+fn=ompt_pre_init
+263 4 0 0 0 0 0 1 0 0
+269 2 0 0 0 0 0 0 0 0
+273 2 0 0 0 0 0 1 0 0
+274 2 1 1 0 0 0 0 0 0
+300 4 1 1 0 0 0 3 0 0
+306 2 1 1 1 1 1 0 0 0
+309 1 0 0 0 0 0 1 0 0
+314 3 0 0 0 0 0 1 0 0
+317 2 0 0 0 0 0 0 0 0
+337 1 0 0 0 0 0 1 1 1
+338 2 0 0 2 1 1 0 0 0
+fn=ompt_start_tool
+162 5 1 1 0 0 0 3 0 0
+169 3 0 0 0 0 0 1 0 0
+170 2 0 0 0 0 0 0 0 0
+173 5 1 1 4 0 0 0 0 0
+fl=/nfs/site/proj/openmp/promo/20190312/tmp/lin_32e-rtl_int_5_nor_dyn.rel.50.c0.s0.t1..h1.w1-fxe16lin03/../../src/ompt-specific.cpp
+fn=__ompt_team_assign_id(kmp_team*, ompt_data_t)
+484 67 42 2 0 0 0 67 0 0
+485 67 0 0 67 0 0 0 0 0
+fn=__sti__$E
+491 2 1 1 1 0 0 1 1 1
+fl=/nfs/site/proj/openmp/promo/20190312/tmp/lin_32e-rtl_int_5_nor_dyn.rel.50.c0.s0.t1..h1.w1-fxe16lin03/../../src/ompt-specific.h
+fn=__kmpc_critical_with_hint
+90 290 0 0 174 109 66 58 36 34
+91 58 0 0 58 37 36 0 0 0
+92 58 0 0 0 0 0 58 0 0
+fn=ompt_pre_init
+121 2 1 1 1 1 1 0 0 0
+fl=/nfs/site/proj/openmp/promo/20190312/tmp/lin_32e-rtl_int_5_nor_dyn.rel.50.c0.s0.t1..h1.w1-fxe16lin03/../../src/thirdparty/ittnotify/ittnotify_config.h
+fn=__kmp_itt_init_ittlib
+369 2 0 0 2 0 0 0 0 0
+fl=/nfs/site/proj/openmp/promo/20190312/tmp/lin_32e-rtl_int_5_nor_dyn.rel.50.c0.s0.t1..h1.w1-fxe16lin03/../../src/thirdparty/ittnotify/ittnotify_static.c
+fn=_INTERNAL_49_______src_thirdparty_ittnotify_ittnotify_static_c_679369ad::__kmp_itt_thr_name_set_init_3_0(char const*, int)
+683 256 0 0 128 50 1 0 0 0
+693 448 2 2 128 29 0 0 0 0
+709 128 3 2 0 0 0 64 0 0
+712 192 0 0 128 0 0 0 0 0
+fn=__kmp_itt_init_ittlib
+813 4 0 0 0 0 0 0 0 0
+839 12 3 3 0 0 0 4 0 0
+840 8 0 0 0 0 0 0 0 0
+860 2 0 0 0 0 0 0 0 0
+984 1 0 0 0 0 0 0 0 0
+1020 15 3 3 7 1 1 0 0 0
+1021 9 1 1 2 0 0 4 0 0
+1055 720 2 2 288 36 36 0 0 0
+1056 430 0 0 286 54 54 143 17 17
+1103 12 2 2 1 0 0 7 0 0
+1111 4 0 0 2 2 2 0 0 0
+1114 49 6 6 13 8 8 6 0 0
+1117 3 0 0 1 0 0 0 0 0
+1119 3 1 1 1 1 1 0 0 0
+1121 18 1 1 7 0 0 2 0 0
+1122 2 0 0 0 0 0 0 0 0
+1126 2 0 0 0 0 0 0 0 0
+1127 10 2 2 3 2 2 0 0 0
+1206 1 0 0 0 0 0 1 0 0
+1207 2 1 1 0 0 0 1 0 0
+1209 1 0 0 0 0 0 1 0 0
+1214 19 1 1 8 0 0 1 0 0
+1219 576 1 1 145 0 0 0 0 0
+1221 573 0 0 429 0 0 0 0 0
+1227 13 1 1 9 0 0 0 0 0
+fl=/nfs/site/proj/openmp/promo/20190312/tmp/lin_32e-rtl_int_5_nor_dyn.rel.50.c0.s0.t1..h1.w1-fxe16lin03/../../src/thirdparty/ittnotify/ittnotify_static.h
+fn=_INTERNAL_49_______src_thirdparty_ittnotify_ittnotify_static_c_679369ad::__kmp_itt_fsync_acquired_init_3_0(void*)
+155 11 1 1 4 0 0 2 0 0
+fl=/nfs/site/proj/openmp/promo/20190312/tmp/lin_32e-rtl_int_5_nor_dyn.rel.50.c0.s0.t1..h1.w1-fxe16lin03/../../src/thirdparty/safeclib/mem_primitives_lib.c
+fn=mem_prim_move(void*, void const*, unsigned int)
+502 584 2 1 0 0 0 365 0 0
+516 146 1 1 0 0 0 0 0 0
+530 288 0 0 0 0 0 0 0 0
+534 284 0 0 0 0 0 0 0 0
+535 142 0 0 0 0 0 0 0 0
+541 142 1 1 0 0 0 0 0 0
+547 105636 0 0 26409 0 0 26409 413 413
+548 52818 0 0 0 0 0 0 0 0
+554 146 1 1 0 0 0 0 0 0
+556 165 1 1 0 0 0 0 0 0
+560 15 0 0 6 0 0 6 0 0
+571 74 1 1 0 0 0 0 0 0
+573 88 0 0 0 0 0 0 0 0
+575 24 0 0 13 0 0 7 0 0
+589 1 1 1 0 0 0 0 0 0
+590 1 0 0 0 0 0 0 0 0
+600 4 0 0 0 0 0 0 0 0
+602 4 0 0 0 0 0 0 0 0
+603 2 0 0 0 0 0 0 0 0
+608 2 0 0 0 0 0 0 0 0
+614 232 1 1 58 0 0 58 1 1
+615 116 0 0 0 0 0 0 0 0
+621 2 0 0 0 0 0 0 0 0
+623 2 0 0 0 0 0 0 0 0
+637 1 1 1 0 0 0 0 0 0
+638 1 0 0 0 0 0 0 0 0
+646 432 1 1 432 0 0 0 0 0
+fl=/nfs/site/proj/openmp/promo/20190312/tmp/lin_32e-rtl_int_5_nor_dyn.rel.50.c0.s0.t1..h1.w1-fxe16lin03/../../src/thirdparty/safeclib/memcpy_s.c
+fn=_memcpy_s_chk
+96 438 1 1 0 0 0 219 0 0
+101 146 0 0 0 0 0 0 0 0
+108 146 0 0 0 0 0 0 0 0
+109 146 0 0 0 0 0 0 0 0
+110 146 0 0 0 0 0 0 0 0
+111 219 0 0 0 0 0 0 0 0
+119 146 1 1 0 0 0 0 0 0
+120 146 0 0 0 0 0 0 0 0
+122 146 0 0 0 0 0 0 0 0
+131 441 2 2 0 0 0 0 0 0
+141 292 0 0 0 0 0 73 0 0
+143 365 0 0 292 0 0 0 0 0
+fl=/nfs/site/proj/openmp/promo/20190312/tmp/lin_32e-rtl_int_5_nor_dyn.rel.50.c0.s0.t1..h1.w1-fxe16lin03/../../src/thirdparty/safeclib/strcpy_s.c
+fn=_strcpy_s_chk
+106 7 1 1 0 0 0 3 0 0
+111 2 0 0 0 0 0 0 0 0
+112 2 1 1 0 0 0 0 0 0
+113 2 0 0 0 0 0 0 0 0
+114 3 0 0 0 0 0 0 0 0
+119 2 0 0 0 0 0 0 0 0
+121 2 0 0 0 0 0 0 0 0
+126 1 0 0 0 0 0 0 0 0
+127 1 0 0 0 0 0 0 0 0
+129 1 0 0 0 0 0 0 0 0
+130 1 0 0 0 0 0 0 0 0
+132 56 1 1 0 0 0 0 0 0
+133 110 0 0 0 0 0 0 0 0
+140 110 0 0 55 0 0 55 1 1
+141 110 0 0 0 0 0 0 0 0
+144 1 1 1 0 0 0 0 0 0
+150 5 1 1 4 0 0 0 0 0
+153 54 0 0 0 0 0 0 0 0
+154 54 0 0 0 0 0 0 0 0
+155 54 0 0 0 0 0 0 0 0
+fl=/nfs/site/proj/openmp/promo/20190312/tmp/lin_32e-rtl_int_5_nor_dyn.rel.50.c0.s0.t1..h1.w1-fxe16lin03/../../src/thirdparty/safeclib/strncpy_s.c
+fn=_strncpy_s_chk
+112 10 2 1 0 0 0 6 0 0
+117 4 0 0 0 0 0 0 0 0
+121 4 2 1 0 0 0 0 0 0
+122 4 2 1 0 0 0 0 0 0
+123 4 0 0 0 0 0 0 0 0
+124 6 0 0 0 0 0 0 0 0
+129 4 0 0 0 0 0 0 0 0
+131 4 0 0 0 0 0 0 0 0
+132 4 0 0 0 0 0 0 0 0
+141 2 2 1 0 0 0 0 0 0
+142 2 0 0 0 0 0 0 0 0
+144 4 0 0 0 0 0 0 0 0
+145 1 0 0 0 0 0 0 0 0
+147 13 0 0 0 0 0 0 0 0
+148 24 0 0 0 0 0 0 0 0
+155 22 0 0 0 0 0 0 0 0
+172 24 0 0 12 0 0 12 1 1
+173 24 0 0 0 0 0 0 0 0
+175 1 1 1 0 0 0 0 0 0
+181 5 0 0 4 0 0 0 0 0
+184 11 1 0 0 0 0 0 0 0
+185 11 0 0 0 0 0 0 0 0
+186 11 0 0 0 0 0 0 0 0
+187 11 0 0 0 0 0 0 0 0
+193 32 1 1 0 0 0 0 0 0
+194 62 0 0 0 0 0 0 0 0
+201 60 0 0 0 0 0 0 0 0
+218 62 1 1 31 0 0 31 1 1
+219 62 0 0 0 0 0 0 0 0
+221 1 1 1 0 0 0 0 0 0
+227 5 0 0 4 0 0 0 0 0
+230 30 0 0 0 0 0 0 0 0
+231 30 0 0 0 0 0 0 0 0
+232 30 0 0 0 0 0 0 0 0
+233 30 0 0 0 0 0 0 0 0
+fl=/nfs/site/proj/openmp/promo/20190312/tmp/lin_32e-rtl_int_5_nor_dyn.rel.50.c0.s0.t1..h1.w1-fxe16lin03/../../src/thirdparty/safeclib/strnlen_s.c
+fn=_strnlen_s_chk
+72 584 2 1 0 0 0 146 0 0
+75 292 0 0 0 0 0 0 0 0
+81 292 0 0 0 0 0 0 0 0
+86 292 0 0 0 0 0 0 0 0
+87 438 2 1 0 0 0 0 0 0
+110 146 0 0 0 0 0 0 0 0
+111 211324 0 0 52977 739 366 0 0 0
+112 52831 0 0 0 0 0 0 0 0
+113 52831 0 0 0 0 0 0 0 0
+114 52831 0 0 0 0 0 0 0 0
+117 292 0 0 292 0 0 0 0 0
+fl=/nfs/site/proj/openmp/promo/20190312/tmp/lin_32e-rtl_int_5_nor_dyn.rel.50.c0.s0.t1..h1.w1-fxe16lin03/../../src/thirdparty/tbb/atomic.h
+fn=__kmp::dynamic_link(char const*, __kmp::dynamic_link_descriptor const*, unsigned long, void**, int)
+299 1 0 0 1 1 1 0 0 0
+fn=__sti__$E
+299 2 1 1 2 1 1 0 0 0
+326 1 0 0 1 1 0 0 0 0
+fl=/nfs/site/proj/openmp/promo/20190312/tmp/lin_32e-rtl_int_5_nor_dyn.rel.50.c0.s0.t1..h1.w1-fxe16lin03/../../src/thirdparty/tbb/dynamic_link.cpp
+fn=_INTERNAL_45_______src_thirdparty_tbb_omp_dynamic_link_cpp_c306cade::__kmp::init_dl_data()
+305 3 1 1 1 1 1 1 0 0
+306 2 0 0 0 0 0 0 0 0
+314 1 0 0 1 0 0 0 0 0
+315 3 1 1 0 0 0 0 0 0
+318 1 0 0 0 0 0 0 0 0
+322 2 0 0 1 0 0 0 0 0
+332 1 0 0 0 0 0 1 1 1
+337 2 1 1 0 0 0 0 0 0
+338 2 0 0 0 0 0 0 0 0
+344 3 0 0 1 0 0 1 0 0
+345 5 0 0 2 0 0 1 0 0
+350 2 1 1 0 0 0 1 0 0
+fn=__kmp::dynamic_link(char const*, __kmp::dynamic_link_descriptor const*, unsigned long, void**, int)
+120 2 0 0 0 0 0 0 0 0
+134 1 0 0 0 0 0 1 0 0
+135 2 1 1 0 0 0 0 0 0
+477 4 1 1 0 0 0 1 0 0
+484 4 0 0 1 1 1 2 0 0
+535 12 1 1 0 0 0 6 0 0
+539 3 1 1 0 0 0 0 0 0
+541 4 1 1 0 0 0 0 0 0
+542 6 0 0 0 0 0 1 0 0
+544 4 1 0 0 0 0 0 0 0
+545 9 0 0 7 1 0 0 0 0
+fn=__kmp::dynamic_load(char const*, __kmp::dynamic_link_descriptor const*, unsigned long)
+380 3 1 1 1 1 1 0 0 0
+383 14 1 1 1 1 1 1 1 1
+384 2 0 0 0 0 0 0 0 0
+385 2 0 0 0 0 0 0 0 0
+500 13 1 1 1 0 0 7 0 0
+507 2 0 0 0 0 0 1 0 0
+508 3 0 0 0 0 0 0 0 0
+514 4 1 1 0 0 0 1 0 0
+518 2 0 0 0 0 0 0 0 0
+525 2 1 1 0 0 0 1 0 0
+526 13 2 2 9 1 0 0 0 0
+fn=__sti__$E
+363 2 0 0 1 1 0 0 0 0
+525 1 1 1 0 0 0 0 0 0
+fl=/nfs/site/proj/openmp/promo/20190312/tmp/lin_32e-rtl_int_5_nor_dyn.rel.50.c0.s0.t1..h1.w1-fxe16lin03/../../src/thirdparty/tbb/machine/linux_intel64.h
+fn=__sti__$E
+76 4 0 0 2 0 0 0 0 0
+fl=/nfs/site/proj/openmp/promo/20190312/tmp/lin_32e-rtl_int_5_nor_dyn.rel.50.c0.s0.t1..h1.w1-fxe16lin03/../../src/thirdparty/tbb/tbb_machine.h
+fn=__kmp::dynamic_link(char const*, __kmp::dynamic_link_descriptor const*, unsigned long, void**, int)
+613 1 0 0 1 1 1 0 0 0
+fn=__sti__$E
+367 2 1 1 2 0 0 0 0 0
+613 2 0 0 2 1 1 0 0 0
+619 1 0 0 0 0 0 1 1 0
+fl=/nfs/site/proj/openmp/promo/20190312/tmp/lin_32e-rtl_int_5_nor_dyn.rel.50.c0.s0.t1..h1.w1-fxe16lin03/../../src/thirdparty/tbb/tbb_misc.h
+fn=__kmp::dynamic_link(char const*, __kmp::dynamic_link_descriptor const*, unsigned long, void**, int)
+219 2 0 0 0 0 0 0 0 0
+fn=__sti__$E
+219 4 0 0 0 0 0 2 0 0
+220 2 0 0 0 0 0 0 0 0
+221 2 0 0 0 0 0 0 0 0
+232 1 0 0 0 0 0 1 0 0
+fl=/nfs/site/proj/openmp/promo/20190312/tmp/lin_32e-rtl_int_5_nor_dyn.rel.50.c0.s0.t1..h1.w1-fxe16lin03/../../src/z_Linux_util.cpp
+fn=_INTERNAL_26_______src_z_Linux_util_cpp_20354e55::__kmp_launch_worker(void*)
+477 126 0 0 0 0 0 63 0 0
+478 126 62 1 0 0 0 63 0 0
+486 189 28 1 0 0 0 63 34 34
+487 126 0 0 0 0 0 0 0 0
+492 315 0 0 0 0 0 126 0 0
+493 126 1 1 0 0 0 0 0 0
+495 315 0 0 0 0 0 63 0 0
+496 126 0 0 0 0 0 0 0 0
+501 189 0 0 0 0 0 63 0 0
+502 126 0 0 0 0 0 0 0 0
+505 378 1 1 126 0 0 0 0 0
+507 126 0 0 0 0 0 63 2 0
+508 63 0 0 0 0 0 63 0 0
+509 126 0 0 0 0 0 63 0 0
+520 630 4 1 63 0 0 315 62 62
+527 63 0 0 0 0 0 63 62 62
+531 63 0 0 63 45 0 0 0 0
+532 126 0 0 0 0 0 63 62 62
+534 189 28 1 0 0 0 126 39 0
+549 189 0 0 0 0 0 63 0 0
+553 252 0 0 0 0 0 63 0 0
+554 126 28 1 0 0 0 0 0 0
+556 252 0 0 0 0 0 63 0 0
+557 126 0 0 0 0 0 0 0 0
+564 252 62 1 189 29 0 63 0 0
+575 378 0 0 126 13 0 0 0 0
+576 441 0 0 0 0 0 63 0 0
+583 126 29 1 0 0 0 63 0 0
+585 126 0 0 0 0 0 63 0 0
+fn=__kmp_affinity_bind_thread
+128 2048 1 1 0 0 0 1536 0 0
+129 1536 0 0 1024 0 0 0 0 0
+133 2560 1 1 2048 1 0 512 0 0
+134 1536 0 0 1024 0 0 512 0 0
+135 2048 0 0 1024 0 0 512 0 0
+136 2048 1 1 1024 0 0 512 0 0
+137 4096 0 0 3072 0 0 0 0 0
+fn=__kmp_affinity_determine_capable
+143 8 2 2 0 0 0 6 0 0
+151 4 0 0 2 1 0 1 0 0
+156 8 0 0 0 0 0 1 0 0
+162 2 0 0 0 0 0 0 0 0
+180 1 0 0 0 0 0 0 0 0
+185 5 1 1 0 0 0 1 0 0
+189 2 0 0 0 0 0 0 0 0
+190 5 1 1 1 0 0 1 0 0
+207 2 0 0 0 0 0 0 0 0
+208 2 0 0 0 0 0 1 0 0
+212 2 0 0 1 0 0 1 0 0
+213 8 1 1 7 0 0 0 0 0
+296 2 0 0 2 1 0 0 0 0
+fn=__kmp_create_worker
+477 2 1 1 0 0 0 1 0 0
+478 1 0 0 0 0 0 1 0 0
+514 1 1 1 0 0 0 1 0 0
+515 2 0 0 0 0 0 1 0 0
+516 1 1 1 0 0 0 1 0 0
+769 768 44 2 64 0 0 384 0 0
+774 64 0 0 0 0 0 64 0 0
+776 64 0 0 0 0 0 64 21 0
+800 2 1 1 0 0 0 2 0 0
+802 2 0 0 0 0 0 1 0 0
+803 5 0 0 2 0 0 0 0 0
+811 189 0 0 0 0 0 63 0 0
+812 126 29 1 0 0 0 0 0 0
+815 252 0 0 0 0 0 63 0 0
+816 126 0 0 0 0 0 0 0 0
+827 315 0 0 126 22 1 0 0 0
+834 252 29 1 0 0 0 63 0 0
+836 126 0 0 0 0 0 0 0 0
+857 378 4 1 0 0 0 63 0 0
+858 315 4 1 63 0 0 0 0 0
+876 63 30 1 0 0 0 63 10 0
+879 126 0 0 0 0 0 63 0 0
+880 126 0 0 0 0 0 0 0 0
+894 700 1 1 510 5 0 0 0 0
+fn=__kmp_gtid_set_specific
+1988 128 30 2 0 0 0 64 0 0
+1989 256 4 2 128 25 1 0 0 0
+1991 384 0 0 128 1 0 64 62 62
+1993 128 0 0 0 0 0 0 0 0
+1997 192 0 0 128 0 0 0 0 0
+fn=__kmp_initialize_system_tick
+2291 5 1 1 0 0 0 5 0 0
+2294 2 0 0 0 0 0 1 0 0
+2295 3 1 1 0 0 0 1 0 0
+2296 4 0 0 0 0 0 1 0 0
+2298 3 0 0 0 0 0 1 0 0
+2300 1 0 0 0 0 0 0 0 0
+2301 23 3 3 2 2 2 0 0 0
+2302 1 0 0 0 0 0 0 0 0
+2303 2 0 0 1 1 1 1 1 1
+2305 6 0 0 6 0 0 0 0 0
+fn=__kmp_install_signals
+1161 46 5 5 1 1 1 11 0 0
+1162 22 1 1 0 0 0 0 0 0
+1170 2 0 0 0 0 0 0 0 0
+1209 14 2 2 2 0 0 6 0 0
+1211 10 2 2 4 2 1 0 0 0
+1214 2 0 0 0 0 0 1 1 0
+1231 16 3 3 10 0 0 0 0 0
+fn=__kmp_lock_suspend_mx
+1711 252 1 1 0 0 0 126 0 0
+1712 378 0 0 0 0 0 126 0 0
+1713 252 0 0 0 0 0 0 0 0
+1714 378 0 0 252 0 0 0 0 0
+fn=__kmp_now_nsec()
+2281 8 1 1 2 0 0 2 0 0
+2283 6 0 0 0 0 0 2 1 0
+2284 2 0 0 2 0 0 0 0 0
+2285 4 0 0 2 0 0 0 0 0
+2286 12 0 0 6 0 0 0 0 0
+fn=__kmp_read_system_time
+2055 6 2 2 1 0 0 2 0 0
+2061 3 0 0 0 0 0 1 0 0
+2062 2 0 0 0 0 0 0 0 0
+2063 1 0 0 1 0 0 0 0 0
+2064 13 1 1 5 1 1 0 0 0
+2065 2 0 0 1 0 0 1 0 0
+2066 7 1 1 4 0 0 0 0 0
+fn=__kmp_register_atfork
+1655 3 1 1 0 0 0 2 0 0
+1656 3 1 1 2 2 2 0 0 0
+1657 5 0 0 0 0 0 1 0 0
+1659 2 0 0 0 0 0 0 0 0
+1660 1 0 0 0 0 0 1 0 0
+1662 4 0 0 3 0 0 0 0 0
+fn=__kmp_resume_64
+1877 189 0 0 189 15 0 0 0 0
+1888 126 1 1 0 0 0 63 0 0
+1889 126 0 0 0 0 0 63 0 0
+1891 126 0 0 0 0 0 0 0 0
+1897 126 0 0 63 0 0 0 0 0
+1920 63 1 1 0 0 0 63 60 0
+1930 189 0 0 0 0 0 63 0 0
+1931 126 0 0 0 0 0 0 0 0
+1932 126 0 0 0 0 0 63 0 0
+1941 315 1 1 0 0 0 126 0 0
+1943 252 0 0 189 23 0 0 0 0
+fn=__kmp_runtime_initialize
+2082 2 0 0 0 0 0 1 0 0
+2119 2 0 0 0 0 0 0 0 0
+2137 5 1 1 1 0 0 2 0 0
+2141 2 0 0 1 0 0 0 0 0
+2146 3 0 0 2 2 2 0 0 0
+2147 2 0 0 1 0 0 1 0 0
+2151 3 1 1 1 1 0 1 1 1
+2156 3 1 1 0 0 0 1 0 0
+2157 2 0 0 0 0 0 0 0 0
+2158 3 1 1 2 1 1 1 1 1
+2160 2 0 0 0 0 0 0 0 0
+2162 2 0 0 1 0 0 1 0 0
+2166 4 0 0 0 0 0 1 0 0
+2169 2 0 0 0 0 0 1 0 0
+2170 2 0 0 0 0 0 0 0 0
+2172 2 1 1 1 1 0 1 1 0
+2179 4 0 0 1 0 0 2 0 0
+2180 2 0 0 0 0 0 0 0 0
+2186 2 0 0 1 0 0 1 1 1
+2188 4 1 1 2 1 1 1 0 0
+2190 2 0 0 0 0 0 0 0 0
+2191 3 1 1 0 0 0 1 0 0
+2192 2 1 1 0 0 0 0 0 0
+2193 4 1 1 0 0 0 1 0 0
+2194 2 0 0 0 0 0 0 0 0
+2195 3 1 1 0 0 0 1 0 0
+2196 2 0 0 0 0 0 0 0 0
+2197 4 1 1 0 0 0 1 0 0
+2198 2 0 0 0 0 0 0 0 0
+2200 1 1 1 0 0 0 1 0 0
+2203 1 0 0 0 0 0 1 0 0
+2204 7 0 0 4 0 0 0 0 0
+fn=__kmp_suspend_64
+1726 189 0 0 189 0 0 0 0 0
+1733 126 0 0 0 0 0 63 44 44
+1735 126 0 0 0 0 0 63 0 0
+1743 189 0 0 126 0 0 0 0 0
+1763 63 61 1 0 0 0 63 45 0
+1776 63 0 0 0 0 0 63 0 0
+1777 126 0 0 63 0 0 0 0 0
+1807 252 2 1 0 0 0 63 0 0
+1808 378 0 0 0 0 0 126 0 0
+1811 126 0 0 0 0 0 0 0 0
+1833 63 0 0 0 0 0 63 60 0
+1834 126 0 0 63 63 0 0 0 0
+1849 126 0 0 0 0 0 63 0 0
+1856 315 2 1 0 0 0 126 0 0
+1858 252 1 1 189 14 0 0 0 0
+fn=__kmp_suspend_initialize
+1664 2 1 1 0 0 0 1 0 0
+1666 3 0 0 0 0 0 1 0 0
+1667 2 0 0 0 0 0 0 0 0
+1668 3 1 1 0 0 0 1 0 0
+1669 2 0 0 0 0 0 0 0 0
+1670 3 0 0 2 0 0 0 0 0
+fn=__kmp_suspend_initialize_thread
+1672 504 61 1 0 0 0 252 0 0
+1673 378 0 0 252 94 0 0 0 0
+1677 252 0 0 0 0 0 63 45 44
+1679 126 1 1 0 0 0 0 0 0
+1680 252 29 1 0 0 0 63 0 0
+1682 126 0 0 0 0 0 0 0 0
+1683 252 29 1 63 0 0 63 0 0
+1685 504 0 0 378 0 0 0 0 0
+fn=__kmp_unlock_suspend_mx
+1716 252 1 1 0 0 0 126 0 0
+1717 378 0 0 0 0 0 126 11 0
+1718 252 0 0 0 0 0 0 0 0
+1719 378 1 1 252 19 0 0 0 0
+fl=/usr/include/bits/stdio2.h
+fn=_INTERNAL_26_______src_kmp_affinity_cpp_662c446f::__kmp_affinity_create_cpuinfo_map(AddrUnsPair**, int*, kmp_i18n_id*, _IO_FILE*)
+255 55304 0 0 0 0 0 13826 0 0
+fn=__kmp_str_buf_vprint
+78 462 3 2 132 0 0 66 62 62
+fn=__kmp_str_format
+78 30 1 1 0 0 0 10 0 0
+fl=/usr/include/bits/string3.h
+fn=_INTERNAL_25_______src_kmp_runtime_cpp_ddfed41b::__kmp_initialize_info(kmp_info*, kmp_team*, int, int)
+85 189 0 0 0 0 0 63 0 0
+fn=_INTERNAL_45_______src_thirdparty_tbb_omp_dynamic_link_cpp_c306cade::__kmp::init_dl_data()
+121 5 1 1 1 0 0 1 0 0
+fn=___kmp_allocate
+85 8368 0 0 0 0 0 2092 0 0
+fn=__kmp::dynamic_load(char const*, __kmp::dynamic_link_descriptor const*, unsigned long)
+121 10 1 1 1 0 0 2 0 0
+fn=__kmp_initialize_bget
+85 256 0 0 0 0 0 64 0 0
+fn=__kmp_initialize_fast_memory
+85 960 60 4 0 0 0 704 0 0
+fn=_strcpy_s_chk
+85 4 0 0 0 0 0 1 0 0
+fn=_strncpy_s_chk
+85 8 2 1 0 0 0 2 0 0
+fn=ompt_pre_init
+85 7 1 1 5 1 1 1 0 0
+fl=/usr/include/pthread.h
+fn=scalable_aligned_free
+1139 2596 2 2 1298 0 0 0 0 0
+fn=scalable_free
+1139 10 2 1 5 0 0 0 0 0
+fl=/usr/include/string.h
+fn=_INTERNAL_26_______src_kmp_affinity_cpp_662c446f::__kmp_affinity_create_cpuinfo_map(AddrUnsPair**, int*, kmp_i18n_id*, _IO_FILE*)
+224 19456 6 6 768 0 0 256 0 0
+fn=_INTERNAL_45_______src_thirdparty_tbb_omp_dynamic_link_cpp_c306cade::__kmp::init_dl_data()
+257 29 1 1 1 1 0 1 0 0
+fn=__kmp_query_cpuid
+251 24 2 2 1 0 0 1 0 0
+fn=__kmp_str_split
+224 1733 1 1 75 0 0 49 0 0
+fl=???
+fn=(below main)
+0 60 5 5 17 6 1 16 1 1
+fn=???
+0 50905616 1987 964 50780559 2663 656 24260 1201 1147
+fn=DGEMM
+0 107 12 12 28 5 5 38 0 0
+fn=MKL_Load_Lib
+0 2396 8 7 38 2 1 2094 129 41
+fn=MKL_malloc
+0 3 1 1 0 0 0 0 0 0
+fn=_IO_default_finish
+0 182 8 2 52 0 0 13 0 0
+fn=_IO_default_uflow
+0 34304 3 1 9362 0 0 5460 0 0
+fn=_IO_default_xsputn
+0 109978 217 14 21228 1 1 18859 132 125
+fn=_IO_doallocbuf
+0 325 10 2 104 7 1 52 0 0
+fn=_IO_file_close
+0 26 3 1 13 0 0 0 0 0
+fn=_IO_file_close_it@@GLIBC_2.2.5
+0 715 32 6 130 0 0 208 0 0
+fn=_IO_file_doallocate
+0 663 22 4 117 4 1 78 5 1
+fn=_IO_file_finish@@GLIBC_2.2.5
+0 156 16 2 39 0 0 26 0 0
+fn=_IO_file_fopen@@GLIBC_2.2.5
+0 14907 47 12 2952 9 5 1923 0 0
+fn=_IO_file_read
+0 3188 4 1 1594 0 0 2 0 0
+fn=_IO_file_seek
+0 2 1 1 1 0 0 0 0 0
+fn=_IO_file_seekoff@@GLIBC_2.2.5
+0 85 9 9 21 0 0 14 0 0
+fn=_IO_file_stat
+0 52 5 1 13 0 0 0 0 0
+fn=_IO_file_underflow@@GLIBC_2.2.5
+0 46772 38 8 15135 9 1 11421 1 0
+fn=_IO_getline
+0 41570 3 1 0 0 0 0 0 0
+fn=_IO_getline_info
+0 1328769 20 6 293295 0 0 270798 2 0
+fn=_IO_link_in
+0 24974 47 10 8863 19 2 4298 0 0
+fn=_IO_new_file_init_internal
+0 3471 6 1 1068 0 0 1335 0 0
+fn=_IO_no_init
+0 293631 78 5 72540 0 0 105027 144 135
+fn=_IO_old_init
+0 319977 109 6 29016 0 0 232929 80 72
+fn=_IO_seekoff_unlocked
+0 28 3 3 6 0 0 2 0 0
+fn=_IO_setb
+0 299797 66 2 71392 0 0 71379 1 0
+fn=_IO_sputbackc
+0 264564 6 2 102886 0 0 44094 1 0
+fn=_IO_str_init_static_internal
+0 498435 54 7 71205 0 0 184805 63 63
+fn=_IO_str_overflow
+0 92 7 7 23 0 0 19 0 0
+fn=_IO_str_underflow
+0 9997 4 1 3845 0 0 0 0 0
+fn=_IO_switch_to_get_mode
+0 19104 12 3 6368 0 0 5572 0 0
+fn=_IO_un_link
+0 24532 46 9 9169 5 0 3254 0 0
+fn=_IO_unsave_markers
+0 117 10 2 52 0 0 13 0 0
+fn=_IO_vfscanf
+0 2202806 256 85 631900 58 14 495471 23 6
+fn=_Init_MKL_Loader
+0 98 10 10 4 0 0 22 0 0
+fn=_L_cond_lock_789
+0 140 2 2 0 0 0 28 28 23
+fn=_L_unlock_713
+0 455 1 0 0 0 0 91 49 27
+fn=__GI___rawmemchr
+0 382499 19 7 55204 0 0 0 0 0
+fn=__GI_memcpy
+0 903995 30 7 158717 3 2 136193 21 12
+fn=__GI_memmove
+0 16645 15 8 3077 0 0 2790 0 0
+fn=__GI_mempcpy
+0 50384 18 5 8010 0 0 6461 19 11
+fn=__GI_memset
+0 41127 58 8 415 0 0 20986 742 714
+fn=__GI_stpcpy
+0 182 4 4 14 0 0 24 0 0
+fn=__GI_strchr
+0 34 3 2 3 0 0 0 0 0
+fn=__GI_strlen
+0 5412 34 12 706 33 28 0 0 0
+fn=__GI_strncmp
+0 3701 56 37 616 7 3 0 0 0
+fn=__GI_strrchr
+0 44 3 3 3 0 0 0 0 0
+fn=__GI_strstr
+0 348 20 4 121 7 1 78 0 0
+fn=____strtod_l_internal
+0 374 39 39 64 5 3 40 0 0
+fn=____strtol_l_internal
+0 31157 34 12 5204 10 0 2602 2 1
+fn=____strtoul_l_internal
+0 138873 57 24 19161 42 18 11934 2 0
+fn=__acos_finite
+0 5 1 1 3 0 0 0 0 0
+fn=__add_to_environ
+0 916 12 12 100 1 1 101 0 0
+fn=__alloc_dir
+0 81 7 3 12 0 0 33 1 1
+fn=__asin_finite
+0 5 1 1 3 0 0 0 0 0
+fn=__atan2_finite
+0 8 1 1 3 0 0 0 0 0
+fn=__close_nocancel
+0 80 5 1 16 0 0 0 0 0
+fn=__ctype_b_loc
+0 78 1 1 78 1 0 0 0 0
+fn=__ctype_init
+0 1024 66 4 640 179 8 192 40 0
+fn=__current_locale_name
+0 20 1 1 16 2 2 0 0 0
+fn=__cxa_atexit
+0 198 4 4 45 1 0 72 4 4
+fn=__dcigettext
+0 478 25 25 110 9 8 94 0 0
+fn=__default_morecore
+0 16 1 1 2 0 0 2 0 0
+fn=__detect_real_cpu
+0 65 10 10 12 3 3 9 0 0
+fn=__errno_location
+0 810 11 4 810 6 2 0 0 0
+fn=__exp_finite
+0 8 1 1 3 0 0 0 0 0
+fn=__fopen_internal
+0 11429 10 2 1322 0 0 3178 8 5
+fn=__fopen_maybe_mmap
+0 52 6 1 26 0 0 0 0 0
+fn=__getdents
+0 4153 6 3 897 132 128 891 0 0
+fn=__init_misc
+0 24 2 2 7 1 1 5 1 1
+fn=__intel_avx_rep_memcpy
+0 26 4 4 11 6 4 7 4 4
+fn=__intel_avx_rep_memset
+0 400457 132 25 9220 328 27 310263 20469 19302
+fn=__intel_cpu_features_init
+0 5 1 1 2 0 0 2 0 0
+fn=__intel_cpu_features_init_body
+0 186 16 16 13 0 0 14 0 0
+fn=__intel_mkl_features_init_body
+0 219 17 17 11 0 0 14 0 0
+fn=__intel_mkl_features_init_x
+0 6 1 1 2 0 0 2 0 0
+fn=__intel_sse2_strchr
+0 5079 2 1 611 0 0 0 0 0
+fn=__intel_sse2_strlen
+0 11 1 1 2 0 0 0 0 0
+fn=__intel_sse2_strncmp
+0 982016 9 9 149504 0 0 33024 0 0
+fn=__intel_sse2_strrchr
+0 116 4 4 10 0 0 0 0 0
+fn=__kmp_hardware_timestamp
+0 8 1 1 2 0 0 0 0 0
+fn=__kmp_invoke_microtask
+0 5056 8 3 704 0 0 832 48 18
+fn=__libc_alloca_cutoff
+0 40 3 2 8 1 1 0 0 0
+fn=__libc_csu_init
+0 34 3 3 8 1 1 8 0 0
+fn=__libc_dl_error_tsd
+0 189 12 8 189 15 4 0 0 0
+fn=__libc_memalign
+0 2945 4 4 494 3 0 487 1 1
+fn=__libc_pthread_init
+0 393 2 2 110 8 8 58 8 8
+fn=__libc_sigaction
+0 849 11 11 258 2 0 247 35 35
+fn=__lll_lock_wait
+0 588 2 2 196 19 0 56 0 0
+fn=__lll_unlock_wake
+0 910 1 1 273 39 0 273 73 49
+fn=__log_finite
+0 8 1 1 3 0 0 0 0 0
+fn=__longjmp
+0 100 4 4 55 0 0 0 0 0
+fn=__lseek_nocancel
+0 5 0 0 1 0 0 0 0 0
+fn=__memcpy_chk
+0 10 3 3 5 1 0 0 0 0
+fn=__memmove_ssse3
+0 25904 22 20 5978 53 22 3924 341 234
+fn=__mkl_cpu_detect_and_load_dll
+0 460 32 32 43 7 5 62 7 6
+fn=__mpn_construct_double
+0 14 2 2 3 0 0 1 0 0
+fn=__mpn_lshift
+0 45 2 2 6 0 0 3 0 0
+fn=__new_exitfn
+0 391 9 9 99 16 9 37 1 1
+fn=__open_nocancel
+0 1101 12 3 17 1 0 0 0 0
+fn=__openat_nocancel
+0 24 4 2 3 0 0 0 0 0
+fn=__opendirat
+0 42 2 1 3 2 2 3 0 0
+fn=__parse_one_specmb
+0 496 15 15 92 3 1 100 4 0
+fn=__pow_finite
+0 5 1 1 3 0 0 0 0 0
+fn=__pthread_disable_asynccancel
+0 189 2 2 63 0 0 0 0 0
+fn=__pthread_enable_asynccancel
+0 378 2 1 126 2 0 0 0 0
+fn=__pthread_initialize_minimal
+0 165 14 14 23 7 5 62 11 10
+fn=__pthread_mutex_cond_lock
+0 1260 2 2 252 99 17 63 0 0
+fn=__pthread_mutex_unlock_usercnt
+0 1197 122 2 252 0 0 63 0 0
+fn=__read_nocancel
+0 4000 9 3 800 1 0 0 0 0
+fn=__register_atfork
+0 171 12 8 39 13 8 30 1 0
+fn=__sigjmp_save
+0 576 0 0 128 0 0 128 0 0
+fn=__sigsetjmp
+0 3016 113 16 706 54 3 1232 12 4
+fn=__snprintf_chk
+0 3612 3 2 258 0 0 1548 0 0
+fn=__sprintf_chk
+0 15 3 3 1 0 0 7 0 0
+fn=__sti__$E
+0 21814 1711 1711 81 3 3 3928 29 27
+fn=__strcasestr_sse42
+0 3677 13 13 635 4 3 174 0 0
+fn=__strncmp_sse42
+0 393977 8 4 67073 6 3 0 0 0
+fn=__strncpy_chk
+0 381 4 4 75 2 2 74 2 2
+fn=__strncpy_ssse3
+0 224 24 24 48 0 0 11 2 2
+fn=__strrchr_sse42
+0 1160 6 6 164 0 0 0 0 0
+fn=__strstr_sse42
+0 14458 13 11 2270 1 1 0 0 0
+fn=__strtol_internal
+0 3 1 0 2 0 0 0 0 0
+fn=__strtoul_internal
+0 2331 4 0 1554 0 0 0 0 0
+fn=__syscall_clock_gettime
+0 9 1 1 3 0 0 0 0 0
+fn=__tls_get_addr
+0 3202 32 2 1816 253 37 146 63 63
+fn=__tls_get_addr_slow
+0 429 38 5 219 0 0 0 0 0
+fn=__uflow
+0 57646 19 5 15580 8 0 3116 2 0
+fn=__underflow
+0 256 5 4 70 5 1 17 0 0
+fn=__vsnprintf_chk
+0 13416 3 3 2580 0 0 3354 0 0
+fn=__vsprintf_chk
+0 47 3 3 9 0 0 13 0 0
+fn=_dl_add_to_namespace_list
+0 990 7 6 247 0 0 111 0 0
+fn=_dl_add_to_slotinfo
+0 144 9 9 54 12 2 36 3 1
+fn=_dl_addr
+0 2773656 41 31 670388 49666 30218 136 16 0
+fn=_dl_allocate_tls
+0 1323 58 2 252 0 0 378 0 0
+fn=_dl_allocate_tls_init
+0 14517 168 12 4331 310 15 1722 1 1
+fn=_dl_allocate_tls_storage
+0 332 3 3 7 0 0 295 37 37
+fn=_dl_cache_libcmp
+0 5142 11 11 782 55 55 0 0 0
+fn=_dl_catch_error
+0 3285 29 22 1010 29 6 1530 37 13
+fn=_dl_check_all_versions
+0 201 3 3 31 0 0 17 0 0
+fn=_dl_check_caller
+0 1164 59 56 474 64 16 60 4 2
+fn=_dl_check_map_versions
+0 11165 47 42 3243 109 72 1372 76 69
+fn=_dl_count_modids
+0 4 2 2 3 0 0 0 0 0
+fn=_dl_debug_initialize
+0 217 13 11 79 10 7 4 0 0
+fn=_dl_debug_state
+0 8 4 3 8 0 0 0 0 0
+fn=_dl_determine_tlsoffset
+0 120 4 4 19 0 0 10 0 0
+fn=_dl_discover_osversion
+0 88 4 4 15 1 1 7 1 1
+fn=_dl_fixup
+0 11422 42 24 4280 884 519 1021 0 0
+fn=_dl_get_tls_static_info
+0 5 1 1 3 0 0 2 1 1
+fn=_dl_higher_prime_number
+0 144 1 1 14 4 2 0 0 0
+fn=_dl_important_hwcaps
+0 267 18 18 48 1 1 45 1 1
+fn=_dl_init
+0 1239 33 24 371 116 46 118 5 0
+fn=_dl_init_paths
+0 19328 19 19 2413 0 0 42 5 5
+fn=_dl_initial_error_catch_tsd
+0 70 0 0 35 0 0 0 0 0
+fn=_dl_load_cache_lookup
+0 2053 42 42 390 50 47 183 2 1
+fn=_dl_lookup_symbol_x
+0 2410346 94 56 409708 7664 4791 165649 214 94
+fn=_dl_make_tlsdesc_dynamic
+0 77 8 8 19 3 2 23 1 0
+fn=_dl_map_object
+0 16359 92 85 4017 199 79 1807 32 18
+fn=_dl_map_object_deps
+0 13251 144 126 2796 159 61 943 20 6
+fn=_dl_map_object_from_fd
+0 13712 188 175 3184 167 153 1380 90 89
+fn=_dl_name_match_p
+0 124263 6 4 32194 610 66 18430 8 5
+fn=_dl_new_object
+0 3134 56 53 601 13 13 542 73 71
+fn=_dl_next_ld_env_entry
+0 474 2 2 164 0 0 2 0 0
+fn=_dl_next_tls_modid
+0 36 6 6 18 0 0 6 0 0
+fn=_dl_open
+0 579 30 27 251 7 2 128 9 3
+fn=_dl_process_tunable_env_entries
+0 445 2 2 148 48 48 1 0 0
+fn=_dl_receive_error
+0 28 2 2 10 0 0 12 0 0
+fn=_dl_relocate_object
+0 1565054 159 145 422983 47194 42272 113181 36388 35101
+fn=_dl_runtime_resolve_xsave
+0 6560 22 15 7872 24 5 8200 437 230
+fn=_dl_setup_hash
+0 355 9 7 111 19 19 90 0 0
+fn=_dl_signal_cerror
+0 19 2 2 2 1 1 5 0 0
+fn=_dl_signal_error
+0 275 8 8 30 0 0 85 6 5
+fn=_dl_start
+0 657 17 17 135 26 26 56 19 19
+fn=_dl_sym
+0 63 0 0 0 0 0 0 0 0
+fn=_dl_sysdep_read_whole_file
+0 123 9 9 18 0 0 27 5 3
+fn=_dl_sysdep_start
+0 502 10 10 141 20 20 30 6 6
+fn=_dl_sysdep_start_cleanup
+0 1 1 1 1 0 0 0 0 0
+fn=_dl_tlsdesc_dynamic
+0 248 6 4 157 6 1 35 0 0
+fn=_dl_try_allocate_static_tls
+0 21 3 3 9 2 1 1 0 0
+fn=_dl_unload_cache
+0 50 9 5 17 7 4 6 0 0
+fn=_dl_update_slotinfo
+0 957 14 13 269 23 16 85 3 0
+fn=_dl_vdso_vsym
+0 42 3 3 18 5 1 0 0 0
+fn=_dlerror_run
+0 1185 25 19 333 37 13 228 3 0
+fn=_fxstat
+0 310 10 6 31 0 0 0 0 0
+fn=_init
+0 60 6 6 14 3 2 18 4 3
+fn=_int_free
+0 29777 193 28 7303 6 4 2813 1 1
+fn=_int_malloc
+0 65488 387 82 8275 281 32 10838 348 272
+fn=_int_realloc
+0 175 19 9 33 0 0 27 1 1
+fn=_intel_fast_memcpy
+0 14 2 2 3 0 0 1 0 0
+fn=_intel_fast_memcpy.V
+0 1 1 1 0 0 0 0 0 0
+fn=_intel_fast_memset
+0 29812 11 6 6880 17 6 2293 0 0
+fn=_intel_fast_memset.V
+0 2292 5 3 0 0 0 0 0 0
+fn=_itoa_word
+0 31184 54 7 2701 26 2 2116 0 0
+fn=_pthread_cleanup_pop_restore
+0 115608 6 1 43353 0 0 14451 0 0
+fn=_pthread_cleanup_push_defer
+0 202314 5 1 43353 14 0 72255 2 1
+fn=_setjmp
+0 128 2 2 0 0 0 0 0 0
+fn=_wordcopy_bwd_dest_aligned
+0 148 8 3 28 0 0 20 0 0
+fn=_wordcopy_fwd_aligned
+0 36 5 5 8 1 1 4 0 0
+fn=_xstat
+0 1349 2 2 110 0 0 83 0 0
+fn=access
+0 9 1 1 1 0 0 1 0 0
+fn=add_to_global
+0 261 6 6 83 2 0 22 0 0
+fn=arena_get2.isra.3
+0 46521 331 14 1915 191 4 16890 2142 2142
+fn=asprintf
+0 17 3 3 1 0 0 9 0 0
+fn=bcmp
+0 10759 57 53 2481 26 20 684 9 9
+fn=brk
+0 51 3 3 7 0 0 4 1 1
+fn=bsearch
+0 904 2 2 164 0 0 118 0 0
+fn=cache_rpath.part.5
+0 102 4 4 42 0 0 36 0 0
+fn=calloc
+0 6390 204 34 1606 132 7 587 9 1
+fn=cblas_dgemm
+0 75 9 9 11 1 1 15 0 0
+fn=check_match.9524
+0 1570378 29 23 599597 17605 6285 262593 143 71
+fn=check_strategy
+0 4160 6 3 896 0 0 576 0 0
+fn=clock_gettime
+0 30 2 2 12 3 1 3 0 0
+fn=clone
+0 1701 91 2 252 48 0 189 63 63
+fn=close
+0 90 5 5 18 0 0 0 0 0
+fn=closedir
+0 24 1 0 6 0 0 6 0 0
+fn=cos
+0 8 2 2 3 0 0 0 0 0
+fn=dcgettext
+0 10 1 1 0 0 0 0 0 0
+fn=dl_main
+0 1532 77 77 342 85 40 158 21 18
+fn=dl_open_worker
+0 1659 91 67 528 33 0 151 13 2
+fn=dladdr
+0 48 7 6 8 7 1 0 0 0
+fn=dlerror
+0 64 8 8 18 2 1 12 0 0
+fn=dll_cpu_version
+0 12 2 1 6 0 0 0 0 0
+fn=dlopen@@GLIBC_2.2.5
+0 102 8 7 24 4 0 24 2 1
+fn=dlopen_doit
+0 158 10 8 70 11 4 34 4 2
+fn=dlsym
+0 525 10 6 189 18 4 168 1 0
+fn=dlsym_doit
+0 186 4 3 103 0 0 62 1 0
+fn=do_clone.constprop.4
+0 2016 27 2 378 11 0 378 9 0
+fn=do_lookup_x
+0 6581095 142 87 1819150 50712 9384 722080 218 115
+fn=do_sym
+0 2421 45 17 891 103 16 294 4 0
+fn=do_work
+0 15970 29 29 5141 910 492 5123 490 469
+fn=elision_init
+0 12 2 2 5 0 0 2 1 1
+fn=expand_dynamic_string_token
+0 132 8 6 24 0 0 36 3 2
+fn=fclose@@GLIBC_2.2.5
+0 1033 41 8 340 15 2 128 0 0
+fn=feof
+0 497736 3 3 179738 4 0 55304 0 0
+fn=fgets
+0 1371732 12 5 415677 0 0 187053 0 0
+fn=fgets_unlocked
+0 36 2 2 7 0 0 7 0 0
+fn=fillin_rpath
+0 4671 14 14 1191 0 0 575 19 19
+fn=floor
+0 5 1 1 3 0 0 0 0 0
+fn=floorf
+0 5 2 2 3 0 0 0 0 0
+fn=fopen@@GLIBC_2.2.5
+0 534 6 1 0 0 0 0 0 0
+fn=free
+0 10947 19 9 3309 36 4 2 0 0
+fn=fscanf
+0 68 6 3 4 0 0 36 0 0
+fn=fseek
+0 44 4 4 17 0 0 5 0 0
+fn=gemm_omp_driver_v2
+0 8516 29 24 1489 9 1 1950 198 181
+fn=getPointer_buffer
+0 6720 1 1 2880 0 0 0 0 0
+fn=getPointer_notrans
+0 1176 1 1 784 0 0 0 0 0
+fn=getPointer_trans
+0 1704 1 1 1136 0 0 0 0 0
+fn=get_nprocs
+0 512 22 16 105 16 9 84 3 2
+fn=get_nprocs_conf
+0 6837 3 3 2347 1 1 537 0 0
+fn=get_phys_pages
+0 2 1 0 0 0 0 0 0 0
+fn=getc
+0 2907989 3 3 1493163 0 0 314368 0 0
+fn=getcwd
+0 152 6 6 44 4 4 28 2 0
+fn=getdelim
+0 12762 11 10 4159 0 0 1730 0 0
+fn=getenv
+0 16954 32 12 5669 542 175 281 1 0
+fn=getpagesize
+0 579 4 2 579 7 0 0 0 0
+fn=getpid
+0 5 1 1 2 0 0 0 0 0
+fn=getrlimit
+0 10 2 2 2 0 0 0 0 0
+fn=gettimeofday
+0 45 3 3 3 0 0 15 0 0
+fn=handle_intel.isra.0
+0 94 4 4 14 0 0 26 1 0
+fn=handle_ld_preload
+0 662 7 7 68 1 1 17 1 1
+fn=index
+0 12221 32 24 856 69 67 0 0 0
+fn=init
+0 13 3 3 3 1 0 3 1 1
+fn=init_cacheinfo
+0 150 10 10 11 0 0 15 2 2
+fn=init_cpu_features.constprop.0
+0 113 12 12 18 2 2 20 0 0
+fn=init_tls
+0 127 5 5 32 13 0 15 1 1
+fn=intel_02_known_compare
+0 324 0 0 162 6 6 0 0 0
+fn=intel_check_word
+0 407 10 10 28 0 0 40 0 0
+fn=lseek
+0 7 1 1 2 0 0 0 0 0
+fn=main
+0 16 2 2 0 0 0 4 0 0
+fn=malloc
+0 15690 138 11 4577 127 5 1238 4 2
+fn=malloc_consolidate
+0 1444 35 17 221 3 1 335 36 35
+fn=malloc_hook_ini
+0 11 2 2 3 1 1 3 0 0
+fn=map_doit
+0 12 1 1 5 0 0 3 0 0
+fn=match_symbol
+0 6498 15 15 2557 70 59 666 0 0
+fn=memalign
+0 30 3 2 11 1 0 6 0 0
+fn=memalign_hook_ini
+0 6 1 1 2 1 0 1 0 0
+fn=memchr
+0 741696 59 17 82720 91 30 0 0 0
+fn=memcpy
+0 3170 32 24 807 0 0 732 72 71
+fn=memcpy@@GLIBC_2.14
+0 10 3 2 5 1 0 0 0 0
+fn=memcpy@GLIBC_2.2.5
+0 75 4 4 20 4 1 0 0 0
+fn=memkind_check_available
+0 42 2 1 18 16 0 0 0 0
+fn=memkind_hbw_all_get_mbind_nodemask
+0 18 2 2 5 0 0 6 0 0
+fn=memkind_hbw_check_available
+0 25 1 1 10 0 0 0 0 0
+fn=memkind_hbw_get_mbind_nodemask
+0 60 4 2 16 0 0 16 0 0
+fn=memkind_hbw_hugetlb_check_available
+0 14 1 0 4 0 0 4 0 0
+fn=memkind_hugetlb_check_available_2mb
+0 91 8 7 25 0 0 12 0 0
+fn=memmove
+0 178 4 4 26 0 0 24 0 0
+fn=mempcpy
+0 33410 119 25 6095 255 194 5060 291 194
+fn=memset
+0 37879 9 7 263 3 0 36413 525 525
+fn=mkl_blas_avx2_dgemm_copyat
+0 2088 2 2 580 42 0 464 43 43
+fn=mkl_blas_avx2_dgemm_copybn
+0 1404 1 1 390 57 0 312 57 46
+fn=mkl_blas_avx2_dgemm_dcopy_right12_ea
+0 1708708 26 26 394756 201448 201309 394176 197088 197088
+fn=mkl_blas_avx2_dgemm_dcopy_right4_ea
+0 426270 12 12 90246 45942 45864 89856 44928 44928
+fn=mkl_blas_avx2_dgemm_get_bufs
+0 78 4 4 16 0 0 12 0 0
+fn=mkl_blas_avx2_dgemm_initialize_buffers
+0 6432 14 10 871 256 1 2345 394 254
+fn=mkl_blas_avx2_dgemm_initialize_kernel_info
+0 6912 14 11 2048 15 6 2240 63 57
+fn=mkl_blas_avx2_dgemm_initialize_strategy
+0 832 4 2 64 0 0 512 4 0
+fn=mkl_blas_avx2_dgemm_ker0
+0 840 3 3 240 29 29 160 29 29
+fn=mkl_blas_avx2_dgemm_kernel_0_b0
+0 352546724 38 38 110834112 9209478 1018198 985680 657351 493887
+fn=mkl_blas_avx2_dgemm_map_thread_to_kernel
+0 1344 4 3 256 1 0 256 61 55
+fn=mkl_blas_avx2_get_kernel_api_version
+0 2 1 1 1 0 0 0 0 0
+fn=mkl_blas_dgemm
+0 436 45 45 125 13 13 165 15 15
+fn=mkl_blas_dgemm_initialize_buffers
+0 1105 6 6 407 1 1 142 0 0
+fn=mkl_blas_dgemm_initialize_kernel_info
+0 1063 8 6 391 2 2 138 0 0
+fn=mkl_blas_dgemm_map_thread_to_kernel
+0 1074 5 5 390 7 4 140 0 0
+fn=mkl_blas_errchk_dgemm
+0 110 9 9 26 0 0 18 0 0
+fn=mkl_blas_get_kernel_api_version
+0 32 5 5 7 5 3 6 1 1
+fn=mkl_dnn_Xbyak_F64::Operand::Operand(int, mkl_dnn_Xbyak_F64::Operand::Kind, int, bool)
+0 40768 6 6 6272 197 190 6272 0 0
+fn=mkl_dnn_avx2_Xbyak_F32::Operand::Operand(int, mkl_dnn_avx2_Xbyak_F32::Operand::Kind, int, bool)
+0 40352 3 3 6208 197 197 6208 0 0
+fn=mkl_dnn_avx2_Xbyak_F64::Operand::Operand(int, mkl_dnn_avx2_Xbyak_F64::Operand::Kind, int, bool)
+0 10088 3 3 1552 49 49 1552 0 0
+fn=mkl_read_threads_env
+0 51 10 10 5 1 1 12 1 1
+fn=mkl_serv_allocate
+0 746 19 16 155 8 4 150 8 5
+fn=mkl_serv_cbwr_get
+0 1580 12 8 587 3 3 394 0 0
+fn=mkl_serv_cbwr_get_nolock
+0 22 2 2 8 1 1 5 0 0
+fn=mkl_serv_core_register_cleanup
+0 72 2 2 15 2 1 24 2 1
+fn=mkl_serv_cpu_detect
+0 240 10 9 72 3 0 36 2 0
+fn=mkl_serv_domain_get_max_threads
+0 82 9 9 19 2 2 16 1 0
+fn=mkl_serv_enable_instructions
+0 30 5 5 4 0 0 7 0 0
+fn=mkl_serv_free
+0 243 7 7 75 0 0 30 1 1
+fn=mkl_serv_get_dynamic
+0 36 2 2 18 1 1 12 0 0
+fn=mkl_serv_get_envmode_variable
+0 34 2 2 34 3 3 0 0 0
+fn=mkl_serv_get_fast_mm_status
+0 30 1 1 15 0 0 0 0 0
+fn=mkl_serv_get_num_stripes
+0 200533 48 47 16423 519 518 39558 537 438
+fn=mkl_serv_getenv
+0 442 6 6 102 0 0 136 1 1
+fn=mkl_serv_iface_verbose_mode
+0 2 1 1 0 0 0 0 0 0
+fn=mkl_serv_inspector_suppress
+0 7634 7 7 3809 715 129 1636 3 1
+fn=mkl_serv_inspector_unsuppress
+0 2176 2 2 1088 241 44 0 0 0
+fn=mkl_serv_intel_cpu_true
+0 36 2 2 11 1 1 9 0 0
+fn=mkl_serv_libc_is_static
+0 20 3 1 4 2 2 2 0 0
+fn=mkl_serv_load_dll
+0 208 12 8 57 8 5 33 1 1
+fn=mkl_serv_load_fun
+0 45 2 2 15 0 0 10 0 0
+fn=mkl_serv_lock
+0 4732 5 5 1352 0 0 1690 103 82
+fn=mkl_serv_lsame
+0 108 2 2 18 1 1 0 0 0
+fn=mkl_serv_malloc
+0 798 36 36 177 22 16 163 12 8
+fn=mkl_serv_mpi_get_ppn
+0 54 8 8 2 1 1 10 0 0
+fn=mkl_serv_set_xerbla_interface
+0 4 1 1 2 1 1 1 0 0
+fn=mkl_serv_strncat_s
+0 2917 17 13 505 5 3 54 0 0
+fn=mkl_serv_strncpy_s
+0 3269 8 5 254 5 1 251 2 1
+fn=mkl_serv_strnlen_s
+0 6390 4 4 977 5 5 41 0 0
+fn=mkl_serv_thr_register_cleanup
+0 24 2 2 5 1 1 8 0 0
+fn=mkl_serv_thread_yield
+0 1148 1 1 0 0 0 0 0 0
+fn=mkl_serv_trylock
+0 2712 3 3 1017 195 55 0 0 0
+fn=mkl_serv_unlock
+0 676 1 1 0 0 0 338 3 1
+fn=mkl_serv_verbose_mode
+0 43 5 5 5 2 2 14 0 0
+fn=mkl_set_xerbla_interface
+0 1 1 1 0 0 0 0 0 0
+fn=mm_account_ptr_by_tid..0
+0 8151 38 35 217 16 11 4257 1040 1032
+fn=mmap
+0 6786 59 17 1471 2 0 1248 47 44
+fn=mprotect
+0 810 6 5 162 0 0 0 0 0
+fn=msort_with_tmp.part.0
+0 109548 17 10 27845 0 0 17621 47 12
+fn=munmap
+0 315 13 2 63 0 0 0 0 0
+fn=new_heap
+0 3071 67 6 441 19 1 550 63 63
+fn=next_line
+0 268 10 8 68 3 0 64 8 8
+fn=numa_allocate_cpumask
+0 15 0 0 0 0 0 3 0 0
+fn=numa_allocate_nodemask
+0 20 2 2 0 0 0 4 0 0
+fn=numa_bitmask_alloc
+0 200 4 2 24 0 0 48 0 0
+fn=numa_bitmask_free
+0 11 1 1 2 0 0 3 0 0
+fn=numa_bitmask_isbitset
+0 1036 0 0 259 0 0 0 0 0
+fn=numa_bitmask_nbytes
+0 5 1 1 2 0 0 0 0 0
+fn=numa_bitmask_setall
+0 1293 2 2 132 0 0 130 0 0
+fn=numa_bitmask_setbit
+0 2331 1 1 777 0 0 518 0 0
+fn=numa_bitmask_weight
+0 56356 2 2 12 0 0 5128 0 0
+fn=numa_max_possible_node
+0 20 1 1 4 0 0 4 0 0
+fn=numa_node_size64
+0 2341 8 8 553 3 1 158 1 0
+fn=numa_num_configured_cpus
+0 3 1 0 2 1 0 0 0 0
+fn=numa_num_configured_nodes
+0 5676 5 2 1548 1 0 774 0 0
+fn=numa_num_possible_cpus
+0 6 0 0 6 0 0 0 0 0
+fn=numa_num_possible_nodes
+0 8 1 1 8 0 0 0 0 0
+fn=numa_sched_getaffinity
+0 17 1 1 4 0 0 4 0 0
+fn=omp_parallel_acopy_lookahead
+0 724292988 76 71 241038065 1939 865 7955 1010 797
+fn=open
+0 3187 8 4 569 0 0 285 0 0
+fn=open_path
+0 23390 43 43 7716 60 49 1905 8 6
+fn=open_verify
+0 11666 49 49 3059 23 10 3112 9 8
+fn=openaux
+0 952 8 8 448 0 0 168 0 0
+fn=opendir
+0 9 2 1 0 0 0 0 0 0
+fn=phys_pages_info
+0 59 3 3 10 2 2 12 1 1
+fn=pthread_atfork
+0 5 2 2 1 1 1 0 0 0
+fn=pthread_attr_destroy
+0 756 0 0 252 7 0 126 0 0
+fn=pthread_attr_getstack
+0 441 61 0 189 0 0 126 2 0
+fn=pthread_attr_init@@GLIBC_2.2.5
+0 4032 90 2 252 0 0 1260 99 97
+fn=pthread_attr_setdetachstate
+0 441 1 1 126 0 0 0 0 0
+fn=pthread_attr_setstacksize
+0 378 45 2 63 0 0 63 0 0
+fn=pthread_cond_init@@GLIBC_2.3.2
+0 5056 63 5 448 0 0 2560 127 65
+fn=pthread_cond_signal@@GLIBC_2.3.2
+0 1890 3 3 567 78 12 0 0 0
+fn=pthread_cond_wait@@GLIBC_2.3.2
+0 4536 63 6 1953 165 29 630 0 0
+fn=pthread_condattr_init
+0 6 2 2 2 0 0 2 0 0
+fn=pthread_create@@GLIBC_2.2.5
+0 13356 396 21 3213 319 7 3528 476 441
+fn=pthread_getaffinity_np@@GLIBC_2.3.4
+0 1260 3 2 126 5 0 63 0 0
+fn=pthread_getattr_np
+0 4221 147 5 1134 48 0 1071 38 37
+fn=pthread_getspecific
+0 39702 40 7 11631 65 8 0 0 0
+fn=pthread_key_create
+0 280 11 6 42 6 3 14 1 1
+fn=pthread_mutex_init
+0 19468 117 10 2512 0 0 3768 415 353
+fn=pthread_mutex_lock
+0 6357 37 16 1506 190 16 339 0 0
+fn=pthread_mutex_trylock
+0 14560 4 4 4004 32 2 2184 8 0
+fn=pthread_mutex_unlock
+0 11447 156 10 3305 58 0 595 0 0
+fn=pthread_mutexattr_destroy
+0 1128 0 0 564 0 0 0 0 0
+fn=pthread_mutexattr_init
+0 1698 6 2 566 0 0 566 1 1
+fn=pthread_mutexattr_settype
+0 6768 8 2 1128 0 0 564 0 0
+fn=pthread_once
+0 252 10 7 106 5 3 16 0 0
+fn=pthread_rwlock_rdlock
+0 108 2 2 42 3 3 0 0 0
+fn=pthread_rwlock_unlock
+0 114 3 3 48 0 0 6 0 0
+fn=pthread_self
+0 3270 19 2 3270 0 0 0 0 0
+fn=pthread_setcancelstate
+0 1323 5 2 189 0 0 126 0 0
+fn=pthread_setcanceltype
+0 1953 91 3 315 3 0 189 0 0
+fn=pthread_setspecific
+0 4555 78 9 938 4 1 937 71 65
+fn=ptmalloc_init.part.7
+0 493 5 5 167 64 2 9 2 0
+fn=qsort
+0 8 2 0 0 0 0 0 0 0
+fn=qsort_r
+0 6654 26 13 2927 10 0 591 43 43
+fn=random
+0 859821036 3 3 303466248 1 1 50577708 0 0
+fn=random_r
+0 1313388869 2 2 404621664 4 3 202310832 0 0
+fn=rawmemchr
+0 7 2 2 4 2 0 0 0 0
+fn=read
+0 1670 7 5 811 0 0 0 0 0
+fn=read_int
+0 12 2 2 5 0 0 1 0 0
+fn=readdir
+0 11343 12 4 4643 5 0 1746 0 0
+fn=readlink
+0 14 2 2 3 1 0 1 0 0
+fn=realloc
+0 1838 73 10 553 90 4 408 38 38
+fn=realloc_hook_ini
+0 82 9 9 17 1 1 11 0 0
+fn=rindex
+0 12 2 2 6 1 0 0 0 0
+fn=rint
+0 5 2 2 3 0 0 0 0 0
+fn=rintf
+0 5 1 1 3 0 0 0 0 0
+fn=round_and_return
+0 63 9 9 9 0 0 8 0 0
+fn=rtld_lock_default_lock_recursive
+0 188 1 1 188 3 1 0 0 0
+fn=rtld_lock_default_unlock_recursive
+0 188 0 0 188 0 0 0 0 0
+fn=sbrk
+0 87 8 8 27 5 3 14 1 0
+fn=sched_yield
+0 5740 1 1 1148 63 15 0 0 0
+fn=secure_getenv
+0 10 4 4 4 3 1 0 0 0
+fn=set_thread_opts_avx2
+0 4544 9 8 896 5 0 960 0 0
+fn=setenv
+0 22 2 2 4 0 0 4 0 0
+fn=sigaction
+0 44 1 1 0 0 0 0 0 0
+fn=sigemptyset
+0 38 2 2 1 0 0 16 2 2
+fn=sin
+0 8 1 1 3 0 0 0 0 0
+fn=sleep
+0 4883 4 4 1542 1 0 1028 0 0
+fn=sscanf
+0 236521 15 3 13913 0 0 125217 0 0
+fn=start_thread
+0 2457 155 4 567 93 0 630 238 126
+fn=stpcpy
+0 131 5 5 11 1 1 16 0 0
+fn=str_to_mpn.isra.0
+0 100 4 4 25 1 1 18 0 0
+fn=strcasecmp
+0 10 2 2 6 4 0 0 0 0
+fn=strcasestr
+0 30 4 4 6 2 0 0 0 0
+fn=strchrnul
+0 31142 50 6 2948 37 14 0 0 0
+fn=strcmp
+0 716424 19 13 239655 13490 6439 0 0 0
+fn=strcpy
+0 9 2 2 4 0 0 0 0 0
+fn=strcspn
+0 6 1 1 3 0 0 0 0 0
+fn=strdup
+0 85 0 0 10 0 0 20 0 0
+fn=strerror
+0 13 1 1 4 0 0 4 0 0
+fn=strerror_r
+0 30 2 2 9 2 2 7 0 0
+fn=strlen
+0 11365 26 26 1229 7 5 0 0 0
+fn=strncasecmp
+0 10 2 2 6 1 0 0 0 0
+fn=strncmp
+0 10 4 2 6 0 0 0 0 0
+fn=strncpy
+0 18 2 2 8 3 0 0 0 0
+fn=strnlen
+0 5 1 1 3 0 0 0 0 0
+fn=strsep
+0 38394 2 2 11950 0 0 51 0 0
+fn=strspn
+0 6 2 2 3 0 0 0 0 0
+fn=strstr
+0 51 6 4 9 3 0 0 0 0
+fn=strtod
+0 4 1 1 2 0 0 0 0 0
+fn=strtol
+0 1036 2 1 518 2 0 0 0 0
+fn=strtoul
+0 1232 3 2 616 7 0 0 0 0
+fn=syscall
+0 9354 35 2 1701 1 0 1 1 0
+fn=sysconf
+0 281 31 12 50 7 3 37 0 0
+fn=sysmalloc
+0 506 30 30 135 16 7 101 10 9
+fn=tfind
+0 45 4 2 15 1 1 9 0 0
+fn=time
+0 15 2 2 1 0 0 5 0 0
+fn=tls_get_addr_tail
+0 3317 254 12 1235 9 1 717 0 0
+fn=tsearch
+0 51 7 7 11 0 0 15 0 0
+fn=uname
+0 5 1 1 1 0 0 0 0 0
+fn=update_get_addr
+0 126 6 6 61 1 1 18 1 0
+fn=use_smalln_kernels
+0 36 5 5 10 1 1 6 0 0
+fn=vasprintf
+0 65 5 5 13 1 1 16 0 0
+fn=version_check_doit
+0 10 2 2 4 0 0 2 0 0
+fn=vfprintf
+0 154412 1324 148 43395 190 19 33785 537 506
+fn=vfscanf
+0 8 1 1 0 0 0 0 0 0
+fn=void bench<double>(Trans, Trans, long, long, long, double*, double*)
+0 505875746 12 12 101208819 20534 4 101155454 6322217 6322215
+fn=vsnprintf
+0 2992 68 6 544 0 0 816 131 126
+fn=vsscanf
+0 459129 15 3 69565 0 0 125217 2 1
+fn=wait_for_work
+0 3300400171 53 53 1100134096 2696 1541 8335 1707 1660
+summary: 7147691179 22499 8662 2322744019 9692697 1374159 360837729 7300648 7129859

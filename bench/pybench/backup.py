@@ -10,25 +10,30 @@ def benchmark(num_iter, num_batch, f, *args):
         start = time.time()
         for jdx in range(num_batch):
             f(*args)
-        acc += (time.time() - start) / num_batch
+        acc += time.time() - start
     return acc / num_iter
 
 def foo(a, b):
     node1 = tn.Node(a)
     node2 = tn.Node(b)
-    node1[0] ^ node2[0]
+    node1[1] ^ node2[0]
     return tn.contract_between(node1, node2)
 
 
 def run(n, num_iter, num_batch):
     a, b = np.random.randn(2,n,n)
     nops = 2 * n ** 3 / 1e9
-    foo(a, b)
     elapsed = benchmark(num_iter, num_batch, foo, a, b)
-    print(n, ", ", nops / elapsed)
+    print(n, " ", nops / elapsed)
 
 if __name__ == "__main__":
     tn.set_default_backend(sys.argv[1])
-    for i in range(4102, 4090 - 1, -1):
-        run(i, 20, 1)
+    for i in range(4096, 512, -256):
+        run(i, 10, 1)
+
+    for i in range(512, 64, -32):
+        run(i, 50, 1000)
+
+    for i in range(64, 16, -1):
+        run(i, 50, 1000)
 
