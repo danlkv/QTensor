@@ -110,3 +110,8 @@ venv.bak/
 .idea/
 out/
 local.properties
+
+# Cobalt output
+*.cobaltlog
+*.error
+*.output
