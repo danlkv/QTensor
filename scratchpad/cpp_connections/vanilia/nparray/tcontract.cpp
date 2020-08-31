@@ -2,6 +2,8 @@
 #include <iostream>
 #include "numpy/arrayobject.h"
 #include <math.h>
+#include <chrono>
+using namespace std::chrono;
 
 static PyObject *
 print_4(PyObject *dummy, PyObject *args)
@@ -12,10 +14,13 @@ print_4(PyObject *dummy, PyObject *args)
 
     if (!PyArg_ParseTuple(args, "O", &arg)) return NULL;
 
-    std::cout << "before convert" << std::endl;
+    std::cout << "before arg convert..." << std::endl;
+    auto epoch = high_resolution_clock::now();
     arr = PyArray_FROM_OTF(arg, NPY_DOUBLE, NPY_ARRAY_IN_ARRAY);
     if (arr == NULL) return NULL;
-    std::cout << "after convert" << std::endl;
+    auto now = high_resolution_clock::now();
+    auto millis = duration_cast<milliseconds>(now - epoch).count();
+    std::cout << "after convert. duration (μs) = " << millis << std::endl;
     
 
     dptr = (double *)PyArray_DATA(arr);

@@ -4,6 +4,7 @@ import numpy as np
 module  = Extension('tcontract'
                     , sources=['tcontract.cpp']
                     , include_dirs=[np.get_include()]
+                    , extra_compile_args=['-g']
                    )
 
 setup(
