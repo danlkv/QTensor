@@ -3,6 +3,36 @@
 #include "numpy/arrayobject.h"
 #include <math.h>
 
+static PyObject *
+print_4(PyObject *dummy, PyObject *args)
+{
+    PyObject *arg=NULL;
+    PyObject *arr=NULL;
+    double *dptr;
+
+    if (!PyArg_ParseTuple(args, "O", &arg)) return NULL;
+
+    std::cout << "before convert" << std::endl;
+    arr = PyArray_FROM_OTF(arg, NPY_DOUBLE, NPY_ARRAY_IN_ARRAY);
+    if (arr == NULL) return NULL;
+    std::cout << "after convert" << std::endl;
+    
+
+    dptr = (double *)PyArray_DATA(arr);
+    std::cout << "arr[0] = " << *dptr << std::endl;
+    std::cout << "arr[1] = " << *(dptr+1) << std::endl;
+    std::cout << "arr[2] = " << *(dptr+2) << std::endl;
+    std::cout << "arr[3] = " << *(dptr+3) << std::endl;
+
+
+    Py_DECREF(arr);
+    Py_INCREF(Py_None);
+    return Py_None;
+
+}
+
+// -- Examples
+
 static PyObject * integrate3(PyObject * module, PyObject * args)
 {
     PyObject * argy=NULL;        // Regular Python/C API
@@ -132,11 +162,15 @@ example_wrapper(PyObject *dummy, PyObject *args)
     return NULL;
 }
 
+// --
+
 static PyMethodDef tcontract_Methods[] = {
     {"integrate3",  integrate3, METH_VARARGS,
      "Pass 3D numpy array (double or complex) and dx,dy,dz step size. Returns Reimman integral"},
     {"example",  example_wrapper, METH_VARARGS,
      "Example from https://numpy.org/doc/stable/user/c-info.how-to-extend.html"},
+    {"print_4",  print_4, METH_VARARGS,
+     "Prints first 4 values of numpy array"},
     {NULL, NULL, 0, NULL}        /* Sentinel */
 };
 
