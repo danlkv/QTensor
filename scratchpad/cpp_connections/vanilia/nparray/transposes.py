@@ -7,6 +7,7 @@ def large_transpose():
         N = int(sys.argv[1])
     except LookupError:
         N = 24
+    print('Numel = ', 2**N)
     arr = np.random.randn(*[2]*N)
     size = sys.getsizeof(arr)
     print('Array size = {C_size:e} bytes'.format(C_size=size))
