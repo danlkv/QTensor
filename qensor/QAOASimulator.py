@@ -16,7 +16,7 @@ class QAOASimulator(Simulator):
         i,j = edge
         # TODO: take only a neighbourhood part of the graph
         graph = get_edge_subgraph(G, edge, len(gamma))
-        log.info('Subgraph nodes: {}, edges: {}', graph.number_of_nodes(), graph.number_of_edges())
+        log.debug('Subgraph nodes: {}, edges: {}', graph.number_of_nodes(), graph.number_of_edges())
         graph = get_edge_subgraph(G, edge, len(gamma))
         mapping = {v:i for i, v in enumerate(graph.nodes())}
         graph = nx.relabel_nodes(graph, mapping, copy=True)

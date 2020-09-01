@@ -14,10 +14,13 @@ from loguru import logger as log
 from qensor import utils
 
 def int_slice(value, vars_to_slice):
+    """
+    Creates a slice dict with integers an values.
+    """
     dimensions = [var.size for var in vars_to_slice]
     multiindex = qtree.utils.unravel_index(value, dimensions)
 
-    return {var: at for var, at in zip(vars_to_slice, multiindex)}
+    return {idx: val for idx, val in zip(vars_to_slice, multiindex)}
 
 class FeynmanSimulator(QtreeSimulator):
     optimizer = SlicesOptimizer

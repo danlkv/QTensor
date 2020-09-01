@@ -1,3 +1,10 @@
+# -- configure logging
+import sys
+from loguru import logger as log
+log.remove()
+log.add(sys.stderr, level='INFO')
+# --
+
 from .CircuitComposer import QAOAComposer
 from .OpFactory import CirqCreator, QtreeCreator
 from qensor.Simulate import CirqSimulator, QtreeSimulator
