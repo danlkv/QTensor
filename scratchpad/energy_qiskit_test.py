@@ -388,7 +388,7 @@ def main(file=None,p=5,shots=1,g=[],b=[],lang='ibm',opt_iters=50,ER=[]):
 
 
     from qensor import QAOA_energy, QtreeQAOAComposer, QtreeSimulator
-    from qensor import QAOA_energy_no_lightcones
+    from qensor import QAOA_energy
     from qensor import CirqQAOAComposer, CirqSimulator
     from qensor.ProcessingFrameworks import PerfNumpyBackend
 
@@ -416,7 +416,7 @@ def main(file=None,p=5,shots=1,g=[],b=[],lang='ibm',opt_iters=50,ER=[]):
         start = time.time()
         def simulate_qiskit(meta_adj_mat, gamma, beta):
             meta_circ_str, nqbits = circuit_gen(meta_adj_mat,gamma,beta,p,'ibm')
-            print('qiskit cirq\n', meta_circ_str)
+            #print('qiskit cirq\n', meta_circ_str)
             meta_run = IBM_run(meta_circ_str,nqbits,shots)
             print('qiskit sim time', time.time()-start)
 
@@ -466,7 +466,7 @@ def main(file=None,p=5,shots=1,g=[],b=[],lang='ibm',opt_iters=50,ER=[]):
 
         start = time.time()
         print(gamma, beta)
-        E = QAOA_energy(G, gamma, beta, profile=False)
+        E = QAOA_energy(G, gamma, beta)
         #assert E-E_no_lightcones<1e-6
 
         qensor_time = time.time() - start
