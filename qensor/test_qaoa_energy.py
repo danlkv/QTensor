@@ -3,6 +3,7 @@ from qensor import QAOAQtreeSimulator
 from qensor.Simulate import CirqSimulator, QtreeSimulator
 from qensor.FeynmanSimulator import FeynmanSimulator
 from qensor.optimisation.Optimizer import TamakiTrimSlicing, TreeTrimSplitter
+from qensor.tests.qiskit_qaoa_energy import simulate_qiskit_amps 
 import numpy as np
 import networkx as nx
 
@@ -14,13 +15,17 @@ def get_test_problem(n=14, p=2, d=3):
     gamma, beta = [np.pi/3]*p, [np.pi/2]*p
     return G, gamma, beta
 
-def test_qaoa_energy():
+def test_qaoa_energy_vs_qiskit():
     G, gamma, beta = get_test_problem()
     sim = QAOAQtreeSimulator(QtreeQAOAComposer)
-    res = sim.energy_expectation(
+    E = sim.energy_expectation(
         G, gamma=gamma, beta=beta)
-    print('result', res)
-    assert res
+
+    assert E
+
+    gamma, beta = -np.array(gamma)*2*np.pi, np.array(beta)*np.pi
+    qiskit_E = simulate_qiskit_amps(G, gamma, beta)
+    assert np.isclose(E, qiskit_E)
 
 def test_qaoa_energy_multithread():
     G, gamma, beta = get_test_problem()

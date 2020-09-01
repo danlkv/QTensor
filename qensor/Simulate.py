@@ -63,7 +63,7 @@ class QtreeSimulator(Simulator):
             sliced_buckets, self.bucket_backend.process_bucket,
             n_var_nosum=len(self.tn.free_vars)
         )
-        print(result, result.data)
+        #print(result, result.data)
         return result.data.flatten()
 
     def simulate_state(self, qc, peo=None):
