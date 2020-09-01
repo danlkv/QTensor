@@ -4,6 +4,8 @@ import qtree
 import qtree.operators as ops
 from qensor.FeynmanSimulator import FeynmanSimulator
 import qensor.optimisation as qop
+import networkx as nx
+import numpy as np
 
 @click.group()
 def cli():
@@ -54,5 +56,33 @@ def tw_exact(filename):
     print(peo)
     print(tw)
 
+
+@cli.command()
+@click.argument('filename')
+@click.option('-t','--tamaki_time', default=15)
+def tw_heuristic(filename, tamaki_time):
+    tn = qop.TensorNet.QtreeTensorNet.from_qsim_file(filename)
+    fopt = qop.Optimizer.TamakiOptimizer()
+    fopt.wait_time = tamaki_time
+    try:
+        peo, tn = fopt.optimize(tn)
+        data = {'treewidth': fopt.treewidth}
+        print(data)
+        #print('peo', peo)
+    except Exception as e:
+        print(e)
+
+@cli.command()
+@click.option('-s','--seed', default=42)
+@click.option('-d','--degree', default=42)
+@click.option('--num-samples', default=100)
+@click.option('-n','--nodes')
+@click.option('-p','--p')
+def qaoa_energy_sim_cost(nodes, seed, degree, p):
+    np.random.seed(seed)
+    G = nx.random_regular_graph(degree, nodes)
+    composer = QtreeQAOAComposer()
+    
+    pass
 
 cli()
