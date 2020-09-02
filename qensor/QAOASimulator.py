@@ -13,21 +13,15 @@ class QAOASimulator(Simulator):
         self.profile = profile
 
     def _get_edge_energy(self, G, gamma, beta, edge):
-        i,j = edge
-        # TODO: take only a neighbourhood part of the graph
-        graph = get_edge_subgraph(G, edge, len(gamma))
-        log.info('Subgraph nodes: {}, edges: {}', graph.number_of_nodes(), graph.number_of_edges())
-        graph = get_edge_subgraph(G, edge, len(gamma))
-        mapping = {v:i for i, v in enumerate(graph.nodes())}
-        graph = nx.relabel_nodes(graph, mapping, copy=True)
+        circuit = self._edge_energy_circuit(G, gamma, beta, edge)
+        return self.simulate(circuit)
 
-        composer = self.composer(
-            graph=graph, gamma=gamma, beta=beta)
+    def _edge_energy_circuit(self, G, gamma, beta, edge):
+        composer = self.composer(G, gamma=gamma, beta=beta)
+        composer.energy_expectation_lightcone(edge)
 
-        i,j = mapping[i], mapping[j]
-        composer.energy_expectation(i,j)
+        return composer.circuit
 
-        return self.simulate(composer.circuit)
 
     def _post_process_energy(self, G, E):
         if np.imag(E)>1e-6:

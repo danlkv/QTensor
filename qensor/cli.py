@@ -1,11 +1,17 @@
 import sys
 import click
 import qtree
-import qtree.operators as ops
-from qensor.FeynmanSimulator import FeynmanSimulator
-import qensor.optimisation as qop
 import networkx as nx
 import numpy as np
+from tqdm import tqdm
+
+import qtree.operators as ops
+import qensor.optimisation as qop
+from qensor.FeynmanSimulator import FeynmanSimulator
+
+from qensor.optimisation.TensorNet import QtreeTensorNet
+from qensor.optimisation.Optimizer import OrderingOptimizer
+from qensor import QtreeQAOAComposer
 
 @click.group()
 def cli():
@@ -74,15 +80,35 @@ def tw_heuristic(filename, tamaki_time):
 
 @cli.command()
 @click.option('-s','--seed', default=42)
-@click.option('-d','--degree', default=42)
-@click.option('--num-samples', default=100)
-@click.option('-n','--nodes')
-@click.option('-p','--p')
-def qaoa_energy_sim_cost(nodes, seed, degree, p):
+@click.option('-d','--degree', default=3)
+@click.option('-n','--nodes', default=10)
+@click.option('-p','--p', default=1)
+@click.option('-G','--graph-type', default='random_regular')
+def qaoa_energy_tw(nodes, seed, degree, p, graph_type):
     np.random.seed(seed)
-    G = nx.random_regular_graph(degree, nodes)
-    composer = QtreeQAOAComposer()
-    
-    pass
+    if graph_type=='random_regular':
+        G = nx.random_regular_graph(degree, nodes)
+    elif graph_type=='erdos_renyi':
+        G = nx.erdos_renyi_graph(nodes, degree/(nodes-1))
+    else:
+        raise Exception('Unsupported graph type')
+    gamma, beta = [0]*p, [0]*p
+
+    def get_tw(circ):
+
+        tn = QtreeTensorNet.from_qtree_gates(composer.circuit)
+
+        opt = OrderingOptimizer()
+        peo, tn = opt.optimize(tn)
+        treewidth = opt.treewidth
+        return treewidth
+
+    twidths = []
+    for edge in tqdm(G.edges()):
+        composer = QtreeQAOAComposer(G, beta=beta, gamma=gamma)
+        composer.energy_expectation_lightcone(edge)
+        tw = get_tw(composer.circuit)
+        twidths.append(tw)
+    print(f'mean={round(np.mean(twidths), 2)}, max={np.max(twidths)}')
 
 cli()

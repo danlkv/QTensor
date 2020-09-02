@@ -1,3 +1,12 @@
+# -- configure logging
+import sys
+from loguru import logger as log
+log.remove()
+log.add(sys.stderr, level='INFO')
+# --
+from qensor.utils import get_edge_subgraph
+import networkx as nx
+
 from .CircuitComposer import QAOAComposer
 from .OpFactory import CirqCreator, QtreeCreator
 from qensor.Simulate import CirqSimulator, QtreeSimulator
@@ -21,6 +30,24 @@ class QtreeQAOAComposer(QAOAComposer, QtreeCreator):
 
         self.circuit = self.circuit + list(reversed(conjugate))
         return self.circuit
+
+    def energy_expectation_lightcone(self, edge):
+        G = self.graph
+        gamma, beta = self.params['gamma'], self.params['beta']
+        i,j = edge
+        # TODO: take only a neighbourhood part of the graph
+        graph = get_edge_subgraph(G, edge, len(gamma))
+        log.debug('Subgraph nodes: {}, edges: {}', graph.number_of_nodes(), graph.number_of_edges())
+        graph = get_edge_subgraph(G, edge, len(gamma))
+        mapping = {v:i for i, v in enumerate(graph.nodes())}
+        graph = nx.relabel_nodes(graph, mapping, copy=True)
+
+        i,j = mapping[i], mapping[j]
+        composer = QtreeQAOAComposer(graph, beta=beta, gamma=gamma)
+        composer.energy_expectation(i,j)
+        self.circuit = composer.circuit
+        # return composer
+
 
 def QAOA_energy(G, gamma, beta, n_processes=0):
     sim = QAOAQtreeSimulator(QtreeQAOAComposer)
