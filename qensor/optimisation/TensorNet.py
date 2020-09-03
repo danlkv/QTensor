@@ -1,5 +1,6 @@
 import qtree
 from qensor.ProcessingFrameworks import NumpyBackend
+from loguru import logger as log
 
 class TensorNet:
     @property
@@ -16,7 +17,7 @@ class TensorNet:
         raise NotImplementedError
 
 
-class QtreeTensorNet:
+class QtreeTensorNet(TensorNet):
     def __init__(self, buckets, data_dict
                  , bra_vars, ket_vars, free_vars=[]
                  , bucket_backend=NumpyBackend):
@@ -26,6 +27,10 @@ class QtreeTensorNet:
         self.ket_vars = ket_vars
         self.free_vars = free_vars
         self.bucket_backend = bucket_backend()
+
+    def set_free_qubits(self, free):
+        self.free_vars = [self.bra_vars[i] for i in free]
+        self.bra_vars = [var for var in self.bra_vars if var not in self.free_vars]
 
     @property
     def _tensors(self):
@@ -39,8 +44,10 @@ class QtreeTensorNet:
 
     def get_line_graph(self):
         ignored_vars = self.bra_vars + self.ket_vars
-        return qtree.graph_model.buckets2graph(self.buckets,
+        graph =  qtree.graph_model.buckets2graph(self.buckets,
                                                ignore_variables=ignored_vars)
+        log.debug('Line graph nodes: {}, edges: {}', graph.number_of_nodes(), graph.number_of_edges())
+        return graph
 
     @classmethod
     def from_qtree_gates(cls, qc):
@@ -50,4 +57,11 @@ class QtreeTensorNet:
         buckets, data_dict, bra_vars, ket_vars = qtree.optimizer.circ2buckets(
             n_qubits, qtree_circuit)
         tn = cls(buckets, data_dict, bra_vars, ket_vars)
+        return tn
+
+    @classmethod
+    def from_qsim_file(cls, file):
+        n, qc = qtree.operators.read_circuit_file(file)
+        all_gates = sum(qc, [])
+        tn = cls.from_qtree_gates(all_gates)
         return tn

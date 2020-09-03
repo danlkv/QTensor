@@ -18,12 +18,7 @@ def run(n, num_iter, num_batch):
     print(n, ", ", nops / elapsed)
 
 if __name__ == "__main__":
-    for i in range(4096, 512 - 256, -256):
-        run(i, 10, 1)
-
-    for i in range(512, 64 - 32, -32):
-        run(i, 50, 100)
-
-    for i in range(64, 16 - 1, -1):
-        run(i, 50, 100)
+    # for i in range(4102, 4090 - 1, -1):
+    #    run(i, 20, 1)
+    run(1000, 20, 1)
 

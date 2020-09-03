@@ -36,7 +36,59 @@ composer.ansatz_state()
 tn = QtreeTensorNet.from_qtree_gates(composer.circuit)
 
 opt = OrderingOptimizer()
-peo, tn = opt.optimize(self.tn)
+peo, tn = opt.optimize(tn)
 treewidth = opt.treewidth
+
+```
+
+### Use tamaki solver
+
+
+Install from here: https://github.com/TCS-Meiji/PACE2017-TrackA
+
+If you have memory errors, modify the `JFLAGS` variable in bash script `./tw-heuristic`. I use `JFLAGS="-Xmx4g -Xms4g -Xss500m"`.
+
+```python
+from qensor.optimisation.Optimizer import TamakiOptimizer
+from qensor.optimisation.TensorNet import QtreeTensorNet
+from qensor import QtreeQAOAComposer
+
+composer = QtreeQAOAComposer(
+	graph=G, gamma=gamma, beta=beta)
+composer.ansatz_state()
+
+
+tn = QtreeTensorNet.from_qtree_gates(composer.circuit)
+
+opt = TamakiOptimizer(wait_time=15) # time in seconds for heuristic algorithm
+peo, tn = opt.optimize(tn)
+treewidth = opt.treewidth
+
+```
+#### Use tamaki for QAOA energy
+
+and also raise an error when treewidth is large.
+
+```python
+from qensor.optimisation.Optimizer import TamakiOptimizer
+from qensor import QAOAQtreeSimulator
+
+class TamakiQAOASimulator(QAOAQtreeSimsulator):
+    def optimize_buckets(self):
+        opt = TamakiOptimizer()
+        peo, self.tn = opt.optimize(self.tn)
+        if opt.treewidth > 30:
+            raise Exception('Treewidth is too large!')
+        return peo
+
+sim = TamakiQAOASimulator(QtreeQAOAComposer)
+
+if n_processes:
+    res = sim.energy_expectation_parallel(G, gamma=gamma, beta=beta
+        ,n_processes=n_processes
+    )
+else:
+    res = sim.energy_expectation(G, gamma=gamma, beta=beta)
+return res
 
 ```

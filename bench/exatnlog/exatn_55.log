@@ -1,0 +1,66 @@
+DAG front node progressed to 6 out of total of 11
+DAG node detected with all dependencies resolved: 6
+[0.103591](LazyGraphExecutor)[EXEC_THREAD]: Submitting tensor operation 6: Opcode = 7: Details:
+TensorOperation(opcode=7)[id=6]{
+ C(i,j)+=A(k,i)*B(k,j)
+ C{0:0,0:0}{4096,4096}
+ A{0:0,0:0}{4096,4096}
+ B{0:0,0:0}{4096,4096}
+ (1.000000,0.000000) (1.000000,0.000000)
+ GFlop estimate = 1.374390e+02
+ GWord estimate = 5.033165e-02
+}
+: Status = 0: Syncing ... Success [0.255198]
+DAG front node progressed to 7 out of total of 11
+DAG node detected with all dependencies resolved: 7
+[0.255244](LazyGraphExecutor)[EXEC_THREAD]: Submitting tensor operation 7: Opcode = 7: Details:
+TensorOperation(opcode=7)[id=7]{
+ C(i,j)+=A(i,k)*B(k,j)
+ C{0:0,0:0}{4096,4096}
+ A{0:0,0:0}{4096,4096}
+ B{0:0,0:0}{4096,4096}
+ (1.000000,0.000000) (1.000000,0.000000)
+ GFlop estimate = 1.374390e+02
+ GWord estimate = 5.033165e-02
+}
+: Status = 0: Syncing ... Success [0.382380]
+DAG front node progressed to 8 out of total of 11
+DAG node detected with all dependencies resolved: 8
+[0.382427](LazyGraphExecutor)[EXEC_THREAD]: Submitting tensor operation 8: Opcode = 7: Details:
+TensorOperation(opcode=7)[id=8]{
+ C(i,j)+=A(k,i)*B(j,k)
+ C{0:0,0:0}{4096,4096}
+ A{0:0,0:0}{4096,4096}
+ B{0:0,0:0}{4096,4096}
+ (1.000000,0.000000) (1.000000,0.000000)
+ GFlop estimate = 1.374390e+02
+ GWord estimate = 5.033165e-02
+}
+: Status = 0: Syncing ... Success [0.505336]
+DAG front node progressed to 9 out of total of 11
+DAG node detected with all dependencies resolved: 9
+[0.505375](LazyGraphExecutor)[EXEC_THREAD]: Submitting tensor operation 9: Opcode = 7: Details:
+TensorOperation(opcode=7)[id=9]{
+ C(i,j)+=A(i,k)*B(j,k)
+ C{0:0,0:0}{4096,4096}
+ A{0:0,0:0}{4096,4096}
+ B{0:0,0:0}{4096,4096}
+ (1.000000,0.000000) (1.000000,0.000000)
+ GFlop estimate = 1.374390e+02
+ GWord estimate = 5.033165e-02
+}
+: Status = 0: Syncing ... Success [0.650945]
+DAG front node progressed to 10 out of total of 11
+DAG node detected with all dependencies resolved: 10
+[0.650998](LazyGraphExecutor)[EXEC_THREAD]: Submitting tensor operation 10: Opcode = 7: Details:
+TensorOperation(opcode=7)[id=10]{
+ C(i,j)+=A(k,i)*B(k,j)
+ C{0:0,0:0}{4096,4096}
+ A{0:0,0:0}{4096,4096}
+ B{0:0,0:0}{4096,4096}
+ (1.000000,0.000000) (1.000000,0.000000)
+ GFlop estimate = 1.374390e+02
+ GWord estimate = 5.033165e-02
+}
+: Status = 0: Syncing ... Success [0.750741]
+

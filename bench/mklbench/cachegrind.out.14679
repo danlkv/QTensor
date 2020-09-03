@@ -1,0 +1,673 @@
+desc: I1 cache:         32768 B, 64 B, 8-way associative
+desc: D1 cache:         32768 B, 64 B, 8-way associative
+desc: LL cache:         1048576 B, 64 B, 16-way associative
+cmd: ./bench
+events: Ir I1mr ILmr Dr D1mr DLmr Dw D1mw DLmw 
+fl=/gpfs/jlse-fs0/users/yeluo/opt/gcc/build-host-gcc/gcc/include/cpuid.h
+fn=__cpu_indicator_init@GCC_4.8.0
+264 4 0 0 0 0 0 0 0 0
+285 4 0 0 0 0 0 0 0 0
+288 8 1 1 0 0 0 0 0 0
+fl=/gpfs/jlse-fs0/users/yeluo/opt/gcc/build-host-gcc/x86_64-pc-linux-gnu/libgcc/../../../gcc/libgcc/config/i386/cpuinfo.c
+fn=__cpu_indicator_init@GCC_4.8.0
+125 2 0 0 0 0 0 0 0 0
+133 7 1 1 1 1 1 0 0 0
+197 2 1 1 0 0 0 1 0 0
+199 1 0 0 0 0 0 0 0 0
+425 2 1 1 0 0 0 2 0 0
+434 4 0 0 2 1 1 0 0 0
+435 1 0 0 0 0 0 0 0 0
+447 2 0 0 0 0 0 0 0 0
+459 3 0 0 0 0 0 0 0 0
+460 3 0 0 0 0 0 0 0 0
+462 3 0 0 0 0 0 0 0 0
+465 2 0 0 0 0 0 0 0 0
+473 2 1 1 0 0 0 0 0 0
+474 2 1 1 0 0 0 0 0 0
+479 2 0 0 0 0 0 1 0 0
+480 1 0 0 0 0 0 1 0 0
+504 2 0 0 0 0 0 0 0 0
+505 4 0 0 3 0 0 0 0 0
+fn=get_available_features
+258 2 1 1 0 0 0 1 0 0
+282 2 0 0 0 0 0 0 0 0
+288 2 0 0 0 0 0 0 0 0
+291 4 0 0 0 0 0 0 0 0
+293 1 0 0 0 0 0 0 0 0
+294 1 1 1 0 0 0 0 0 0
+295 4 0 0 0 0 0 0 0 0
+309 3 0 0 0 0 0 0 0 0
+312 4 1 1 0 0 0 0 0 0
+314 4 0 0 0 0 0 0 0 0
+316 4 0 0 0 0 0 0 0 0
+318 4 0 0 0 0 0 0 0 0
+320 4 1 1 0 0 0 0 0 0
+322 4 0 0 0 0 0 0 0 0
+324 4 0 0 0 0 0 0 0 0
+326 4 0 0 0 0 0 0 0 0
+328 4 1 1 0 0 0 0 0 0
+330 4 0 0 0 0 0 0 0 0
+331 2 0 0 0 0 0 0 0 0
+333 2 0 0 0 0 0 0 0 0
+334 1 0 0 0 0 0 0 0 0
+335 2 0 0 0 0 0 0 0 0
+336 2 1 1 0 0 0 0 0 0
+340 2 1 1 0 0 0 0 0 0
+342 3 0 0 0 0 0 0 0 0
+343 2 0 0 0 0 0 0 0 0
+344 1 0 0 0 0 0 0 0 0
+345 2 0 0 0 0 0 0 0 0
+347 2 0 0 0 0 0 0 0 0
+348 1 0 0 0 0 0 0 0 0
+350 2 0 0 0 0 0 0 0 0
+351 1 0 0 0 0 0 0 0 0
+352 2 0 0 0 0 0 0 0 0
+392 2 1 1 0 0 0 0 0 0
+394 2 0 0 0 0 0 0 0 0
+396 2 0 0 0 0 0 0 0 0
+398 2 0 0 0 0 0 0 0 0
+400 2 0 0 0 0 0 0 0 0
+402 2 0 0 0 0 0 0 0 0
+404 2 0 0 0 0 0 0 0 0
+409 2 0 0 1 0 0 1 0 0
+415 2 0 0 2 0 0 0 0 0
+fl=/gpfs/jlse-fs0/users/yeluo/opt/gcc/build-host-gcc/x86_64-pc-linux-gnu/libstdc++-v3/include/bits/locale_classes.h
+fn=_GLOBAL__sub_I_cxx11_locale_inst.cc
+793 4 1 1 2 1 1 1 0 0
+fn=_GLOBAL__sub_I_cxx11_wlocale_inst.cc
+793 4 1 1 2 1 1 1 0 0
+fn=_GLOBAL__sub_I_locale_inst.cc
+793 4 1 1 2 1 1 1 0 0
+fn=_GLOBAL__sub_I_wlocale_inst.cc
+793 4 1 1 2 1 1 1 0 0
+fl=/gpfs/jlse-fs0/users/yeluo/opt/gcc/build-host-gcc/x86_64-pc-linux-gnu/libstdc++-v3/include/bits/locale_facets.h
+fn=_GLOBAL__sub_I_cxx11_locale_inst.cc
+1883 4 0 0 2 1 1 1 0 0
+fn=_GLOBAL__sub_I_cxx11_wlocale_inst.cc
+1883 4 0 0 2 1 1 1 0 0
+fn=_GLOBAL__sub_I_locale_inst.cc
+1883 4 0 0 2 2 2 1 0 0
+2277 4 0 0 2 1 1 1 0 0
+2557 4 0 0 2 1 1 1 0 0
+fn=_GLOBAL__sub_I_wlocale_inst.cc
+1883 4 0 0 2 2 2 1 0 0
+2277 4 0 0 2 1 1 1 0 0
+2557 4 0 0 2 0 0 1 0 0
+fl=/gpfs/jlse-fs0/users/yeluo/opt/gcc/build-host-gcc/x86_64-pc-linux-gnu/libstdc++-v3/include/bits/locale_facets_nonio.h
+fn=_GLOBAL__sub_I_cxx11_locale_inst.cc
+756 4 0 0 2 0 0 1 0 0
+1375 8 0 0 4 3 3 2 0 0
+1605 4 0 0 2 1 1 1 0 0
+1762 4 1 1 2 1 1 1 0 0
+1968 4 0 0 2 1 1 1 0 0
+fn=_GLOBAL__sub_I_cxx11_wlocale_inst.cc
+756 4 0 0 2 1 1 1 0 0
+1375 8 0 0 4 3 3 2 0 0
+1605 4 0 0 2 1 1 1 0 0
+1762 4 1 1 2 0 0 1 0 0
+1968 4 0 0 2 0 0 1 0 0
+fn=_GLOBAL__sub_I_locale_inst.cc
+320 4 1 1 2 1 1 1 0 0
+756 4 0 0 2 1 1 1 0 0
+889 4 0 0 2 1 1 1 0 0
+1375 8 0 0 4 2 2 2 0 0
+1605 4 0 0 2 1 1 1 0 0
+1762 4 1 1 2 1 1 1 0 0
+1968 4 0 0 2 1 0 1 0 0
+fn=_GLOBAL__sub_I_wlocale_inst.cc
+320 4 1 1 2 1 1 1 0 0
+756 4 0 0 2 0 0 1 0 0
+889 4 0 0 2 1 1 1 0 0
+1375 8 0 0 4 3 3 2 0 0
+1605 4 0 0 2 1 1 1 0 0
+1762 4 1 1 2 0 0 1 0 0
+1968 4 0 0 2 1 1 1 0 0
+fl=/gpfs/jlse-fs0/users/yeluo/opt/gcc/build-host-gcc/x86_64-pc-linux-gnu/libstdc++-v3/include/ext/bitmap_allocator.h
+fn=_GLOBAL__sub_I_bitmap_allocator.cc
+107 8 1 1 0 0 0 6 2 2
+413 6 0 0 0 0 0 2 0 0
+421 2 1 1 0 0 0 2 0 0
+422 2 0 0 0 0 0 2 0 0
+423 2 0 0 0 0 0 0 0 0
+1109 8 1 1 2 1 1 2 0 0
+1122 8 2 2 2 0 0 2 0 0
+1127 8 0 0 2 0 0 2 0 0
+fl=/gpfs/jlse-fs0/users/yeluo/opt/gcc/build-host-gcc/x86_64-pc-linux-gnu/libstdc++-v3/include/ext/concurrence.h
+fn=_GLOBAL__sub_I_bitmap_allocator.cc
+129 28 0 0 0 0 0 20 2 2
+fn=_GLOBAL__sub_I_eh_alloc.cc
+129 4 1 1 0 0 0 3 1 1
+fl=/gpfs/jlse-fs0/users/yeluo/opt/gcc/build-host-gcc/x86_64-pc-linux-gnu/libstdc++-v3/include/parallel/settings.h
+fn=_GLOBAL__sub_I_parallel_settings.cc
+338 50 8 8 1 1 1 44 6 6
+fl=/gpfs/jlse-fs0/users/yeluo/opt/gcc/build-host-gcc/x86_64-pc-linux-gnu/libstdc++-v3/libsupc++/../../../../gcc/libstdc++-v3/libsupc++/eh_alloc.cc
+fn=_GLOBAL__sub_I_eh_alloc.cc
+121 1 0 0 0 0 0 1 0 0
+123 3 0 0 0 0 0 2 1 0
+124 2 0 0 0 0 0 0 0 0
+133 1 0 0 0 0 0 1 0 0
+135 1 0 0 0 0 0 1 0 0
+136 1 0 0 0 0 0 1 0 0
+338 3 0 0 1 0 0 0 0 0
+fl=/gpfs/jlse-fs0/users/yeluo/opt/gcc/build-host-gcc/x86_64-pc-linux-gnu/libstdc++-v3/libsupc++/../../../../gcc/libstdc++-v3/libsupc++/guard.cc
+fn=__cxa_guard_acquire
+120 1 1 1 1 0 0 0 0 0
+202 2 0 0 0 0 0 0 0 0
+239 1 0 0 0 0 0 0 0 0
+244 6 0 0 0 0 0 5 0 0
+249 2 0 0 0 0 0 0 0 0
+255 2 0 0 1 1 1 0 0 0
+265 4 0 0 1 0 0 0 0 0
+346 6 1 1 6 0 0 0 0 0
+fn=__cxa_guard_release
+200 1 0 0 0 0 0 0 0 0
+393 2 1 1 1 0 0 0 0 0
+398 1 0 0 2 0 0 0 0 0
+400 2 0 0 0 0 0 0 0 0
+426 1 0 0 1 0 0 0 0 0
+fl=/gpfs/jlse-fs0/users/yeluo/opt/gcc/build-host-gcc/x86_64-pc-linux-gnu/libstdc++-v3/src/../../../../gcc/libstdc++-v3/src/c++11/compatibility-c++0x.cc
+fn=_GLOBAL__sub_I_compatibility_c__0x.cc
+184 4 0 0 0 0 0 2 0 0
+199 4 0 0 0 0 0 2 0 0
+214 6 1 1 0 0 0 2 1 1
+215 6 1 1 0 0 0 1 0 0
+256 2 1 1 1 0 0 1 0 0
+fn=std::error_category::error_category()
+136 8 1 1 4 1 1 2 0 0
+fl=/gpfs/jlse-fs0/users/yeluo/opt/gcc/build-host-gcc/x86_64-pc-linux-gnu/libstdc++-v3/src/../../../../gcc/libstdc++-v3/src/c++11/compatibility-thread-c++0x.cc
+fn=_GLOBAL__sub_I_compatibility_thread_c__0x.cc
+50 3 1 1 1 1 1 2 1 1
+124 3 0 0 1 0 0 0 0 0
+fl=/gpfs/jlse-fs0/users/yeluo/opt/gcc/build-host-gcc/x86_64-pc-linux-gnu/libstdc++-v3/src/c++11/../../../../../gcc/libstdc++-v3/src/c++11/future.cc
+fn=std::future_category()
+65 13 2 2 1 1 1 3 0 0
+79 4 1 1 1 0 0 0 0 0
+fl=/gpfs/jlse-fs0/users/yeluo/opt/gcc/build-host-gcc/x86_64-pc-linux-gnu/libstdc++-v3/src/c++11/../../../../../gcc/libstdc++-v3/src/c++11/locale-inst.cc
+fn=_GLOBAL__sub_I_cxx11_locale_inst.cc
+380 1 0 0 1 0 0 0 0 0
+fn=_GLOBAL__sub_I_cxx11_wlocale_inst.cc
+380 1 0 0 1 0 0 0 0 0
+fn=_GLOBAL__sub_I_locale_inst.cc
+380 1 0 0 1 0 0 0 0 0
+fn=_GLOBAL__sub_I_wlocale_inst.cc
+380 1 0 0 1 0 0 0 0 0
+fl=/gpfs/jlse-fs0/users/yeluo/opt/gcc/build-host-gcc/x86_64-pc-linux-gnu/libstdc++-v3/src/c++11/../../../../../gcc/libstdc++-v3/src/c++11/system_error.cc
+fn=_GLOBAL__sub_I_system_error.cc
+326 4 0 0 0 0 0 1 0 0
+327 4 1 1 0 0 0 0 0 0
+378 2 0 0 0 0 0 0 0 0
+fl=/gpfs/jlse-fs0/users/yeluo/opt/gcc/build-host-gcc/x86_64-pc-linux-gnu/libstdc++-v3/src/c++17/../../../../../gcc/libstdc++-v3/src/c++17/memory_resource.cc
+fn=_GLOBAL__sub_I_memory_resource.cc
+88 4 0 0 0 0 0 1 0 0
+89 4 1 1 0 0 0 1 0 0
+142 4 0 0 0 0 0 0 0 0
+1394 2 0 0 0 0 0 0 0 0
+fl=/gpfs/jlse-fs0/users/yeluo/opt/gcc/build-host-gcc/x86_64-pc-linux-gnu/libstdc++-v3/src/c++98/../../../../../gcc/libstdc++-v3/src/c++98/bitmap_allocator.cc
+fn=_GLOBAL__sub_I_bitmap_allocator.cc
+125 1 0 0 1 0 0 0 0 0
+fl=/gpfs/jlse-fs0/users/yeluo/opt/gcc/build-host-gcc/x86_64-pc-linux-gnu/libstdc++-v3/src/c++98/../../../../../gcc/libstdc++-v3/src/c++98/parallel_settings.cc
+fn=_GLOBAL__sub_I_parallel_settings.cc
+42 1 0 0 1 0 0 0 0 0
+fl=/nfs/site/proj/openmp/compilers/intel/16.0/Linux/install/update4/compilers_and_libraries_2016.4.258/linux/compiler/include/atomicint.h
+fn=__sti__$E
+240 17 16 16 0 0 0 0 0 0
+fl=/nfs/site/proj/openmp/promo/20190218-tbbmalloc/tbbmalloc/bld/build/linux_intel64_icc_cc4.4.6_libc2.12_kernel2.6.32_release/../../src/tbbmalloc/backref.cpp
+fn=__sti__$E
+97 1 1 1 1 0 0 0 0 0
+fl=/nfs/site/proj/openmp/promo/20190218-tbbmalloc/tbbmalloc/bld/build/linux_intel64_icc_cc4.4.6_libc2.12_kernel2.6.32_release/../../src/tbbmalloc/frontend.cpp
+fn=__sti__$E
+305 1 1 1 1 0 0 0 0 0
+fl=/nfs/site/proj/openmp/promo/20190312/tmp/lin_32e-rtl_int_5_nor_dyn.rel.50.c0.s0.t1..h1.w1-fxe16lin03/../../src/kmp_affinity.cpp
+fn=__sti__$E
+50 3 1 1 0 0 0 2 1 1
+fl=/nfs/site/proj/openmp/promo/20190312/tmp/lin_32e-rtl_int_5_nor_dyn.rel.50.c0.s0.t1..h1.w1-fxe16lin03/../../src/kmp_affinity.h
+fn=__sti__$E
+702 3 0 0 0 0 0 2 0 0
+fl=/nfs/site/proj/openmp/promo/20190312/tmp/lin_32e-rtl_int_5_nor_dyn.rel.50.c0.s0.t1..h1.w1-fxe16lin03/../../src/kmp_global.cpp
+fn=__sti__$E
+88 2 0 0 1 1 1 1 1 1
+89 2 0 0 1 1 1 1 0 0
+195 5 0 0 1 1 1 4 2 2
+458 2 0 0 1 1 1 1 1 1
+519 2 1 1 1 1 1 1 1 1
+575 4 0 0 1 1 1 3 1 1
+576 4 0 0 1 1 1 3 1 1
+587 4 0 0 1 1 1 3 1 1
+590 4 0 0 1 1 1 3 1 1
+597 4 1 1 1 0 0 3 1 1
+600 4 0 0 1 1 1 3 1 1
+604 4 0 0 1 1 1 3 1 1
+fl=/nfs/site/proj/openmp/promo/20190312/tmp/lin_32e-rtl_int_5_nor_dyn.rel.50.c0.s0.t1..h1.w1-fxe16lin03/../../src/kmp_i18n.cpp
+fn=__sti__$E
+83 4 0 0 1 0 0 3 1 1
+fl=/nfs/site/proj/openmp/promo/20190312/tmp/lin_32e-rtl_int_5_nor_dyn.rel.50.c0.s0.t1..h1.w1-fxe16lin03/../../src/kmp_io.cpp
+fn=__sti__$E
+63 5 0 0 2 1 1 3 1 1
+65 4 0 0 1 1 1 3 1 1
+fl=/nfs/site/proj/openmp/promo/20190312/tmp/lin_32e-rtl_int_5_nor_dyn.rel.50.c0.s0.t1..h1.w1-fxe16lin03/../../src/kmp_itt.cpp
+fn=__sti__$E
+77 4 0 0 1 0 0 3 1 1
+fl=/nfs/site/proj/openmp/promo/20190312/tmp/lin_32e-rtl_int_5_nor_dyn.rel.50.c0.s0.t1..h1.w1-fxe16lin03/../../src/kmp_itt.inl
+fn=__sti__$E
+89 45 3 3 0 0 0 45 15 15
+90 15 0 0 15 0 0 0 0 0
+fl=/nfs/site/proj/openmp/promo/20190312/tmp/lin_32e-rtl_int_5_nor_dyn.rel.50.c0.s0.t1..h1.w1-fxe16lin03/../../src/kmp_sched.cpp
+fn=__sti__$E
+68 1 0 0 0 0 0 1 1 1
+fl=/nfs/site/proj/openmp/promo/20190312/tmp/lin_32e-rtl_int_5_nor_dyn.rel.50.c0.s0.t1..h1.w1-fxe16lin03/../../src/kmp_tasking.cpp
+fn=__sti__$E
+3260 4 0 0 1 1 1 3 1 1
+fl=/nfs/site/proj/openmp/promo/20190312/tmp/lin_32e-rtl_int_5_nor_dyn.rel.50.c0.s0.t1..h1.w1-fxe16lin03/../../src/ompt-specific.cpp
+fn=__sti__$E
+491 2 1 1 1 0 0 1 1 1
+fl=/nfs/site/proj/openmp/promo/20190312/tmp/lin_32e-rtl_int_5_nor_dyn.rel.50.c0.s0.t1..h1.w1-fxe16lin03/../../src/thirdparty/tbb/atomic.h
+fn=__sti__$E
+299 2 1 1 2 1 1 0 0 0
+326 1 0 0 1 1 0 0 0 0
+fl=/nfs/site/proj/openmp/promo/20190312/tmp/lin_32e-rtl_int_5_nor_dyn.rel.50.c0.s0.t1..h1.w1-fxe16lin03/../../src/thirdparty/tbb/dynamic_link.cpp
+fn=_INTERNAL_45_______src_thirdparty_tbb_omp_dynamic_link_cpp_c306cade::__kmp::init_dl_data()
+305 3 1 1 1 1 1 1 0 0
+306 2 0 0 0 0 0 0 0 0
+314 1 0 0 1 0 0 0 0 0
+315 3 1 1 0 0 0 0 0 0
+318 1 0 0 0 0 0 0 0 0
+322 2 0 0 1 0 0 0 0 0
+332 1 0 0 0 0 0 1 1 1
+337 2 1 1 0 0 0 0 0 0
+338 2 0 0 0 0 0 0 0 0
+344 3 0 0 1 0 0 1 0 0
+345 5 0 0 2 0 0 1 0 0
+350 2 1 1 0 0 0 1 0 0
+fn=__sti__$E
+363 2 0 0 1 1 0 0 0 0
+525 1 1 1 0 0 0 0 0 0
+fl=/nfs/site/proj/openmp/promo/20190312/tmp/lin_32e-rtl_int_5_nor_dyn.rel.50.c0.s0.t1..h1.w1-fxe16lin03/../../src/thirdparty/tbb/machine/linux_intel64.h
+fn=__sti__$E
+76 4 0 0 2 0 0 0 0 0
+fl=/nfs/site/proj/openmp/promo/20190312/tmp/lin_32e-rtl_int_5_nor_dyn.rel.50.c0.s0.t1..h1.w1-fxe16lin03/../../src/thirdparty/tbb/tbb_machine.h
+fn=__sti__$E
+367 2 1 1 2 0 0 0 0 0
+613 2 0 0 2 1 1 0 0 0
+619 1 0 0 0 0 0 1 1 0
+fl=/nfs/site/proj/openmp/promo/20190312/tmp/lin_32e-rtl_int_5_nor_dyn.rel.50.c0.s0.t1..h1.w1-fxe16lin03/../../src/thirdparty/tbb/tbb_misc.h
+fn=__sti__$E
+219 4 0 0 0 0 0 2 0 0
+220 2 0 0 0 0 0 0 0 0
+221 2 0 0 0 0 0 0 0 0
+232 1 0 0 0 0 0 1 0 0
+fl=/usr/include/bits/string3.h
+fn=_INTERNAL_45_______src_thirdparty_tbb_omp_dynamic_link_cpp_c306cade::__kmp::init_dl_data()
+121 5 1 1 1 0 0 1 0 0
+fl=/usr/include/string.h
+fn=_INTERNAL_45_______src_thirdparty_tbb_omp_dynamic_link_cpp_c306cade::__kmp::init_dl_data()
+257 29 1 1 1 1 0 1 0 0
+fl=???
+fn=(below main)
+0 60 5 5 17 6 1 16 1 1
+fn=???
+0 43922485 115 110 43922103 103 62 139 1 1
+fn=MKL_malloc
+0 3 1 1 0 0 0 0 0 0
+fn=_Init_MKL_Loader
+0 98 10 10 4 0 0 22 0 0
+fn=__GI_memset
+0 28 4 2 2 0 0 4 0 0
+fn=__GI_strlen
+0 81 8 8 9 2 2 0 0 0
+fn=__GI_strncmp
+0 108 10 10 12 1 1 0 0 0
+fn=__GI_strrchr
+0 44 3 3 3 0 0 0 0 0
+fn=__acos_finite
+0 5 1 1 3 0 0 0 0 0
+fn=__asin_finite
+0 5 1 1 3 0 0 0 0 0
+fn=__atan2_finite
+0 8 1 1 3 0 0 0 0 0
+fn=__ctype_init
+0 16 2 2 10 5 4 3 1 0
+fn=__cxa_atexit
+0 198 4 4 45 1 0 72 4 4
+fn=__default_morecore
+0 16 1 1 2 0 0 2 0 0
+fn=__exp_finite
+0 8 1 1 3 0 0 0 0 0
+fn=__init_misc
+0 24 2 2 7 1 1 5 1 1
+fn=__intel_mkl_features_init_body
+0 219 17 17 11 0 0 14 0 0
+fn=__intel_mkl_features_init_x
+0 6 1 1 2 0 0 2 0 0
+fn=__intel_sse2_strrchr
+0 71 2 2 6 0 0 0 0 0
+fn=__libc_csu_init
+0 34 3 3 8 1 1 8 0 0
+fn=__libc_dl_error_tsd
+0 15 2 1 15 2 1 0 0 0
+fn=__libc_memalign
+0 2945 4 4 494 3 0 487 1 1
+fn=__libc_pthread_init
+0 393 2 2 110 8 8 58 8 8
+fn=__libc_sigaction
+0 134 5 5 38 0 0 38 4 4
+fn=__log_finite
+0 8 1 1 3 0 0 0 0 0
+fn=__longjmp
+0 40 2 2 22 0 0 0 0 0
+fn=__new_exitfn
+0 391 9 9 99 16 9 37 1 1
+fn=__pow_finite
+0 5 1 1 3 0 0 0 0 0
+fn=__pthread_initialize_minimal
+0 165 14 14 23 7 5 62 11 10
+fn=__register_atfork
+0 50 4 4 12 3 3 10 0 0
+fn=__sigjmp_save
+0 9 0 0 2 0 0 2 0 0
+fn=__sigsetjmp
+0 719 7 7 179 1 0 288 1 1
+fn=__sti__$E
+0 3949 301 301 66 3 3 723 9 8
+fn=__strncpy_ssse3
+0 127 13 13 26 0 0 7 2 2
+fn=_dl_add_to_namespace_list
+0 646 2 2 161 0 0 83 0 0
+fn=_dl_add_to_slotinfo
+0 72 3 3 27 8 0 18 2 0
+fn=_dl_addr
+0 2176124 21 11 521809 38300 19640 91 11 0
+fn=_dl_allocate_tls_init
+0 153 6 6 47 9 9 21 1 1
+fn=_dl_allocate_tls_storage
+0 332 3 3 7 0 0 295 37 37
+fn=_dl_cache_libcmp
+0 3538 7 7 538 38 38 0 0 0
+fn=_dl_catch_error
+0 1278 9 9 393 2 1 595 2 2
+fn=_dl_check_all_versions
+0 201 3 3 31 0 0 17 0 0
+fn=_dl_check_caller
+0 194 15 15 79 9 4 10 0 0
+fn=_dl_check_map_versions
+0 8837 14 14 2587 97 62 1084 76 69
+fn=_dl_count_modids
+0 4 2 2 3 0 0 0 0 0
+fn=_dl_debug_initialize
+0 121 5 5 43 4 2 4 0 0
+fn=_dl_debug_state
+0 2 1 1 2 0 0 0 0 0
+fn=_dl_determine_tlsoffset
+0 120 4 4 19 0 0 10 0 0
+fn=_dl_discover_osversion
+0 88 4 4 15 1 1 7 1 1
+fn=_dl_fixup
+0 2833 8 6 1066 242 143 248 0 0
+fn=_dl_get_tls_static_info
+0 5 1 1 3 0 0 2 1 1
+fn=_dl_higher_prime_number
+0 144 1 1 14 4 2 0 0 0
+fn=_dl_important_hwcaps
+0 267 18 18 48 1 1 45 1 1
+fn=_dl_init
+0 733 15 11 215 84 46 65 1 0
+fn=_dl_init_paths
+0 19328 19 19 2413 0 0 42 5 5
+fn=_dl_initial_error_catch_tsd
+0 70 0 0 35 0 0 0 0 0
+fn=_dl_load_cache_lookup
+0 1472 25 25 284 35 33 132 1 1
+fn=_dl_lookup_symbol_x
+0 1502441 10 10 246763 4965 3209 90552 73 15
+fn=_dl_map_object
+0 8042 48 48 1937 34 7 970 19 12
+fn=_dl_map_object_deps
+0 7092 37 37 1480 81 2 460 5 4
+fn=_dl_map_object_from_fd
+0 9929 46 46 2256 94 93 1002 90 89
+fn=_dl_name_match_p
+0 72815 2 2 18865 271 11 10800 2 2
+fn=_dl_new_object
+0 2338 14 14 447 13 13 406 70 70
+fn=_dl_next_ld_env_entry
+0 474 2 2 164 0 0 2 0 0
+fn=_dl_next_tls_modid
+0 18 2 2 9 0 0 3 0 0
+fn=_dl_open
+0 141 10 10 60 0 0 24 0 0
+fn=_dl_process_tunable_env_entries
+0 445 2 2 148 48 48 1 0 0
+fn=_dl_receive_error
+0 28 2 2 10 0 0 12 0 0
+fn=_dl_relocate_object
+0 1175420 54 54 322546 39911 36242 82735 34721 33800
+fn=_dl_runtime_resolve_xsave
+0 1640 4 4 1968 6 0 2050 93 25
+fn=_dl_setup_hash
+0 272 2 2 85 15 15 69 0 0
+fn=_dl_signal_error
+0 110 4 4 12 0 0 34 3 2
+fn=_dl_start
+0 657 17 17 135 26 26 56 19 19
+fn=_dl_sysdep_read_whole_file
+0 82 6 6 12 0 0 18 3 2
+fn=_dl_sysdep_start
+0 502 10 10 141 20 20 30 6 6
+fn=_dl_sysdep_start_cleanup
+0 1 1 1 1 0 0 0 0 0
+fn=_dl_unload_cache
+0 20 4 2 6 2 2 4 0 0
+fn=_dl_vdso_vsym
+0 35 2 2 15 3 1 0 0 0
+fn=_dlerror_run
+0 54 4 4 14 2 1 10 0 0
+fn=_fxstat
+0 130 2 2 13 0 0 0 0 0
+fn=_init
+0 60 6 6 14 3 2 18 4 3
+fn=_int_free
+0 69 5 5 17 0 0 7 0 0
+fn=_int_malloc
+0 1204 39 27 162 20 4 192 12 8
+fn=_setjmp
+0 2 1 1 0 0 0 0 0 0
+fn=_xstat
+0 1349 2 2 110 0 0 83 0 0
+fn=access
+0 9 1 1 1 0 0 1 0 0
+fn=bcmp
+0 9624 32 32 2193 17 13 600 7 7
+fn=brk
+0 38 2 2 5 0 0 3 1 1
+fn=bsearch
+0 904 2 2 164 0 0 118 0 0
+fn=cache_rpath.part.5
+0 34 2 2 14 0 0 12 0 0
+fn=calloc
+0 312 10 10 19 7 0 11 0 0
+fn=check_match.9524
+0 792196 5 5 298901 5353 2223 129549 45 12
+fn=close
+0 65 2 2 13 0 0 0 0 0
+fn=cos
+0 8 2 2 3 0 0 0 0 0
+fn=dl_main
+0 1532 77 77 342 85 40 158 21 18
+fn=dl_open_worker
+0 93 10 10 31 0 0 13 0 0
+fn=dladdr
+0 30 3 2 5 5 1 0 0 0
+fn=dlopen@@GLIBC_2.2.5
+0 17 2 2 4 1 0 4 0 0
+fn=dlopen_doit
+0 22 2 1 9 3 0 5 0 0
+fn=do_lookup_x
+0 3441403 35 35 882569 19992 4350 339227 97 47
+fn=elision_init
+0 12 2 2 5 0 0 2 1 1
+fn=expand_dynamic_string_token
+0 33 2 2 6 0 0 9 1 1
+fn=fillin_rpath
+0 4671 14 14 1191 0 0 575 19 19
+fn=floor
+0 5 1 1 3 0 0 0 0 0
+fn=floorf
+0 5 2 2 3 0 0 0 0 0
+fn=free
+0 28 3 3 9 1 0 2 0 0
+fn=getcwd
+0 152 6 6 44 4 4 28 2 0
+fn=getenv
+0 1392 8 8 465 115 115 23 0 0
+fn=getrlimit
+0 5 1 1 1 0 0 0 0 0
+fn=gettimeofday
+0 30 1 1 2 0 0 10 0 0
+fn=handle_intel.isra.0
+0 94 4 4 14 0 0 26 1 0
+fn=handle_ld_preload
+0 662 7 7 68 1 1 17 1 1
+fn=index
+0 8747 11 11 591 54 54 0 0 0
+fn=init
+0 13 3 3 3 1 0 3 1 1
+fn=init_cacheinfo
+0 150 10 10 11 0 0 15 2 2
+fn=init_cpu_features.constprop.0
+0 113 12 12 18 2 2 20 0 0
+fn=init_tls
+0 127 5 5 32 13 0 15 1 1
+fn=intel_02_known_compare
+0 324 0 0 162 6 6 0 0 0
+fn=intel_check_word
+0 407 10 10 28 0 0 40 0 0
+fn=lseek
+0 5 0 0 1 0 0 0 0 0
+fn=main
+0 16 2 2 0 0 0 4 0 0
+fn=malloc
+0 612 6 5 102 13 1 26 1 0
+fn=malloc_consolidate
+0 915 8 8 50 1 0 273 34 33
+fn=malloc_hook_ini
+0 11 2 2 3 1 1 3 0 0
+fn=map_doit
+0 12 1 1 5 0 0 3 0 0
+fn=match_symbol
+0 4604 5 5 1811 35 28 468 0 0
+fn=memcpy
+0 2219 12 12 616 0 0 561 66 66
+fn=memcpy@GLIBC_2.2.5
+0 45 1 1 12 1 0 0 0 0
+fn=mempcpy
+0 23278 12 12 3915 58 50 3234 65 65
+fn=memset
+0 16942 3 3 42 2 0 16754 265 265
+fn=mkl_dnn_Xbyak_F64::Operand::Operand(int, mkl_dnn_Xbyak_F64::Operand::Kind, int, bool)
+0 15288 3 3 2352 74 74 2352 0 0
+fn=mkl_serv_core_register_cleanup
+0 72 2 2 15 2 1 24 2 1
+fn=mkl_serv_get_envmode_variable
+0 4 1 1 4 1 1 0 0 0
+fn=mkl_serv_getenv
+0 52 3 3 12 0 0 16 0 0
+fn=mkl_serv_inspector_suppress
+0 172 4 4 78 9 3 37 0 0
+fn=mkl_serv_inspector_unsuppress
+0 44 0 0 22 2 0 0 0 0
+fn=mkl_serv_lock
+0 112 2 2 32 0 0 40 0 0
+fn=mkl_serv_malloc
+0 465 25 25 102 17 11 94 8 7
+fn=mkl_serv_strncat_s
+0 996 9 9 184 4 2 12 0 0
+fn=mkl_serv_strnlen_s
+0 1188 2 2 176 1 1 4 0 0
+fn=mkl_serv_trylock
+0 72 1 1 27 4 3 0 0 0
+fn=mkl_serv_unlock
+0 16 0 0 0 0 0 8 1 0
+fn=mm_account_ptr_by_tid..0
+0 7502 21 21 85 10 7 4169 1035 1029
+fn=mmap
+0 1372 6 6 305 0 0 252 3 3
+fn=mprotect
+0 130 1 1 26 0 0 0 0 0
+fn=munmap
+0 10 1 1 2 0 0 0 0 0
+fn=open
+0 2162 2 2 246 0 0 233 0 0
+fn=open_path
+0 18909 29 29 6263 33 26 1589 3 3
+fn=open_verify
+0 9317 19 19 2465 6 6 2525 3 3
+fn=openaux
+0 544 2 2 256 0 0 96 0 0
+fn=pthread_getspecific
+0 94 3 2 25 5 1 0 0 0
+fn=pthread_key_create
+0 78 3 2 12 2 1 6 1 1
+fn=pthread_mutex_lock
+0 217 7 4 49 3 0 14 0 0
+fn=pthread_mutex_unlock
+0 203 8 5 56 12 0 7 0 0
+fn=pthread_once
+0 28 2 2 9 1 0 4 0 0
+fn=pthread_setspecific
+0 101 6 3 21 0 0 20 2 0
+fn=ptmalloc_init.part.7
+0 493 5 5 167 64 2 9 2 0
+fn=random
+0 746656864 3 3 263525952 1 1 43920992 0 0
+fn=random_r
+0 1140528986 2 2 351367936 4 3 175683968 0 0
+fn=read
+0 60 1 1 12 0 0 0 0 0
+fn=rint
+0 5 2 2 3 0 0 0 0 0
+fn=rintf
+0 5 1 1 3 0 0 0 0 0
+fn=rtld_lock_default_lock_recursive
+0 188 1 1 188 3 1 0 0 0
+fn=rtld_lock_default_unlock_recursive
+0 188 0 0 188 0 0 0 0 0
+fn=sbrk
+0 63 5 5 19 2 1 10 1 0
+fn=secure_getenv
+0 5 2 2 2 1 1 0 0 0
+fn=sin
+0 8 1 1 3 0 0 0 0 0
+fn=strcasecmp
+0 10 2 2 6 4 0 0 0 0
+fn=strcasestr
+0 15 2 2 3 2 0 0 0 0
+fn=strcmp
+0 475192 4 4 152292 4157 2053 0 0 0
+fn=strcspn
+0 6 1 1 3 0 0 0 0 0
+fn=strdup
+0 68 0 0 8 0 0 16 0 0
+fn=strlen
+0 9479 10 10 1033 3 3 0 0 0
+fn=strncasecmp
+0 10 2 2 6 1 0 0 0 0
+fn=strncpy
+0 9 1 1 4 1 0 0 0 0
+fn=strnlen
+0 5 1 1 3 0 0 0 0 0
+fn=strsep
+0 38394 2 2 11950 0 0 51 0 0
+fn=strspn
+0 6 2 2 3 0 0 0 0 0
+fn=strstr
+0 17 2 2 3 2 0 0 0 0
+fn=sysmalloc
+0 323 22 22 84 14 6 62 6 5
+fn=time
+0 15 2 2 1 0 0 5 0 0
+fn=uname
+0 5 1 1 1 0 0 0 0 0
+fn=version_check_doit
+0 10 2 2 4 0 0 2 0 0
+fn=void bench<double>(Trans, Trans, long, long, long, double*, double*)
+0 439297194 11 11 87890509 17290 4 87842014 5490127 5490125
+summary: 2380313898 1759 1707 749207449 132084 68943 308145016 5527180 5525983
