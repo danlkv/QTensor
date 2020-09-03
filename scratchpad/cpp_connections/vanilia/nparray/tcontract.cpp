@@ -43,13 +43,12 @@ triple_loop_contract(PyObject *dummy, PyObject *args)
     Aptr = (double *)PyArray_DATA(A);
     Bptr = (double *)PyArray_DATA(B);
     Cptr = (double *)PyArray_DATA(C);
+
     for (int i=0; i<dimC[0]; i++){
         for (int j=0; j<dimC[1]; j++){
             for (int k=0; k<dimC[2]; k++){
                 Cptr[i*dimC[1]*dimC[2] + j*dimC[2] + k] = 
                     Aptr[i*dimC[1] + j]*Bptr[i*dimC[2] + k];
-                //*(Cptr + i*dimC[0] + j*dimC[1] + k) = 
-                 //   *(Aptr+i*dimC[0]+j*dimC[1])*(*(Bptr+i*dimC[0]+k*dimC[2]));
             }
         }
     }
