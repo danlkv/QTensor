@@ -1,4 +1,5 @@
 import sys
+import time
 import click
 import qtree
 import networkx as nx
@@ -10,7 +11,7 @@ import qensor.optimisation as qop
 from qensor.FeynmanSimulator import FeynmanSimulator
 
 from qensor.optimisation.TensorNet import QtreeTensorNet
-from qensor.optimisation.Optimizer import OrderingOptimizer
+from qensor.optimisation.Optimizer import OrderingOptimizer, TamakiOptimizer
 from qensor import QtreeQAOAComposer
 
 @click.group()
@@ -84,31 +85,76 @@ def tw_heuristic(filename, tamaki_time):
 @click.option('-n','--nodes', default=10)
 @click.option('-p','--p', default=1)
 @click.option('-G','--graph-type', default='random_regular')
-def qaoa_energy_tw(nodes, seed, degree, p, graph_type):
+@click.option('-E','--edge-index', default=0)
+def generate_qaoa_energy_circuit(seed, degree, nodes, p, graph_type, edge_index):
     np.random.seed(seed)
     if graph_type=='random_regular':
         G = nx.random_regular_graph(degree, nodes)
     elif graph_type=='erdos_renyi':
         G = nx.erdos_renyi_graph(nodes, degree/(nodes-1))
+    elif graph_type=='erdos_renyi_core':
+        G = nx.erdos_renyi_graph(nodes, degree/(nodes-1))
+        print('degrees', list(G.degree))
+        G = nx.algorithms.core.k_core(G, k=degree)
+        print('nodes', G.number_of_nodes())
+    else:
+        raise Exception('Unsupported graph type')
+    gamma, beta = [0]*p, [0]*p
+    edge = list(G.edges())[edge_index]
+    composer = QtreeQAOAComposer(G, beta=beta, gamma=gamma)
+    composer.energy_expectation_lightcone(edge)
+    txt = qtree.operators.circuit_to_text([composer.circuit], nodes)
+    print(txt)
+
+@cli.command()
+@click.option('-s','--seed', default=42)
+@click.option('-d','--degree', default=3)
+@click.option('-n','--nodes', default=10)
+@click.option('-p','--p', default=1)
+@click.option('-G','--graph-type', default='random_regular')
+@click.option('-T','--max-time', default=0, help='Max time for every evaluation')
+@click.option('-O','--ordering-algo', default='greedy', help='Algorithm for elimination order')
+def qaoa_energy_tw(nodes, seed, degree, p, graph_type, max_time, ordering_algo):
+    np.random.seed(seed)
+    if graph_type=='random_regular':
+        G = nx.random_regular_graph(degree, nodes)
+    elif graph_type=='erdos_renyi':
+        G = nx.erdos_renyi_graph(nodes, degree/(nodes-1))
+    elif graph_type=='erdos_renyi_core':
+        G = nx.erdos_renyi_graph(nodes, degree/(nodes-1))
+        print('degrees', list(G.degree))
+        G = nx.algorithms.core.k_core(G, k=degree)
+        print('nodes', G.number_of_nodes())
     else:
         raise Exception('Unsupported graph type')
     gamma, beta = [0]*p, [0]*p
 
     def get_tw(circ):
 
-        tn = QtreeTensorNet.from_qtree_gates(composer.circuit)
+        tn = QtreeTensorNet.from_qtree_gates(circ)
 
-        opt = OrderingOptimizer()
+        if ordering_algo=='greedy':
+            opt = OrderingOptimizer()
+        elif ordering_algo=='tamaki':
+            opt = TamakiOptimizer(wait_time=45)
+        else:
+            raise ValueError("Ordering algorithm not supported")
         peo, tn = opt.optimize(tn)
         treewidth = opt.treewidth
         return treewidth
 
     twidths = []
+    if max_time:
+        start = time.time()
+    else:
+        start = np.inf
     for edge in tqdm(G.edges()):
         composer = QtreeQAOAComposer(G, beta=beta, gamma=gamma)
         composer.energy_expectation_lightcone(edge)
         tw = get_tw(composer.circuit)
         twidths.append(tw)
-    print(f'mean={round(np.mean(twidths), 2)}, max={np.max(twidths)}')
+        if time.time() - start > max_time:
+            break
+    print(f'med={np.median(twidths)} mean={round(np.mean(twidths), 2)} max={np.max(twidths)}')
 
 cli()
