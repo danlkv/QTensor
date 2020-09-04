@@ -109,3 +109,104 @@ def nodes_at_distance(G, nodes, dist):
 def get_edge_subgraph(G, edge, dist):
     nodes = nodes_at_distance(G, edge, dist)
     return G.subgraph(set(nodes))
+
+
+class ReportTable():
+    measures = {
+        'max':np.max
+        ,'min': np.min
+        ,'mean': np.mean
+        ,'sum': np.sum
+        ,'median': np.median
+    }
+    def __init__(self, measure=['max', 'min'], columns=[], max_records=100):
+        self.measure = measure
+        self.columns = columns
+        self.records = []
+        self.max_records = max_records
+
+    def record(self, **kwargs):
+        if self.columns:
+            if set(self.columns) != set(kwargs.keys()):
+                raise ValueError(f"columns doesn't match: {kwargs.keys()}, expect: {self.columns}")
+        else:
+            self.columns = set(kwargs.keys())
+        self.records += [[kwargs[key] for key in self.columns]]
+
+    def _title_row(self):
+        return ['N'] + list(self.columns)
+
+    def _print_title(self):
+        print(','.join(self._title_row()))
+
+    def _format_row(self, row):
+        def format(x):
+            if isinstance(x, str): return x
+            if x == 0:
+                return '0'
+            if x > 1000 or x<0.001:
+                return f"{x:.3e}"
+            if isinstance(x, int):
+                return str(x)
+            return f"{x:.3f}"
+        return [format(x) for x in row]
+
+    def _measure_rows(self):
+        rows = []
+        for stat_label in self.measure:
+            stat_func = self.measures[stat_label]
+            stat_row = [stat_label]
+            for i, key in enumerate(self.columns):
+                column = [row[i] for row in self.records]
+                stat_row.append(stat_func(column))
+            rows.append(stat_row)
+        return rows
+
+    def _print_row(self, row):
+        print(','.join(self._format_row(row)))
+
+    def markdown(self):
+        cells = []
+        cells.append(self._title_row())
+        for i, row in enumerate(self.records):
+            cells.append([str(i)] + self._format_row(row))
+        cells += [self._format_row(r) for r in self._measure_rows()]
+        table = MarkdownTable(cells)
+        return table.markdown()
+
+    def print(self):
+        self._print_title()
+        for i in range(min(self.max_records, len(self.records))):
+            self._print_row([i] + list(self.records[i]))
+
+        for stat_row in self._measure_rows():
+            self._print_row(stat_row)
+
+class MarkdownTable:
+    """ Stolen from https://github.com/lzakharov/csv2md/blob/master/csv2md/table.py """
+    def __init__(self, cells):
+        self.cells = cells
+        self.widths = list(map(max, zip(*[list(map(len, row)) for row in cells])))
+
+    def markdown(self, center_aligned_columns=None, right_aligned_columns=None):
+        def format_row(row):
+            return '| ' + ' | '.join(row) + ' |'
+
+        rows = [format_row([cell.ljust(width) for cell, width in zip(row, self.widths)]) for row in self.cells]
+        separators = ['-' * width for width in self.widths]
+
+        if right_aligned_columns is not None:
+            for column in right_aligned_columns:
+                separators[column] = ('-' * (self.widths[column] - 1)) + ':'
+        if center_aligned_columns is not None:
+            for column in center_aligned_columns:
+                separators[column] = ':' + ('-' * (self.widths[column] - 2)) + ':'
+
+        rows.insert(1, format_row(separators))
+
+        return '\n'.join(rows)
+
+    @staticmethod
+    def parse_csv(file, delimiter=',', quotechar='"'):
+        return Table(list(csv.reader(file, delimiter=delimiter, quotechar=quotechar)))
+
