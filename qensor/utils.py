@@ -104,6 +104,7 @@ def nodes_at_distance(G, nodes, dist):
             neigh = list(G[n].keys())
             range_d_nodes += neigh
         nodes += range_d_nodes
+        nodes  = list(set(nodes))
     return set(nodes)
 
 def get_edge_subgraph(G, edge, dist):
