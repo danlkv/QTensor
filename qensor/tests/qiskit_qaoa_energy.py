@@ -4,6 +4,13 @@ import networkx as nx
 from functools import partial
 from qiskit.optimization.ising.max_cut import get_operator as get_maxcut_operator
 from qiskit.aqua.algorithms.adaptive.qaoa.var_form import QAOAVarForm
+# Use these lines for import with new qiskit(>=0.19). The resulting QAOA energy will be wrong
+# The change is somewhere in this file: https://github.com/Qiskit/qiskit-aqua/blob/0.7.5/qiskit/aqua/algorithms/minimum_eigen_solvers/qaoa/var_form.py
+# It's ridiculous that nobody found this and never fixed, August 2020
+
+
+# from qiskit.optimization.applications.ising.max_cut import get_operator as get_maxcut_operator
+# from qiskit.aqua.algorithms.minimum_eigen_solvers.qaoa.var_form import QAOAVarForm
 from qiskit import Aer, execute
 from qiskit.compiler import transpile
 
@@ -81,6 +88,8 @@ def simulate_qiskit_amps(G, gamma, beta):
     C, _ = get_maxcut_operator(w)
     parameters = np.concatenate([beta, -np.array(gamma)])
 
+    # When transitioning to newer qiskit this raises error.
+    # Adding C.to_opflow() removes the error, but the values are still wrong
     varform = QAOAVarForm(p=p,cost_operator=C)
     circuit = varform.construct_circuit(parameters)
 
