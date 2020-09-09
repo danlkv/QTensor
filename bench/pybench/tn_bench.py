@@ -29,12 +29,6 @@ def run(n, num_iter, num_batch):
 
 if __name__ == "__main__":
     tn.set_default_backend(sys.argv[1])
-    for i in range(4096, 512 - 256, -256):
+    for i in range(4120, 4082 - 2, -2):
         run(i, 10, 1)
-
-    for i in range(512, 64 - 32, -32):
-        run(i, 50, 100)
-
-    for i in range(64, 16 - 1, -1):
-        run(i, 50, 100)
 
