@@ -147,14 +147,20 @@ int main(void)
     //               transa    transb    M     N     K
     int i;
 
-    for (i = 4096; i >= 512; i -= 256)
-        run_size<double>(no_trans, no_trans, i, i, i);
- 
-    for (i = 512; i >= 64; i -= 32)
-        run_size<double>(no_trans, no_trans, i, i, i);   
+    //run_size<double>(no_trans, do_trans, 4096, 4096, 4096);
+    run_size<double>(no_trans, do_trans, 4096, 1, 4096);
+    //run_size<double>(no_trans, do_trans, 1000, 1000, 1000);
+    run_size<double>(no_trans, do_trans, 1000, 1, 1000);
 
-    for (i = 64; i >= 16; i -= 1)
-        run_size<double>(no_trans, no_trans, i, i, i);
+
+    // for (i = 4096; i >= 512; i -= 256)
+    //    run_size<double>(no_trans, no_trans, i, i, i);
+ 
+    //for (i = 512; i >= 64; i -= 32)
+    //    run_size<double>(no_trans, no_trans, i, i, i);   
+
+    //for (i = 64; i >= 16; i -= 1)
+    //    run_size<double>(no_trans, no_trans, i, i, i);
 
     return EXIT_SUCCESS;
 }
