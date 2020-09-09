@@ -7,12 +7,10 @@ class CircuitComposer(CircuitCreator):
     def __init__(self, *args, **params):
         super().__init__(*args, **params)
         self.params = params
-        self.qubits = self.get_qubits()
-        self.circuit = self.get_circuit()
 
     def layer_of_Hadamards(self):
         for q in self.qubits:
-            self.circuit.append(self.operators.H(q))
+            self.apply_gate(self.operators.H, q)
 
     def create(self):
         raise NotImplementedError
@@ -27,7 +25,7 @@ class QAOAComposer(CircuitComposer):
 
     def x_term(self, u, beta):
         #self.circuit.append(self.operators.H(u))
-        self.circuit.append(self.operators.XPhase(u, alpha=2*beta))
+        self.apply_gate(self.operators.XPhase, u, alpha=2*beta)
         #self.circuit.append(self.operators.H(u))
     def mixer_operator(self, beta):
         G = self.graph
@@ -37,12 +35,12 @@ class QAOAComposer(CircuitComposer):
 
     def append_zz_term(self, q1, q2, gamma):
         try:
-            self.circuit.append(self.operators.CC(q1, q2, alpha=2*gamma))
+            self.apply_gate(self.operators.CC, q1, q2, alpha=2*gamma)
         except AttributeError:
             pass
-        self.circuit.append(self.operators.cX(q1, q2))
-        self.circuit.append(self.operators.ZPhase(q2, alpha=2*gamma))
-        self.circuit.append(self.operators.cX(q1, q2))
+        self.apply_gate(self.operators.cX, q1, q2)
+        self.apply_gate(self.operators.ZPhase, q2, alpha=2*gamma)
+        self.apply_gate(self.operators.cX, q1, q2)
     def cost_operator_circuit(self, gamma):
         for i, j in self.graph.edges():
             u, v = self.qubits[i], self.qubits[j]
@@ -64,6 +62,6 @@ class QAOAComposer(CircuitComposer):
     def energy_edge(self, i, j):
         #self.circuit.append(self.operators.CC(u, v))
         u, v = self.qubits[i], self.qubits[j]
-        self.circuit.append(self.operators.Z(u))
-        self.circuit.append(self.operators.Z(v))
+        self.apply_gate(self.operators.Z, u)
+        self.apply_gate(self.operators.Z, v)
 
