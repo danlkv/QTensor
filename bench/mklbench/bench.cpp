@@ -76,7 +76,7 @@ static inline int ld_fix(int m, int size_elt)
     int ld, offset = 64 / size_elt;
     ld = (m + offset - 1) / offset * offset;
     ld = (((ld * size_elt) % 256) == 0) ? ld + offset : ld;
-    return ld; 
+    return m + 0; 
 }
 
 template <typename T>
@@ -89,13 +89,21 @@ void bench(enum Trans ta, enum Trans tb, dim_t m, dim_t n, dim_t k,
     dim_t b_nrows = tb == no_trans ? k : n;
 
     // Using tight leading dimensions.
-    dim_t lda = ld_fix(a_nrows, sizeof(T));
-    dim_t ldb = ld_fix(b_nrows, sizeof(T));
-    dim_t ldc = ld_fix(m, sizeof(T));
+   dim_t lda = ld_fix(a_nrows, sizeof(T));
+   dim_t ldb = ld_fix(b_nrows, sizeof(T));
+   dim_t ldc = ld_fix(m, sizeof(T));
+//  dim_t lda = a_nrows;
+//  dim_t ldb = b_nrows;
+//  dim_t ldc = m;
+
 
     T *a = (T *) mkl_malloc(sizeof(*a) * lda * a_ncols, 64);
     T *b = (T *) mkl_malloc(sizeof(*b) * ldb * b_ncols, 64);
     T *c = (T *) mkl_malloc(sizeof(*c) * ldc * n, 64);
+//    T *a = (T *) malloc(sizeof(*a) * lda * a_ncols);
+//    T *b = (T *) malloc(sizeof(*b) * ldb * b_ncols);
+//    T *c = (T *) malloc(sizeof(*c) * ldc * n);
+
 
     fill_array(a, a_nrows, a_ncols, lda);
     fill_array(b, b_nrows, b_ncols, ldb);
@@ -133,11 +141,13 @@ void bench(enum Trans ta, enum Trans tb, dim_t m, dim_t n, dim_t k,
 }
 
 template <typename T>
-void run_size(enum Trans ta, enum Trans tb, dim_t m, dim_t n, dim_t k)
+void run_size(enum Trans ta, enum Trans tb, dim_t m)
 {
     double perf_avg, perf_max;
+    dim_t n = m, k = m;
     bench<T>(ta, tb, m, n, k, &perf_max, &perf_avg);
-    printf("%4ld, %12.6f, %12.6f\n", m, perf_avg, perf_max);
+    //printf("%4ld, %4ld, %12.6f\n", m, ld_fix(m, sizeof(T))-m, perf_avg);
+    printf("%12.6f\n", perf_avg);
     return;
 }
 
@@ -145,8 +155,8 @@ int main(void)
 {
     // Modify problem size here if needed.
     //               transa    transb    M     N     K
+    
     int i;
-
     //run_size<double>(no_trans, do_trans, 4096, 4096, 4096);
     run_size<double>(no_trans, do_trans, 4096, 1, 4096);
     //run_size<double>(no_trans, do_trans, 1000, 1000, 1000);
@@ -161,6 +171,6 @@ int main(void)
 
     //for (i = 64; i >= 16; i -= 1)
     //    run_size<double>(no_trans, no_trans, i, i, i);
-
+    
     return EXIT_SUCCESS;
 }

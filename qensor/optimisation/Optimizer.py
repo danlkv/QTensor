@@ -1,6 +1,8 @@
 import qtree
 import psutil
+import sys
 import numpy as np
+import networkx as nx
 
 from qensor import utils
 from qensor.optimisation.Greedy import GreedyParvars
@@ -28,6 +30,7 @@ class OrderingOptimizer(Optimizer):
 
         peo, path = self._get_ordering_ints(graph)
         self.treewidth = max(path)
+        self.peo_ints = peo
 
         peo = [qtree.optimizer.Var(var, size=graph.nodes[var]['size'],
                         name=graph.nodes[var]['name'])
@@ -41,14 +44,14 @@ class OrderingOptimizer(Optimizer):
         self.ignored_vars = ignored_vars
         return peo, tensor_net
 
-
-
 class SlicesOptimizer(OrderingOptimizer):
 
     def __init__(self, tw_bias=2):
         self.tw_bias = tw_bias
 
     def _get_max_tw(self):
+        if hasattr(self, 'max_tw'):
+            return self.max_tw
         mem = psutil.virtual_memory()
         avail = mem.available
         log.info('Memory available: {}', avail)
@@ -104,3 +107,66 @@ class SlicesOptimizer(OrderingOptimizer):
         self.peo = self.ignored_vars + peo + self.parallel_vars 
         #log.info('peo {}', self.peo)
         return self.peo, self.parallel_vars, tensor_net
+
+class TamakiOptimizer(OrderingOptimizer):
+    def __init__(self, *args, wait_time=5, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.wait_time = wait_time
+
+    def _get_ordering_ints(self, graph):
+        peo, tw = qtree.graph_model.peo_calculation.get_upper_bound_peo_pace2017(
+                graph, method="tamaki", wait_time=self.wait_time)
+
+        return peo, [tw]
+
+class TreeTrimSplitter(SlicesOptimizer):
+    cost_type = 'length'
+    def _split_graph(self, p_graph, max_tw):
+        peo_ints = self.peo_ints
+        tw = self.treewidth
+        self._slice_hist = []
+        self._slice_hist.append([0, tw])
+        log.info('Treewidth: {}', tw)
+        log.info('Target treewidth: {}', max_tw)
+        result = []
+        delta = tw - max_tw
+        while delta > 0:
+            if hasattr(self, 'par_var_step') and self.par_var_step:
+                var_target = self.par_var_step
+            else:
+                var_target = int((delta)*.2) + 1
+            # var_target(1) = 1
+            # var_target(2) = 2
+            # var_target(15) = 12
+            # -- relabel
+
+            graph, label_dict = qtree.graph_model.relabel_graph_nodes(
+                p_graph, dict(zip(peo_ints, range(len(p_graph.nodes()))))
+            )
+            if self.cost_type == 'width':
+                par_vars, _ = qtree.graph_model.splitters.split_graph_by_tree_trimming_width(graph, var_target)
+            else:
+                par_vars, _ = qtree.graph_model.splitters.split_graph_by_tree_trimming(graph, var_target)
+            par_vars = [label_dict[i] for i in par_vars]
+            for var in  par_vars:
+                log.debug('Remove node {}. Hood size {}', var, utils.n_neighbors(p_graph, var))
+                qtree.graph_model.base.remove_node(p_graph, var)
+            result += par_vars
+            # -- dislabel
+            pv_cnt = len(result)
+            log.debug('Parvars count: {}. Amps count: {}', pv_cnt, 2**pv_cnt)
+
+            peo_ints, path = self._get_ordering_ints(p_graph)
+            tw = max(path)
+            log.debug('Treewidth: {}', tw)
+            self._slice_hist.append([pv_cnt, tw])
+
+            delta = tw - max_tw
+            self.treewidth = tw
+
+
+        return peo_ints, result
+
+
+class TamakiTrimSlicing(TamakiOptimizer, TreeTrimSplitter):
+    pass

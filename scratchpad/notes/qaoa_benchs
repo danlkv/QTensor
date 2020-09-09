@@ -1,0 +1,72 @@
+
+For different types of graphs and circuits:
+circuits = Enum( qaoa_circuit, some_generic_circuit)
+    qaoa_circuit = task_graph, p, depth(p)
+        task_graph = num_of_nodes, num_of_edges(degree)
+        task_graph = degree, type_of_graph, n_nodes
+        // n_nodes = num_qubits
+        // Usually use degree-3 random graphs https://networkx.github.io/documentation/networkx-1.10/reference/generated/networkx.generators.random_graphs.random_regular_graph.html
+
+    some_generic_circuit = num_qubits, depth
+
+                                                            diagonal simplification                 full gates
+    N_nodes (in a tensor-net graph, a line garph of the tensor network)
+    treewidth (theoretical estim of complexity)
+    exp.results (time, memory, OPS, FLOPS = OPS/time )
+
+circuits plots: 
+
+    diagonal, full:
+        x-axis: num_qubits
+        y-axis: N_nodes
+
+    diagonal, full:
+        x-axis: num_qubits
+        y-axis: treewidth
+
+    diagonal, full:
+        x-axis: num_qubits
+        y-axis: exp time
+
+Perf plots:
+    x-axis: 2^treewidth
+    y-axis: exp-results (time)
+
+
+
+# Hardcoded global
+np.random.seed(42)
+
+for n_q in range(5, 30):
+    graph = get_degree3_random_graph(n_q)
+    circ = QAOACircuitComposer(graph)
+    sim = Simulator()
+    sim.simulate(circ)
+
+
+    result = sim.treewidth
+
+    #-- V2
+    perf_result = sim.bucket_backend.perf_data
+    perf_results.app
+    #--
+    #-- V3
+    graph_sizes.append( sim.graph.num_of_nodes() )
+    #--
+
+    results.append( result )
+
+# Plot the results
+plt.plot(range(5,30), results)
+
+print(convert_to_csv(range(5,30), results,....))
+
+
+# From shell:
+$ python foo.py > results.csv
+
+
+
+
+
+

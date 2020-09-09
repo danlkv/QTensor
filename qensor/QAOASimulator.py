@@ -4,6 +4,7 @@ import numpy as np
 import networkx as nx
 from tqdm import tqdm
 from multiprocessing import Pool
+from loguru import logger as log
 
 class QAOASimulator(Simulator):
     def __init__(self, composer, profile=False, *args, **kwargs):
@@ -12,19 +13,15 @@ class QAOASimulator(Simulator):
         self.profile = profile
 
     def _get_edge_energy(self, G, gamma, beta, edge):
-        i,j = edge
-        # TODO: take only a neighbourhood part of the graph
-        graph = get_edge_subgraph(G, edge, len(gamma))
-        mapping = {v:i for i, v in enumerate(graph.nodes())}
-        graph = nx.relabel_nodes(graph, mapping, copy=True)
+        circuit = self._edge_energy_circuit(G, gamma, beta, edge)
+        return self.simulate(circuit)
 
-        composer = self.composer(
-            graph=graph, gamma=gamma, beta=beta)
+    def _edge_energy_circuit(self, G, gamma, beta, edge):
+        composer = self.composer(G, gamma=gamma, beta=beta)
+        composer.energy_expectation_lightcone(edge)
 
-        i,j = mapping[i], mapping[j]
-        composer.energy_expectation(i,j)
+        return composer.circuit
 
-        return self.simulate(composer.circuit)
 
     def _post_process_energy(self, G, E):
         if np.imag(E)>1e-6:
@@ -64,8 +61,9 @@ class QAOASimulator(Simulator):
         return C
 
 
-    def _parallel_unit(self, args):
+    def _parallel_unit_edge(self, args):
         return self._get_edge_energy(*args)
+
     def energy_expectation_parallel(self, G, gamma, beta, n_processes=4):
         """
         Arguments:
@@ -78,7 +76,7 @@ class QAOASimulator(Simulator):
 
         with Pool(n_processes) as p:
 
-           r = list(tqdm(p.imap(self._parallel_unit, args), total=G.number_of_edges()))
+           r = list(tqdm(p.imap(self._parallel_unit_edge, args), total=G.number_of_edges()))
            total_E = sum(r)
         C = self._post_process_energy(G, total_E)
 

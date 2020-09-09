@@ -16,7 +16,7 @@ def benchmark(num_iter, num_batch, f, *args):
 def foo(a, b):
     node1 = tn.Node(a)
     node2 = tn.Node(b)
-    node1[1] ^ node2[0]
+    node1[0] ^ node2[0]
     return tn.contract_between(node1, node2)
 
 

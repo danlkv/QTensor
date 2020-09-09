@@ -1,0 +1,5 @@
+g++ -o bench.o -DNDEBUG -D_FORTIFY_SOURCE=2 -Wall -Wextra -std=c++11 -O3 -I/home/cibrahim/openblas/include -c bench.cpp
+
+g++ -L/home/cibrahim/openblas/lib -o bench bench.o -lopenblas -liomp5 -lpthread -lm -ldl
+
+LD_LIBRARY_PATH=/home/cibrahim/openblas/lib KMP_AFFINITY=compact,1,0,granularity=fine ./bench
