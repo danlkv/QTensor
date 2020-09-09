@@ -18,6 +18,9 @@ from qensor.ProcessingFrameworks import PerfNumpyBackend, NumpyBackend
 class CirqQAOAComposer(QAOAComposer, CirqCreator):
     pass
 
+class QiskitQAOAComposer(QAOAComposer, QiskitCreator):
+    pass
+
 class QtreeQAOAComposer(QAOAComposer, QtreeCreator):
     def energy_expectation(self, i, j):
         G = self.graph
