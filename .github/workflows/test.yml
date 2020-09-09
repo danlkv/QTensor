@@ -36,4 +36,4 @@ jobs:
         cd qtree && pip install .
   
     - name: Test
-      run: cd qensor && pytest
+      run: cd qtensor && pytest
