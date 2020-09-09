@@ -1,5 +1,5 @@
 import qtree
-from qensor.ProcessingFrameworks import NumpyBackend
+from qtensor.ProcessingFrameworks import NumpyBackend
 from loguru import logger as log
 
 class TensorNet:

@@ -5,9 +5,9 @@ import glob
 import numpy as np
 from pathlib import Path
 
-from qensor import QtreeQAOAComposer
-from qensor.optimisation.Optimizer import OrderingOptimizer, TamakiOptimizer
-from qensor.optimisation.TensorNet import QtreeTensorNet
+from qtensor import QtreeQAOAComposer
+from qtensor.optimisation.Optimizer import OrderingOptimizer, TamakiOptimizer
+from qtensor.optimisation.TensorNet import QtreeTensorNet
 
 def print_row(*args):
     row = [str(i) for i in args]

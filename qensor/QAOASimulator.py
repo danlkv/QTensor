@@ -1,5 +1,5 @@
-from qensor.Simulate import Simulator, QtreeSimulator
-from qensor.utils import get_edge_subgraph
+from qtensor.Simulate import Simulator, QtreeSimulator
+from qtensor.utils import get_edge_subgraph
 import numpy as np
 import networkx as nx
 from tqdm import tqdm

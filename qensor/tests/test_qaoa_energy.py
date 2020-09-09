@@ -1,9 +1,9 @@
-from qensor import CirqQAOAComposer, QtreeQAOAComposer
-from qensor import QAOAQtreeSimulator
-from qensor.Simulate import CirqSimulator, QtreeSimulator
-from qensor.FeynmanSimulator import FeynmanSimulator
-from qensor.optimisation.Optimizer import TamakiTrimSlicing, TreeTrimSplitter
-from qensor.tests.qiskit_qaoa_energy import simulate_qiskit_amps 
+from qtensor import CirqQAOAComposer, QtreeQAOAComposer
+from qtensor import QAOAQtreeSimulator
+from qtensor.Simulate import CirqSimulator, QtreeSimulator
+from qtensor.FeynmanSimulator import FeynmanSimulator
+from qtensor.optimisation.Optimizer import TamakiTrimSlicing, TreeTrimSplitter
+from qtensor.tests.qiskit_qaoa_energy import simulate_qiskit_amps 
 import numpy as np
 import networkx as nx
 

@@ -1,12 +1,12 @@
 import qtree
-from qensor.ProcessingFrameworks import NumpyBackend
+from qtensor.ProcessingFrameworks import NumpyBackend
 import cirq
-from qensor.optimisation.TensorNet import QtreeTensorNet
-from qensor.optimisation.Optimizer import OrderingOptimizer
+from qtensor.optimisation.TensorNet import QtreeTensorNet
+from qtensor.optimisation.Optimizer import OrderingOptimizer
 
 from loguru import logger as log
 
-from qensor import utils
+from qtensor import utils
 
 class Simulator:
     def __init__(self):

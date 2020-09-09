@@ -1,6 +1,6 @@
 from qtree import np_framework
 from pyrofiler import timing
-from qensor.utils import ReportTable
+from qtensor.utils import ReportTable
 
 class BucketBackend:
     def process_bucket(self, bucket, no_sum=False):
