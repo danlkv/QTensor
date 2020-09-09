@@ -3,6 +3,9 @@
 #include "numpy/arrayobject.h"
 #include <math.h>
 #include <chrono>
+
+#include "mkl.h"
+
 using namespace std::chrono;
 
 static PyObject *
@@ -45,12 +48,19 @@ triple_loop_contract(PyObject *dummy, PyObject *args)
     Cptr = (double *)PyArray_DATA(C);
 
     for (int i=0; i<dimC[0]; i++){
-        for (int j=0; j<dimC[1]; j++){
-            for (int k=0; k<dimC[2]; k++){
-                Cptr[i*dimC[1]*dimC[2] + j*dimC[2] + k] = 
-                    Aptr[i*dimC[1] + j]*Bptr[i*dimC[2] + k];
-            }
-        }
+//      for (int j=0; j<dimC[1]; j++){
+//          for (int k=0; k<dimC[2]; k++){
+//              Cptr[i*dimC[1]*dimC[2] + j*dimC[2] + k] = 
+//                  Aptr[i*dimC[1] + j]*Bptr[i*dimC[2] + k];
+//          }
+//      }
+       cblas_dgemm(CblasColMajor,
+                CblasNoTrans,
+                CblasTrans,
+                dimC[2], dimC[1], 1, 1.0,
+                Bptr + i*dimC[2], dimC[2],
+                Aptr + i*dimC[1], dimC[1], 0.0,
+                Cptr + i*dimC[2]*dimC[1], dimC[2]); 
     }
 
 
