@@ -69,7 +69,7 @@ class PerfBackend(BucketBackend):
 
         # -- report on totals
         for indices, time in  data[:max_lines]:
-            self.report_table.record(
+            kwargs= dict(
                 bucket_len = len(indices)
                 , time = time
                 , flop = self._perfect_bucket_flop(indices)
@@ -78,6 +78,7 @@ class PerfBackend(BucketBackend):
                 , min_size = min([len(ixs) for ixs in indices])
                 , result_size = len(set.union(*[set(i) for i in indices])) - 1
             )
+            self.report_table.record( **kwargs)
 
         print(self.report_table.markdown())
 
