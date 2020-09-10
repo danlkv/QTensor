@@ -88,8 +88,10 @@ class QtreeSimulator(Simulator):
         return perm_dict
 
     def _get_slice_dict(self, initial_state=0, target_state=0):
-        slice_dict = int_slice(initial_state, self.tn.ket_vars)
-        slice_dict.update(int_slice(target_state, self.tn.bra_vars))
+        #slice_dict = int_slice(initial_state, self.tn.ket_vars)
+        #slice_dict.update(int_slice(target_state, self.tn.bra_vars))
+        slice_dict = qtree.utils.slice_from_bits(initial_state, self.tn.ket_vars)
+        slice_dict.update(qtree.utils.slice_from_bits(target_state, self.tn.bra_vars))
         slice_dict.update({var: slice(None) for var in self.tn.free_vars})
         return slice_dict
 
