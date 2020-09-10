@@ -41,7 +41,7 @@ def sim_file(filename, profile=False, num_processes=1, target_tw=25):
         class PerfMKLBackend(PerfBackend):
             Backend = CMKLExtendedBackend
         backend = PerfMKLBackend(print=False)
-        #backend = PerfNumpyBackend(print=False)
+        # backend = PerfNumpyBackend(print=False)
         kwargs['bucket_backend'] = backend
     sim = FeynmanSimulator(**kwargs)
     circuit = sum(circuit, [])

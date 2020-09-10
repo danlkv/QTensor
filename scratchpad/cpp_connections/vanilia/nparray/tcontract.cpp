@@ -19,7 +19,6 @@ mkl_contract_complex(PyObject *dummy, PyObject *args)
     std::complex<double> alpha(1, 0);
     std::complex<double> beta(0, 0);
 
-    std::cout << "before arg convert..." << std::endl;
     auto epoch = high_resolution_clock::now();
     int nd;
     npy_intp * dimC;
@@ -100,7 +99,6 @@ mkl_contract(PyObject *dummy, PyObject *args)
     PyObject *A=NULL, *B, *C;
     double *Aptr, *Bptr, *Cptr;
 
-    std::cout << "before arg convert..." << std::endl;
     auto epoch = high_resolution_clock::now();
     int nd;
     npy_intp * dimC;
@@ -140,8 +138,8 @@ mkl_contract(PyObject *dummy, PyObject *args)
 //          }
 //      }
        cblas_dgemm(CblasColMajor,
-                CblasTrans,
                 CblasNoTrans,
+                CblasTrans,
                 dimC[2], dimC[1], 1, 1.0,
                 Bptr + i*dimC[2], dimC[2],
                 Aptr + i*dimC[1], dimC[1], 0.0,
@@ -179,7 +177,6 @@ triple_loop_contract(PyObject *dummy, PyObject *args)
     PyObject *A=NULL, *B, *C;
     double *Aptr, *Bptr, *Cptr;
 
-    std::cout << "before arg convert..." << std::endl;
     auto epoch = high_resolution_clock::now();
     int nd;
     npy_intp * dimC;
@@ -245,7 +242,6 @@ print_4(PyObject *dummy, PyObject *args)
 
     if (!PyArg_ParseTuple(args, "O", &arg)) return NULL;
 
-    std::cout << "before arg convert..." << std::endl;
     auto epoch = high_resolution_clock::now();
     arr = PyArray_FROM_OTF(arg, NPY_DOUBLE, NPY_ARRAY_IN_ARRAY);
     if (arr == NULL) return NULL;
