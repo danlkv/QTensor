@@ -21,9 +21,11 @@ def contract():
     size = sys.getsizeof(C)
     print('Result size = {C_size:e} bytes'.format(C_size=size))
 
-    start = time.time()
     with prof.timing('Triple loop', ops=Ops):
         tcontract.triple_loop_contract(A, B, C)
+
+    with prof.timing('MKL', ops=Ops):
+        tcontract.mkl_contract(A, B, C)
 
     with prof.timing('Einsum', ops=Ops):
         C_einsum =np.einsum('ij,ik -> ijk', A, B)
