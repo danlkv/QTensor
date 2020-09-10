@@ -14,6 +14,7 @@ from qensor.optimisation.TensorNet import QtreeTensorNet
 from qensor.optimisation.Optimizer import OrderingOptimizer, TamakiOptimizer, WithoutOptimizer
 from qensor import QtreeQAOAComposer
 from qensor import PerfNumpyBackend
+from qensor.ProcessingFrameworks import CMKLExtendedBackend, PerfBackend
 
 @click.group()
 def cli():
@@ -37,7 +38,10 @@ def sim_file(filename, profile=False, num_processes=1, target_tw=25):
         , pool_type='thread'
     )
     if profile:
-        backend = PerfNumpyBackend(print=False)
+        class PerfMKLBackend(PerfBackend):
+            Backend = CMKLExtendedBackend
+        backend = PerfMKLBackend(print=False)
+        #backend = PerfNumpyBackend(print=False)
         kwargs['bucket_backend'] = backend
     sim = FeynmanSimulator(**kwargs)
     circuit = sum(circuit, [])

@@ -4,9 +4,20 @@ import cirq
 from qensor.optimisation.TensorNet import QtreeTensorNet
 from qensor.optimisation.Optimizer import OrderingOptimizer
 
+
+
 from loguru import logger as log
 
 from qensor import utils
+
+def int_slice(value, vars_to_slice):
+    """
+    Creates a slice dict with integers an values.
+    """
+    dimensions = [var.size for var in vars_to_slice]
+    multiindex = qtree.utils.unravel_index(value, dimensions)
+
+    return {idx: val for idx, val in zip(vars_to_slice, multiindex)}
 
 class Simulator:
     def __init__(self):
@@ -77,8 +88,8 @@ class QtreeSimulator(Simulator):
         return perm_dict
 
     def _get_slice_dict(self, initial_state=0, target_state=0):
-        slice_dict = qtree.utils.slice_from_bits(initial_state, self.tn.ket_vars)
-        slice_dict.update(qtree.utils.slice_from_bits(target_state, self.tn.bra_vars))
+        slice_dict = int_slice(initial_state, self.tn.ket_vars)
+        slice_dict.update(int_slice(target_state, self.tn.bra_vars))
         slice_dict.update({var: slice(None) for var in self.tn.free_vars})
         return slice_dict
 
