@@ -3,19 +3,102 @@
 #include "numpy/arrayobject.h"
 #include <math.h>
 #include <chrono>
+#include <complex>
 
 #include "mkl.h"
 
 using namespace std::chrono;
+using namespace std;
 
 static PyObject *
-triple_loop_contract(PyObject *dummy, PyObject *args)
+mkl_contract_complex(PyObject *dummy, PyObject *args)
+{
+    PyObject *argA=NULL, *argB, *argC;
+    PyObject *A=NULL, *B, *C;
+    std::complex<double> *Aptr, *Bptr, *Cptr;
+    std::complex<double> alpha(1, 0);
+    std::complex<double> beta(0, 0);
+
+    auto epoch = high_resolution_clock::now();
+    int nd;
+    npy_intp * dimC;
+
+    if (!PyArg_ParseTuple(args, "OOO!", &argA, &argB,
+        &PyArray_Type, &argC)) return NULL;
+
+    A = PyArray_FROM_OTF(argA, NPY_COMPLEX128, NPY_ARRAY_IN_ARRAY);
+    if (A == NULL) return NULL;
+    B = PyArray_FROM_OTF(argB, NPY_COMPLEX128, NPY_ARRAY_IN_ARRAY);
+    if (B == NULL) goto fail;
+#if NPY_API_VERSION >= 0x0000000c
+    C = PyArray_FROM_OTF(argC, NPY_COMPLEX128, NPY_ARRAY_INOUT_ARRAY2);
+#else
+    C = PyArray_FROM_OTF(argC, NPY_COMPLEX128, NPY_ARRAY_INOUT_ARRAY);
+#endif
+    if (C == NULL) goto fail;
+    
+
+
+    //auto now = high_resolution_clock::now();
+    //auto millis = duration_cast<milliseconds>(now - epoch).count();
+    //std::cout << "after convert. duration (μs) = " << millis << std::endl;
+    
+    nd = PyArray_NDIM(C);
+    if (nd!=3) goto fail;
+    dimC = PyArray_DIMS(C);
+    Aptr = (std::complex<double> *)PyArray_DATA(A);
+    Bptr = (std::complex<double> *)PyArray_DATA(B);
+    Cptr = (std::complex<double> *)PyArray_DATA(C);
+
+
+    for (int i=0; i<dimC[0]; i++){
+//      for (int j=0; j<dimC[1]; j++){
+//          for (int k=0; k<dimC[2]; k++){
+//              Cptr[i*dimC[1]*dimC[2] + j*dimC[2] + k] = 
+//                  Aptr[i*dimC[1] + j]*Bptr[i*dimC[2] + k];
+//          }
+//      }
+       cblas_zgemm(CblasColMajor,
+                CblasNoTrans,
+                CblasTrans,
+                dimC[2], dimC[1], 1, &alpha,
+                Bptr + i*dimC[2], dimC[2],
+                Aptr + i*dimC[1], dimC[1], &beta,
+                Cptr + i*dimC[2]*dimC[1], dimC[2]); 
+    }
+
+
+    /* code that makes use of arguments */
+    /* You will probably need at least
+       nd = PyArray_NDIM(<..>)    -- number of dimensions
+       dims = PyArray_DIMS(<..>)  -- npy_intp array of length nd
+                                     showing length in each dim.
+       dptr = (double *)PyArray_DATA(<..>) -- pointer to data.
+
+       If an error occurs goto fail.
+     */
+
+    Py_DECREF(A);
+    Py_DECREF(B);
+    Py_DECREF(C);
+    Py_INCREF(Py_None);
+    return Py_None;
+
+ fail:
+    Py_XDECREF(A);
+    Py_XDECREF(B);
+    Py_XDECREF(C);
+    return NULL;
+
+}
+
+static PyObject *
+mkl_contract(PyObject *dummy, PyObject *args)
 {
     PyObject *argA=NULL, *argB, *argC;
     PyObject *A=NULL, *B, *C;
     double *Aptr, *Bptr, *Cptr;
 
-    std::cout << "before arg convert..." << std::endl;
     auto epoch = high_resolution_clock::now();
     int nd;
     npy_intp * dimC;
@@ -87,6 +170,68 @@ triple_loop_contract(PyObject *dummy, PyObject *args)
     return NULL;
 
 }
+static PyObject *
+triple_loop_contract(PyObject *dummy, PyObject *args)
+{
+    PyObject *argA=NULL, *argB, *argC;
+    PyObject *A=NULL, *B, *C;
+    double *Aptr, *Bptr, *Cptr;
+
+    auto epoch = high_resolution_clock::now();
+    int nd;
+    npy_intp * dimC;
+
+    if (!PyArg_ParseTuple(args, "OOO!", &argA, &argB,
+        &PyArray_Type, &argC)) return NULL;
+
+    A = PyArray_FROM_OTF(argA, NPY_DOUBLE, NPY_ARRAY_IN_ARRAY);
+    if (A == NULL) return NULL;
+    B = PyArray_FROM_OTF(argB, NPY_DOUBLE, NPY_ARRAY_IN_ARRAY);
+    if (B == NULL) goto fail;
+#if NPY_API_VERSION >= 0x0000000c
+    C = PyArray_FROM_OTF(argC, NPY_DOUBLE, NPY_ARRAY_INOUT_ARRAY2);
+#else
+    C = PyArray_FROM_OTF(argC, NPY_DOUBLE, NPY_ARRAY_INOUT_ARRAY);
+#endif
+    if (C == NULL) goto fail;
+    
+
+
+    //auto now = high_resolution_clock::now();
+    //auto millis = duration_cast<milliseconds>(now - epoch).count();
+    //std::cout << "after convert. duration (μs) = " << millis << std::endl;
+    
+    nd = PyArray_NDIM(C);
+    if (nd!=3) goto fail;
+    dimC = PyArray_DIMS(C);
+    Aptr = (double *)PyArray_DATA(A);
+    Bptr = (double *)PyArray_DATA(B);
+    Cptr = (double *)PyArray_DATA(C);
+
+    for (int i=0; i<dimC[0]; i++){
+        for (int j=0; j<dimC[1]; j++){
+            for (int k=0; k<dimC[2]; k++){
+                Cptr[i*dimC[1]*dimC[2] + j*dimC[2] + k] = 
+                    Aptr[i*dimC[1] + j]*Bptr[i*dimC[2] + k];
+            }
+        }
+    }
+
+
+
+    Py_DECREF(A);
+    Py_DECREF(B);
+    Py_DECREF(C);
+    Py_INCREF(Py_None);
+    return Py_None;
+
+ fail:
+    Py_XDECREF(A);
+    Py_XDECREF(B);
+    Py_XDECREF(C);
+    return NULL;
+
+}
 
 static PyObject *
 print_4(PyObject *dummy, PyObject *args)
@@ -97,7 +242,6 @@ print_4(PyObject *dummy, PyObject *args)
 
     if (!PyArg_ParseTuple(args, "O", &arg)) return NULL;
 
-    std::cout << "before arg convert..." << std::endl;
     auto epoch = high_resolution_clock::now();
     arr = PyArray_FROM_OTF(arg, NPY_DOUBLE, NPY_ARRAY_IN_ARRAY);
     if (arr == NULL) return NULL;
@@ -261,6 +405,10 @@ static PyMethodDef tcontract_Methods[] = {
      "Prints first 4 values of numpy array"},
     {"triple_loop_contract",  triple_loop_contract, METH_VARARGS,
      "Contracts two arrays with first common index"},
+    {"mkl_contract",  mkl_contract, METH_VARARGS,
+     "Contracts two arrays with first common index using MKL"},
+    {"mkl_contract_complex",  mkl_contract_complex, METH_VARARGS,
+     "Contracts two arrays with first common index using MKL"},
     {NULL, NULL, 0, NULL}        /* Sentinel */
 };
 

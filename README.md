@@ -1,10 +1,10 @@
-# Qensor
+# QTensor
 
 ## Installation
 
 ```bash
-git clone --recurse-submodules https://github.com/DaniloZZZ/Qensor
-cd Qensor
+git clone --recurse-submodules https://github.com/DaniloZZZ/QTensor
+cd QTensor
 cd qtree && pip install .
 pip install .
 ```
@@ -13,7 +13,7 @@ pip install .
 ## Usage
 
 ```python
-from qensor import QAOA_energy
+from qtensor import QAOA_energy
 
 G = nx.random_regular_graph(3, 10)
 gamma, beta = [np.pi/3], [np.pi/2]
@@ -24,9 +24,9 @@ E = QAOA_energy(G, gamma, beta)
 ## Get treewidth
 
 ```python
-from qensor.optimisation.Optimizer import OrderingOptimizer
-from qensor.optimisation.TensorNet import QtreeTensorNet
-from qensor import QtreeQAOAComposer
+from qtensor.optimisation.Optimizer import OrderingOptimizer
+from qtensor.optimisation.TensorNet import QtreeTensorNet
+from qtensor import QtreeQAOAComposer
 
 composer = QtreeQAOAComposer(
 	graph=G, gamma=gamma, beta=beta)
@@ -49,9 +49,9 @@ Install from here: https://github.com/TCS-Meiji/PACE2017-TrackA
 If you have memory errors, modify the `JFLAGS` variable in bash script `./tw-heuristic`. I use `JFLAGS="-Xmx4g -Xms4g -Xss500m"`.
 
 ```python
-from qensor.optimisation.Optimizer import TamakiOptimizer
-from qensor.optimisation.TensorNet import QtreeTensorNet
-from qensor import QtreeQAOAComposer
+from qtensor.optimisation.Optimizer import TamakiOptimizer
+from qtensor.optimisation.TensorNet import QtreeTensorNet
+from qtensor import QtreeQAOAComposer
 
 composer = QtreeQAOAComposer(
 	graph=G, gamma=gamma, beta=beta)
@@ -70,8 +70,8 @@ treewidth = opt.treewidth
 and also raise an error when treewidth is large.
 
 ```python
-from qensor.optimisation.Optimizer import TamakiOptimizer
-from qensor import QAOAQtreeSimulator
+from qtensor.optimisation.Optimizer import TamakiOptimizer
+from qtensor import QAOAQtreeSimulator
 
 class TamakiQAOASimulator(QAOAQtreeSimsulator):
     def optimize_buckets(self):
@@ -91,4 +91,11 @@ else:
     res = sim.energy_expectation(G, gamma=gamma, beta=beta)
 return res
 
+```
+
+
+### Use cli to run benchmarks
+
+```bash
+» python -m qensor.cli generate-qaoa-ansatz-circuit -p 3 -n 24 | python -m qensor.cli sim-file --profile --target-tw 27
 ```
