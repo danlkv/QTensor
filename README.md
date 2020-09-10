@@ -97,5 +97,5 @@ return res
 ### Use cli to run benchmarks
 
 ```bash
-» python -m qensor.cli generate-qaoa-ansatz-circuit -p 3 -n 22 | python -m qensor.cli sim-file --profile
+» python -m qensor.cli generate-qaoa-ansatz-circuit -p 3 -n 24 | python -m qensor.cli sim-file --profile --target-tw 27
 ```
