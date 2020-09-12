@@ -144,8 +144,12 @@ def qaoa_energy_tw(nodes, seed, degree, p, graph_type, max_time, max_tw, orderin
         G = nx.erdos_renyi_graph(nodes, degree/(nodes-1))
     else:
         raise Exception('Unsupported graph type')
-    gamma, beta = [0]*p, [0]*p
 
+    qaoa_energy_tw_from_graph(G, p, max_time, max_tw, ordering_algo)
+
+
+def qaoa_energy_tw_from_graph(G, p, max_time=0, max_tw=0, ordering_algo='greedy'):
+    gamma, beta = [0]*p, [0]*p
     def get_tw(circ):
 
         tn = QtreeTensorNet.from_qtree_gates(circ)
