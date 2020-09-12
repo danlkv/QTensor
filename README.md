@@ -41,12 +41,27 @@ treewidth = opt.treewidth
 
 ```
 
-### Use tamaki solver
+### Tamaki solver
+
+#### Instalation
+
+The tamaki solver repository should be already cloned into
+`QTensor/qtree/thirdparty/tamaki_treewidth`.
+
+To compile it, go to the directory and run `make heuristic`.
+
+```bash
+> cd Qtensor/qtree/thirdparty/tamaki_treewidth
+> make heuristic 
+javac tw/heuristic/*.java
+```
+
+Tamaki solver repository: https://github.com/TCS-Meiji/PACE2017-TrackA
 
 
-Install from here: https://github.com/TCS-Meiji/PACE2017-TrackA
+If you have memory errors, modify the `JFLAGS` variable in the bash script `./tw-heuristic`. I use `JFLAGS="-Xmx4g -Xms4g -Xss500m"`.
 
-If you have memory errors, modify the `JFLAGS` variable in bash script `./tw-heuristic`. I use `JFLAGS="-Xmx4g -Xms4g -Xss500m"`.
+#### Usage
 
 ```python
 from qtensor.optimisation.Optimizer import TamakiOptimizer
