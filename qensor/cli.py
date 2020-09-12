@@ -142,11 +142,6 @@ def qaoa_energy_tw(nodes, seed, degree, p, graph_type, max_time, max_tw, orderin
         G = nx.random_regular_graph(degree, nodes)
     elif graph_type=='erdos_renyi':
         G = nx.erdos_renyi_graph(nodes, degree/(nodes-1))
-    elif graph_type=='erdos_renyi_core':
-        G = nx.erdos_renyi_graph(nodes, degree/(nodes-1))
-        print('degrees', list(G.degree))
-        G = nx.algorithms.core.k_core(G, k=degree)
-        print('nodes', G.number_of_nodes())
     else:
         raise Exception('Unsupported graph type')
     gamma, beta = [0]*p, [0]*p
