@@ -157,29 +157,20 @@ int main(void)
     //               transa    transb    M     N     K
     
     int i;
-    run_size<double>(do_trans, no_trans, 4096);
+    //run_size<double>(no_trans, do_trans, 4096, 4096, 4096);
+    run_size<double>(no_trans, do_trans, 4096, 1, 4096);
+    //run_size<double>(no_trans, do_trans, 1000, 1000, 1000);
+    run_size<double>(no_trans, do_trans, 1000, 1, 1000);
 
-//    for (i = 10; i >= -10; i--)
-//        run_size<double>(do_trans, no_trans, 4096 + i);
-//    for (i = 10; i >= -10; i--)
-//        run_size<double>(do_trans, no_trans, 2048 + i);
-//    for (i = 10; i >= -10; i--)
-//        run_size<double>(do_trans, no_trans, 1024 + i);
-//    for (i = 10; i >= -10; i--)
-//        run_size<double>(do_trans, no_trans, 256 + i);
-//    for (i = 10; i >= -10; i--)
-//        run_size<double>(do_trans, no_trans, 128 + i);
-//    for (i = 10; i >= -10; i--)
-//        run_size<double>(do_trans, no_trans, 32 + i);
-//
-//  for (i = 4096; i >= 512; i -= 256)
-//      run_size<double>(no_trans, no_trans, i, i, i);
-//
-//  for (i = 512; i >= 64; i -= 32)
-//      run_size<double>(no_trans, no_trans, i, i, i);   
 
-//  for (i = 64; i >= 16; i -= 1)
-//      run_size<double>(no_trans, no_trans, i, i, i);
+    // for (i = 4096; i >= 512; i -= 256)
+    //    run_size<double>(no_trans, no_trans, i, i, i);
+ 
+    //for (i = 512; i >= 64; i -= 32)
+    //    run_size<double>(no_trans, no_trans, i, i, i);   
 
+    //for (i = 64; i >= 16; i -= 1)
+    //    run_size<double>(no_trans, no_trans, i, i, i);
+    
     return EXIT_SUCCESS;
 }

@@ -14,19 +14,44 @@ from qensor.optimisation.TensorNet import QtreeTensorNet
 from qensor.optimisation.Optimizer import OrderingOptimizer, TamakiOptimizer, WithoutOptimizer
 from qensor import QtreeQAOAComposer
 from qensor.toolbox import qaoa_energy_tw_from_graph
+from qensor import PerfNumpyBackend
+from qensor.ProcessingFrameworks import CMKLExtendedBackend, PerfBackend
 
 @click.group()
 def cli():
     pass
 
 @cli.command()
-@click.argument('filename')
-def sim_file(filename):
-    n_qubits, circuit = ops.read_circuit_file(filename)
-    sim = FeynmanSimulator()
+@click.argument('filename', nargs=-1)
+@click.option('-p','--num-processes', default=1)
+@click.option('-P','--profile', default=False, is_flag=True)
+@click.option('-t','--target-tw', default=25)
+def sim_file(filename, profile=False, num_processes=1, target_tw=25):
+    if not filename:
+        stream = sys.stdin
+    else:
+        stream = open(filename[0],'r')
+
+    n_qubits, circuit = ops.read_circuit_stream(stream)
+    kwargs = dict(
+        n_processes=num_processes
+        ,target_tw=target_tw
+        , pool_type='thread'
+    )
+    if profile:
+        class PerfMKLBackend(PerfBackend):
+            Backend = CMKLExtendedBackend
+        backend = PerfMKLBackend(print=False)
+        # backend = PerfNumpyBackend(print=False)
+        kwargs['bucket_backend'] = backend
+    sim = FeynmanSimulator(**kwargs)
     circuit = sum(circuit, [])
     result = sim.simulate(circuit, batch_vars=4, tw_bias=0)
     print(result)
+
+    if profile:
+        print('Profiling results')
+        backend.gen_report()
 
 @cli.command()
 @click.argument('filename')
@@ -97,7 +122,7 @@ def generate_qaoa_ansatz_circuit(seed, degree, nodes, p, graph_type):
         G = nx.algorithms.core.k_core(G, k=degree)
     else:
         raise Exception('Unsupported graph type')
-    gamma, beta = [0]*p, [0]*p
+    gamma, beta = [0.1]*p, [0.2]*p
     composer = QtreeQAOAComposer(G, beta=beta, gamma=gamma)
     composer.ansatz_state()
     txt = qtree.operators.circuit_to_text([composer.circuit], nodes)
@@ -121,7 +146,7 @@ def generate_qaoa_energy_circuit(seed, degree, nodes, p, graph_type, edge_index)
         G = nx.algorithms.core.k_core(G, k=degree)
     else:
         raise Exception('Unsupported graph type')
-    gamma, beta = [0]*p, [0]*p
+    gamma, beta = [0.1]*p, [0.2]*p
     edge = list(G.edges())[edge_index]
     composer = QtreeQAOAComposer(G, beta=beta, gamma=gamma)
     composer.energy_expectation_lightcone(edge)
