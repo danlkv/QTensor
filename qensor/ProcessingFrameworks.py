@@ -17,6 +17,42 @@ class NumpyBackend(BucketBackend):
     def get_sliced_buckets(self, buckets, data_dict, slice_dict):
         return np_framework.get_sliced_np_buckets(buckets, data_dict, slice_dict)
 
+def exatn_process_bucket(bucket, no_sum=no_sum):
+    """
+    Process bucket in the bucket elimination algorithm.
+    We multiply all tensors in the bucket and sum over the
+    variable which the bucket corresponds to. This way the
+    variable of the bucket is removed from the expression.
+
+    Parameters
+    ----------
+    bucket : list
+           List containing tuples of tensors (gates) with their indices.
+
+    Returns
+    -------
+    tensor : optimizer.Tensor
+           wrapper tensor object holding the resulting computational graph
+    """
+    result_data = bucket[0].data
+    result_indices = bucket[0].indices
+
+    for tensor in bucket[1:]:
+        expr = utils.get_einsum_expr(list(map(int, result_indices)),
+                                     list(map(int, tensor.indices)))
+
+        result_data = tf.einsum(expr, result_data, tensor.data)
+        # Merge and sort indices and shapes
+        
+
+class ExaTnBackend(BucketBackend):
+    def process_bucket(self, bucket, no_sum=False):
+        res =  process_bucket_exatn(bucket, no_sum=no_sum)
+        return res
+
+    def get_sliced_buckets(self, buckets, data_dict, slice_dict):
+        return get_sliced_exatn_buckets(buckets, data_dict, slice_dict)
+
 class PerfBackend(BucketBackend):
     Backend = BucketBackend
 
