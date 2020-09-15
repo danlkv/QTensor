@@ -401,8 +401,8 @@ def main(file=None,p=5,shots=1,g=[],b=[],lang='ibm',opt_iters=50,ER=[]):
         print(composer.circuit)
         sim = QtreeSimulator()
         result = sim.simulate(composer.circuit)
-        print('Qensor 1 amp',result.data)
-        print('Qensor 1 prob',np.abs(result.data)**2)
+        print('QTensor 1 amp',result.data)
+        print('QTensor 1 prob',np.abs(result.data)**2)
 
 
     def profile_graph(G, gamma, beta):
@@ -470,7 +470,7 @@ def main(file=None,p=5,shots=1,g=[],b=[],lang='ibm',opt_iters=50,ER=[]):
         #assert E-E_no_lightcones<1e-6
 
         qtensor_time = time.time() - start
-        print('\n Qensor:', E)
+        print('\n QTensor:', E)
 
         print('####== Qiskit:', qiskit_e)
         print('Delta with qtensor:',E-qiskit_e)
@@ -479,7 +479,7 @@ def main(file=None,p=5,shots=1,g=[],b=[],lang='ibm',opt_iters=50,ER=[]):
         print('Delta with qtensor:',E-qiskit_result)
 
         print('qiskit energy time', qiskit_time)
-        print('Qensor full time', qtensor_time)
+        print('QTensor full time', qtensor_time)
         assert abs(E-qiskit_result) < 1e-6, 'Results of qtensor do not match with qiskit'
 
         return qiskit_time, qtensor_time
