@@ -11,6 +11,7 @@ REQUIRED_PACKAGES = [
     ,'pyrofiler>=0.1.5'
     ,'loguru'
     ,'tqdm'
+    ,'click'
 
 ]
 

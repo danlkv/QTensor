@@ -134,22 +134,22 @@ def generate_qaoa_energy_circuit(seed, degree, nodes, p, graph_type, edge_index)
 @click.option('-p','--p', default=1)
 @click.option('-G','--graph-type', default='random_regular')
 @click.option('-T','--max-time', default=0, help='Max time for every evaluation')
+@click.option('--max-tw', default=0, help='Max tw after wich no point to calculate')
 @click.option('-O','--ordering-algo', default='greedy', help='Algorithm for elimination order')
-def qaoa_energy_tw(nodes, seed, degree, p, graph_type, max_time, ordering_algo):
+def qaoa_energy_tw(nodes, seed, degree, p, graph_type, max_time, max_tw, ordering_algo):
     np.random.seed(seed)
     if graph_type=='random_regular':
         G = nx.random_regular_graph(degree, nodes)
     elif graph_type=='erdos_renyi':
         G = nx.erdos_renyi_graph(nodes, degree/(nodes-1))
-    elif graph_type=='erdos_renyi_core':
-        G = nx.erdos_renyi_graph(nodes, degree/(nodes-1))
-        print('degrees', list(G.degree))
-        G = nx.algorithms.core.k_core(G, k=degree)
-        print('nodes', G.number_of_nodes())
     else:
         raise Exception('Unsupported graph type')
-    gamma, beta = [0]*p, [0]*p
 
+    qaoa_energy_tw_from_graph(G, p, max_time, max_tw, ordering_algo)
+
+
+def qaoa_energy_tw_from_graph(G, p, max_time=0, max_tw=0, ordering_algo='greedy'):
+    gamma, beta = [0]*p, [0]*p
     def get_tw(circ):
 
         tn = QtreeTensorNet.from_qtree_gates(circ)
@@ -175,6 +175,10 @@ def qaoa_energy_tw(nodes, seed, degree, p, graph_type, max_time, ordering_algo):
         composer = QtreeQAOAComposer(G, beta=beta, gamma=gamma)
         composer.energy_expectation_lightcone(edge)
         tw = get_tw(composer.circuit)
+        if max_tw:
+            if tw>max_tw:
+                print(f'Encountered treewidth of {tw}, which is larger {max_tw}')
+                break
         twidths.append(tw)
         if time.time() - start > max_time:
             break
