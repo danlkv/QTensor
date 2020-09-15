@@ -1,6 +1,6 @@
-from qensor import CirqQAOAComposer, QtreeQAOAComposer
-from qensor import QiskitQAOAComposer
-from qensor import QtreeSimulator
+from qtensor import CirqQAOAComposer, QtreeQAOAComposer
+from qtensor import QiskitQAOAComposer
+from qtensor import QtreeSimulator
 from qtree.operators import from_qiskit_circuit
 
 import networkx as nx

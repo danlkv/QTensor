@@ -1,7 +1,7 @@
-from qensor import QtreeQAOAComposer
-from qensor.ProcessingFrameworks import PerfNumpyBackend
+from qtensor import QtreeQAOAComposer
+from qtensor.ProcessingFrameworks import PerfNumpyBackend
 
-from qensor.Simulate import CirqSimulator, QtreeSimulator
+from qtensor.Simulate import CirqSimulator, QtreeSimulator
 import numpy as np
 import networkx as nx
 

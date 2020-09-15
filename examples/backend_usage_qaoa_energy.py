@@ -1,9 +1,9 @@
-from qensor.optimisation.Optimizer import OrderingOptimizer
-from qensor.optimisation.TensorNet import QtreeTensorNet
-from qensor import QtreeQAOAComposer
-from qensor import QAOAQtreeSimulator
-from qensor import PerfNumpyBackend
-from qensor import QAOA_energy
+from qtensor.optimisation.Optimizer import OrderingOptimizer
+from qtensor.optimisation.TensorNet import QtreeTensorNet
+from qtensor import QtreeQAOAComposer
+from qtensor import QAOAQtreeSimulator
+from qtensor import PerfNumpyBackend
+from qtensor import QAOA_energy
 import networkx as nx
 import numpy as np
 

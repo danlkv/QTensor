@@ -4,8 +4,8 @@ import sys
 import numpy as np
 import networkx as nx
 
-from qensor import utils
-from qensor.optimisation.Greedy import GreedyParvars
+from qtensor import utils
+from qtensor.optimisation.Greedy import GreedyParvars
 from loguru import logger as log
 
 

@@ -1,8 +1,8 @@
-import qensor
-from qensor import CirqQAOAComposer, QtreeQAOAComposer
-from qensor import QAOAQtreeSimulator
-from qensor.Simulate import CirqSimulator, QtreeSimulator
-from qensor.FeynmanSimulator import FeynmanSimulator
+import qtensor
+from qtensor import CirqQAOAComposer, QtreeQAOAComposer
+from qtensor import QAOAQtreeSimulator
+from qtensor.Simulate import CirqSimulator, QtreeSimulator
+from qtensor.FeynmanSimulator import FeynmanSimulator
 import numpy as np
 import networkx as nx
 

@@ -3,15 +3,15 @@ import numpy as np
 from multiprocessing import Pool
 from tqdm import tqdm
 
-from qensor.ProcessingFrameworks import NumpyBackend
-from qensor.Simulate import Simulator, QtreeSimulator
-from qensor.optimisation.Optimizer import SlicesOptimizer
-from qensor.optimisation.TensorNet import QtreeTensorNet
+from qtensor.ProcessingFrameworks import NumpyBackend
+from qtensor.Simulate import Simulator, QtreeSimulator
+from qtensor.optimisation.Optimizer import SlicesOptimizer
+from qtensor.optimisation.TensorNet import QtreeTensorNet
 import psutil
 
 from loguru import logger as log
 
-from qensor import utils
+from qtensor import utils
 
 def int_slice(value, vars_to_slice):
     """

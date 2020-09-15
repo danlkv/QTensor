@@ -387,10 +387,10 @@ def main(file=None,p=5,shots=1,g=[],b=[],lang='ibm',opt_iters=50,ER=[]):
 
 
 
-    from qensor import QAOA_energy, QtreeQAOAComposer, QtreeSimulator
-    from qensor import QAOA_energy
-    from qensor import CirqQAOAComposer, CirqSimulator
-    from qensor.ProcessingFrameworks import PerfNumpyBackend
+    from qtensor import QAOA_energy, QtreeQAOAComposer, QtreeSimulator
+    from qtensor import QAOA_energy
+    from qtensor import CirqQAOAComposer, CirqSimulator
+    from qtensor.ProcessingFrameworks import PerfNumpyBackend
 
     ##TESTING STARTS HERE##
 
@@ -401,8 +401,8 @@ def main(file=None,p=5,shots=1,g=[],b=[],lang='ibm',opt_iters=50,ER=[]):
         print(composer.circuit)
         sim = QtreeSimulator()
         result = sim.simulate(composer.circuit)
-        print('Qensor 1 amp',result.data)
-        print('Qensor 1 prob',np.abs(result.data)**2)
+        print('QTensor 1 amp',result.data)
+        print('QTensor 1 prob',np.abs(result.data)**2)
 
 
     def profile_graph(G, gamma, beta):
@@ -469,24 +469,24 @@ def main(file=None,p=5,shots=1,g=[],b=[],lang='ibm',opt_iters=50,ER=[]):
         E = QAOA_energy(G, gamma, beta)
         #assert E-E_no_lightcones<1e-6
 
-        qensor_time = time.time() - start
-        print('\n Qensor:', E)
+        qtensor_time = time.time() - start
+        print('\n QTensor:', E)
 
         print('####== Qiskit:', qiskit_e)
-        print('Delta with qensor:',E-qiskit_e)
+        print('Delta with qtensor:',E-qiskit_e)
 
         print('####== Qiskit amps result', qiskit_result)
-        print('Delta with qensor:',E-qiskit_result)
+        print('Delta with qtensor:',E-qiskit_result)
 
         print('qiskit energy time', qiskit_time)
-        print('Qensor full time', qensor_time)
-        assert abs(E-qiskit_result) < 1e-6, 'Results of qensor do not match with qiskit'
+        print('QTensor full time', qtensor_time)
+        assert abs(E-qiskit_result) < 1e-6, 'Results of qtensor do not match with qiskit'
 
-        return qiskit_time, qensor_time
+        return qiskit_time, qtensor_time
 
     gamma, beta = [np.pi/8], [np.pi/6]
     qiskit_profs = []
-    qensor_profs = []
+    qtensor_profs = []
     graphs = [networkx.random_regular_graph(3, n) for n in range(4, 16, 2)]
     for n in range(4, 8, 1):
         G = networkx.complete_graph(n)
@@ -515,14 +515,14 @@ def main(file=None,p=5,shots=1,g=[],b=[],lang='ibm',opt_iters=50,ER=[]):
     for G in graphs:
         #G.add_edges_from([[1,n-1]])
 
-        qiskit_time, qensor_time = profile_graph(G, gamma, beta)
+        qiskit_time, qtensor_time = profile_graph(G, gamma, beta)
         qiskit_profs.append(qiskit_time)
-        qensor_profs.append(qensor_time)
+        qtensor_profs.append(qtensor_time)
 
         #print((G.number_of_edges()-E)/2)
     tostr = lambda x: [str(a) for a in x]
     print(', '.join(tostr(qiskit_profs)))
-    print(', '.join(tostr(qensor_profs)))
+    print(', '.join(tostr(qtensor_profs)))
 
 
 
