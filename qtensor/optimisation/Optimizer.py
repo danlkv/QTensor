@@ -74,11 +74,12 @@ class OrderingOptimizer(Optimizer):
 
 class SlicesOptimizer(OrderingOptimizer):
 
-    def __init__(self, tw_bias=2):
+    def __init__(self, tw_bias=2, max_tw=None):
         self.tw_bias = tw_bias
+        self.max_tw = max_tw
 
     def _get_max_tw(self):
-        if hasattr(self, 'max_tw'):
+        if hasattr(self, 'max_tw') and self.max_tw is not None:
             return self.max_tw
         mem = psutil.virtual_memory()
         avail = mem.available
