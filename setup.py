@@ -12,11 +12,12 @@ REQUIRED_PACKAGES = [
     ,'loguru'
     ,'tqdm'
     ,'click'
+    ,'qtensor-qtree'
 
 ]
 
 setuptools.setup(name='qtensor',
-                 version='0.1.1',
+                 version='0.1.2',
                  description='Framework for efficient quantum circuit simulations',
                  url='https://github.com/danlkv/qtensor',
                  keywords='quantum_circuit quantum_algorithms',
