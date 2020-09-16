@@ -25,6 +25,10 @@ class NumpyBackend(BucketBackend):
         return np_framework.get_sliced_np_buckets(buckets, data_dict, slice_dict)
 
 class ExaTnBackend(BucketBackend):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        exatn_framework.import_exatn()
+
     def process_bucket(self, bucket, no_sum=False):
         res = exatn_framework.process_bucket_exatn(bucket, no_sum=no_sum)
         return res
