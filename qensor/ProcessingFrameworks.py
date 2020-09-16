@@ -1,6 +1,8 @@
 from qtree import np_framework
 from qtree import optimizer as opt
 
+from . import exatn_framework
+
 from pyrofiler import timing
 from qensor.utils import ReportTable
 import numpy as np
@@ -24,11 +26,11 @@ class NumpyBackend(BucketBackend):
 
 class ExaTnBackend(BucketBackend):
     def process_bucket(self, bucket, no_sum=False):
-        res =  process_bucket_exatn(bucket, no_sum=no_sum)
+        res = exatn_framework.process_bucket_exatn(bucket, no_sum=no_sum)
         return res
 
     def get_sliced_buckets(self, buckets, data_dict, slice_dict):
-        return get_sliced_exatn_buckets(buckets, data_dict, slice_dict)
+        return np_framework.get_sliced_np_buckets(buckets, data_dict, slice_dict)
 
 class CMKLExtendedBackend(BucketBackend):
     def get_sliced_buckets(self, buckets, data_dict, slice_dict):
@@ -39,24 +41,6 @@ class CMKLExtendedBackend(BucketBackend):
         result_data = bucket[0].data
 
         for tensor in bucket[1:]:
-            """
-            next_result_indices = tuple(sorted(
-                set(result_indices + tensor.indices),
-                key=int)
-            )
-            ixc = list(map(int, next_result_indices))
-            idx_to_least_idx = {old_idx: new_idx for new_idx, old_idx
-                            in enumerate(ixc)}
-
-            ixa, ixb = list(map(int, result_indices)), list(map(int, tensor.indices))
-            ixa, ixb = list(map(lambda x: idx_to_least_idx[x], ixa)), list(map(lambda x: idx_to_least_idx[x], ixb))
-            print(len(ixa), len(ixb), len(ixc))
-            #print(result_data.shape, len(ixb), len(ixc))
-            ixc = list(map(lambda x: idx_to_least_idx[x], ixc))
-
-            result_data = np.einsum(result_data, ixa, tensor.data, ixb, ixc)
-            result_indices = next_result_indices
-            """
             ixa, ixb = result_indices, tensor.indices
             common_ids = sorted(list(set.intersection(set(ixa), set(ixb))), key=int)
             distinct_a = [x for x in sorted(ixa, key=int) if x not in common_ids]
