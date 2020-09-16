@@ -1,6 +1,9 @@
 import tcontract
 import sys
+import torch as t
 import numpy as np
+from opt_einsum import contract as opt_einsum
+
 import time
 from pyrofiler import Profiler
 
@@ -31,6 +34,9 @@ def contract():
 
     with prof.timing('MKL', ops=Ops):
         tcontract.mkl_contract(A, B, C)
+
+    with prof.timing('Opt Einsum', ops=Ops):
+        _ = opt_einsum('ij,ik -> ijk', t.Tensor(A), t.Tensor(B), backend='torch')
 
     assert np.array_equal(C_einsum, C)
 
