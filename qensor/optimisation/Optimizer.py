@@ -13,6 +13,34 @@ class Optimizer:
     def optimize(self, tensor_net):
         raise NotImplementedError
 
+class WithoutOptimizer(Optimizer):
+
+    def optimize(self, tensor_net):
+        line_graph = tensor_net.get_line_graph()
+        free_vars = tensor_net.free_vars
+        ignored_vars = tensor_net.ket_vars + tensor_net. bra_vars
+        graph = line_graph
+
+
+        peo = sorted([int(v) for v in graph.nodes()])
+        # magic line
+        peo = list(reversed(peo))
+        _, path = utils.get_neighbours_path(graph, peo)
+        self.treewidth = max(path)
+        self.peo_ints = peo
+
+        peo = [qtree.optimizer.Var(var, size=graph.nodes[var]['size'],
+                        name=graph.nodes[var]['name'])
+                    for var in peo]
+        if free_vars:
+            peo = qtree.graph_model.get_equivalent_peo(graph, peo, free_vars)
+
+        peo = ignored_vars + peo
+        self.peo = peo
+        self.graph = graph
+        self.ignored_vars = ignored_vars
+        return peo, tensor_net
+
 class OrderingOptimizer(Optimizer):
     def _get_ordering_ints(self, graph, free_vars=[]):
         peo_ints, path = utils.get_locale_peo(graph, utils.n_neighbors)
@@ -46,8 +74,9 @@ class OrderingOptimizer(Optimizer):
 
 class SlicesOptimizer(OrderingOptimizer):
 
-    def __init__(self, tw_bias=2):
+    def __init__(self, tw_bias=2, target_tw=None):
         self.tw_bias = tw_bias
+        self.max_tw = target_tw
 
     def _get_max_tw(self):
         if hasattr(self, 'max_tw'):

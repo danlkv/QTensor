@@ -65,3 +65,11 @@ class QtreeTensorNet(TensorNet):
         all_gates = sum(qc, [])
         tn = cls.from_qtree_gates(all_gates)
         return tn
+
+    @classmethod
+    def from_qiskit_circuit(cls, qiskit_circ):
+        n, qc = qtree.operators.from_qiskit_circuit(qiskit_circ)
+        all_gates = sum(qc, [])
+        tn = cls.from_qtree_gates(all_gates)
+        return tn
+

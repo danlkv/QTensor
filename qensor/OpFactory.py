@@ -1,6 +1,10 @@
 import cirq
 import qtree
+import qiskit
+# Qiskit >=0.19
 #import qiskit.circuit.library as qiskit_lib
+
+import qiskit.extensions.standard as qiskit_lib
 import numpy as np
 
 class OpFactory:
@@ -39,25 +43,27 @@ class CC(qtree.operators.ParametricGate):
 
 #QtreeFactory.CC = CC
 
-"""
 class QiskitFactory:
     H=qiskit_lib.HGate
-    cX=qiskit_lib.CXGate
+    cX=qiskit_lib.CnotGate
 
     @staticmethod
-    def ZPhase(x, alpha):
+    def ZPhase(alpha):
         return qiskit_lib.RZGate(phi=alpha*np.pi)
 
-    cZ=qiskit_lib.CZGate
+    @staticmethod
+    def XPhase(alpha):
+        return qiskit_lib.RXGate(theta=alpha*np.pi)
 
-"""
+    cZ=qiskit_lib.CzGate
+
 class CircuitCreator:
     operators = OpFactory
 
     def __init__(self, n_qubits, **params):
         self.n_qubits = n_qubits
-        self.qubits = self.get_qubits()
         self.circuit = self.get_circuit()
+        self.qubits = self.get_qubits()
 
     def get_qubits(self):
         raise NotImplementedError
@@ -91,3 +97,18 @@ class QtreeCreator(CircuitCreator):
     def apply_gate(self, gate, *qubits, **params):
         self.circuit.append(gate(*qubits, **params))
 
+class QiskitCreator(CircuitCreator):
+    operators = QiskitFactory
+
+    def get_qubits(self):
+        # The ``get_circuit`` should be called first
+        return self.circuit.qubits
+
+    def get_circuit(self):
+        qreg_size = self.n_qubits
+        creg_size = qreg_size
+        return qiskit.QuantumCircuit(qreg_size, creg_size)
+
+    def apply_gate(self, gate, *qubits, **params):
+
+        self.circuit.append(gate(**params), qubits)
