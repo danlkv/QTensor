@@ -7,15 +7,14 @@ import numpy as np
 from tqdm import tqdm
 
 import qtree.operators as ops
-import qensor.optimisation as qop
-from qensor.FeynmanSimulator import FeynmanSimulator
+import qtensor.optimisation as qop
+from qtensor.FeynmanSimulator import FeynmanSimulator
 
-from qensor.optimisation.TensorNet import QtreeTensorNet
-from qensor.optimisation.Optimizer import OrderingOptimizer, TamakiOptimizer, WithoutOptimizer
-from qensor import QtreeQAOAComposer
-from qensor.toolbox import qaoa_energy_tw_from_graph
-from qensor import PerfNumpyBackend
-from qensor.ProcessingFrameworks import CMKLExtendedBackend, PerfBackend
+from qtensor.ProcessingFrameworks import CMKLExtendedBackend, PerfBackend
+from qtensor.toolbox import qaoa_energy_tw_from_graph
+from qtensor.optimisation.TensorNet import QtreeTensorNet
+from qtensor.optimisation.Optimizer import OrderingOptimizer, TamakiOptimizer, WithoutOptimizer
+from qtensor import QtreeQAOAComposer
 
 @click.group()
 def cli():

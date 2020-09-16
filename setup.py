@@ -12,16 +12,17 @@ REQUIRED_PACKAGES = [
     ,'loguru'
     ,'tqdm'
     ,'click'
+    ,'qtensor-qtree'
 
 ]
 
-setuptools.setup(name='qensor',
-                 version='0.1.1',
+setuptools.setup(name='qtensor',
+                 version='0.1.2',
                  description='Framework for efficient quantum circuit simulations',
-                 url='https://github.com/DaniloZZZ/qensor',
+                 url='https://github.com/danlkv/qtensor',
                  keywords='quantum_circuit quantum_algorithms',
                  author='D. Lykov, et al.',
-                 author_email='dan@qensor.org',
+                 author_email='dan@qtensor.org',
                  license='Apache',
                  packages=setuptools.find_packages(),
                  install_requires=REQUIRED_PACKAGES,

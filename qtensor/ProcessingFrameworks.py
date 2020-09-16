@@ -4,10 +4,10 @@ from qtree import optimizer as opt
 from . import exatn_framework
 
 from pyrofiler import timing
-from qensor.utils import ReportTable
+from qtensor.utils import ReportTable
 import numpy as np
-
 import tcontract
+from qtensor.utils import ReportTable
 
 class BucketBackend:
     def process_bucket(self, bucket, no_sum=False):

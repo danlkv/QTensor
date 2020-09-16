@@ -3,6 +3,10 @@
 ## Installation
 
 ```bash
+pip install qtensor
+```
+Or from source:
+```bash
 git clone --recurse-submodules https://github.com/DaniloZZZ/QTensor
 cd QTensor
 cd qtree && pip install .

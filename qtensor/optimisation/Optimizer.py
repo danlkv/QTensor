@@ -4,8 +4,8 @@ import sys
 import numpy as np
 import networkx as nx
 
-from qensor import utils
-from qensor.optimisation.Greedy import GreedyParvars
+from qtensor import utils
+from qtensor.optimisation.Greedy import GreedyParvars
 from loguru import logger as log
 
 
@@ -74,12 +74,12 @@ class OrderingOptimizer(Optimizer):
 
 class SlicesOptimizer(OrderingOptimizer):
 
-    def __init__(self, tw_bias=2, target_tw=None):
+    def __init__(self, tw_bias=2, max_tw=None):
         self.tw_bias = tw_bias
-        self.max_tw = target_tw
+        self.max_tw = max_tw
 
     def _get_max_tw(self):
-        if hasattr(self, 'max_tw'):
+        if hasattr(self, 'max_tw') and self.max_tw is not None:
             return self.max_tw
         mem = psutil.virtual_memory()
         avail = mem.available

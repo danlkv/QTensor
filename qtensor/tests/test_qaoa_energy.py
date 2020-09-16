@@ -1,18 +1,18 @@
-from qensor import CirqQAOAComposer, QtreeQAOAComposer
-from qensor import QAOAQtreeSimulator
-from qensor.Simulate import CirqSimulator, QtreeSimulator
-from qensor.FeynmanSimulator import FeynmanSimulator
-from qensor.optimisation.Optimizer import TamakiTrimSlicing, TreeTrimSplitter
-from qensor.tests.qiskit_qaoa_energy import simulate_qiskit_amps 
+from qtensor import CirqQAOAComposer, QtreeQAOAComposer
+from qtensor import QAOAQtreeSimulator
+from qtensor.Simulate import CirqSimulator, QtreeSimulator
+from qtensor.FeynmanSimulator import FeynmanSimulator
+from qtensor.optimisation.Optimizer import TamakiTrimSlicing, TreeTrimSplitter
+from qtensor.tests.qiskit_qaoa_energy import simulate_qiskit_amps 
 import numpy as np
 import networkx as nx
 
-def get_test_problem(n=14, p=2, d=3):
+def get_test_problem(n=10, p=2, d=3):
     w = np.array([[0,1,1,0],[1,0,1,1],[1,1,0,1],[0,1,1,0]])
     G = nx.from_numpy_matrix(w)
 
     G = nx.random_regular_graph(d, n)
-    gamma, beta = [np.pi/3]*p, [np.pi/2]*p
+    gamma, beta = [np.pi/5]*p, [np.pi/2]*p
     return G, gamma, beta
 
 def test_qaoa_energy_vs_qiskit():
@@ -34,29 +34,30 @@ def test_qaoa_energy_multithread():
         G, gamma=gamma, beta=beta,
         n_processes=4
     )
-    print('result', res)
+    print('result parallel', res)
     assert res
     res_1 = sim.energy_expectation(
         G, gamma=gamma, beta=beta)
-    print('result', res_1)
+    print('result serial', res_1)
     assert res_1 - res < 1e-6
 
 class FeynmanQAOASimulator(QAOAQtreeSimulator, FeynmanSimulator):
     pass
 
 def test_qaoa_energy_feynman():
-    G, gamma, beta = get_test_problem(14, 3, 3)
+    G, gamma, beta = get_test_problem(10, 3, 3)
     sim = QAOAQtreeSimulator(QtreeQAOAComposer)
     res = sim.energy_expectation(
         G, gamma=gamma, beta=beta)
-    print('result', res)
+    print('result simple simulator', res)
 
     sim = FeynmanQAOASimulator(QtreeQAOAComposer)
-    sim.opt_args['tw_bias'] = 6
+    sim.opt_args['max_tw'] = 13
+    sim.opt_args['tw_bias'] = 0
     sim.optimizer = TreeTrimSplitter
     res_1 = sim.energy_expectation(
         G, gamma=gamma, beta=beta)
-    print('result', res_1)
+    print('result feynman simulator', res_1)
     assert np.isclose(res, res_1)
 
 if __name__ == '__main__':

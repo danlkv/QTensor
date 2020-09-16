@@ -4,16 +4,16 @@ from loguru import logger as log
 log.remove()
 log.add(sys.stderr, level='INFO')
 # --
-from qensor.utils import get_edge_subgraph
+from qtensor.utils import get_edge_subgraph
 import networkx as nx
 
 from .CircuitComposer import QAOAComposer
 from .OpFactory import CirqCreator, QtreeCreator
 from .OpFactory import CirqCreator, QtreeCreator, QiskitCreator
-from qensor.Simulate import CirqSimulator, QtreeSimulator
-from qensor.QAOASimulator import QAOAQtreeSimulator
-from qensor.FeynmanSimulator import FeynmanSimulator
-from qensor.ProcessingFrameworks import PerfNumpyBackend, NumpyBackend
+from qtensor.Simulate import CirqSimulator, QtreeSimulator
+from qtensor.QAOASimulator import QAOAQtreeSimulator
+from qtensor.FeynmanSimulator import FeynmanSimulator
+from qtensor.ProcessingFrameworks import PerfNumpyBackend, NumpyBackend
 
 class CirqQAOAComposer(QAOAComposer, CirqCreator):
     pass

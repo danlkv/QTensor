@@ -1,10 +1,10 @@
-import qensor
-from qensor import CirqQAOAComposer, QtreeQAOAComposer
-from qensor import QAOAQtreeSimulator
-from qensor.optimisation.Optimizer import OrderingOptimizer, TamakiTrimSlicing, TreeTrimSplitter
-from qensor.optimisation.Optimizer import SlicesOptimizer
-from qensor.optimisation.TensorNet import QtreeTensorNet
-from qensor.FeynmanSimulator import FeynmanSimulator
+import qtensor
+from qtensor import CirqQAOAComposer, QtreeQAOAComposer
+from qtensor import QAOAQtreeSimulator
+from qtensor.optimisation.Optimizer import OrderingOptimizer, TamakiTrimSlicing, TreeTrimSplitter
+from qtensor.optimisation.Optimizer import SlicesOptimizer
+from qtensor.optimisation.TensorNet import QtreeTensorNet
+from qtensor.FeynmanSimulator import FeynmanSimulator
 import numpy as np
 import networkx as nx
 np.random.seed(42)
