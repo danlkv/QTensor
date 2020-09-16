@@ -29,7 +29,7 @@ class FeynmanSimulator(QtreeSimulator):
 
     def __init__(self, *args,
                  pool_type='process', n_processes=None
-                 ,target_tw=None
+                 ,max_tw=None
                  , **kwargs):
         super().__init__(*args, **kwargs)
         if n_processes is None:
@@ -40,13 +40,13 @@ class FeynmanSimulator(QtreeSimulator):
             self.pool = ThreadPool
         else:
             self.pool = Pool
-        self.target_tw = target_tw
+        self.max_tw = max_tw
 
     def optimize_buckets(self, fixed_vars: list=None):
         opt_args = {'tw_bias': self.tw_bias}
         opt_args.update(self.opt_args)
-        if self.target_tw:
-            opt_args['target_tw'] = self.target_tw
+        if self.max_tw:
+            opt_args['max_tw'] = self.max_tw
         opt = self.optimizer(**opt_args)
         peo, par_vars, self.tn = opt.optimize(self.tn)
         self.parallel_vars = par_vars

@@ -10,7 +10,7 @@ import qtree.operators as ops
 import qtensor.optimisation as qop
 from qtensor.FeynmanSimulator import FeynmanSimulator
 
-from qtensor.ProcessingFrameworks import CMKLExtendedBackend, PerfBackend
+from qtensor.ProcessingFrameworks import CMKLExtendedBackend, PerfBackend, ExaTnBackend
 from qtensor.toolbox import qaoa_energy_tw_from_graph
 from qtensor.optimisation.TensorNet import QtreeTensorNet
 from qtensor.optimisation.Optimizer import OrderingOptimizer, TamakiOptimizer, WithoutOptimizer
@@ -24,8 +24,8 @@ def cli():
 @click.argument('filename', nargs=-1)
 @click.option('-p','--num-processes', default=1)
 @click.option('-P','--profile', default=False, is_flag=True)
-@click.option('-t','--target-tw', default=25)
-def sim_file(filename, profile=False, num_processes=1, target_tw=25):
+@click.option('-t','--max-tw', default=25)
+def sim_file(filename, profile=False, num_processes=1, max_tw=25):
     if not filename:
         stream = sys.stdin
     else:
@@ -34,7 +34,7 @@ def sim_file(filename, profile=False, num_processes=1, target_tw=25):
     n_qubits, circuit = ops.read_circuit_stream(stream)
     kwargs = dict(
         n_processes=num_processes
-        ,target_tw=target_tw
+        ,max_tw=max_tw
         , pool_type='thread'
     )
     if profile:

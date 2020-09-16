@@ -3,9 +3,9 @@ import numpy as np
 from tqdm import tqdm
 import time
 
-from qensor.optimisation.TensorNet import QtreeTensorNet
-from qensor.optimisation.Optimizer import OrderingOptimizer, TamakiOptimizer, WithoutOptimizer
-from qensor import QtreeQAOAComposer
+from qtensor.optimisation.TensorNet import QtreeTensorNet
+from qtensor.optimisation.Optimizer import OrderingOptimizer, TamakiOptimizer, WithoutOptimizer
+from qtensor import QtreeQAOAComposer
 
 def qaoa_energy_tw_from_graph(G, p, max_time=0, max_tw=0, ordering_algo='greedy'):
     gamma, beta = [0]*p, [0]*p
