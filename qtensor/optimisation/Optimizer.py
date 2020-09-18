@@ -199,3 +199,7 @@ class TreeTrimSplitter(SlicesOptimizer):
 
 class TamakiTrimSlicing(TamakiOptimizer, TreeTrimSplitter):
     pass
+
+# A convenience variable to use in other packages
+
+DefaultOptimizer = OrderingOptimizer
