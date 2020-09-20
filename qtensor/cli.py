@@ -146,7 +146,7 @@ def qaoa_energy_tw(nodes, seed, degree, p, graph_type, max_time, max_tw, orderin
     else:
         raise Exception('Unsupported graph type')
 
-    qaoa_energy_tw_from_graph(G, p, max_time, max_tw, ordering_algo)
+    qaoa_energy_tw_from_graph(G, p, max_time, max_tw, ordering_algo, print_stats=True)
 
 
 cli()

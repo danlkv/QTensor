@@ -3,11 +3,37 @@ import numpy as np
 from tqdm import tqdm
 import time
 
-from qensor.optimisation.TensorNet import QtreeTensorNet
-from qensor.optimisation.Optimizer import OrderingOptimizer, TamakiOptimizer, WithoutOptimizer
-from qensor import QtreeQAOAComposer
+from qtensor.optimisation.TensorNet import QtreeTensorNet
+from qtensor.optimisation.Optimizer import OrderingOptimizer, TamakiOptimizer, WithoutOptimizer
+from qtensor import QtreeQAOAComposer
 
-def qaoa_energy_tw_from_graph(G, p, max_time=0, max_tw=0, ordering_algo='greedy'):
+def random_graph(nodes, type='random', **kwargs):
+    """
+    Generate a random graph
+    Parameters:
+        nodes: int
+            Number of nodes in the graph
+        type: enum['random', 'erdos_renyi']
+            algorithm to use
+        **kwargs:
+            keyword arguments to specific algorithm
+            usually of form
+                seed: int
+                degree: int
+    """
+    if type == 'random':
+        return nx.random_regular_graph(n=nodes, d=kwargs['degree']
+                                 , seed=kwargs.get('seed'))
+    if type == 'erdos_renyi':
+        prob_of_edge_add = kwargs['degree']/(nodes-1)
+        return nx.erdos_renyi_graph(n=nodes, p=prob_of_edge_add
+                                    , seed=kwargs.get('seed'))
+    else:
+        raise ValueError('Unsupported graph type')
+
+
+def qaoa_energy_tw_from_graph(G, p, max_time=0, max_tw=0,
+                              ordering_algo='greedy', print_stats=False):
     gamma, beta = [0]*p, [0]*p
     def get_tw(circ):
 
@@ -41,4 +67,6 @@ def qaoa_energy_tw_from_graph(G, p, max_time=0, max_tw=0, ordering_algo='greedy'
         twidths.append(tw)
         if time.time() - start > max_time:
             break
-    print(f'med={np.median(twidths)} mean={round(np.mean(twidths), 2)} max={np.max(twidths)}')
+    if print_stats:
+        print(f'med={np.median(twidths)} mean={round(np.mean(twidths), 2)} max={np.max(twidths)}')
+    return twidths

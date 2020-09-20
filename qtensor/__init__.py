@@ -62,3 +62,6 @@ def QAOA_energy(G, gamma, beta, n_processes=0):
     else:
         res = sim.energy_expectation(G, gamma=gamma, beta=beta)
     return res
+
+
+from . import toolbox
