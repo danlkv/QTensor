@@ -1,9 +1,9 @@
 from loguru import logger as log
 from qtensor.utils import get_edge_subgraph
 import networkx as nx
-from .OpFactory import CircuitCreator
+from .OpFactory import CircuitBuilder
 
-class CircuitComposer(CircuitCreator):
+class CircuitComposer(CircuitBuilder):
     def __init__(self, *args, **params):
         super().__init__(*args, **params)
         self.params = params
@@ -12,9 +12,6 @@ class CircuitComposer(CircuitCreator):
         for q in self.qubits:
             self.apply_gate(self.operators.H, q)
 
-    def create(self):
-        raise NotImplementedError
-
 
 class QAOAComposer(CircuitComposer):
     def __init__(self, graph, *args, **kwargs):
@@ -22,6 +19,24 @@ class QAOAComposer(CircuitComposer):
         super().__init__(n_qubits, *args, **kwargs)
 
         self.graph = graph
+
+    @classmethod
+    def _get_of_my_type(cls, *args, **kwargs):
+        return cls(*args, **kwargs)
+
+    def energy_expectation(self, i, j):
+        G = self.graph
+        self.ansatz_state()
+        self.energy_edge(i, j)
+
+        beta, gamma = self.params['beta'], self.params['gamma']
+        conjugate = self._get_of_my_type(G, beta=beta, gamma=gamma)
+        conjugate.ansatz_state()
+        conjugate = [g.dagger_me() for g in conjugate.circuit]
+
+        self.circuit = self.circuit + list(reversed(conjugate))
+        return self.circuit
+
 
     def x_term(self, u, beta):
         #self.circuit.append(self.operators.H(u))

@@ -57,7 +57,8 @@ class QiskitFactory:
 
     cZ=qiskit_lib.CzGate
 
-class CircuitCreator:
+class CircuitBuilder:
+    """ ABC for creating a circuit."""
     operators = OpFactory
 
     def __init__(self, n_qubits, **params):
@@ -75,7 +76,7 @@ class CircuitCreator:
         self.circuit.append(gate(**params), *qubits)
 
 
-class CirqCreator(CircuitCreator):
+class CirqBuilder(CircuitBuilder):
     operators = CirqFactory
 
     def get_qubits(self):
@@ -86,7 +87,7 @@ class CirqCreator(CircuitCreator):
     def apply_gate(self, gate, *qubits, **params):
         self.circuit.append(gate(*qubits, **params))
 
-class QtreeCreator(CircuitCreator):
+class QtreeBuilder(CircuitBuilder):
     operators = QtreeFactory
 
     def get_qubits(self):
@@ -97,7 +98,7 @@ class QtreeCreator(CircuitCreator):
     def apply_gate(self, gate, *qubits, **params):
         self.circuit.append(gate(*qubits, **params))
 
-class QiskitCreator(CircuitCreator):
+class QiskitBuilder(CircuitBuilder):
     operators = QiskitFactory
 
     def get_qubits(self):

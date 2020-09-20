@@ -8,20 +8,20 @@ from qtensor.utils import get_edge_subgraph
 import networkx as nx
 
 from .CircuitComposer import QAOAComposer
-from .OpFactory import CirqCreator, QtreeCreator
-from .OpFactory import CirqCreator, QtreeCreator, QiskitCreator
+from .OpFactory import CirqBuilder, QtreeBuilder
+from .OpFactory import CirqBuilder, QtreeBuilder, QiskitBuilder
 from qtensor.Simulate import CirqSimulator, QtreeSimulator
 from qtensor.QAOASimulator import QAOAQtreeSimulator
 from qtensor.FeynmanSimulator import FeynmanSimulator
 from qtensor.ProcessingFrameworks import PerfNumpyBackend, NumpyBackend
 
-class CirqQAOAComposer(QAOAComposer, CirqCreator):
+class CirqQAOAComposer(QAOAComposer, CirqBuilder):
     pass
 
-class QiskitQAOAComposer(QAOAComposer, QiskitCreator):
+class QiskitQAOAComposer(QAOAComposer, QiskitBuilder):
     pass
 
-class QtreeQAOAComposer(QAOAComposer, QtreeCreator):
+class QtreeQAOAComposer(QAOAComposer, QtreeBuilder):
     def energy_expectation(self, i, j):
         G = self.graph
         self.ansatz_state()
