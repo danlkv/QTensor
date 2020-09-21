@@ -106,7 +106,6 @@ def get_exatn_expr(tensor1, tensor2, result_name, result_idx):
     tensor1 = TensorInfo(name=tensor1.name, indices=[idx_to_least_idx[idx] for idx in tensor1.indices])
     tensor2 = TensorInfo(name=tensor2.name, indices=[idx_to_least_idx[idx] for idx in tensor2.indices])
     result_ide = [idx_to_least_idx[idx] for idx in result_idx]
-uld 
 
     # T(a,b,c) = A(a,b) * B(b,c)
     str1 = tensor_to_string(tensor1)
@@ -144,11 +143,12 @@ def process_bucket_exatn(bucket, no_sum=False):
     """
 
     pr_info = bucket[0]
+    n = len(bucket)
 
     for i, t_info in enumerate(bucket[1:]):
-        is_hcon = len(bucket) == 2 # TODO better check if hypercontraction is required
-        result_indices = get_result_indices(idx1, idx2, contract=is_hcon)
-        if is_hcon:
+        no_hcon = n == 2 or i == n - 1 # TODO better check if hypercontraction is required
+        result_indices = get_result_indices(idx1, idx2, contract=no_hcon)
+        if no_hcon:
             no_sum = True
         else:
             raise Exception('QTensorError: Exatn Hyper-contractions are not supported at the moment')

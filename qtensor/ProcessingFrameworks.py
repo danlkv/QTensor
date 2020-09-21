@@ -21,7 +21,7 @@ class NumpyBackend(BucketBackend):
         return np_framework.process_bucket_np(bucket, no_sum=no_sum)
 
     def get_sliced_buckets(self, buckets, data_dict, slice_dict):
-        return get_sliced_exatn_buckets(buckets, data_dict, slice_dict)
+        return np_framework.get_sliced_np_buckets(buckets, data_dict, slice_dict)
 
 class ExaTnBackend(BucketBackend):
     def __init__(self, *args, **kwargs):
@@ -33,7 +33,7 @@ class ExaTnBackend(BucketBackend):
         return res
 
     def get_sliced_buckets(self, buckets, data_dict, slice_dict):
-        return np_framework.get_sliced_np_buckets(buckets, data_dict, slice_dict)
+        return exatn_framework.get_sliced_exatn_buckets(buckets, data_dict, slice_dict)
 
 class CMKLExtendedBackend(BucketBackend):
     def get_sliced_buckets(self, buckets, data_dict, slice_dict):
