@@ -19,9 +19,6 @@ class ExatnMock:
 exatn = ExatnMock()
 def import_exatn():
     global exatn
-    import sys
-    from pathlib import Path
-    sys.path.insert(1, str(Path.home()) + '/.exatn')
     exatn = import_module('exatn')
 
 # --
@@ -29,6 +26,67 @@ def import_exatn():
 from collections import namedtuple
 
 TensorInfo = namedtuple("TensorInfo", "name indices")
+
+def get_sliced_exatn_buckets(buckets, data_dict, slice_dict):
+    """
+    Takes placeholder buckets and populates them with
+    actual sliced values. This function is a sum of
+    :func:`get_np_buckets` and :func:`slice_np_buckets`
+
+    Parameters
+    ----------
+    buckets : list of list
+              buckets as returned by :py:meth:`circ2buckets`
+              and :py:meth:`reorder_buckets`.
+    data_dict : dict
+              dictionary containing values for the placeholder Tensors
+    slice_dict : dict
+              Current subtensor along the sliced variables
+              in the form {variable: slice}
+    Returns
+    -------
+    sliced_buckets : list of lists
+              buckets with sliced Numpy tensors
+    """
+    # import pdb
+    # pdb.set_trace()
+
+    # Create np buckets from buckets
+    sliced_buckets = []
+    for bucket in buckets:
+        sliced_bucket = []
+        for tensor in bucket:
+            # get data
+            # sort tensor dimensions
+            transpose_order = np.argsort(list(map(int, tensor.indices)))
+            data = np.transpose(data_dict[tensor.data_key],
+                                transpose_order)
+            # transpose indices
+            indices_sorted = [tensor.indices[pp]
+                              for pp in transpose_order]
+
+            # slice data
+            slice_bounds = []
+            for idx in indices_sorted:
+                try:
+                    slice_bounds.append(slice_dict[idx])
+                except KeyError:
+                    slice_bounds.append(slice(None))
+
+            data = data[tuple(slice_bounds)]
+
+            # update indices
+            indices_sliced = [idx.copy(size=size) for idx, size in
+                              zip(indices_sorted, data.shape)]
+            indices_sliced = [i for sl, i in zip(slice_bounds, indices_sliced) if not isinstance(sl, int)]
+            assert len(data.shape) == len(indices_sliced)
+
+            exatn.createTensor(tensor.name, data)
+
+            sliced_bucket.append(TensorInfo(tensor.name, indices_sliced))
+        sliced_buckets.append(sliced_bucket)
+
+    return sliced_buckets
 
 def idx_to_string(idx):
     idx = map(int, idx)
@@ -47,7 +105,8 @@ def get_exatn_expr(tensor1, tensor2, result_name, result_idx):
                         in enumerate(all_indices)}
     tensor1 = TensorInfo(name=tensor1.name, indices=[idx_to_least_idx[idx] for idx in tensor1.indices])
     tensor2 = TensorInfo(name=tensor2.name, indices=[idx_to_least_idx[idx] for idx in tensor2.indices])
-    result_idx = [idx_to_least_idx[idx] for idx in result_idx]
+    result_ide = [idx_to_least_idx[idx] for idx in result_idx]
+uld 
 
     # T(a,b,c) = A(a,b) * B(b,c)
     str1 = tensor_to_string(tensor1)
@@ -55,6 +114,13 @@ def get_exatn_expr(tensor1, tensor2, result_name, result_idx):
     str3 = f"{result_name}({idx_to_string(result_idx)})"
 
     return f"{str3} = {str2} * {str1}"
+
+def get_result_indices(idx1, idx2, contract=True):
+    result_indices = tuple(sorted(set(idx1 + idx2), key=int))
+    if contract:
+        result_indices = result_indices[1:]
+    return result_indices
+   
 
 def process_bucket_exatn(bucket, no_sum=False):
     """
@@ -76,68 +142,22 @@ def process_bucket_exatn(bucket, no_sum=False):
     tensor : optimizer.Tensor
            wrapper tensor object holding the result
     """
-    if len(bucket)>1:
-        # Use exatn if we need to contract things
-        print("BBUCKET")
-        for x in bucket:
-            print(f'create Tensor {x.name}')
-            exatn.createTensor(x.name, x.data.astype(complex))
-        print("ABUCKET")
-    prev_result = bucket[0]
-    pr_info = TensorInfo(prev_result.name, prev_result.indices)
 
+    pr_info = bucket[0]
 
-    for i, tensor in enumerate(bucket[1:]):
-        t_info = TensorInfo(tensor.name, tensor.indices)
-
-        result_indices = tuple(sorted(
-            set(pr_info.indices + t_info.indices),
-            key=int)
-        )
-        if len(bucket) == 2:
-            result_indices = result_indices[1:]
+    for i, t_info in enumerate(bucket[1:]):
+        is_hcon = len(bucket) == 2 # TODO better check if hypercontraction is required
+        result_indices = get_result_indices(idx1, idx2, contract=is_hcon)
+        if is_hcon:
             no_sum = True
         else:
             raise Exception('QTensorError: Exatn Hyper-contractions are not supported at the moment')
 
         new_name = f"C{np.random.randint(0, 100000)}"
-        print(f'create Tensor {new_name}')
         exatn.createTensor(new_name, np.empty([2]*len(result_indices), dtype=complex))
         expr = get_exatn_expr(pr_info, t_info, new_name, result_indices)
 
         pr_info = TensorInfo(new_name, result_indices)
-        print("BCONTRACT")
-        print(expr)
         exatn.contractTensors(expr)
-        #exatn.evaluateTensorNetwork('net', expr)
-        print("ACONTRACT")
 
-    result_indices = pr_info.indices
-
-
-    if len(result_indices) > 0:
-        if not no_sum:  # trim first index
-            first_index, *result_indices = result_indices
-        else:
-            first_index, *_ = result_indices
-        tag = first_index.identity
-    else:
-        tag = 'f'
-        result_indices = []
-
-    if len(bucket)>1:
-        print(f"Before getLocalTensor {pr_info.name}")
-        result_data = exatn.getLocalTensor(pr_info.name)
-        print("After getLocalTensor")
-    else:
-        # Bucket is just one tensor that needs summation
-        result_data = bucket[0].data
-
-
-    # reduce
-    if no_sum:
-        result = opt.Tensor(f'E{tag}', result_indices, data=result_data)
-    else:
-        result = opt.Tensor(f'E{tag}', result_indices, 
-                                data=np.sum(result_data, axis=0))
-    return result
+    return pr_info
