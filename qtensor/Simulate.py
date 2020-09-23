@@ -1,6 +1,7 @@
 import qtree
-from qtensor.ProcessingFrameworks import NumpyBackend
 import cirq
+from qtensor.ProcessingFrameworks import NumpyBackend
+
 from qtensor.optimisation.TensorNet import QtreeTensorNet
 from qtensor.optimisation.Optimizer import DefaultOptimizer
 from tqdm.auto import tqdm
@@ -25,17 +26,18 @@ class Simulator:
         pass
 
     def simulate(self, qc):
-       """ Factory method """
-       raise NotImplementedError()
+        """ Factory method """
+        raise NotImplementedError()
 
 
 class QtreeSimulator(Simulator):
+    FallbackOptimizer = DefaultOptimizer
     def __init__(self, bucket_backend=NumpyBackend(), optimizer=None, max_tw=None):
         self.bucket_backend = bucket_backend
         if optimizer:
             self.optimizer = optimizer
         else:
-            self.optimizer = DefaultOptimizer()
+            self.optimizer = self.FallbackOptimizer()
         self.max_tw = max_tw
 
     #-- Internal helpers
@@ -92,15 +94,14 @@ class QtreeSimulator(Simulator):
         sliced_buckets = self.tn.slice(slice_dict)
         #self.bucket_backend.pbar.set_total ( len(sliced_buckets))
 
-        with tqdm(total=len(sliced_buckets), desc='Bucket elimitation', leave=True) as pbar:
-            self.bucket_backend.set_progress_bar(pbar)
+        #with tqdm(total=len(sliced_buckets), desc='Bucket elimitation', leave=True) as pbar:
+            #self.bucket_backend.set_progress_bar(pbar)
 
-            result = qtree.optimizer.bucket_elimination(
-                sliced_buckets, self.bucket_backend.process_bucket,
-                n_var_nosum=len(self.tn.free_vars)
-            )
-        #print(result, result.data)
-        return result.data.flatten()
+        result = qtree.optimizer.bucket_elimination(
+            sliced_buckets, self.bucket_backend.process_bucket,
+            n_var_nosum=len(self.tn.free_vars)
+        )
+        return self.bucket_backend.get_result_data(result).flatten()
 
     def simulate(self, qc):
         return self.simulate_state(qc)

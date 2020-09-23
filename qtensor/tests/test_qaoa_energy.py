@@ -52,9 +52,7 @@ def test_qaoa_energy_feynman():
     print('result simple simulator', res)
 
     sim = FeynmanQAOASimulator(QtreeQAOAComposer)
-    sim.opt_args['max_tw'] = 13
-    sim.opt_args['tw_bias'] = 0
-    sim.optimizer = TreeTrimSplitter
+    sim.optimizer = TreeTrimSplitter(max_tw=13, tw_bias=0)
     res_1 = sim.energy_expectation(
         G, gamma=gamma, beta=beta)
     print('result feynman simulator', res_1)

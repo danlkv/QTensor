@@ -28,7 +28,7 @@ def test_profiled(capsys):
     print("Profile results")
     print(backend.gen_report())
 
-    qtree_amp = result.data
+    qtree_amp = result
 
     assert qtree_amp
 

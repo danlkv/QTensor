@@ -53,12 +53,13 @@ class QAOASimulator(Simulator):
 
         with tqdm(total=G.number_of_edges(), desc='Edge iteration', ) as pbar:
             for edge in G.edges():
-                pbar.set_postfix(Treewidth=self.optimizer.treewidth)
                 E = self._get_edge_energy(G, gamma, beta, edge)
+                pbar.set_postfix(Treewidth=self.optimizer.treewidth)
                 pbar.update(1)
+                total_E += E
+
             if self.profile:
                 print(self.backend.gen_report())
-            total_E += E
 
         C = self._post_process_energy(G, total_E)
         return C
