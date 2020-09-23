@@ -10,6 +10,9 @@ class BucketBackend:
     def get_sliced_buckets(self, buckets, data_dict, slice_dict):
         raise NotImplementedError
 
+    def get_result_data(self, result):
+        raise NotImplementedError
+
 class NumpyBackend(BucketBackend):
     def __init__(self):
         super().__init__()
@@ -25,6 +28,9 @@ class NumpyBackend(BucketBackend):
 
     def get_sliced_buckets(self, buckets, data_dict, slice_dict):
         return np_framework.get_sliced_np_buckets(buckets, data_dict, slice_dict)
+
+    def get_result_data(self, result):
+        return result.data
 
 class PerfBackend(BucketBackend):
     Backend = BucketBackend
@@ -50,6 +56,9 @@ class PerfBackend(BucketBackend):
 
     def get_sliced_buckets(self, buckets, data_dict, slice_dict):
         return self.backend.get_sliced_buckets(buckets, data_dict, slice_dict)
+
+    def get_result_data(self, result):
+        return self.backend.get_result_data(result)
 
     def _perfect_bucket_flop(self, bucket_indices):
         resulting_indices = list(set.union(*[set(ixs) for ixs in bucket_indices]))
