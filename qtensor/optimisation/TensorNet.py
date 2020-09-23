@@ -1,5 +1,6 @@
 import qtree
 from qtensor.ProcessingFrameworks import NumpyBackend
+from qtensor import utils
 from loguru import logger as log
 
 class TensorNet:
@@ -31,6 +32,11 @@ class QtreeTensorNet(TensorNet):
     def set_free_qubits(self, free):
         self.free_vars = [self.bra_vars[i] for i in free]
         self.bra_vars = [var for var in self.bra_vars if var not in self.free_vars]
+
+    def simulation_cost(self, peo):
+        g, _ = utils(self.get_line_graph(), peo)
+        mems, flops = qtree.get_contraction_costs(g)
+        return mems, flops
 
     @property
     def _tensors(self):

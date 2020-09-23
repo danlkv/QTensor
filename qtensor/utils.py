@@ -1,5 +1,6 @@
 import copy
 import numpy as np
+import itertools
 import qtree
 from qtree.optimizer import Var
 import matplotlib.pyplot as plt
@@ -18,6 +19,21 @@ def get_neighbours_peo(old_graph):
         qtree.graph_model.eliminate_node(graph, best_node)
     return peo, nghs
 
+def eliminate_node_no_structure(graph, node):
+    neighbors_wo_node = list(graph[node])
+    while node in neighbors_wo_node:
+        neighbors_wo_node.remove(node)
+
+    graph.remove_node(node)
+
+    # prepare new tensor
+    if len(neighbors_wo_node) > 1:
+        graph.add_edges_from( itertools.combinations(neighbors_wo_node, 2))
+
+    elif len(neighbors_wo_node) == 1 :
+        # This node had a single neighbor, add self loop to it
+        graph.add_edges_from([[neighbors_wo_node[0], neighbors_wo_node[0]]])
+
 def get_locale_peo(old_graph, rule):
     # This is far below computationally effective
     graph = copy.deepcopy(old_graph)
@@ -33,7 +49,7 @@ def get_locale_peo(old_graph, rule):
         vals.append(costs[_idx])
         node = nodes[_idx]
         path.append(node)
-        qtree.graph_model.eliminate_node(graph, node)
+        eliminate_node_no_structure(graph, node)
     return path, vals
 
 
