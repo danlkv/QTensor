@@ -1,10 +1,11 @@
 import networkx as nx
 import numpy as np
-from tqdm import tqdm
+from tqdm.auto import tqdm
 import time
 
 from qtensor.optimisation.TensorNet import QtreeTensorNet
 from qtensor.optimisation.Optimizer import OrderingOptimizer, TamakiOptimizer, WithoutOptimizer
+from qtensor.utils import get_edge_subgraph
 from qtensor import QtreeQAOAComposer
 
 def random_graph(nodes, type='random', **kwargs):
@@ -56,17 +57,21 @@ def qaoa_energy_tw_from_graph(G, p, max_time=0, max_tw=0,
         start = time.time()
     else:
         start = np.inf
-    for edge in tqdm(G.edges()):
-        composer = QtreeQAOAComposer(G, beta=beta, gamma=gamma)
-        composer.energy_expectation_lightcone(edge)
-        tw = get_tw(composer.circuit)
-        if max_tw:
-            if tw>max_tw:
-                print(f'Encountered treewidth of {tw}, which is larger {max_tw}')
+    with tqdm(total=G.number_of_edges(), desc='Edge iteration') as pbar:
+        for edge in G.edges():
+            composer = QtreeQAOAComposer(G, beta=beta, gamma=gamma)
+            composer.energy_expectation_lightcone(edge)
+            tw = get_tw(composer.circuit)
+            pbar.update()
+            subgraph = get_edge_subgraph(G, edge, len(beta))
+            pbar.set_postfix(current_tw=tw, subgraph_nodes=subgraph.number_of_nodes())
+            if max_tw:
+                if tw>max_tw:
+                    print(f'Encountered treewidth of {tw}, which is larger {max_tw}')
+                    break
+            twidths.append(tw)
+            if time.time() - start > max_time:
                 break
-        twidths.append(tw)
-        if time.time() - start > max_time:
-            break
     if print_stats:
         print(f'med={np.median(twidths)} mean={round(np.mean(twidths), 2)} max={np.max(twidths)}')
     return twidths

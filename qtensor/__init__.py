@@ -8,10 +8,10 @@ from qtensor.utils import get_edge_subgraph
 import networkx as nx
 
 from .CircuitComposer import QAOAComposer
-from .OpFactory import CirqBuilder, QtreeBuilder
 from .OpFactory import CirqBuilder, QtreeBuilder, QiskitBuilder
 from qtensor.Simulate import CirqSimulator, QtreeSimulator
 from qtensor.QAOASimulator import QAOAQtreeSimulator
+from qtensor.QAOASimulator import QAOACirqSimulator
 from qtensor.FeynmanSimulator import FeynmanSimulator
 from qtensor.ProcessingFrameworks import PerfNumpyBackend, NumpyBackend
 

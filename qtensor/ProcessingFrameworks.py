@@ -1,6 +1,7 @@
 from qtree import np_framework
 from pyrofiler import timing
 from qtensor.utils import ReportTable
+from tqdm import tqdm
 
 class BucketBackend:
     def process_bucket(self, bucket, no_sum=False):
@@ -10,8 +11,16 @@ class BucketBackend:
         raise NotImplementedError
 
 class NumpyBackend(BucketBackend):
+    def __init__(self):
+        super().__init__()
+        #self.pbar = tqdm(desc='Buckets', position=2)
+        #self.status_bar = tqdm(desc='Current status', position=3, bar_format='{desc}')
+
     def process_bucket(self, bucket, no_sum=False):
+        total_indices = set.union(*[set(t.indices) for t in bucket])
+        #self.status_bar.set_description_str(f'Current bucker result size: {len(total_indices)}')
         res =  np_framework.process_bucket_np(bucket, no_sum=no_sum)
+        #self.pbar.update(1)
         return res
 
     def get_sliced_buckets(self, buckets, data_dict, slice_dict):

@@ -3,6 +3,7 @@ from qtensor.ProcessingFrameworks import NumpyBackend
 import cirq
 from qtensor.optimisation.TensorNet import QtreeTensorNet
 from qtensor.optimisation.Optimizer import DefaultOptimizer
+from tqdm.auto import tqdm
 
 from loguru import logger as log
 
@@ -18,8 +19,13 @@ class Simulator:
 
 
 class QtreeSimulator(Simulator):
-    def __init__(self, bucket_backend=NumpyBackend()):
+    def __init__(self, bucket_backend=NumpyBackend(), optimizer=None, max_tw=None):
         self.bucket_backend = bucket_backend
+        if optimizer:
+            self.optimizer = optimizer
+        else:
+            self.optimizer = DefaultOptimizer()
+        self.max_tw = max_tw
 
     #-- Internal helpers
     def _new_circuit(self, qc):
@@ -50,8 +56,8 @@ class QtreeSimulator(Simulator):
     #-- 
 
     def optimize_buckets(self):
-        opt = DefaultOptimizer()
-        peo, self.tn = opt.optimize(self.tn)
+        peo, self.tn = self.optimizer.optimize(self.tn)
+        #print('Treewidth', self.optimizer.treewidth)
         return peo
 
     def simulate_batch(self, qc, batch_vars=0, peo=None):
@@ -62,6 +68,9 @@ class QtreeSimulator(Simulator):
         self._set_free_qubits(free_final_qubits)
         if peo is None:
             self._optimize_buckets()
+            if self.max_tw:
+                if self.optimizer.treewidth > self.max_tw:
+                    raise ValueError(f'Treewidth {self.optimizer.treewidth} is larger than max_tw={self.max_tw}.')
         else:
             self.peo = peo
 
@@ -70,11 +79,15 @@ class QtreeSimulator(Simulator):
         #log.info('batch slice {}', slice_dict)
 
         sliced_buckets = self.tn.slice(slice_dict)
+        #self.bucket_backend.pbar.set_total ( len(sliced_buckets))
 
-        result = qtree.optimizer.bucket_elimination(
-            sliced_buckets, self.bucket_backend.process_bucket,
-            n_var_nosum=len(self.tn.free_vars)
-        )
+        with tqdm(total=len(sliced_buckets), desc='Bucket elimitation', leave=True) as pbar:
+            self.bucket_backend.set_progress_bar(pbar)
+
+            result = qtree.optimizer.bucket_elimination(
+                sliced_buckets, self.bucket_backend.process_bucket,
+                n_var_nosum=len(self.tn.free_vars)
+            )
         #print(result, result.data)
         return result.data.flatten()
 

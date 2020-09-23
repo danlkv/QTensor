@@ -70,9 +70,9 @@ class QAOAComposer(CircuitComposer):
         beta, gamma = self.params['beta'], self.params['gamma']
         conjugate = self._get_of_my_type(G, beta=beta, gamma=gamma)
         conjugate.ansatz_state()
-        conjugate = [g.dagger_me() for g in conjugate.circuit]
+        conjugate.builder.conjugate()
 
-        self.circuit = self.circuit + list(reversed(conjugate))
+        self.circuit = self.circuit + list(reversed(conjugate.circuit ))
         return self.circuit
 
     def energy_expectation_lightcone(self, edge):
