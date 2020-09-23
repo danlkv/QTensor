@@ -40,6 +40,10 @@ class CircuitComposer():
 
     def apply_gate(self, gate, *qubits, **params):
         self.builder.apply_gate(gate, *qubits, **params)
+
+    def conjugate(self):
+        # changes builder.circuit, hence self.circuit()
+        self.builder.conjugate()
     #--
 
     def layer_of_Hadamards(self):
@@ -70,7 +74,7 @@ class QAOAComposer(CircuitComposer):
         beta, gamma = self.params['beta'], self.params['gamma']
         conjugate = self._get_of_my_type(G, beta=beta, gamma=gamma)
         conjugate.ansatz_state()
-        conjugate.builder.conjugate()
+        conjugate.conjugate()
 
         self.circuit = self.circuit + list(reversed(conjugate.circuit ))
         return self.circuit

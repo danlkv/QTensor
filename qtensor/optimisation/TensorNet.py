@@ -34,7 +34,7 @@ class QtreeTensorNet(TensorNet):
         self.bra_vars = [var for var in self.bra_vars if var not in self.free_vars]
 
     def simulation_cost(self, peo):
-        g, _ = utils(self.get_line_graph(), peo)
+        g, _ = utils.reorder_graph(self.get_line_graph(), peo)
         mems, flops = qtree.get_contraction_costs(g)
         return mems, flops
 
