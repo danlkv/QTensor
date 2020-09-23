@@ -129,4 +129,22 @@ G_reg = random_graph(12, type='random', degree=3, seed=42)
 G_er = random_graph(12, type='erdos_renyi', degree=3, seed=42)
 
 ```
+- get cost estimation
 
+```python
+from qtensor.optimisation.Optimizer import TamakiOptimizer
+from qtensor.optimisation.TensorNet import QtreeTensorNet
+from qtensor import QtreeQAOAComposer
+
+composer = QtreeQAOAComposer(
+	graph=G, gamma=gamma, beta=beta)
+composer.ansatz_state()
+
+tn = QtreeTensorNet.from_qtree_gates(composer.circuit)
+
+opt = TamakiOptimizer(wait_time=15)
+peo, tn = opt.optimize(tn)
+treewidth = opt.treewidth
+mems, flops = tn.simulation_cost(peo)
+print('Max memory=', max(mems), 'Total flops=', sum(flops))
+```
