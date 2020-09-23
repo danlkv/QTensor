@@ -1,6 +1,7 @@
 import qtree
-from qtensor.ProcessingFrameworks import NumpyBackend
 import cirq
+from qtensor.ProcessingFrameworks import NumpyBackend
+
 from qtensor.optimisation.TensorNet import QtreeTensorNet
 from qtensor.optimisation.Optimizer import DefaultOptimizer
 from tqdm.auto import tqdm
@@ -15,7 +16,7 @@ class Simulator:
 
     def simulate(self, qc):
         """ Factory method """
-       raise NotImplementedError()
+        raise NotImplementedError()
 
 
 class QtreeSimulator(Simulator):
@@ -85,10 +86,10 @@ class QtreeSimulator(Simulator):
         #with tqdm(total=len(sliced_buckets), desc='Bucket elimitation', leave=True) as pbar:
             #self.bucket_backend.set_progress_bar(pbar)
 
-            result = qtree.optimizer.bucket_elimination(
-                sliced_buckets, self.bucket_backend.process_bucket,
-                n_var_nosum=len(self.tn.free_vars)
-            )
+        result = qtree.optimizer.bucket_elimination(
+            sliced_buckets, self.bucket_backend.process_bucket,
+            n_var_nosum=len(self.tn.free_vars)
+        )
         return self.bucket_backend.get_result_data(result).flatten()
 
     def simulate(self, qc):
