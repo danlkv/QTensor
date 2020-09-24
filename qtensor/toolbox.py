@@ -32,26 +32,43 @@ def random_graph(nodes, type='random', **kwargs):
     else:
         raise ValueError('Unsupported graph type')
 
+def get_tw(circ, ordering_algo='greedy'):
+
+    tn = QtreeTensorNet.from_qtree_gates(circ)
+
+    if ordering_algo=='greedy':
+        opt = OrderingOptimizer()
+    elif ordering_algo=='tamaki':
+        opt = TamakiOptimizer(wait_time=45)
+    elif ordering_algo=='without':
+        opt = WithoutOptimizer()
+    else:
+        raise ValueError("Ordering algorithm not supported")
+    peo, tn = opt.optimize(tn)
+    treewidth = opt.treewidth
+    return treewidth
+
+def get_cost_params(circ, ordering_algo='greedy'):
+
+    tn = QtreeTensorNet.from_qtree_gates(circ)
+
+    if ordering_algo=='greedy':
+        opt = OrderingOptimizer()
+    elif ordering_algo=='tamaki':
+        opt = TamakiOptimizer(wait_time=45)
+    elif ordering_algo=='without':
+        opt = WithoutOptimizer()
+    else:
+        raise ValueError("Ordering algorithm not supported")
+    peo, _ = opt.optimize(tn)
+    treewidth = opt.treewidth
+    mems, flops = tn.simulation_cost(peo)
+    return treewidth, max(mems), sum(flops)
+
 
 def qaoa_energy_tw_from_graph(G, p, max_time=0, max_tw=0,
                               ordering_algo='greedy', print_stats=False):
     gamma, beta = [0]*p, [0]*p
-    def get_tw(circ):
-
-        tn = QtreeTensorNet.from_qtree_gates(circ)
-
-        if ordering_algo=='greedy':
-            opt = OrderingOptimizer()
-        elif ordering_algo=='tamaki':
-            opt = TamakiOptimizer(wait_time=45)
-        elif ordering_algo=='without':
-            opt = WithoutOptimizer()
-        else:
-            raise ValueError("Ordering algorithm not supported")
-        peo, tn = opt.optimize(tn)
-        treewidth = opt.treewidth
-        return treewidth
-
     twidths = []
     if max_time:
         start = time.time()
@@ -61,7 +78,34 @@ def qaoa_energy_tw_from_graph(G, p, max_time=0, max_tw=0,
         for edge in G.edges():
             composer = QtreeQAOAComposer(G, beta=beta, gamma=gamma)
             composer.energy_expectation_lightcone(edge)
-            tw = get_tw(composer.circuit)
+            tw = get_tw(composer.circuit, ordering_algo=ordering_algo)
+            pbar.update()
+            subgraph = get_edge_subgraph(G, edge, len(beta))
+            pbar.set_postfix(current_tw=tw, subgraph_nodes=subgraph.number_of_nodes())
+            if max_tw:
+                if tw>max_tw:
+                    print(f'Encountered treewidth of {tw}, which is larger {max_tw}')
+                    break
+            twidths.append(tw)
+            if time.time() - start > max_time:
+                break
+    if print_stats:
+        print(f'med={np.median(twidths)} mean={round(np.mean(twidths), 2)} max={np.max(twidths)}')
+    return twidths
+
+def qaoa_energy_cost_params_from_graph(G, p, max_time=0, max_tw=0,
+                              ordering_algo='greedy', print_stats=False):
+    gamma, beta = [0]*p, [0]*p
+    twidths = []
+    if max_time:
+        start = time.time()
+    else:
+        start = np.inf
+    with tqdm(total=G.number_of_edges(), desc='Edge iteration') as pbar:
+        for edge in G.edges():
+            composer = QtreeQAOAComposer(G, beta=beta, gamma=gamma)
+            composer.energy_expectation_lightcone(edge)
+            tw = get_cost_params(composer.circuit, ordering_algo=ordering_algo)
             pbar.update()
             subgraph = get_edge_subgraph(G, edge, len(beta))
             pbar.set_postfix(current_tw=tw, subgraph_nodes=subgraph.number_of_nodes())
