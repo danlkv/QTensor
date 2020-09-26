@@ -14,6 +14,8 @@ class OpFactory:
 class CirqFactory:
     H=cirq.H
     cX=cirq.CX
+    Z=cirq.Z
+    X=cirq.X
 
     @staticmethod
     def ZPhase(x, alpha):
@@ -57,7 +59,8 @@ class QiskitFactory:
 
     cZ=qiskit_lib.CzGate
 
-class CircuitCreator:
+class CircuitBuilder:
+    """ ABC for creating a circuit."""
     operators = OpFactory
 
     def __init__(self, n_qubits, **params):
@@ -71,11 +74,17 @@ class CircuitCreator:
     def get_circuit(self):
         raise NotImplementedError
 
+    def conjugate(self):
+        if not hasattr(self, '_warned'):
+            #print('Warning: conjugate is not implemented. Returning same circuit, in case you only care about circuit structure')
+            self._warned = True
+        return self.circuit
+
     def apply_gate(self, gate, *qubits, **params):
         self.circuit.append(gate(**params), *qubits)
 
 
-class CirqCreator(CircuitCreator):
+class CirqBuilder(CircuitBuilder):
     operators = CirqFactory
 
     def get_qubits(self):
@@ -86,7 +95,7 @@ class CirqCreator(CircuitCreator):
     def apply_gate(self, gate, *qubits, **params):
         self.circuit.append(gate(*qubits, **params))
 
-class QtreeCreator(CircuitCreator):
+class QtreeBuilder(CircuitBuilder):
     operators = QtreeFactory
 
     def get_qubits(self):
@@ -97,7 +106,11 @@ class QtreeCreator(CircuitCreator):
     def apply_gate(self, gate, *qubits, **params):
         self.circuit.append(gate(*qubits, **params))
 
-class QiskitCreator(CircuitCreator):
+    def conjugate(self):
+        self.circuit = [g.dagger_me() for g in self.circuit]
+        return self.circuit
+
+class QiskitBuilder(CircuitBuilder):
     operators = QiskitFactory
 
     def get_qubits(self):

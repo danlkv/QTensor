@@ -1,4 +1,4 @@
-# QTensor
+
 
 ## Installation
 
@@ -92,7 +92,7 @@ and also raise an error when treewidth is large.
 from qtensor.optimisation.Optimizer import TamakiOptimizer
 from qtensor import QAOAQtreeSimulator
 
-class TamakiQAOASimulator(QAOAQtreeSimsulator):
+class TamakiQAOASimulator(QAOAQtreeSimulator):
     def optimize_buckets(self):
         opt = TamakiOptimizer()
         peo, self.tn = opt.optimize(self.tn)
@@ -112,6 +112,42 @@ return res
 
 ```
 
+### Useful features
+
+- raise ValueError if treewidth is too large:
+```python
+sim = QAOAQtreeSimulator(max_tw=24)
+sim.energy_expectation(G, gamma=gamma, beta=beta)
+```
+
+- generate graphs
+
+```python
+from qtree.toolbox import random_graph
+
+G_reg = random_graph(12, type='random', degree=3, seed=42)
+G_er = random_graph(12, type='erdos_renyi', degree=3, seed=42)
+
+```
+- get cost estimation
+
+```python
+from qtensor.optimisation.Optimizer import TamakiOptimizer
+from qtensor.optimisation.TensorNet import QtreeTensorNet
+from qtensor import QtreeQAOAComposer
+
+composer = QtreeQAOAComposer(
+	graph=G, gamma=gamma, beta=beta)
+composer.ansatz_state()
+
+tn = QtreeTensorNet.from_qtree_gates(composer.circuit)
+
+opt = TamakiOptimizer(wait_time=15)
+peo, tn = opt.optimize(tn)
+treewidth = opt.treewidth
+mems, flops = tn.simulation_cost(peo)
+print('Max memory=', max(mems), 'Total flops=', sum(flops))
+```
 
 ### Use cli to run benchmarks
 

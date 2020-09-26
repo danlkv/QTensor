@@ -43,6 +43,8 @@ class WithoutOptimizer(Optimizer):
 
 class OrderingOptimizer(Optimizer):
     def _get_ordering_ints(self, graph, free_vars=[]):
+        #mapping = {a:b for a,b in zip(graph.nodes(), reversed(list(graph.nodes())))}
+        #graph = nx.relabel_nodes(graph, mapping)
         peo_ints, path = utils.get_locale_peo(graph, utils.n_neighbors)
 
         return peo_ints, path
@@ -199,3 +201,7 @@ class TreeTrimSplitter(SlicesOptimizer):
 
 class TamakiTrimSlicing(TamakiOptimizer, TreeTrimSplitter):
     pass
+
+# A convenience variable to use in other packages
+
+DefaultOptimizer = OrderingOptimizer

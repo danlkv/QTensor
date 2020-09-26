@@ -1,8 +1,8 @@
-from qtensor.Simulate import Simulator, QtreeSimulator
+from qtensor.Simulate import Simulator, QtreeSimulator, CirqSimulator
 from qtensor.utils import get_edge_subgraph
 import numpy as np
 import networkx as nx
-from tqdm import tqdm
+from tqdm.auto import tqdm
 from multiprocessing import Pool
 from loguru import logger as log
 
@@ -51,11 +51,15 @@ class QAOASimulator(Simulator):
 
         total_E = 0
 
-        for edge in tqdm(G.edges(), 'Edge iteration'):
-            E = self._get_edge_energy(G, gamma, beta, edge)
+        with tqdm(total=G.number_of_edges(), desc='Edge iteration', ) as pbar:
+            for edge in G.edges():
+                E = self._get_edge_energy(G, gamma, beta, edge)
+                pbar.set_postfix(Treewidth=self.optimizer.treewidth)
+                pbar.update(1)
+                total_E += E
+
             if self.profile:
                 print(self.backend.gen_report())
-            total_E += E
 
         C = self._post_process_energy(G, total_E)
         return C
@@ -84,4 +88,15 @@ class QAOASimulator(Simulator):
 
 
 class QAOAQtreeSimulator(QAOASimulator, QtreeSimulator):
+    pass
+
+class QAOACirqSimulator(QAOASimulator, CirqSimulator):
+    def _get_edge_energy(self, G, gamma, beta, edge):
+        self.max_tw = 25
+        if not hasattr(self, '_warned'):
+            print('Warning: the energy calculation is not yet implemented')
+            self._warned = True
+        circuit = self._edge_energy_circuit(G, gamma, beta, edge)
+        trial_result = self.simulate(circuit)
+        return np.sum(trial_result.state_vector())
     pass

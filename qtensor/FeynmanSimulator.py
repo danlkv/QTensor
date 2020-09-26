@@ -24,12 +24,10 @@ def int_slice(value, vars_to_slice):
     return {idx: val for idx, val in zip(vars_to_slice, multiindex)}
 
 class FeynmanSimulator(QtreeSimulator):
-    optimizer = SlicesOptimizer
-    opt_args = {}
+    FallbackOptimizer = SlicesOptimizer
 
     def __init__(self, *args,
                  pool_type='process', n_processes=None
-                 ,max_tw=None
                  , **kwargs):
         super().__init__(*args, **kwargs)
         if n_processes is None:
@@ -40,14 +38,9 @@ class FeynmanSimulator(QtreeSimulator):
             self.pool = ThreadPool
         else:
             self.pool = Pool
-        self.max_tw = max_tw
 
     def optimize_buckets(self, fixed_vars: list=None):
-        opt_args = {'tw_bias': self.tw_bias}
-        opt_args.update(self.opt_args)
-        if self.max_tw:
-            opt_args['max_tw'] = self.max_tw
-        opt = self.optimizer(**opt_args)
+        opt = self.optimizer
         peo, par_vars, self.tn = opt.optimize(self.tn)
         self.parallel_vars = par_vars
         return peo
@@ -59,7 +52,8 @@ class FeynmanSimulator(QtreeSimulator):
         result = qtree.optimizer.bucket_elimination(
             sliced_buckets, self.bucket_backend.process_bucket
         , n_var_nosum=len(self.tn.free_vars + self.parallel_vars))
-        return result.data.flatten()
+
+        return self.bucket_backend.get_result_data(result).flatten()
 
     def simulate(self, qc, batch_vars=0, tw_bias=2):
         return self.simulate_batch_adaptive(qc, batch_vars, tw_bias=tw_bias)

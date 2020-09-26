@@ -1,13 +1,14 @@
+import numpy as np
 from qtree import np_framework
 from qtree import optimizer as opt
-
-from . import exatn_framework
-
 from pyrofiler import timing
-from qtensor.utils import ReportTable
-import numpy as np
+from tqdm import tqdm
+
 import tcontract
+
 from qtensor.utils import ReportTable
+from qtensor.utils import ReportTable
+from . import exatn_framework
 
 class BucketBackend:
     def process_bucket(self, bucket, no_sum=False):
@@ -16,23 +17,35 @@ class BucketBackend:
     def get_sliced_buckets(self, buckets, data_dict, slice_dict):
         raise NotImplementedError
 
+    def get_result_data(self, result):
+        raise NotImplementedError
+
 class NumpyBackend(BucketBackend):
+    def __init__(self):
+        super().__init__()
+        #self.pbar = tqdm(desc='Buckets', position=2)
+        #self.status_bar = tqdm(desc='Current status', position=3, bar_format='{desc}')
+
     def process_bucket(self, bucket, no_sum=False):
         return np_framework.process_bucket_np(bucket, no_sum=no_sum)
 
     def get_sliced_buckets(self, buckets, data_dict, slice_dict):
         return np_framework.get_sliced_np_buckets(buckets, data_dict, slice_dict)
 
+    def get_result_data(self, result):
+        return result.data
+
 class ExaTnBackend(BucketBackend):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.next_tensor_id = 0
         exatn_framework.import_exatn()
 
     def process_bucket(self, bucket, no_sum=False):
-        result_id = self.next_tensor_id
-        self.next_tensor_id += 1
-        res = exatn_framework.process_bucket_exatn(bucket, no_sum=no_sum, result_id=result_id)
+        res = exatn_framework.process_bucket_exatn(bucket, no_sum=no_sum)
+        total_indices = set.union(*[set(t.indices) for t in bucket])
+        #self.status_bar.set_description_str(f'Current bucker result size: {len(total_indices)}')
+        res =  np_framework.process_bucket_np(bucket, no_sum=no_sum)
+        #self.pbar.update(1)
         return res
 
     def get_sliced_buckets(self, buckets, data_dict, slice_dict):
@@ -88,6 +101,9 @@ class CMKLExtendedBackend(BucketBackend):
                                 data=np.sum(result_data, axis=0))
         return result
 
+    def get_result_data(self, result):
+        return result.data
+
 class PerfBackend(BucketBackend):
     Backend = BucketBackend
 
@@ -112,6 +128,9 @@ class PerfBackend(BucketBackend):
 
     def get_sliced_buckets(self, buckets, data_dict, slice_dict):
         return self.backend.get_sliced_buckets(buckets, data_dict, slice_dict)
+
+    def get_result_data(self, result):
+        return self.backend.get_result_data(result)
 
     def _perfect_bucket_flop(self, bucket_indices):
         resulting_indices = list(set.union(*[set(ixs) for ixs in bucket_indices]))
