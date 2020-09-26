@@ -185,11 +185,11 @@ class TreeTrimSplitter(SlicesOptimizer):
             result += par_vars
             # -- dislabel
             pv_cnt = len(result)
-            log.debug('Parvars count: {}. Amps count: {}', pv_cnt, 2**pv_cnt)
+            log.info('Parvars count: {}. Amps count: {}', pv_cnt, 2**pv_cnt)
 
             peo_ints, path = self._get_ordering_ints(p_graph)
             tw = max(path)
-            log.debug('Treewidth: {}', tw)
+            log.info('Treewidth: {}', tw)
             self._slice_hist.append([pv_cnt, tw])
 
             delta = tw - max_tw
