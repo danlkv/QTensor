@@ -152,5 +152,5 @@ print('Max memory=', max(mems), 'Total flops=', sum(flops))
 ### Use cli to run benchmarks
 
 ```bash
-» python -m qensor.cli generate-qaoa-ansatz-circuit -p 3 -n 24 | python -m qensor.cli sim-file --profile --target-tw 27
+» python -m qtensor.cli generate-qaoa-ansatz-circuit -p 3 -n 24 | python -m qtensor.cli sim-file --profile --max-tw 27
 ```
