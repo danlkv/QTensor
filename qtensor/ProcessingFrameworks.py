@@ -26,10 +26,13 @@ class NumpyBackend(BucketBackend):
 class ExaTnBackend(BucketBackend):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        self.next_tensor_id = 0
         exatn_framework.import_exatn()
 
     def process_bucket(self, bucket, no_sum=False):
-        res = exatn_framework.process_bucket_exatn(bucket, no_sum=no_sum)
+        result_id = self.next_tensor_id
+        self.next_tensor_id += 1
+        res = exatn_framework.process_bucket_exatn(bucket, no_sum=no_sum, result_id=result_id)
         return res
 
     def get_sliced_buckets(self, buckets, data_dict, slice_dict):

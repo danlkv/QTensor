@@ -121,7 +121,7 @@ def get_result_indices(idx1, idx2, contract=True):
     return result_indices
    
 
-def process_bucket_exatn(bucket, no_sum=False):
+def process_bucket_exatn(bucket, no_sum=False, result_id=0):
     """
     Process bucket in the bucket elimination algorithm.
     We multiply all tensors in the bucket and sum over the
@@ -145,6 +145,8 @@ def process_bucket_exatn(bucket, no_sum=False):
     pr_info = bucket[0]
     n = len(bucket)
 
+    tmp_id = 0
+
     for i, t_info in enumerate(bucket[1:]):
         no_hcon = n == 2 or i == n - 1 # TODO better check if hypercontraction is required
         result_indices = get_result_indices(idx1, idx2, contract=no_hcon)
@@ -153,7 +155,7 @@ def process_bucket_exatn(bucket, no_sum=False):
         else:
             raise Exception('QTensorError: Exatn Hyper-contractions are not supported at the moment')
 
-        new_name = f"C{np.random.randint(0, 100000)}"
+        new_name = pr_info.name + t_info.name
         exatn.createTensor(new_name, np.empty([2]*len(result_indices), dtype=complex))
         expr = get_exatn_expr(pr_info, t_info, new_name, result_indices)
 
