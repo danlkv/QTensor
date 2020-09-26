@@ -1,6 +1,7 @@
 import qtree
 import numpy as np
 from multiprocessing import Pool
+from multiprocessing.dummy import Pool as ThreadPool
 from tqdm import tqdm
 
 from qtensor.ProcessingFrameworks import NumpyBackend
@@ -24,6 +25,19 @@ def int_slice(value, vars_to_slice):
 
 class FeynmanSimulator(QtreeSimulator):
     FallbackOptimizer = SlicesOptimizer
+
+    def __init__(self, *args,
+                 pool_type='process', n_processes=None
+                 , **kwargs):
+        super().__init__(*args, **kwargs)
+        if n_processes is None:
+            self.n_processes = 2
+        else:
+            self.n_processes = n_processes
+        if pool_type == 'thread':
+            self.pool = ThreadPool
+        else:
+            self.pool = Pool
 
     def optimize_buckets(self, fixed_vars: list=None):
         opt = self.optimizer
@@ -57,10 +71,9 @@ class FeynmanSimulator(QtreeSimulator):
 
         self._reorder_buckets()
 
-        n_processes = 2
-        with Pool(n_processes) as p:
+        with self.pool(self.n_processes) as p:
             total_paths = 2**len(self.parallel_vars)
-            log.info('Starting to simulate {} paths using {} processes', total_paths, n_processes)
+            log.info('Starting to simulate {} paths using {} processes', total_paths, self.n_processes)
             args = range(total_paths)
             piter = p.imap(self._parallel_unit, args)
             r = list(tqdm(piter, total=total_paths))

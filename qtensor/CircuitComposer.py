@@ -86,7 +86,7 @@ class QAOAComposer(CircuitComposer):
         # TODO: take only a neighbourhood part of the graph
         graph = get_edge_subgraph(G, edge, len(gamma))
         log.debug('Subgraph nodes: {}, edges: {}', graph.number_of_nodes(), graph.number_of_edges())
-        graph = get_edge_subgraph(G, edge, len(gamma))
+        self.n_qubits = graph.number_of_nodes()
         mapping = {v:i for i, v in enumerate(graph.nodes())}
         graph = nx.relabel_nodes(graph, mapping, copy=True)
 
