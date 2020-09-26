@@ -44,11 +44,19 @@ def sim_file(filename, profile=False, num_processes=1, max_tw=25, backend='numpy
     if profile:
         class PerfExaTnBackend(PerfBackend):
             Backend = ExaTnBackend
+        class PerfMKLBackend(PerfBackend):
+            Backend = CMKLExtendedBackend
         if backend == 'numpy':
             backend_obj = PerfNumpyBackend(print=False)
+        if backend == 'mkl':
+            backend_obj = PerfMKLBackend(print=False)
+        if backend == 'exatn':
+            backend_obj = PerfExaTnBackend(print=False)
         kwargs['bucket_backend'] = backend_obj
     if optimizer=='tamaki':
-        kwargs['optimizer'] = TamakiTrimSlicing(wait_time=23)
+        kwargs['optimizer'] = TamakiTrimSlicing(max_tw=max_tw, wait_time=23)
+    else:
+        kwargs['optimizer'] = SlicesOptimizer(max_tw=max_tw, tw_bias=0)
 
     sim = FeynmanSimulator(**kwargs)
     circuit = sum(circuit, [])

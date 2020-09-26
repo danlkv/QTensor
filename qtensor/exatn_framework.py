@@ -81,6 +81,7 @@ def get_sliced_exatn_buckets(buckets, data_dict, slice_dict):
             indices_sliced = [i for sl, i in zip(slice_bounds, indices_sliced) if not isinstance(sl, int)]
             assert len(data.shape) == len(indices_sliced)
 
+            print(f"creating {tensor.name}")
             exatn.createTensor(tensor.name, data)
 
             sliced_bucket.append(TensorInfo(tensor.name, indices_sliced))
@@ -94,6 +95,7 @@ def idx_to_string(idx):
     return ",".join(letters)
 
 def tensor_to_string(tensor):
+    print(tensor.indices)
     idx = idx_to_string(tensor.indices)
     return tensor.name + "(" + idx + ")"
 
@@ -105,7 +107,7 @@ def get_exatn_expr(tensor1, tensor2, result_name, result_idx):
                         in enumerate(all_indices)}
     tensor1 = TensorInfo(name=tensor1.name, indices=[idx_to_least_idx[idx] for idx in tensor1.indices])
     tensor2 = TensorInfo(name=tensor2.name, indices=[idx_to_least_idx[idx] for idx in tensor2.indices])
-    result_ide = [idx_to_least_idx[idx] for idx in result_idx]
+    result_idx = [idx_to_least_idx[idx] for idx in result_idx]
 
     # T(a,b,c) = A(a,b) * B(b,c)
     str1 = tensor_to_string(tensor1)
@@ -149,13 +151,13 @@ def process_bucket_exatn(bucket, no_sum=False, result_id=0):
 
     for i, t_info in enumerate(bucket[1:]):
         no_hcon = n == 2 or i == n - 1 # TODO better check if hypercontraction is required
-        result_indices = get_result_indices(idx1, idx2, contract=no_hcon)
+        result_indices = get_result_indices(pr_info.indices, t_info.indices, contract=no_hcon)
         if no_hcon:
             no_sum = True
         else:
             raise Exception('QTensorError: Exatn Hyper-contractions are not supported at the moment')
 
-        new_name = pr_info.name + t_info.name
+        new_name = f"C{np.random.randint(0, 1000000000)}"
         exatn.createTensor(new_name, np.empty([2]*len(result_indices), dtype=complex))
         expr = get_exatn_expr(pr_info, t_info, new_name, result_indices)
 
