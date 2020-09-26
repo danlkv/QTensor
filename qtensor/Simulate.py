@@ -46,6 +46,7 @@ class QtreeSimulator(Simulator):
 
     def _create_buckets(self):
         self.tn = QtreeTensorNet.from_qtree_gates(self.all_gates)
+        self.tn.bucket_backend = self.bucket_backend
 
     def _set_free_qubits(self, free_final_qubits):
         self.tn.free_vars = [self.tn.bra_vars[i] for i in free_final_qubits]
