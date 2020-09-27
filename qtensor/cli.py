@@ -46,6 +46,10 @@ def sim_file(filename, profile=False, num_processes=1, max_tw=25, backend='numpy
         kwargs['bucket_backend'] = backend_obj
     if optimizer=='tamaki':
         kwargs['optimizer'] = TamakiTrimSlicing(wait_time=23)
+    else:
+        kwargs['optimizer'] = SlicesOptimizer()
+    kwargs['optimizer'].max_tw = max_tw
+
 
 
     sim = FeynmanSimulator(**kwargs)
