@@ -133,12 +133,10 @@ def get_neighbours_path(old_graph, peo=None):
         graph = copy.deepcopy(old_graph)
     ngh = []
     nodes = sorted(graph.nodes, key=int)
-    with tqdm(total=len(nodes)) as pbar:
-        for node in nodes:
-            ngh.append(n_neighbors(graph, node))
-            #qtree.graph_model.eliminate_node(graph, node)
-            eliminate_node_no_structure(graph, node)
-            pbar.update(1)
+    for node in nodes:
+        ngh.append(n_neighbors(graph, node))
+        #qtree.graph_model.eliminate_node(graph, node)
+        eliminate_node_no_structure(graph, node)
     return nodes, ngh
 
 def nodes_at_distance(G, nodes, dist):

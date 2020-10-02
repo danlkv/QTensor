@@ -54,13 +54,15 @@ def get_tw(circ, ordering_algo='greedy'):
     treewidth = opt.treewidth
     return treewidth
 
-def get_cost_params(circ, ordering_algo='greedy', overflow_tw=31):
+def get_cost_params(circ, ordering_algo='greedy', overflow_tw=None):
     peo, tn, opt = optimize_circuit(circ, algo=ordering_algo)
     treewidth = opt.treewidth
-    if treewidth > overflow_tw:
-        mems, flops = [np.inf], [np.inf]
-    else:
-        mems, flops = tn.simulation_cost(peo)
+    print('tw', treewidth)
+    if overflow_tw is not None:
+        if treewidth > overflow_tw:
+            mems, flops = [np.inf], [np.inf]
+            return treewidth, np.inf, np.inf
+    mems, flops = tn.simulation_cost(peo)
     return treewidth, max(mems), sum(flops)
 
 
@@ -79,7 +81,7 @@ def qaoa_energy_lightcone_iterator(G, p, max_time=None):
             break
 
 
-def qaoa_energy_cost_params_stats_from_graph(G, p, max_time=0, max_tw=0,
+def qaoa_energy_cost_params_stats_from_graph(G, p, max_time=0, max_tw=None,
                               ordering_algo='greedy', print_stats=False):
     cost_params = []
     tw = mem = flop = 0
