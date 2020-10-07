@@ -2,8 +2,7 @@
 
 __all__ = ["index", "modules", "custom_doc_links", "git_url"]
 
-index = {"SEED": "Time_vs_FLOP.ipynb",
-         "ex": "Time_vs_FLOP.ipynb",
+index = {"ex": "Time_vs_FLOP.ipynb",
          "graph": "Time_vs_FLOP.ipynb",
          "circuit": "Time_vs_FLOP.ipynb",
          "tn": "Time_vs_FLOP.ipynb",
@@ -12,6 +11,7 @@ index = {"SEED": "Time_vs_FLOP.ipynb",
          "sum_flops": "Time_vs_FLOP.ipynb",
          "step_flops": "Time_vs_FLOP.ipynb",
          "max_mem": "Time_vs_FLOP.ipynb",
+         "SEED": "Time_vs_FLOP.ipynb",
          "EDGE_IDX_FOR_SEED": "Time_vs_FLOP.ipynb",
          "EDGE_IDX_FOR_SEED_JLSE": "Time_vs_FLOP.ipynb",
          "sim_profile": "Time_vs_FLOP.ipynb",
