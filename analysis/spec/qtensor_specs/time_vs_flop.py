@@ -155,8 +155,10 @@ def time_vs_flops_plot(filename):
     p = 3
     N = 1000
 
-    estimators = ex.map_variable('step_flops', d=ds, edge_idx=edge_indices, n=[N], p=[p])
-    times = ex.map_variable('step_sim_time', d=ds, edge_idx=edge_indices, n=[N], p=[p])
+    estimators = ex.map_variable('step_flops', d=ds,
+                                 edge_idx=edge_indices, n=[N], p=[p], seed=[SEED])
+    times = ex.map_variable('step_sim_time', d=ds,
+                            edge_idx=edge_indices, n=[N], p=[p], seed=[SEED])
 
     est_flat = np.concatenate(estimators.flatten())
     times_flat = np.concatenate(times.flatten())
