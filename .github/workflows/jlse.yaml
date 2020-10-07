@@ -45,4 +45,4 @@ jobs:
           add: '.'
           author_name: Actions Runner
           author_email: mail@example.com
-          message: '[jlse-results] for `$(git show -s --format=%s)`'
+          message: '[jlse-results] for `${{github.event.head_commit.message}}`'
