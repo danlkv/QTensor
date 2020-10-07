@@ -15,7 +15,7 @@ tail_pid=$!
 wait $!
 kill $tail_pid
 
-if cat $job_id.cobaltlog | grep norbally with an exit code of 0; then
+if cat $job_id.cobaltlog | grep normally with an exit code of 0; then
     echo "Job returned with exit code 0"
     exit 0
 else
