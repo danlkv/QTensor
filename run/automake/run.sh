@@ -25,4 +25,5 @@ else
     echo "########################"
     echo "Debug log:"
     cat $job_id.cobaltlog
+    exit 1
 fi
