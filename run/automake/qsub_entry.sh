@@ -10,5 +10,4 @@ lscpu
 echo $PYTHONPATH
 echo $PATH
 echo $SHELL
-(cd ../../analysis/spec/ && python setup.py develop --user --no-deps)
 qtensor-specs-time-flop-plot time-vs-flops-plot results/time_vs_flops.png > time_vs_flops.log
