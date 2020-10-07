@@ -10,10 +10,5 @@ lscpu
 echo $PYTHONPATH
 echo $PATH
 echo $SHELL
-python -c "import matplotlib.pyplot as plt; plt.plot(range(55)); plt.savefig('results/image.png')"
-echo 'pwd'
-pwd
-echo 'test'>test.txt
-echo 'ls'
-ls
-python -c "print('Hello from python')"
+pip install -e ../../analysis/spec
+qtensor-specs-time-flop-plot time-vs-flops-plot results/time_vs_flops.png > time_vs_flops.log
