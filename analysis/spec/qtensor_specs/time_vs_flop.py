@@ -157,6 +157,12 @@ def time_vs_flops_plot(filename):
 
     estimators = ex.map_variable('step_flops', d=ds,
                                  edge_idx=edge_indices, n=[N], p=[p], seed=[SEED])
+    maxmems = ex.map_variable('max_mem', d=ds,
+                                 edge_idx=edge_indices, n=[N], p=[p], seed=[SEED])
+    if np.max(maxmems)>1e10:
+        print('memory estimations:', maxmems)
+        raise Exception('Will get too large tetsors!!')
+
     times = ex.map_variable('step_sim_time', d=ds,
                             edge_idx=edge_indices, n=[N], p=[p], seed=[SEED])
 
