@@ -70,7 +70,7 @@ SEED=107
 
 # Cell
 EDGE_IDX_FOR_SEED = {
-    ,107:  [2, 3, 10, 15]
+    107:  [2, 3, 10, 15]
 }
 
 EDGE_IDX_FOR_SEED_JLSE = {
