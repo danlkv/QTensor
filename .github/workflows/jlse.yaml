@@ -28,6 +28,11 @@ jobs:
             (cd ../../analysis/spec/ && python setup.py develop --user --no-deps)
             (cd ../../qtree/ && python setup.py develop --user --no-deps)
 
+      - name: Remove previous result.md
+        run: |
+            rm results/result.md
+            touch results/result.md
+
       - name: Checks
         run: |
             echo $PATH
