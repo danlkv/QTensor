@@ -21,10 +21,10 @@ jobs:
     # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
     - name: Setup git
       run: |
-        apt-get install software-properties-common
-        add-apt-repository ppa:git-core/ppa
-        apt-get update
-        apt-get install git
+        yes | apt-get install software-properties-common
+        yes | add-apt-repository ppa:git-core/ppa
+        yes | apt-get update
+        yes | apt-get install git
 
 
     - uses: actions/checkout@v2
