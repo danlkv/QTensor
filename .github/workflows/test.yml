@@ -48,6 +48,9 @@ jobs:
         
     - name: Setup dependencies
       run: |
+        python --version
+        python3 --version
+        pip --version
         /usr/bin/env pip install .
         /usr/bin/env pip install pytest mock
         (cd qtree && /usr/bin/env pip install .)
