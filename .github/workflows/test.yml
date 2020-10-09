@@ -22,7 +22,7 @@ jobs:
     - name: Setup git
       run: |
         yes | apt-get update
-        yes | apt-get install software-properties-common
+        yes | apt-get install software-properties-common python3
         yes | add-apt-repository ppa:git-core/ppa
         yes | apt-get update
         yes | apt-get install git
@@ -33,10 +33,11 @@ jobs:
 
     - name: Link to proper python
       run: |
-        which pip; which pip3
+        echo $PATH
+        which pip3
         ln -srf $(which python3) /usr/bin/python
         ln -srf $(which pip3) /usr/bin/pip
-        which pip; which pip3
+         which pip3
         echo $PATH
         
         
