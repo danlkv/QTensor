@@ -1,0 +1,9 @@
+Selected edges [3 4]
+Estimated memories [11534336 16777216 46137344 436207616]
+Lin fit: [ 8.31173190e-09 -2.45433083e-04]
+Log fit: [  1.1372553  -20.93973565]
+===Results===
+Total time: 2.0177
+Simulator fitted flops: 1.2417 G
+Matmul flops: 533.67 G
+Simulator optimality: 0.002326671888925848
