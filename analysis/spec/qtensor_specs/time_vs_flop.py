@@ -69,6 +69,8 @@ def max_mem(sim_costs):
 SEED=107
 
 # Cell
+
+# These values work only for initial run
 EDGE_IDX_FOR_SEED = {
     107:  [2, 3, 10, 15]
 }
@@ -79,8 +81,12 @@ EDGE_IDX_FOR_SEED_JLSE = {
 
 # Cell
 @ex.provider
-def sim_profile(circuit, tn):
-    backend = qt.PerfNumpyBackend(print=False)
+def sim_profile(circuit, tn, backend='numpy'):
+    if backend == 'numpy':
+        backend = qt.PerfNumpyBackend(print=False)
+    elif backend == 'mkl':
+        backend = qt.ProcessingFrameworks.PerfBackend.from_backend(
+            qt.ProcessingFrameworks.CMKLExtendedBackend, print=False)
     sim = qt.QtreeSimulator(bucket_backend=backend)
 
     sim.simulate(circuit)
@@ -95,7 +101,7 @@ def step_sim_time(sim_profile, tn):
 
 # Cell
 def plot_with_filter(est_flat, times_flat):
-    filt = (est_flat>1e4) #& (times_flat>1e-4)
+    filt = (est_flat>5e4) #& (times_flat>1e-4)
     est_flat_filtered = est_flat[filt]
     times_flat_filtered = times_flat[filt]
 
@@ -107,12 +113,15 @@ def plot_with_filter(est_flat, times_flat):
     fit_fn = np.poly1d(log_fit_coef)
 
     # Plot scatter with filtered data
-    plt.scatter(est_flat_filtered, times_flat_filtered)
-    xfit = 10**np.linspace(4, 7, 100)
+    plt.scatter(est_flat_filtered, times_flat_filtered, marker='x')
+    min_x = np.log10(est_flat_filtered.min())
+    max_x = np.log10(est_flat_filtered.max()) + .5
+    xfit = 10**np.linspace(min_x, max_x, 100)
     plt.plot(xfit, np.exp(fit_fn(np.log(xfit))), color='blue')
     plt.loglog()
     plt.xlabel('estimated FLOP')
     plt.ylabel('Runtime')
+    plt.grid()
     return log_fit_coef, fit_coef
 
 # Cell
@@ -120,7 +129,7 @@ import timeit
 def get_log_flops_vs_matmul(log_fit_coef):
     FLOPS_logfit = np.exp(-log_fit_coef[1])
 
-    N = 300
+    N = 500
     matmul_flop = N**2*(N-1)
     x, y = np.random.randn(2, N, N)
     number = 100
@@ -138,9 +147,12 @@ import click
 def cli():
     pass
 
-@cli.command()
-@click.argument('filename')
-def time_vs_flops_plot(filename):
+@click.argument('filename', nargs=-1)
+@click.option('-B', '--backend', default='numpy')
+@click.option('-M', '--max-memory', default=3e8)
+@click.option('--min-memory', default=3e6)
+def time_vs_flops_plot(filename=None, backend='numpy',
+                       max_memory=2e8, min_memory=1e6):
     """
     Plots times and estimated FLOP for each step of several QAOA energy computation contractions.
 
@@ -150,31 +162,44 @@ def time_vs_flops_plot(filename):
         - N = 1000
 
     """
-    edge_indices = EDGE_IDX_FOR_SEED[SEED]
     ds = [3, 4]
     p = 3
     N = 1000
 
-    estimators = ex.map_variable('step_flops', d=ds,
-                                 edge_idx=edge_indices, n=[N], p=[p], seed=[SEED])
-    maxmems = ex.map_variable('max_mem', d=ds,
-                                 edge_idx=edge_indices, n=[N], p=[p], seed=[SEED])
-    if np.max(maxmems)>1e10:
-        print('memory estimations:', maxmems)
-        raise Exception('Will get too large tetsors!!')
+    edges_to_try = 20
+    estimators, maxmems = ex.map_variables(
+        ('step_flops', 'max_mem'),
+         d=ds,
+         edge_idx=range(edges_to_try), n=[N], p=[p],
+         seed=[SEED],
+        )
+
+
+    selector = ((min_memory < maxmems) & (maxmems < max_memory)).all(axis=0)
+    edge_indices = np.arange(edges_to_try)[selector]
+    print('Selected edges', edge_indices)
+    print('Estimated memories', maxmems.T[selector].flatten())
+    estimators = estimators.T[selector]
 
     times = ex.map_variable('step_sim_time', d=ds,
-                            edge_idx=edge_indices, n=[N], p=[p], seed=[SEED])
+                            edge_idx=edge_indices, n=[N], p=[p],
+                            seed=[SEED],
+                            backend=[backend]
+                           )
 
-    est_flat = np.concatenate(estimators.flatten())
+    est_flat = np.concatenate(estimators.T.flatten())
     times_flat = np.concatenate(times.flatten())
 
     log_fit_coef, fit_coef = plot_with_filter(est_flat, times_flat)
-    plt.savefig(filename)
+    if filename:
+        plt.savefig(filename[0])
 
     fit, matmul = get_log_flops_vs_matmul(log_fit_coef)
 
     print('===Results===')
+    print(f'Total time: {times_flat.sum():.5}')
     print(f'Simulator fitted flops: {fit/1e9:.5} G')
     print(f'Matmul flops: {matmul/1e9:.5} G')
     print(f'Simulator optimality: {fit/matmul}')
+
+cli.command()(time_vs_flops_plot)
