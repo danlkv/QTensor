@@ -26,24 +26,29 @@ jobs:
         yes | add-apt-repository ppa:git-core/ppa
         yes | apt-get update
         yes | apt-get install git
+        which pip; which pip3
 
 
     - uses: actions/checkout@v2
       with:
-          submodules: recursive
+        submodules: recursive
+
       
     - name: Setup Python
       uses: actions/setup-python@v2
       with:
         python-version: 3.x
+      run: |
+        ln -srf $(which python3) /usr/bin/python
+        ln -srf $(which pip3) /usr/bin/pip
         
         
     - name: Setup dependencies
       run: |
         pip install .
         pip install pytest mock
-        (cd qtree && pip3 install .)
-        (cd scratchpad/cpp_connections/vanilia/nparray/ && pip3 install .)
+        (cd qtree && pip install .)
+        (cd scratchpad/cpp_connections/vanilia/nparray/ && pip install .)
   
     - name: Test
       run: cd qtensor && pytest
