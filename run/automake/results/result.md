@@ -1,15 +1,15 @@
 ## Automake run result
 ### Performance summary:
 ===Results===
-Total time: 2.4037
-Simulator fitted flops: 1.204 G
-Matmul flops: 442.24 G
-Simulator optimality: 0.002722635885697399
+Total time: 2.0027
+Simulator fitted flops: 1.3026 G
+Matmul flops: 591.27 G
+Simulator optimality: 0.0022030887121806233
 \n
 \n
 Backend used: mkl (contraction only)
 \n
 ### Performance plot:
-![](https://asset.cml.dev/1c4b1e9357bcc15ad33727f25111a6febb530c0b)
+![](https://asset.cml.dev/503075ff2f9ecf4bb29b74913ca2972c3737448c)
 \n
-Run date: Fri Oct  9 10:36:17 UTC 2020
+Run date: Fri Oct  9 10:41:24 UTC 2020
