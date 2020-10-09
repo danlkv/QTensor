@@ -4,24 +4,12 @@ simulator. It's main use is in conjunction with the :py:mod:`optimizer`
 module, and example programs are listed in :py:mod:`simulator` module.
 """
 
+import lazy_import
 import numpy as np
-import copy
-import qtree.operators as ops
-import qtree.optimizer as opt
+
 import qtree.utils as utils
-from importlib import import_module
 
-# -- Dynamic import of exatn
-class ExatnMock:
-    def __getattribute__(self):
-        print('You have to import exatn first')
-
-exatn = ExatnMock()
-def import_exatn():
-    global exatn
-    exatn = import_module('exatn')
-
-# --
+exatn = lazy_import.lazy_module('exatn')
 
 from collections import namedtuple
 

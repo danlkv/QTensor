@@ -1,12 +1,12 @@
 import numpy as np
+import lazy_import
 from qtree import np_framework
 from qtree import optimizer as opt
 from pyrofiler import timing
 from tqdm import tqdm
 
-import tcontract
+tcontract = lazy_import.lazy_module('tcontract')
 
-from qtensor.utils import ReportTable
 from qtensor.utils import ReportTable
 from . import exatn_framework
 

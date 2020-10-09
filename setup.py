@@ -12,14 +12,10 @@ REQUIRED_PACKAGES = [
     ,'loguru'
     ,'tqdm'
     ,'click'
+    ,'lazy-import'
     ,'qtensor-qtree'
 
 ]
-
-NON_PYPI_REQUIRED = [
-    './scratchpad/cpp_connections/vanilia/nparray'
-]
-
 
 setuptools.setup(name='qtensor',
                  version='0.1.2',
@@ -31,7 +27,6 @@ setuptools.setup(name='qtensor',
                  license='Apache',
                  packages=setuptools.find_packages(),
                  install_requires=REQUIRED_PACKAGES,
-                 dependency_links=NON_PYPI_REQUIRED,
                  extras_require={
                      'tensorflow': ['tensorflow<=1.15'],
                  },
