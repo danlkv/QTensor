@@ -19,6 +19,13 @@ jobs:
 
     steps:
     # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+    - name: Setup git
+      run: |
+        add-apt-repository ppa:git-core/ppa
+        apt-get update
+        apt-get install git
+
+
     - uses: actions/checkout@v2
       with:
           submodules: recursive
