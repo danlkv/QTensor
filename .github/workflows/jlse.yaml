@@ -22,8 +22,9 @@ jobs:
           submodules: recursive
 
 
-      - name: Update subpackages
+      - name: Update packages
         run: |
+            (cd ../../ && python setup.py develop --user --no-deps)
             (cd ../../analysis/spec/ && python setup.py develop --user --no-deps)
             (cd ../../qtree/ && python setup.py develop --user --no-deps)
 
