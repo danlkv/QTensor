@@ -42,14 +42,16 @@ jobs:
         which pip; which pip3
         ln -srf $(which python3) /usr/bin/python
         ln -srf $(which pip3) /usr/bin/pip
+        which pip; which pip3
+        echo $PATH
         
         
     - name: Setup dependencies
       run: |
-        pip install .
-        pip install pytest mock
-        (cd qtree && pip install .)
-        (cd scratchpad/cpp_connections/vanilia/nparray/ && pip install .)
+        /usr/bin/env pip install .
+        /usr/bin/env pip install pytest mock
+        (cd qtree && /usr/bin/env pip install .)
+        (cd scratchpad/cpp_connections/vanilia/nparray/ && /usr/bin/env pip install .)
   
     - name: Test
       run: cd qtensor && pytest

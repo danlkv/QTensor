@@ -3,7 +3,7 @@
 echo "## Automake run result" >> results/result.md
 
 echo "### Performance summary:" >> results/result.md
-tail -n 5 time_vs_flops.log >> results/result.md
+tail -n 5 results/time_vs_flops.log >> results/result.md
 echo "\n" >> results/result.md
 
 echo "\n" >> results/result.md
