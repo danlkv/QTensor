@@ -150,8 +150,9 @@ def cli():
 @click.argument('filename', nargs=-1)
 @click.option('-B', '--backend', default='numpy')
 @click.option('-M', '--max-memory', default=3e8)
+@click.option('-s', '--seed', default=SEED)
 @click.option('--min-memory', default=3e6)
-def time_vs_flops_plot(filename=None, backend='numpy',
+def time_vs_flops_plot(filename=None, backend='numpy', seed=SEED,
                        max_memory=2e8, min_memory=1e6):
     """
     Plots times and estimated FLOP for each step of several QAOA energy computation contractions.
@@ -183,7 +184,7 @@ def time_vs_flops_plot(filename=None, backend='numpy',
 
     times = ex.map_variable('step_sim_time', d=ds,
                             edge_idx=edge_indices, n=[N], p=[p],
-                            seed=[SEED],
+                            seed=[seed],
                             backend=[backend]
                            )
 
