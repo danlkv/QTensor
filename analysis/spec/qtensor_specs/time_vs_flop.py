@@ -166,7 +166,7 @@ def time_vs_flops_plot(filename=None, backend='numpy',
     p = 3
     N = 1000
 
-    edges_to_try = 20
+    edges_to_try = 30
     estimators, maxmems = ex.map_variables(
         ('step_flops', 'max_mem'),
          d=ds,

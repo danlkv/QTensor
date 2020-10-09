@@ -26,8 +26,6 @@ jobs:
         yes | add-apt-repository ppa:git-core/ppa
         yes | apt-get update
         yes | apt-get install git
-        which pip; which pip3
-
 
     - uses: actions/checkout@v2
       with:
@@ -38,7 +36,10 @@ jobs:
       uses: actions/setup-python@v2
       with:
         python-version: 3.x
+
+    - name: Link to proper python
       run: |
+        which pip; which pip3
         ln -srf $(which python3) /usr/bin/python
         ln -srf $(which pip3) /usr/bin/pip
         
