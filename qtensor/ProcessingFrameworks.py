@@ -5,7 +5,17 @@ from qtree import optimizer as opt
 from pyrofiler import timing
 from tqdm import tqdm
 
-tcontract = lazy_import.lazy_module('tcontract')
+class MockModule:
+    def __getattribute__(self, attr):
+        # Fail spectacularly
+        raise ImportError(f'Module tcontract is not imported! Please install it and try again.')
+
+tcontract = MockModule()
+try:
+    import tcontract
+except ImportError:
+    pass
+
 
 from qtensor.utils import ReportTable
 from . import exatn_framework
@@ -62,8 +72,8 @@ class CMKLExtendedBackend(BucketBackend):
         for tensor in bucket[1:]:
             ixa, ixb = result_indices, tensor.indices
             common_ids = sorted(list(set.intersection(set(ixa), set(ixb))), key=int)
-            distinct_a = [x for x in sorted(ixa, key=int) if x not in common_ids]
-            distinct_b = [x for x in sorted(ixb, key=int) if x not in common_ids]
+            distinct_a = [x for x in ixa if x not in common_ids]
+            distinct_b = [x for x in ixb if x not in common_ids]
             transp_a = [ixa.index(x) for x in common_ids+distinct_a]
             transp_b = [ixb.index(x) for x in common_ids+distinct_b]
             a = result_data.transpose(transp_a)
@@ -80,7 +90,11 @@ class CMKLExtendedBackend(BucketBackend):
                 set(result_indices + tensor.indices),
                 key=int)
             )
-            result_data = c.reshape([2 for _ in result_indices])
+            ixc = common_ids + distinct_a + distinct_b
+            assert len(result_indices) == len(ixc), 'Wrong transposition, please submit an issue'
+            transp_c = [ixc.index(x) for x in result_indices]
+            result_data = c.reshape(*[2 for _ in result_indices])
+            result_data = result_data.transpose(transp_c)
 
         if len(result_indices) > 0:
             if not no_sum:  # trim first index
@@ -119,6 +133,12 @@ class PerfBackend(BucketBackend):
             print(f"PROF:: perf data {label}: {time}")
         self._profile_results[str(indices)] = indices, time
 
+    @classmethod
+    def from_backend(cls, backend, *args, **kwargs):
+        """ Dynamically create and instantiate a class with a given backend. """
+        class CustomGeneratedBackend(cls):
+            Backend = backend
+        return CustomGeneratedBackend(*args, **kwargs)
 
     def process_bucket(self, bucket, no_sum=False):
         indices = [tensor.indices for tensor in bucket]

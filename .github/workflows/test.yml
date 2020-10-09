@@ -34,6 +34,7 @@ jobs:
         pip install .
         pip install pytest mock
         cd qtree && pip install .
+        cd scratchpad/cpp_connections/vanilia/nparray/ && pip install .
   
     - name: Test
       run: cd qtensor && pytest
