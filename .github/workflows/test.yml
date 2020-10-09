@@ -33,12 +33,9 @@ jobs:
 
     - name: Link to proper python
       run: |
-        echo $PATH
-        python3  --version
-        which pip3
         ln -srf $(which python3) /usr/bin/python
         ln -srf $(which pip3) /usr/bin/pip
-         which pip3
+        which pip3
         echo $PATH
         
         
@@ -48,16 +45,13 @@ jobs:
         LANG: en_US.UTF-8
         LC_ALL: C.UTF-8
       run: |
-        python --version
-        python3 --version
-        pip --version
         pip install --upgrade pip
         pip install --upgrade setuptools
         pip --version
         pip install .
         pip install pytest mock
-        (cd qtree && LC_ALL=C.UTF-8 pip install .)
-        (cd scratchpad/cpp_connections/vanilia/nparray/ && LC_ALL=C.UTF-8 pip install .)
+        (cd qtree && pip install .)
+        (cd scratchpad/cpp_connections/vanilia/nparray/ && pip install .)
   
     - name: Test
-      run: cd qtensor && pytest
+      run: cd qtensor && pytest -s
