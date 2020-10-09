@@ -172,7 +172,7 @@ def time_vs_flops_plot(filename=None, backend='numpy', seed=SEED,
         ('step_flops', 'max_mem'),
          d=ds,
          edge_idx=range(edges_to_try), n=[N], p=[p],
-         seed=[SEED],
+         seed=[seed],
         )
 
 

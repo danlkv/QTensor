@@ -54,4 +54,6 @@ jobs:
         (cd scratchpad/cpp_connections/vanilia/nparray/ && pip install .)
   
     - name: Test
+      env: 
+        LD_PRELOAD: "/opt/intel/mkl/lib/intel64/libmkl_def.so:/opt/intel/mkl/lib/intel64/libmkl_avx.so"
       run: cd qtensor && pytest -s
