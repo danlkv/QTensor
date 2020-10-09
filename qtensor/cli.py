@@ -57,6 +57,8 @@ def sim_file(filename, profile=False, num_processes=1, max_tw=25, backend='numpy
         kwargs['optimizer'] = TamakiTrimSlicing(max_tw=max_tw, wait_time=23)
     else:
         kwargs['optimizer'] = SlicesOptimizer(max_tw=max_tw, tw_bias=0)
+    kwargs['optimizer'].max_tw = max_tw
+
 
     sim = FeynmanSimulator(**kwargs)
     circuit = sum(circuit, [])
