@@ -50,10 +50,10 @@ jobs:
         python --version
         python3 --version
         pip --version
-        /usr/bin/env pip install .
-        /usr/bin/env pip install pytest mock
-        (cd qtree && /usr/bin/env pip install .)
-        (cd scratchpad/cpp_connections/vanilia/nparray/ && /usr/bin/env pip install .)
+        LC_ALL=C.UTF-8 pip install .
+        LC_ALL=C.UTF-8 pip install pytest mock
+        (cd qtree && LC_ALL=C.UTF-8 pip install .)
+        (cd scratchpad/cpp_connections/vanilia/nparray/ && LC_ALL=C.UTF-8 pip install .)
   
     - name: Test
       run: cd qtensor && pytest
