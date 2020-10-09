@@ -10,4 +10,4 @@ lscpu
 echo $PYTHONPATH
 echo $PATH
 echo $SHELL
-qtensor-specs-time-flop-plot time-vs-flops-plot results/time_vs_flops.png --backend=mkl --max-memory=4e10 --min-memory=1e6 --seed=108 > results/time_vs_flops.txt
+qtensor-specs-time-flop-plot time-vs-flops-plot results/time_vs_flops.png --backend=mkl --max-memory=4e10 --min-memory=1e6 --seed=109 > results/time_vs_flops.txt
