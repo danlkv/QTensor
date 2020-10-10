@@ -8622,10 +8622,10 @@ Dimensions: f:1 k:2 n:8 m:1
 Selected edges [ 7  8  9 23]
 Estimated memories [1835008 1610612736 3407872 16106127360 3670016 8589934592 3670016
  301989888]
-Lin fit: [ 4.51181355e-09 -3.02204837e-02]
-Log fit: [  0.87971631 -17.65089851]
+Lin fit: [ 4.42116846e-09 -3.02228348e-02]
+Log fit: [  0.87176776 -17.53601154]
 ===Results===
-Total time: 80.923
-Simulator fitted flops: 0.046311 G
-Matmul flops: 204.3 G
-Simulator optimality: 0.00022668319088030888
+Total time: 79.116
+Simulator fitted flops: 0.041285 G
+Matmul flops: 221.86 G
+Simulator optimality: 0.00018608346870725733
