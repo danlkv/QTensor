@@ -147,9 +147,7 @@ class CMKLExtendedBackend(BucketBackend):
         shapes_a = {i:s for i,s in zip(k+f+m, a.shape)}
         shapes_b = {i:s for i,s in zip(k+f+n, b.shape)}
         shapes = {**shapes_b, **shapes_a}
-        print(f'{shapes=}')
         K, F, M, N = [reduce(np.multiply, (shapes[i] for i in x), 1) for x in (k, f, m, n)]
-        print(f'{a.shape=} {b.shape=}')
         a = a.reshape(K, F, M)
         b = b.reshape(K, F, N)
         # ----
@@ -165,7 +163,6 @@ class CMKLExtendedBackend(BucketBackend):
             set(result_indices + last_tensor.indices),
             key=int)
         )
-        print(f'{result_indices=}, {k=} {f=}')
         assert result_indices[0] == k[0], 'Broken ordering, please report'
         result_indices = result_indices[1:]
         ixc = f + m + n
