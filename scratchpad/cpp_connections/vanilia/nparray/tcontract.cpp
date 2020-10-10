@@ -46,6 +46,76 @@ int python_abc_complex_args(PyObject *dummy, PyObject *args, PyObject **Obj, std
 }
 //
 
+// DEBUG
+static PyObject *
+debug_mkl_contract_sum(PyObject *dummy, PyObject *args)
+{
+    std::complex<double> alpha(1, 0);
+    std::complex<double> beta(0, 0);
+    // -- Parse Python arguments
+    PyObject *Obj[3];
+    std::complex<double> *Data[3];
+    int parse_fail;
+    parse_fail = python_abc_complex_args(dummy, args, Obj, Data);
+
+    if (parse_fail != 0) {
+        std::cerr << "Failed to parse arguments" << std::endl;
+        return NULL;
+    }
+    // -- 
+    PyObject *A, *B, *C;
+    A = Obj[0]; B = Obj[1]; C = Obj[2];
+
+    std::complex<double> *Aptr, *Bptr, *Cptr;
+    Aptr = Data[0]; Bptr = Data[1]; Cptr = Data[2]; 
+    npy_intp *dimC = PyArray_DIMS(C);
+    npy_intp *dimA = PyArray_DIMS(A);
+
+    int m = dimC[1]; // Row length of A, third index
+    int n = dimC[2]; // Row length of B, third index
+    int k = dimA[0]; // Summation length, first index of A and B
+    int f = dimA[1]; // Multiplication-only index, second index of A and B
+
+    std::cerr << "Dimensions: f:" << f << " k:" << k << " n:" << n << " m:" << m << std::endl;
+    auto start = high_resolution_clock::now();
+    /*
+     * Performs opearation
+     * \sum_k A_{kfm} * B_{kfn} = C_{fmn}
+     */
+
+    for (int i=0; i<f; i++){
+       cblas_zgemm(CblasRowMajor,
+                CblasTrans,
+                CblasNoTrans,
+                m, n, k, &alpha,
+                Aptr + i*m, f*m,
+                Bptr + i*n, f*n, &beta,
+                Cptr + i*n*m, n); 
+    }
+    auto stop = high_resolution_clock::now();
+    auto millis = duration_cast<milliseconds>(stop - start).count();
+    std::cerr << "Duration: " << millis << " milliseconds" << std::endl;
+
+    /*
+     * Works as well:
+       cblas_zgemm(CblasColMajor,
+                CblasNoTrans,
+                CblasTrans,
+                n, m, k, &alpha,
+                Bptr + i*n, f*n,
+                Aptr + i*m, f*m,
+                &beta,
+                Cptr + i*n*m, n); 
+    */
+    // -- Clean up python pointers
+    Py_DECREF(A);
+    Py_DECREF(B);
+    Py_DECREF(C);
+    Py_INCREF(Py_None);
+    return Py_None;
+}
+
+
 static PyObject *
 mkl_contract_sum(PyObject *dummy, PyObject *args)
 {
@@ -59,17 +129,14 @@ mkl_contract_sum(PyObject *dummy, PyObject *args)
     parse_fail = python_abc_complex_args(dummy, args, Obj, Data);
 
     if (parse_fail != 0) {
-        std::cout << "Failed to parse arguments" << std::endl;
+        std::cerr << "Failed to parse arguments" << std::endl;
         return NULL;
     }
     // -- 
-
     PyObject *A, *B, *C;
     A = Obj[0]; B = Obj[1]; C = Obj[2];
-
     std::complex<double> *Aptr, *Bptr, *Cptr;
     Aptr = Data[0]; Bptr = Data[1]; Cptr = Data[2]; 
-
     npy_intp *dimC = PyArray_DIMS(C);
     npy_intp *dimA = PyArray_DIMS(A);
 
@@ -78,7 +145,6 @@ mkl_contract_sum(PyObject *dummy, PyObject *args)
     int k = dimA[0]; // Summation length, first index of A and B
     int f = dimA[1]; // Multiplication-only index, second index of A and B
 
-    std::cout << "Dimensions: f:" << f << " k:" << k << " n:" << n << " m:" << m << std::endl;
 
     /*
      * Performs opearation
@@ -94,19 +160,6 @@ mkl_contract_sum(PyObject *dummy, PyObject *args)
                 Bptr + i*n, f*n, &beta,
                 Cptr + i*n*m, n); 
     }
-    /*
-     * Works as well:
-     
-       cblas_zgemm(CblasColMajor,
-                CblasNoTrans,
-                CblasTrans,
-                n, m, k, &alpha,
-                Bptr + i*n, f*n,
-                Aptr + i*m, f*m,
-                &beta,
-                Cptr + i*n*m, n); 
-    */
-
     // -- Clean up python pointers
     Py_DECREF(A);
     Py_DECREF(B);
@@ -114,6 +167,63 @@ mkl_contract_sum(PyObject *dummy, PyObject *args)
     Py_INCREF(Py_None);
     return Py_None;
 }
+
+// DEBUG
+static PyObject *
+debug_mkl_contract_complex(PyObject *dummy, PyObject *args)
+{
+    std::complex<double> alpha(1, 0);
+    std::complex<double> beta(0, 0);
+
+    // -- Parse Python arguments
+    PyObject *Obj[3];
+    std::complex<double> *Data[3];
+    int parse_fail;
+    parse_fail = python_abc_complex_args(dummy, args, Obj, Data);
+
+    if (parse_fail != 0) {
+        std::cerr << "Failed to parse arguments" << std::endl;
+        return NULL;
+    }
+    // -- 
+
+    PyObject *A, *B, *C;
+    A = Obj[0]; B = Obj[1]; C = Obj[2];
+
+    std::complex<double> *Aptr, *Bptr, *Cptr;
+    Aptr = Data[0]; Bptr = Data[1]; Cptr = Data[2]; 
+
+    //auto now = high_resolution_clock::now();
+    //auto millis = duration_cast<milliseconds>(now - epoch).count();
+    //std::cout << "after convert. duration (μs) = " << millis << std::endl;
+    
+    npy_intp *dimC = PyArray_DIMS(C);
+
+    std::cerr << "Dimensions: C[0]:" << dimC[0] << " C[1]:" << dimC[1] << " C[2]:" << dimC[2] << std::endl;
+    auto start = high_resolution_clock::now();
+
+    for (int i=0; i<dimC[0]; i++){
+       cblas_zgemm(CblasColMajor,
+                CblasNoTrans,
+                CblasTrans,
+                dimC[2], dimC[1], 1, &alpha,
+                Bptr + i*dimC[2], dimC[2],
+                Aptr + i*dimC[1], dimC[1], &beta,
+                Cptr + i*dimC[2]*dimC[1], dimC[2]); 
+    }
+
+    auto stop = high_resolution_clock::now();
+    auto millis = duration_cast<milliseconds>(stop - start).count();
+    std::cerr << "Duration: " << millis << " milliseconds" << std::endl;
+
+    Py_DECREF(A);
+    Py_DECREF(B);
+    Py_DECREF(C);
+    Py_INCREF(Py_None);
+    return Py_None;
+}
+
+
 static PyObject *
 mkl_contract_complex(PyObject *dummy, PyObject *args)
 {
@@ -127,7 +237,7 @@ mkl_contract_complex(PyObject *dummy, PyObject *args)
     parse_fail = python_abc_complex_args(dummy, args, Obj, Data);
 
     if (parse_fail != 0) {
-        std::cout << "Failed to parse arguments" << std::endl;
+        std::cerr << "Failed to parse arguments" << std::endl;
         return NULL;
     }
     // -- 
@@ -540,18 +650,24 @@ static PyMethodDef tcontract_Methods[] = {
      "Example from https://numpy.org/doc/stable/user/c-info.how-to-extend.html"},
     {"print_4",  print_4, METH_VARARGS,
      "Prints first 4 values of numpy array"},
+    {"mkl_dotmul",  mkl_dotmul, METH_VARARGS,
+     "Matrix multiplication"},
+
     {"triple_loop_contract",  triple_loop_contract, METH_VARARGS,
      "Contracts two arrays with first common index"},
     {"mkl_contract",  mkl_contract, METH_VARARGS,
      "Contracts two arrays with first common index using MKL"},
     {"mkl_contract_complex",  mkl_contract_complex, METH_VARARGS,
      "Contracts two arrays with first common index using MKL"},
-    {"mkl_dotmul",  mkl_dotmul, METH_VARARGS,
-     "Matrix multiplication"},
-
     {"mkl_contract_sum",  mkl_contract_sum, METH_VARARGS,
      "Performs opearation:\
      \\sum_k A_{kfm} * B_{kfn} = C_{fmn}"},
+
+    {"debug_mkl_contract_sum",  debug_mkl_contract_sum, METH_VARARGS,
+     "DEBUG Performs opearation:\
+     \\sum_k A_{kfm} * B_{kfn} = C_{fmn}"},
+    {"debug_mkl_contract_complex",  debug_mkl_contract_complex, METH_VARARGS,
+     "DEBUG Contracts two arrays with first common index using MKL"},
     {NULL, NULL, 0, NULL}        /* Sentinel */
 };
 

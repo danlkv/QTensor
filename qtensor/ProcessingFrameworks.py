@@ -1,3 +1,4 @@
+import sys
 import numpy as np
 from functools import reduce
 import time
@@ -216,7 +217,7 @@ class PerfBackend(BucketBackend):
         end = time.time()
         duration = end - start
         if self._print:
-            print(f"PROF:: perf data process bucket time: {duration}")
+            print(f"PROF:: perf data process bucket time: {duration}", file=sys.stderr)
         self._profile_results[str(indices)] = indices, duration
         return result
 
