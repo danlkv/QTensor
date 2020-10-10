@@ -155,8 +155,6 @@ class CMKLExtendedBackend(BucketBackend):
         # \sum_k A_{kfm} * B_{kfn} = C_{fmn}
         c = np.empty((F, M, N), dtype=np.complex128)
         tcontract.mkl_contract_sum(a, b, c)
-        c_einsum = np.einsum('kfm, kfn -> fmn', a, b)
-        assert np.allclose(c_einsum, c)
 
         # ---- Post-process output
         result_indices = tuple(sorted(
