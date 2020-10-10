@@ -1,5 +1,6 @@
 import numpy as np
 from functools import reduce
+import time
 import lazy_import
 from qtree import np_framework
 from qtree import optimizer as opt
@@ -198,11 +199,26 @@ class PerfBackend(BucketBackend):
             Backend = backend
         return CustomGeneratedBackend(*args, **kwargs)
 
-    def process_bucket(self, bucket, no_sum=False):
+    def process_bucket_pyrofiler(self, bucket, no_sum=False):
+        """ This method was original, but let's try what is with vanilia time.time()
+        Using pyrofiler allows to easily add more profilers like memory or cpu,
+        but adds a couple of function calls.
+        """
         indices = [tensor.indices for tensor in bucket]
         with timing('process bucket time', indices
                          , callback=self._profile_callback):
             return self.backend.process_bucket(bucket, no_sum=no_sum)
+
+    def process_bucket(self, bucket, no_sum=False):
+        indices = [tensor.indices for tensor in bucket]
+        start = time.time()
+        result = self.backend.process_bucket(bucket, no_sum=no_sum)
+        end = time.time()
+        duration = end - start
+        if self._print:
+            print(f"PROF:: perf data process bucket time: {duration}")
+        self._profile_results[str(indices)] = indices, duration
+        return result
 
     def get_sliced_buckets(self, buckets, data_dict, slice_dict):
         return self.backend.get_sliced_buckets(buckets, data_dict, slice_dict)
