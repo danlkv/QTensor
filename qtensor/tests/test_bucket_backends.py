@@ -17,7 +17,7 @@ def test_problem():
     G = nx.from_numpy_matrix(w)
 
     G = nx.random_regular_graph(3, 18)
-    gamma, beta = [np.pi/3], [np.pi/2]
+    gamma, beta = [np.pi/3]*2, [np.pi/2]*2
     yield G, gamma, beta
 
 @pytest.fixture(scope='module')
