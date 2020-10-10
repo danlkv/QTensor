@@ -7,7 +7,7 @@ tail -n 5 results/time_vs_flops.txt >> results/result.md
 echo "\n" >> results/result.md
 
 echo "\n" >> results/result.md
-echo "Backend used: mkl (contraction only)" >> results/result.md
+echo "Backend used: mkl (full)" >> results/result.md
 echo "\n" >> results/result.md
 
 echo "### Performance plot:" >> results/result.md
