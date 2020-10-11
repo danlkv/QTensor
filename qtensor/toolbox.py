@@ -1,7 +1,9 @@
 import networkx as nx
 import numpy as np
+from itertools import repeat
 from tqdm.auto import tqdm
 import time
+from multiprocessing.dummy import Pool
 
 from qtensor.optimisation.TensorNet import QtreeTensorNet
 from qtensor.optimisation.Optimizer import OrderingOptimizer, TamakiOptimizer, WithoutOptimizer
@@ -97,24 +99,35 @@ def qaoa_energy_cost_params_stats_from_graph(G, p, max_time=0, max_tw=None,
     return tw, mem, flop
 
 
+def _twidth_parallel_unit(args):
+    circuit, subgraph, ordering_algo, tamaki_time, max_tw = args
+    tw = get_tw(circuit, ordering_algo=ordering_algo, tamaki_time=tamaki_time)
+    if max_tw:
+        if tw>max_tw:
+            print(f'Encountered treewidth of {tw}, which is larger {max_tw}')
+            raise ValueError(f'Encountered treewidth of {tw}, which is larger {max_tw}')
+
 def qaoa_energy_tw_from_graph(G, p, max_time=0, max_tw=0,
                               ordering_algo='greedy', print_stats=False,
-                              tamaki_time=15):
-    twidths = []
-    with tqdm(total=G.number_of_edges(), desc='Edge iteration') as pbar:
-        for circuit, subgraph in qaoa_energy_lightcone_iterator(G, p, max_time=max_time):
-            tw = get_tw(circuit, ordering_algo=ordering_algo, tamaki_time=tamaki_time)
-            pbar.update()
-            pbar.set_postfix(current_tw=tw, subgraph_nodes=subgraph.number_of_nodes())
-            if max_tw:
-                if tw>max_tw:
-                    print(f'Encountered treewidth of {tw}, which is larger {max_tw}')
-                    break
-            twidths.append(tw)
+                              tamaki_time=15, n_processes=1):
+
+    lightcone_gen = qaoa_energy_lightcone_iterator(G, p, max_time=max_time)
+    arggen = zip(lightcone_gen, repeat(ordering_algo), repeat(tamaki_time), repeat(max_tw))
+    if n_processes > 1:
+        with Pool(n_processes=n_processes) as p:
+            twidths = list(tqdm(p.imap(_twidth_parallel_unit, arggen), total=G.number_of_edges()))
+    else:
+        with tqdm(total=G.number_of_edges(), desc='Edge iteration') as pbar:
+            for circuit, subgraph, ordering_algo, tamaki_time, max_tw in arggen:
+                tw = _twidth_parallel_unit(circuit, ordering_algo=ordering_algo, tamaki_time=tamaki_time)
+                pbar.update()
+                pbar.set_postfix(current_tw=tw, subgraph_nodes=subgraph.number_of_nodes())
+                twidths.append(tw)
 
     if print_stats:
         print(f'med={np.median(twidths)} mean={round(np.mean(twidths), 2)} max={np.max(twidths)}')
     return twidths
+
 
 
 def qaoa_energy_cost_params_from_graph(G, p, max_time=0, max_tw=0,

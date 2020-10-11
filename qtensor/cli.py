@@ -193,7 +193,8 @@ def generate_qaoa_energy_circuit(seed, degree, nodes, p, graph_type, edge_index)
 @click.option('--max-tw', default=0, help='Max tw after wich no point to calculate')
 @click.option('-O','--ordering-algo', default='greedy', help='Algorithm for elimination order')
 @click.option('--tamaki_time', default=20, help='Algorithm for elimination order')
-def qaoa_energy_tw(nodes, seed, degree, p, graph_type, max_time, max_tw, ordering_algo, tamaki_time):
+@click.option('--n_processes', default=1, help='Number of processes.')
+def qaoa_energy_tw(nodes, seed, degree, p, graph_type, max_time, max_tw, ordering_algo, tamaki_time, n_processes):
     np.random.seed(seed)
     if graph_type=='random_regular':
         G = nx.random_regular_graph(degree, nodes)
@@ -202,7 +203,7 @@ def qaoa_energy_tw(nodes, seed, degree, p, graph_type, max_time, max_tw, orderin
     else:
         raise Exception('Unsupported graph type')
 
-    qaoa_energy_tw_from_graph(G, p, max_time, max_tw, ordering_algo, print_stats=True, tamaki_time=tamaki_time)
+    qaoa_energy_tw_from_graph(G, p, max_time, max_tw, ordering_algo, print_stats=True, tamaki_time=tamaki_time, n_processes=n_processes)
 
 
 @cli.command()
