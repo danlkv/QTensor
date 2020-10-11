@@ -106,7 +106,7 @@ def plot_with_filter(est_flat, times_flat):
     def fixed_slope(x, shift):
         slope = 1.0
         return x*slope + shift
-    popt, pcov = scipy.optimize.curve_fit(fixed_slope, np.log(est_flat_filtered, np.log(times_flat_filtered))
+    popt, pcov = scipy.optimize.curve_fit(fixed_slope, np.log(est_flat_filtered), np.log(times_flat_filtered))
     print('Lin fit:', fit_coef)
     print('Log fit:', log_fit_coef)
     print('Slope-1 log fit:', popt)
