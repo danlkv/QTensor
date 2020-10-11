@@ -100,7 +100,8 @@ def qaoa_energy_cost_params_stats_from_graph(G, p, max_time=0, max_tw=None,
 
 
 def _twidth_parallel_unit(args):
-    circuit, subgraph, ordering_algo, tamaki_time, max_tw = args
+    circ_graph, ordering_algo, tamaki_time, max_tw = args
+    circuit, subgraph = circ_graph
     tw = get_tw(circuit, ordering_algo=ordering_algo, tamaki_time=tamaki_time)
     if max_tw:
         if tw>max_tw:
