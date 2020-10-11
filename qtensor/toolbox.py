@@ -114,7 +114,7 @@ def qaoa_energy_tw_from_graph(G, p, max_time=0, max_tw=0,
     lightcone_gen = qaoa_energy_lightcone_iterator(G, p, max_time=max_time)
     arggen = zip(lightcone_gen, repeat(ordering_algo), repeat(tamaki_time), repeat(max_tw))
     if n_processes > 1:
-        with Pool(n_processes=n_processes) as p:
+        with Pool(n_processes) as p:
             twidths = list(tqdm(p.imap(_twidth_parallel_unit, arggen), total=G.number_of_edges()))
     else:
         with tqdm(total=G.number_of_edges(), desc='Edge iteration') as pbar:
