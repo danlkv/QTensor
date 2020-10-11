@@ -107,6 +107,7 @@ def _twidth_parallel_unit(args):
         if tw>max_tw:
             print(f'Encountered treewidth of {tw}, which is larger {max_tw}')
             raise ValueError(f'Encountered treewidth of {tw}, which is larger {max_tw}')
+    return tw
 
 def qaoa_energy_tw_from_graph(G, p, max_time=0, max_tw=0,
                               ordering_algo='greedy', print_stats=False,
