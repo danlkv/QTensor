@@ -34,12 +34,14 @@ def random_graph(nodes, type='random', **kwargs):
 
 
 
-def optimize_circuit(circ, algo='greedy'):
+def optimize_circuit(circ, algo='greedy', tamaki_time=15):
 
+    # Should I somomehow generalize the tamaki-time argument? provide something like
+    # Optimizer-params argument? How would cli parse this?
     if algo=='greedy':
         opt = OrderingOptimizer()
     elif algo=='tamaki':
-        opt = TamakiOptimizer(wait_time=45)
+        opt = TamakiOptimizer(wait_time=tamaki_time)
     elif algo=='without':
         opt = WithoutOptimizer()
     else:
@@ -49,8 +51,8 @@ def optimize_circuit(circ, algo='greedy'):
     peo, tn = opt.optimize(tn)
     return peo, tn, opt
 
-def get_tw(circ, ordering_algo='greedy'):
-    peo, tn, opt = optimize_circuit(circ, algo=ordering_algo)
+def get_tw(circ, ordering_algo='greedy', tamaki_time=15):
+    peo, tn, opt = optimize_circuit(circ, algo=ordering_algo, tamaki_time=tamaki_time)
     treewidth = opt.treewidth
     return treewidth
 
@@ -96,11 +98,12 @@ def qaoa_energy_cost_params_stats_from_graph(G, p, max_time=0, max_tw=None,
 
 
 def qaoa_energy_tw_from_graph(G, p, max_time=0, max_tw=0,
-                              ordering_algo='greedy', print_stats=False):
+                              ordering_algo='greedy', print_stats=False,
+                              tamaki_time=15):
     twidths = []
     with tqdm(total=G.number_of_edges(), desc='Edge iteration') as pbar:
         for circuit, subgraph in qaoa_energy_lightcone_iterator(G, p, max_time=max_time):
-            tw = get_tw(circuit, ordering_algo=ordering_algo)
+            tw = get_tw(circuit, ordering_algo=ordering_algo, tamaki_time=tamaki_time)
             pbar.update()
             pbar.set_postfix(current_tw=tw, subgraph_nodes=subgraph.number_of_nodes())
             if max_tw:
