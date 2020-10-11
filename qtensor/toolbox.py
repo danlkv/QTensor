@@ -119,8 +119,8 @@ def qaoa_energy_tw_from_graph(G, p, max_time=0, max_tw=0,
             twidths = list(tqdm(p.imap(_twidth_parallel_unit, arggen), total=G.number_of_edges()))
     else:
         with tqdm(total=G.number_of_edges(), desc='Edge iteration') as pbar:
-            for circuit, subgraph, ordering_algo, tamaki_time, max_tw in arggen:
-                tw = _twidth_parallel_unit(circuit, ordering_algo=ordering_algo, tamaki_time=tamaki_time)
+            for args in arggen:
+                tw = _twidth_parallel_unit(args)
                 pbar.update()
                 pbar.set_postfix(current_tw=tw, subgraph_nodes=subgraph.number_of_nodes())
                 twidths.append(tw)
