@@ -119,6 +119,7 @@ def qaoa_energy_tw_from_graph(G, p, max_time=0, max_tw=0,
         with Pool(n_processes) as p:
             twidths = list(tqdm(p.imap(_twidth_parallel_unit, arggen), total=G.number_of_edges()))
     else:
+        twidths = []
         with tqdm(total=G.number_of_edges(), desc='Edge iteration') as pbar:
             for args in arggen:
                 circ_graph, ordering_algo, tamaki_time, max_tw = args
