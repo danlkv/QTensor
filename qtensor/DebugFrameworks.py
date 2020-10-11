@@ -136,6 +136,9 @@ class _CMKLExtendedBackend(BucketBackend):
         result = opt.Tensor(f'E{tag}', result_indices, data=result_data)
         return result
 
+    def get_result_data(self, result):
+        return result.data
+
 class DebugMKLBackend(PerfBackend):
     Backend = _CMKLExtendedBackend
     # Just use print by default

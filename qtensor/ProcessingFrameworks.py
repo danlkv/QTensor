@@ -213,6 +213,8 @@ class PerfBackend(BucketBackend):
     def process_bucket(self, bucket, no_sum=False):
         indices = [tensor.indices for tensor in bucket]
         start = time.time()
+        if self._print:
+            print(f"PROF:: Bucket contains: {bucket}", file=sys.stderr)
         result = self.backend.process_bucket(bucket, no_sum=no_sum)
         end = time.time()
         duration = end - start

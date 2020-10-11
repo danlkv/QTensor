@@ -20,6 +20,7 @@ extra_link_args = ['-I', '/opt/intel/mkl/include'
                   ]
 
 extra_compile_args = ['-I','/opt/intel/mkl/include'
+                      ,'-std=c++11'
                       ,'-m64'
                       ,'-fopenmp'
                      ]
