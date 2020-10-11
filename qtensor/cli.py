@@ -185,7 +185,7 @@ def generate_qaoa_energy_circuit(seed, degree, nodes, p, graph_type, edge_index)
 @click.option('-T','--max-time', default=0, help='Max time for every evaluation')
 @click.option('--max-tw', default=0, help='Max tw after wich no point to calculate')
 @click.option('-O','--ordering-algo', default='greedy', help='Algorithm for elimination order')
-@click.option('--tamaki_time', default='greedy', help='Algorithm for elimination order')
+@click.option('--tamaki_time', default=20, help='Algorithm for elimination order')
 def qaoa_energy_tw(nodes, seed, degree, p, graph_type, max_time, max_tw, ordering_algo, tamaki_time):
     np.random.seed(seed)
     if graph_type=='random_regular':
