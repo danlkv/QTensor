@@ -7,6 +7,7 @@ __all__ = ['ex', 'graph', 'circuit', 'tn', 'peo', 'sim_costs', 'sum_flops', 'ste
 import sys
 import numpy as np
 import matplotlib.pyplot as plt
+import scipy
 
 import qtensor as qt
 from cartesian_explorer import Explorer
@@ -36,15 +37,19 @@ def tn(circuit):
     return qt.optimisation.TensorNet.QtreeTensorNet.from_qtree_gates(circuit)
 
 @ex.provider
-def peo(tn):
-    opt = qt.optimisation.Optimizer.DefaultOptimizer()
+def peo(tn, ordering_algo='greedy', tamaki_wait_time=15):
+    if ordering_algo=='greedy':
+        opt = qt.optimisation.Optimizer.DefaultOptimizer()
+    elif 'tamaki' in ordering_algo:
+        if '_' in ordering_algo:
+            _, time_str = ordering_algo.split('_')
+            tamaki_wait_time=int(time_str)
+        opt = qt.optimisation.Optimizer.TamakiOptimizer(wait_time=tamaki_wait_time)
     peo, _ = opt.optimize(tn)
     return tuple(peo)
 
 @ex.provider
 def sim_costs(tn, peo):
-    opt = qt.optimisation.Optimizer.DefaultOptimizer()
-    peo, _ = opt.optimize(tn)
     costs, mems = tn.simulation_cost(peo)
     return costs, mems
 
@@ -98,16 +103,22 @@ def plot_with_filter(est_flat, times_flat):
     # Fit times
     log_fit_coef = np.polyfit(np.log(est_flat_filtered), np.log(times_flat_filtered), 1)
     fit_coef = np.polyfit(est_flat_filtered, times_flat_filtered, 1)
+    def fixed_slope(x, shift):
+        slope = 1.0
+        return x*slope + shift
+    popt, pcov = scipy.optimize.curve_fit(fixed_slope, np.log(est_flat_filtered, np.log(times_flat_filtered))
     print('Lin fit:', fit_coef)
     print('Log fit:', log_fit_coef)
+    print('Slope-1 log fit:', popt)
     fit_fn = np.poly1d(log_fit_coef)
+    fit_fn = fixed_slope
 
     # Plot scatter with filtered data
     plt.scatter(est_flat_filtered, times_flat_filtered, marker='x')
     min_x = np.log10(est_flat_filtered.min())
     max_x = np.log10(est_flat_filtered.max()) + .5
     xfit = 10**np.linspace(min_x, max_x, 100)
-    plt.plot(xfit, np.exp(fit_fn(np.log(xfit))), color='blue')
+    plt.plot(xfit, np.exp(fit_fn(np.log(xfit), popt[0])), color='blue')
     plt.loglog()
     plt.xlabel('estimated FLOP')
     plt.ylabel('Runtime')
@@ -141,9 +152,16 @@ def cli():
 @click.option('-B', '--backend', default='numpy')
 @click.option('-M', '--max-memory', default=3e8)
 @click.option('-s', '--seed', default=SEED)
+@click.option('-O', '--ordering_algo', default='greedy'
+              ,help=("One of (greedy, tamaki, tamaki_{wait_time})"
+                     "'tamki_15' means heuristic solver running for 15 seconds per graph"
+                    )
+             )
 @click.option('--min-memory', default=3e6)
 def time_vs_flops_plot(filename=None, backend='numpy', seed=SEED,
-                       max_memory=2e8, min_memory=1e6):
+                       max_memory=2e8, min_memory=1e6,
+                       ordering_algo='greedy', tamaki_time=10
+                      ):
     """
     Plots times and estimated FLOP for each step of several QAOA energy computation contractions.
 
@@ -157,12 +175,13 @@ def time_vs_flops_plot(filename=None, backend='numpy', seed=SEED,
     p = 3
     N = 1000
 
-    edges_to_try = 30
+    edges_to_try = 20
     estimators, maxmems = ex.map_variables(
         ('step_flops', 'max_mem'),
          d=ds,
          edge_idx=range(edges_to_try), n=[N], p=[p],
          seed=[seed],
+         ordering_algo=[ordering_algo],
         )
 
 
@@ -173,9 +192,10 @@ def time_vs_flops_plot(filename=None, backend='numpy', seed=SEED,
     estimators = estimators.T[selector]
 
     times = ex.map_variable('step_sim_time', d=ds,
-                            edge_idx=edge_indices, n=[N], p=[p],
-                            seed=[seed],
-                            backend=[backend]
+                            edge_idx=edge_indices, n=[N], p=[p]
+                            ,seed=[seed]
+                            ,backend=[backend]
+                            ,ordering_algo=[ordering_algo]
                            )
 
     est_flat = np.concatenate(estimators.T.flatten())
