@@ -224,9 +224,9 @@ def qaoa_energy_sim(nodes, seed,
                     backend, n_processes, profile):
     np.random.seed(seed)
     if graph_type=='random_regular':
-        G = nx.random_regular_graph(degree, nodes)
+        G = nx.random_regular_graph(degree, nodes, seed=seed)
     elif graph_type=='erdos_renyi':
-        G = nx.erdos_renyi_graph(nodes, degree/(nodes-1))
+        G = nx.erdos_renyi_graph(nodes, degree/(nodes-1), seed=seed)
     else:
         raise Exception('Unsupported graph type')
     gamma, beta = [np.pi/3]*p, [np.pi/2]*p
