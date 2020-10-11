@@ -16,11 +16,21 @@ from qtensor.toolbox import qaoa_energy_tw_from_graph
 from qtensor.optimisation.TensorNet import QtreeTensorNet
 from qtensor.optimisation.Optimizer import OrderingOptimizer, TamakiOptimizer, WithoutOptimizer
 from qtensor.optimisation.Optimizer import TamakiTrimSlicing, SlicesOptimizer
-from qtensor import QtreeQAOAComposer
+from qtensor import QtreeQAOAComposer, QAOAQtreeSimulator
+import qtensor.ProcessingFrameworks as backends
+import qtensor.optimisation.Optimizer as optimizers
 
 @click.group()
 def cli():
     pass
+
+def choose_backend(backend_str):
+    if backend_str=='numpy':
+        return backends.NumpyBackend
+    elif backend_str=='mkl':
+        return backends.CMKLExtendedBackend
+    elif backend_str=='exatn':
+        return backends.ExaTnBackend
 
 @cli.command()
 @click.argument('filename', nargs=-1)
@@ -41,18 +51,15 @@ def sim_file(filename, profile=False, num_processes=1, max_tw=25, backend='numpy
         ,max_tw=max_tw
         , pool_type='thread'
     )
+    Backend = choose_backend(backend)
     if profile:
-        class PerfExaTnBackend(PerfBackend):
-            Backend = ExaTnBackend
-        class PerfMKLBackend(PerfBackend):
-            Backend = CMKLExtendedBackend
-        if backend == 'numpy':
-            backend_obj = PerfNumpyBackend(print=False)
-        if backend == 'mkl':
-            backend_obj = PerfMKLBackend(print=False)
-        if backend == 'exatn':
-            backend_obj = PerfExaTnBackend(print=False)
+        class DynamicallyGeneratedBackend(PerfBackend):
+            Backend = Backend
+        backend_obj = DynamicallyGeneratedBackend(print=False)
         kwargs['bucket_backend'] = backend_obj
+    else:
+        kwargs['bucket_backend'] = Backend()
+
     if optimizer=='tamaki':
         kwargs['optimizer'] = TamakiTrimSlicing(max_tw=max_tw, wait_time=23)
     else:
@@ -196,6 +203,60 @@ def qaoa_energy_tw(nodes, seed, degree, p, graph_type, max_time, max_tw, orderin
         raise Exception('Unsupported graph type')
 
     qaoa_energy_tw_from_graph(G, p, max_time, max_tw, ordering_algo, print_stats=True, tamaki_time=tamaki_time)
+
+
+@cli.command()
+@click.option('-s','--seed', default=42)
+@click.option('-d','--degree', default=3)
+@click.option('-n','--nodes', default=10)
+@click.option('-p','--p', default=1)
+@click.option('-G','--graph-type', default='random_regular')
+@click.option('-T','--max-time', default=0, help='Max time for every evaluation')
+@click.option('--max-tw', default=0, help='Max tw after wich no point to calculate')
+@click.option('-O','--ordering-algo', default='greedy', help='Algorithm for elimination order')
+@click.option('--tamaki_time', default=20, help='Algorithm for elimination order')
+@click.option('-B','--backend', default='numpy')
+@click.option('--n_processes', default=1)
+@click.option('-P','--profile', default=False, is_flag=True)
+def qaoa_energy_sim(nodes, seed,
+                    degree, p, graph_type,
+                    max_time, max_tw, ordering_algo, tamaki_time,
+                    backend, n_processes, profile):
+    np.random.seed(seed)
+    if graph_type=='random_regular':
+        G = nx.random_regular_graph(degree, nodes)
+    elif graph_type=='erdos_renyi':
+        G = nx.erdos_renyi_graph(nodes, degree/(nodes-1))
+    else:
+        raise Exception('Unsupported graph type')
+    gamma, beta = [np.pi/3]*p, [np.pi/2]*p
+
+
+    if ordering_algo=='tamaki_slice':
+        optimizer = TamakiTrimSlicing(max_tw=max_tw, wait_time=tamaki_time)
+    elif ordering_algo=='tamaki':
+        optimizer = optimizers.TamakiOptimizer(wait_time=tamaki_time)
+    else:
+        optimizer = optimizers.DefaultOptimizer()
+
+    Backend = choose_backend(backend)
+    backend_obj = Backend()
+    if profile:
+        backend_obj = PerfBackend(print=False)
+        backend_obj.backend = Backend()
+
+    sim = QAOAQtreeSimulator(QtreeQAOAComposer, bucket_backend=backend_obj, optimizer=optimizer)
+    start = time.time()
+    if n_processes==1:
+        result = sim.energy_expectation(G, gamma, beta)
+        if profile:
+            print('Profiling results')
+            backend_obj.gen_report()
+    else:
+        result = sim.energy_expectation_parallel(G, gamma, beta, n_processes=n_processes)
+    end = time.time()
+    print(f"Simutation time: {end - start}")
+    print(result)
 
 
 cli()
