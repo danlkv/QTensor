@@ -67,16 +67,17 @@ class QAOAComposer(CircuitComposer):
         return cls(*args, **kwargs)
 
     def energy_expectation(self, i, j):
-        G = self.graph
+        # Will need to deprecate stateful API and return the circuit
         self.ansatz_state()
         self.energy_edge(i, j)
+        first_part = self.builder.circuit
 
-        beta, gamma = self.params['beta'], self.params['gamma']
-        conjugate = self._get_of_my_type(G, beta=beta, gamma=gamma)
-        conjugate.ansatz_state()
-        conjugate.conjugate()
+        self.builder.reset()
+        self.ansatz_state()
+        self.builder.inverse()
+        second_part = self.builder.circuit
 
-        self.circuit = self.circuit + list(reversed(conjugate.circuit ))
+        self.circuit = first_part + second_part
         return self.circuit
 
     def energy_expectation_lightcone(self, edge):
@@ -101,9 +102,9 @@ class QAOAComposer(CircuitComposer):
         #self.circuit.append(self.operators.H(u))
         self.apply_gate(self.operators.XPhase, u, alpha=2*beta)
         #self.circuit.append(self.operators.H(u))
-    def mixer_operator(self, beta):
-        G = self.graph
-        for n in G:
+    def mixer_operator(self, beta, nodes=None):
+        if nodes is None: nodes = self.graph.nodes()
+        for n in nodes:
             qubit = self.qubits[n]
             self.x_term(qubit, beta)
 
@@ -115,8 +116,9 @@ class QAOAComposer(CircuitComposer):
         self.apply_gate(self.operators.cX, q1, q2)
         self.apply_gate(self.operators.ZPhase, q2, alpha=2*gamma)
         self.apply_gate(self.operators.cX, q1, q2)
-    def cost_operator_circuit(self, gamma):
-        for i, j in self.graph.edges():
+    def cost_operator_circuit(self, gamma, edges=None):
+        if edges is None: edges = self.graph.edges()
+        for i, j in edges:
             u, v = self.qubits[i], self.qubits[j]
             self.append_zz_term(u, v, gamma)
 
@@ -139,3 +141,5 @@ class QAOAComposer(CircuitComposer):
         self.apply_gate(self.operators.Z, u)
         self.apply_gate(self.operators.Z, v)
 
+
+class ConeQAOAComposer(QAOAComposer):
