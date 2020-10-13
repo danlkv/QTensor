@@ -51,7 +51,7 @@ class CircuitComposer():
             self.apply_gate(self.operators.H, q)
 
 
-class QAOAComposer(CircuitComposer):
+class OldQAOAComposer(CircuitComposer):
     """ Abstract base class for QAOA Director """
     def __init__(self, graph, *args, **kwargs):
         self.n_qubits = graph.number_of_nodes()
@@ -84,7 +84,6 @@ class QAOAComposer(CircuitComposer):
         G = self.graph
         gamma, beta = self.params['gamma'], self.params['beta']
         i,j = edge
-        # TODO: take only a neighbourhood part of the graph
         graph = get_edge_subgraph(G, edge, len(gamma))
         log.debug('Subgraph nodes: {}, edges: {}', graph.number_of_nodes(), graph.number_of_edges())
         self.n_qubits = graph.number_of_nodes()
@@ -142,4 +141,36 @@ class QAOAComposer(CircuitComposer):
         self.apply_gate(self.operators.Z, v)
 
 
-class ConeQAOAComposer(QAOAComposer):
+class QAOAComposer(OldQAOAComposer):
+    def cone_ansatz(self, edge):
+        beta, gamma = self.params['beta'], self.params['gamma']
+
+        assert(len(beta) == len(gamma))
+        p = len(beta) # infering number of QAOA steps from the parameters passed
+        self.layer_of_Hadamards()
+        # second, apply p alternating operators
+        cone_base = self.graph
+
+        for i, g, b in zip(range(p, 0, -1), gamma, beta):
+            i=2
+            self.graph = get_edge_subgraph(cone_base, edge, i)
+            self.cost_operator_circuit(g)
+            self.mixer_operator(b)
+        self.graph = cone_base
+        return self.circuit
+
+
+    def energy_expectation(self, i, j):
+        # Will need to deprecate stateful API and return the circuit
+        self.cone_ansatz(edge=(i, j))
+        self.energy_edge(i, j)
+        first_part = self.builder.circuit
+        self.builder.reset()
+
+        self.cone_ansatz(edge=(i, j))
+        self.builder.inverse()
+        second_part = self.builder.circuit
+
+        self.circuit = first_part + second_part
+        return self.circuit
+

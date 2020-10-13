@@ -58,6 +58,7 @@ class QiskitFactory:
         return qiskit_lib.RXGate(theta=alpha*np.pi)
 
     cZ=qiskit_lib.CzGate
+    Z=qiskit_lib.ZGate
 
 class CircuitBuilder:
     """ ABC for creating a circuit."""
