@@ -143,7 +143,8 @@ def process_bucket_exatn(bucket, no_sum=False, result_id=0):
         if no_hcon:
             no_sum = True
         else:
-            raise Exception('QTensorError: Exatn Hyper-contractions are not supported at the moment')
+            # raise Exception('QTensorError: Exatn Hyper-contractions are not supported at the moment')
+            no_sum = False
 
         new_name = f"C{np.random.randint(0, 1000000000)}"
         exatn.createTensor(new_name, np.empty([2]*len(result_indices), dtype=complex))
