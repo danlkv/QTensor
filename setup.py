@@ -12,6 +12,7 @@ REQUIRED_PACKAGES = [
     ,'loguru'
     ,'tqdm'
     ,'click'
+    ,'lazy-import'
     ,'qtensor-qtree'
 
 ]

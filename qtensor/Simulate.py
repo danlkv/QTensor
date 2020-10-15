@@ -6,9 +6,20 @@ from qtensor.optimisation.TensorNet import QtreeTensorNet
 from qtensor.optimisation.Optimizer import DefaultOptimizer
 from tqdm.auto import tqdm
 
+
+
 from loguru import logger as log
 
 from qtensor import utils
+
+def int_slice(value, vars_to_slice):
+    """
+    Creates a slice dict with integers an values.
+    """
+    dimensions = [var.size for var in vars_to_slice]
+    multiindex = qtree.utils.unravel_index(value, dimensions)
+
+    return {idx: val for idx, val in zip(vars_to_slice, multiindex)}
 
 class Simulator:
     def __init__(self):

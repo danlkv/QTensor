@@ -148,3 +148,9 @@ treewidth = opt.treewidth
 mems, flops = tn.simulation_cost(peo)
 print('Max memory=', max(mems), 'Total flops=', sum(flops))
 ```
+
+### Use cli to run benchmarks
+
+```bash
+» python -m qtensor.cli generate-qaoa-ansatz-circuit -p 3 -n 24 | python -m qtensor.cli sim-file --profile --max-tw 27
+```

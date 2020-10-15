@@ -174,7 +174,7 @@ class ReportTable():
             if set(self.columns) != set(kwargs.keys()):
                 raise ValueError(f"columns doesn't match: {kwargs.keys()}, expect: {self.columns}")
         else:
-            self.columns = set(kwargs.keys())
+            self.columns = list(kwargs.keys())
         self.records += [[kwargs[key] for key in self.columns]]
 
     def _title_row(self):

@@ -1,27 +1,42 @@
-from qtensor import QtreeQAOAComposer
-from qtensor.ProcessingFrameworks import PerfNumpyBackend
-
-from qtensor.Simulate import CirqSimulator, QtreeSimulator
 import numpy as np
 import networkx as nx
+import pytest
+
+from qtensor import QtreeQAOAComposer
+from qtensor.Simulate import CirqSimulator, QtreeSimulator
+
+from qtensor.ProcessingFrameworks import PerfBackend
+from qtensor.ProcessingFrameworks import PerfNumpyBackend
+
+from qtensor.ProcessingFrameworks import CMKLExtendedBackend
 
 
-def get_test_problem():
+@pytest.fixture(scope="module")
+def test_problem():
     w = np.array([[0,1,1,0],[1,0,1,1],[1,1,0,1],[0,1,1,0]])
     G = nx.from_numpy_matrix(w)
 
-    G = nx.random_regular_graph(5, 14)
-    gamma, beta = [np.pi/3], [np.pi/2]
-    return G, gamma, beta
+    G = nx.random_regular_graph(3, 18)
+    gamma, beta = [np.pi/3]*2, [np.pi/2]*2
+    yield G, gamma, beta
 
-def test_profiled(capsys):
-    G, gamma, beta = get_test_problem()
-
-    composer = QtreeQAOAComposer(
-        graph=G, gamma=[np.pi/3], beta=[np.pi/4])
+@pytest.fixture(scope='module')
+def ground_truth_energy(test_problem):
+    G, gamma, beta = test_problem
+    composer = QtreeQAOAComposer(graph=G, gamma=gamma, beta=beta)
     composer.ansatz_state()
 
-    print(composer.circuit)
+    sim = QtreeSimulator()
+
+    result = sim.simulate(composer.circuit)
+    yield result
+
+
+def test_profiled(capsys, ground_truth_energy, test_problem):
+    G, gamma, beta = test_problem
+    composer = QtreeQAOAComposer(graph=G, gamma=gamma, beta=beta)
+    composer.ansatz_state()
+
     backend = PerfNumpyBackend()
     sim = QtreeSimulator(bucket_backend=backend)
 
@@ -29,6 +44,22 @@ def test_profiled(capsys):
     print("Profile results")
     print(backend.gen_report())
 
-    qtree_amp = result
+    assert np.allclose(result, ground_truth_energy)
 
-    assert qtree_amp
+def test_mkl(capsys, test_problem, ground_truth_energy):
+    G, gamma, beta = test_problem
+    composer = QtreeQAOAComposer(graph=G, gamma=gamma, beta=beta)
+    composer.ansatz_state()
+
+    backend = PerfBackend.from_backend(CMKLExtendedBackend, print=False)
+    sim = QtreeSimulator(bucket_backend=backend)
+
+    result = sim.simulate(composer.circuit)
+    print("Profile results")
+    print(backend.gen_report())
+
+    assert np.allclose(result, ground_truth_energy)
+
+
+if __name__=='__main__':
+    test_profiled(None)

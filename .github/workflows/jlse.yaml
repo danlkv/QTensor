@@ -17,16 +17,16 @@ jobs:
       run:
         working-directory: run/automake
     steps:
-      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v2
         with:
           submodules: recursive
 
 
-      - name: Update subpackages
+      - name: Update packages
         run: |
-            (cd ../../analysis/spec/ && python setup.py develop --user --no-deps)
-            (cd ../../qtree/ && python setup.py develop --user --no-deps)
+            (cd ../../ && python setup.py develop --user)
+            (cd ../../analysis/spec/ && python setup.py develop --user)
+            (cd ../../qtree/ && python setup.py develop --user)
 
       - name: Remove previous result.md
         run: |

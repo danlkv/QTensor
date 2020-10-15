@@ -15,25 +15,46 @@ jobs:
   build:
     # The type of runner that the job will run on
     runs-on: ubuntu-latest
+    container: robbyjo/ubuntu-mkl:18.04-2019.1
 
-    # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
     # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+    - name: Setup git
+      run: |
+        yes | apt-get update
+        yes | apt-get install software-properties-common python3 python3-pip
+        yes | add-apt-repository ppa:git-core/ppa
+        yes | apt-get update
+        yes | apt-get install git
+
     - uses: actions/checkout@v2
       with:
-          submodules: recursive
-      
-    - name: Setup Python
-      uses: actions/setup-python@v2
-      with:
-        python-version: 3.x
+        submodules: recursive
+
+    - name: Link to proper python
+      run: |
+        ln -srf $(which python3) /usr/bin/python
+        ln -srf $(which pip3) /usr/bin/pip
+        which pip3
+        echo $PATH
         
         
     - name: Setup dependencies
+      env:
+        LC_CTYPE: en_US.UTF-8
+        LANG: en_US.UTF-8
+        LC_ALL: C.UTF-8
       run: |
+        pip install --upgrade pip
+        pip install --upgrade setuptools
+        pip --version
         pip install .
         pip install pytest mock
-        cd qtree && pip install .
+        (cd qtree && pip install .)
+        (cd scratchpad/cpp_connections/vanilia/nparray/ && pip install .)
   
     - name: Test
-      run: cd qtensor && pytest
+      env: 
+        LD_PRELOAD: "/opt/intel/mkl/lib/intel64/libmkl_def.so:/opt/intel/mkl/lib/intel64/libmkl_avx2.so:/opt/intel/mkl/lib/intel64/libmkl_core.so:/opt/intel/mkl/lib/intel64/libmkl_intel_lp64.so:/opt/intel/mkl/lib/intel64/libmkl_intel_thread.so:/opt/intel/lib/intel64_lin/libiomp5.so"
+        LC_ALL: C.UTF-8
+      run: cd qtensor && pytest -s

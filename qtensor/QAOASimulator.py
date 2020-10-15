@@ -1,16 +1,18 @@
-from qtensor.Simulate import Simulator, QtreeSimulator, CirqSimulator
-from qtensor.utils import get_edge_subgraph
 import numpy as np
-import networkx as nx
 from tqdm.auto import tqdm
 from multiprocessing import Pool
 from loguru import logger as log
+
+from qtensor.Simulate import Simulator, QtreeSimulator, CirqSimulator
+from qtensor.utils import get_edge_subgraph
+from qtensor.lib import graph_hash
 
 class QAOASimulator(Simulator):
     def __init__(self, composer, profile=False, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.composer = composer
         self.profile = profile
+        self._subgraph_energy_cache = {}
 
     def _get_edge_energy(self, G, gamma, beta, edge):
         circuit = self._edge_energy_circuit(G, gamma, beta, edge)
@@ -86,6 +88,21 @@ class QAOASimulator(Simulator):
 
         return C
 
+class CachedQAOASimulator(QAOASimulator):
+    def __init__(self, composer, profile=False, *args, **kwargs):
+        super().__init__(composer, profile=profile, *args, **kwargs)
+        self._subgraph_energy_cache = {}
+
+    def _get_edge_energy(self, G, gamma, beta, edge):
+        graph = get_edge_subgraph(G, edge, len(gamma))
+        ghash = graph_hash(graph)
+        cached_value = self._subgraph_energy_cache.get(ghash)
+        if cached_value is None:
+            E = super()._get_edge_energy(G, gamma, beta, edge)
+            self._subgraph_energy_cache[ghash] = E
+            return E
+        else:
+            return cached_value
 
 class QAOAQtreeSimulator(QAOASimulator, QtreeSimulator):
     pass
