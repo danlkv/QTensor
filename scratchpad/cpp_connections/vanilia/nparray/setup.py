@@ -1,14 +1,21 @@
 from setuptools import setup, Extension # use setuptools instead of distutils from tutorial
 import numpy as np
+import os
 
 """
 Use this before:
 
-export LD_PRELOAD=/opt/intel/mkl/lib/intel64/libmkl_def.so:/opt/intel/mkl/lib/intel64/libmkl_avx2.so:/opt/intel/mkl/lib/intel64/libmkl_core.so:/opt/intel/mkl/lib/intel64/libmkl_intel_lp64.so:/opt/intel/mkl/lib/intel64/libmkl_intel_thread.so:/usr/lib/libomp.so
+export LD_PRELOAD=$MKLROOT/lib/intel64/libmkl_def.so:$MKLROOT/lib/intel64/libmkl_avx2.so:$MKLROOT/lib/intel64/libmkl_core.so:$MKLROOT/lib/intel64/libmkl_intel_lp64.so:$MKLROOT/lib/intel64/libmkl_intel_thread.so
 """
 
-extra_link_args = ['-I', '/opt/intel/mkl/include'
-                  , '-L', '/opt/intel/mkl/lib/intel64/'
+# :/usr/lib/libomp.so
+
+mklroot = os.environ['MKLROOT']
+mklinclude = mklroot + '/include'
+mkllib = mklroot + '/lib/intel64'
+
+extra_link_args = ['-I', mklinclude
+                  , '-L', mkllib
                    , '-Wl,--no-as-needed'
                    , '-lmkl_intel_lp64'
                    , '-lmkl_gnu_thread'
@@ -19,7 +26,7 @@ extra_link_args = ['-I', '/opt/intel/mkl/include'
                    , '-ldl'
                   ]
 
-extra_compile_args = ['-I','/opt/intel/mkl/include'
+extra_compile_args = ['-I', mklinclude
                       ,'-std=c++11'
                       ,'-m64'
                       ,'-fopenmp'
