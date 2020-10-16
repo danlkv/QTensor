@@ -6,7 +6,7 @@ import time
 from qtensor.optimisation.TensorNet import QtreeTensorNet
 from qtensor.optimisation.Optimizer import OrderingOptimizer, TamakiOptimizer, WithoutOptimizer
 from qtensor.utils import get_edge_subgraph
-from qtensor import QtreeQAOAComposer
+from qtensor import QtreeQAOAComposer, OldQtreeQAOAComposer
 
 def random_graph(nodes, type='random', **kwargs):
     """
@@ -66,14 +66,17 @@ def get_cost_params(circ, ordering_algo='greedy', overflow_tw=None):
     return treewidth, max(mems), sum(flops)
 
 
-def qaoa_energy_lightcone_iterator(G, p, max_time=None):
+def qaoa_energy_lightcone_iterator(G, p, max_time=None, composer_type='cone'):
     gamma, beta = [0.1]*p, [0.3]*p
     if max_time:
         start = time.time()
     else:
         start = np.inf
     for edge in G.edges():
-        composer = QtreeQAOAComposer(G, beta=beta, gamma=gamma)
+        if composer_type=='cylinder':
+            composer = OldQtreeQAOAComposer(G, beta=beta, gamma=gamma)
+        elif composer_type=='cone':
+            composer = QtreeQAOAComposer(G, beta=beta, gamma=gamma)
         composer.energy_expectation_lightcone(edge)
         subgraph = get_edge_subgraph(G, edge, len(beta))
         yield composer.circuit, subgraph
@@ -96,10 +99,10 @@ def qaoa_energy_cost_params_stats_from_graph(G, p, max_time=0, max_tw=None,
 
 
 def qaoa_energy_tw_from_graph(G, p, max_time=0, max_tw=0,
-                              ordering_algo='greedy', print_stats=False):
+                              ordering_algo='greedy', print_stats=False, composer_type='cone'):
     twidths = []
     with tqdm(total=G.number_of_edges(), desc='Edge iteration') as pbar:
-        for circuit, subgraph in qaoa_energy_lightcone_iterator(G, p, max_time=max_time):
+        for circuit, subgraph in qaoa_energy_lightcone_iterator(G, p, max_time=max_time, composer_type=composer_type):
             tw = get_tw(circuit, ordering_algo=ordering_algo)
             pbar.update()
             pbar.set_postfix(current_tw=tw, subgraph_nodes=subgraph.number_of_nodes())

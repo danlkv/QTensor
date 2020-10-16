@@ -26,9 +26,12 @@ def graph(n, d, seed):
     return qt.toolbox.random_graph(nodes=n, degree=d, seed=seed)
 
 @ex.provider
-def circuit(graph, edge_idx, p):
+def circuit(graph, edge_idx, p, composer_type='cone'):
     gamma, beta = [.1]*p, [.3]*p
-    comp = qt.QtreeQAOAComposer(graph, gamma=gamma, beta=beta)
+    if composer_type=='cylinder':
+        comp = qt.OldQtreeQAOAComposer(graph, gamma=gamma, beta=beta)
+    if composer_type=='cone':
+        comp = qt.QtreeQAOAComposer(graph, gamma=gamma, beta=beta)
     comp.energy_expectation_lightcone(list(graph.edges())[edge_idx])
     return tuple(comp.circuit)
 

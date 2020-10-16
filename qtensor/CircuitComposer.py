@@ -152,7 +152,7 @@ class QAOAComposer(OldQAOAComposer):
         cone_base = self.graph
 
         for i, g, b in zip(range(p, 0, -1), gamma, beta):
-            i=2
+            i=3
             self.graph = get_edge_subgraph(cone_base, edge, i)
             self.cost_operator_circuit(g)
             self.mixer_operator(b)
