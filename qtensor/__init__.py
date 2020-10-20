@@ -7,7 +7,7 @@ log.add(sys.stderr, level='INFO')
 from qtensor.utils import get_edge_subgraph
 import networkx as nx
 
-from .CircuitComposer import QAOAComposer, OldQAOAComposer
+from .CircuitComposer import QAOAComposer, OldQAOAComposer, CCQAOAComposer
 from .OpFactory import CirqBuilder, QtreeBuilder, QiskitBuilder
 from qtensor.Simulate import CirqSimulator, QtreeSimulator
 from qtensor.QAOASimulator import QAOAQtreeSimulator
@@ -28,6 +28,10 @@ class QtreeQAOAComposer(QAOAComposer):
         return QtreeBuilder
 
 class OldQtreeQAOAComposer(OldQAOAComposer):
+    def _get_builder_class(self):
+        return QtreeBuilder
+
+class CCQtreeQAOAComposer(CCQAOAComposer):
     def _get_builder_class(self):
         return QtreeBuilder
 

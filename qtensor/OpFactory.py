@@ -34,16 +34,15 @@ class CC(qtree.operators.ParametricGate):
     _changes_qubits=tuple()
     def gen_tensor(self):
         alpha = self.parameters['alpha']
-        ep = np.exp(1j*np.pi*alpha/2)
-        em = np.exp(-1j*np.pi*alpha/2)
+        p = np.exp(1j*np.pi*alpha/2)
+        m = np.exp(-1j*np.pi*alpha/2)
         tensor = np.array([
-            [ep,em]
-            ,[em,ep]
+             [m, p]
+            ,[p, m]
         ])
         return tensor
 
-
-#QtreeFactory.CC = CC
+QtreeFactory.CC = CC
 
 class QiskitFactory:
     H=qiskit_lib.HGate
@@ -76,7 +75,7 @@ class CircuitBuilder:
         """ Initialize new circuit """
         raise NotImplementedError
 
-    def conjugate(self):
+    def inverse(self):
         if not hasattr(self, '_warned'):
             #print('Warning: conjugate is not implemented. Returning same circuit, in case you only care about circuit structure')
             self._warned = True
