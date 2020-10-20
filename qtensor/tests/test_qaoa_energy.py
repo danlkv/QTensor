@@ -1,30 +1,68 @@
-from qtensor import CirqQAOAComposer, QtreeQAOAComposer
+import numpy as np
+import networkx as nx
+import pytest
+
+import pyrofiler as prof
+
+from qtensor import CirqQAOAComposer, QtreeQAOAComposer, CCQtreeQAOAComposer
 from qtensor import QAOAQtreeSimulator
 from qtensor.Simulate import CirqSimulator, QtreeSimulator
 from qtensor.FeynmanSimulator import FeynmanSimulator
 from qtensor.optimisation.Optimizer import TamakiTrimSlicing, TreeTrimSplitter
 from qtensor.tests.qiskit_qaoa_energy import simulate_qiskit_amps 
-import numpy as np
-import networkx as nx
 
-def get_test_problem(n=10, p=2, d=3):
-    w = np.array([[0,1,1,0],[1,0,1,1],[1,1,0,1],[0,1,1,0]])
-    G = nx.from_numpy_matrix(w)
-
-    G = nx.random_regular_graph(d, n)
+def get_test_problem(n=10, p=2, d=3, type='random'):
+    print('Test problem: n, p, d', n, p, d)
+    if type == 'random':
+        G = nx.random_regular_graph(d, n)
+    elif type == 'grid2d':
+        G = nx.grid_2d_graph(n,n)
+    elif type == 'line':
+        G = nx.Graph()
+        G.add_edges_from(zip(range(n-1), range(1, n)))
     gamma, beta = [np.pi/5]*p, [np.pi/2]*p
     return G, gamma, beta
 
-def test_qaoa_energy_vs_qiskit():
-    G, gamma, beta = get_test_problem()
-    sim = QAOAQtreeSimulator(QtreeQAOAComposer)
-    E = sim.energy_expectation(
-        G, gamma=gamma, beta=beta)
+@pytest.fixture
+def test_problem(request):
+    n, p, d, type = request.param
+    return get_test_problem(n, p, d, type)
 
+
+paramtest = [
+    [4, 4, 3, 'random']
+    ,[10, 2, 3, 'random']
+    ,[10, 5, 2, 'random']
+    ,[14, 1, 3, 'random']
+    ,[3, 3, 0, 'grid2d']
+    ,[8, 4, 0, 'line']
+]
+
+@pytest.mark.parametrize('test_problem', paramtest ,indirect=True)
+def test_CC_qaoa_energy_vs_qiskit(test_problem):
+    G, gamma, beta = test_problem
+    sim = QAOAQtreeSimulator(CCQtreeQAOAComposer)
+    with prof.timing('QTensor energy time'):
+        E = sim.energy_expectation(G, gamma=gamma, beta=beta)
     assert E
 
     gamma, beta = -np.array(gamma)*2*np.pi, np.array(beta)*np.pi
-    qiskit_E = simulate_qiskit_amps(G, gamma, beta)
+    with prof.timing('Qiskit energy time'):
+        qiskit_E = simulate_qiskit_amps(G, gamma, beta)
+    assert np.isclose(E, qiskit_E)
+
+
+@pytest.mark.parametrize('test_problem', paramtest ,indirect=True)
+def test_qaoa_energy_vs_qiskit(test_problem):
+    G, gamma, beta = test_problem
+    sim = QAOAQtreeSimulator(QtreeQAOAComposer)
+    with prof.timing('QTensor energy time'):
+        E = sim.energy_expectation(G, gamma=gamma, beta=beta)
+    assert E
+
+    gamma, beta = -np.array(gamma)*2*np.pi, np.array(beta)*np.pi
+    with prof.timing('Qiskit energy time'):
+        qiskit_E = simulate_qiskit_amps(G, gamma, beta)
     assert np.isclose(E, qiskit_E)
 
 def test_qaoa_energy_multithread():

@@ -60,8 +60,8 @@ def test_cost_estimation():
         log_flop_diff = np.log2(st1[1]/st2[1])
         print(f'{log_mem_diff=}, {log_flop_diff=}, {tw_diff=}')
 
-        assert np.isclose(log_mem_diff, tw_diff, atol=1)
-        assert np.isclose(log_flop_diff, tw_diff, atol=1)
+        assert np.isclose(log_mem_diff, tw_diff, atol=1.4)
+        assert np.isclose(log_flop_diff, tw_diff, atol=1.4)
 
 if __name__ == '__main__':
     test_tamaki_trimming_opt()

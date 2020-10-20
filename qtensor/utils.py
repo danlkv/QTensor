@@ -1,26 +1,47 @@
 import copy
+import time
 import numpy as np
 import itertools
 import qtree
 from qtree.optimizer import Var
 import matplotlib.pyplot as plt
+import networkx as nx
+from tqdm.auto import tqdm
+import operator
 
 def get_neighbours_peo(old_graph):
     graph = copy.deepcopy(old_graph)
+    graph.remove_edges_from(nx.selfloop_edges(old_graph))
     peo = []
     nghs = []
+
     while graph.number_of_nodes():
-        nodes, degrees = np.array(list(graph.degree())).T
-        best_idx = np.argmin(degrees)
-        best_degree = degrees[best_idx]
-        best_node = nodes[best_idx]
-        peo.append(best_node)
-        nghs.append(best_degree)
-        qtree.graph_model.eliminate_node(graph, best_node)
+        ###start = time.time()
+        costs = np.array(list(
+            map(len, map(operator.itemgetter(1), graph.adjacency()))
+        ))
+        #costs = list(graph.degree)
+        ###costtime = time.time() - start
+
+        ###start = time.time()
+        best_idx = np.argmin(costs)
+        best_degree = costs[best_idx]
+        best_node = list(graph.nodes())[best_idx]
+        del costs
+        peo.append(int(best_node))
+        nghs.append(int(best_degree))
+        #nodeiter_time = time.time() - start
+
+
+        #start = time.time()
+        #qtree.graph_model.eliminate_node(graph, best_node)
+        eliminate_node_no_structure(graph, best_node)
+        #eltime = time.time() - start
+        #pbar.set_postfix(costiter=1/costtime, nodeiter=1/nodeiter_time, eliter=1/eltime ,costtime=costtime, nodeiter_time=nodeiter_time, eltime=eltime)
     return peo, nghs
 
 def eliminate_node_no_structure(graph, node):
-    neighbors_wo_node = list(graph[node])
+    neighbors_wo_node = set(graph[node])
     while node in neighbors_wo_node:
         neighbors_wo_node.remove(node)
 
@@ -30,9 +51,6 @@ def eliminate_node_no_structure(graph, node):
     if len(neighbors_wo_node) > 1:
         graph.add_edges_from( itertools.combinations(neighbors_wo_node, 2))
 
-    elif len(neighbors_wo_node) == 1 :
-        # This node had a single neighbor, add self loop to it
-        graph.add_edges_from([[neighbors_wo_node[0], neighbors_wo_node[0]]])
 
 def get_locale_peo(old_graph, rule):
     # This is far below computationally effective
@@ -40,16 +58,24 @@ def get_locale_peo(old_graph, rule):
     
     path= []
     vals = []
-    while graph.number_of_nodes():
-        #nodes = sorted(graph.nodes, key=int)
-        nodes = sorted(list(graph.nodes), key=int)
-        rule_ = lambda n: rule(graph, n)
-        costs = list(map(rule_, nodes))
-        _idx = np.argmin(costs)
-        vals.append(costs[_idx])
-        node = nodes[_idx]
-        path.append(node)
-        eliminate_node_no_structure(graph, node)
+
+    with tqdm(total=graph.number_of_nodes(), desc='Node removal') as pbar:
+        while graph.number_of_nodes():
+            #nodes = sorted(graph.nodes, key=int)
+            nodes = sorted(list(graph.nodes), key=int)
+            rule_ = lambda n: rule(graph, n)
+            start = time.time()
+            costs = list(map(rule_, nodes))
+            costtime = time.time() - start
+            _idx = np.argmin(costs)
+            vals.append(costs[_idx])
+            node = nodes[_idx]
+            path.append(node)
+            start = time.time()
+            eliminate_node_no_structure(graph, node)
+            eltime = time.time() - start
+            pbar.update(1)
+            pbar.set_postfix(eliter=1/eltime, costiter=1/costtime, degree=costs[_idx])
     return path, vals
 
 
@@ -109,7 +135,8 @@ def get_neighbours_path(old_graph, peo=None):
     nodes = sorted(graph.nodes, key=int)
     for node in nodes:
         ngh.append(n_neighbors(graph, node))
-        qtree.graph_model.eliminate_node(graph, node)
+        #qtree.graph_model.eliminate_node(graph, node)
+        eliminate_node_no_structure(graph, node)
     return nodes, ngh
 
 def nodes_at_distance(G, nodes, dist):

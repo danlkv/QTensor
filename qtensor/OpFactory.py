@@ -34,16 +34,15 @@ class CC(qtree.operators.ParametricGate):
     _changes_qubits=tuple()
     def gen_tensor(self):
         alpha = self.parameters['alpha']
-        ep = np.exp(1j*np.pi*alpha/2)
-        em = np.exp(-1j*np.pi*alpha/2)
+        p = np.exp(1j*np.pi*alpha/2)
+        m = np.exp(-1j*np.pi*alpha/2)
         tensor = np.array([
-            [ep,em]
-            ,[em,ep]
+             [m, p]
+            ,[p, m]
         ])
         return tensor
 
-
-#QtreeFactory.CC = CC
+QtreeFactory.CC = CC
 
 class QiskitFactory:
     H=qiskit_lib.HGate
@@ -58,6 +57,7 @@ class QiskitFactory:
         return qiskit_lib.RXGate(theta=alpha*np.pi)
 
     cZ=qiskit_lib.CzGate
+    Z=qiskit_lib.ZGate
 
 class CircuitBuilder:
     """ ABC for creating a circuit."""
@@ -65,23 +65,35 @@ class CircuitBuilder:
 
     def __init__(self, n_qubits, **params):
         self.n_qubits = n_qubits
-        self.circuit = self.get_circuit()
+        self.reset()
         self.qubits = self.get_qubits()
 
     def get_qubits(self):
         raise NotImplementedError
 
-    def get_circuit(self):
+    def reset(self):
+        """ Initialize new circuit """
         raise NotImplementedError
 
-    def conjugate(self):
+    def inverse(self):
         if not hasattr(self, '_warned'):
             #print('Warning: conjugate is not implemented. Returning same circuit, in case you only care about circuit structure')
             self._warned = True
-        return self.circuit
+        return self._circuit
 
     def apply_gate(self, gate, *qubits, **params):
-        self.circuit.append(gate(**params), *qubits)
+        self._circuit.append(gate(**params), *qubits)
+
+    @property
+    def circuit(self):
+        return self._circuit
+    @circuit.setter
+    def circuit(self, circuit):
+        self._circuit = circuit
+
+    def inverse(self):
+        """ Reverse order and conjugate gates. """
+        raise NotImplementedError
 
 
 class CirqBuilder(CircuitBuilder):
@@ -89,39 +101,45 @@ class CirqBuilder(CircuitBuilder):
 
     def get_qubits(self):
         return [cirq.LineQubit(i) for i in range(self.n_qubits)]
-    def get_circuit(self):
-        return cirq.Circuit()
+
+    def reset(self):
+        self._circuit = cirq.Circuit()
 
     def apply_gate(self, gate, *qubits, **params):
-        self.circuit.append(gate(*qubits, **params))
+        self._circuit.append(gate(*qubits, **params))
+
+    def inverse(self):
+        self._circuit = cirq.inverse(self._circuit)
 
 class QtreeBuilder(CircuitBuilder):
     operators = QtreeFactory
 
     def get_qubits(self):
         return list(range(self.n_qubits))
-    def get_circuit(self):
-        return []
+
+    def reset(self):
+        self._circuit = []
 
     def apply_gate(self, gate, *qubits, **params):
-        self.circuit.append(gate(*qubits, **params))
+        self._circuit.append(gate(*qubits, **params))
 
-    def conjugate(self):
-        self.circuit = [g.dagger_me() for g in self.circuit]
-        return self.circuit
+    def inverse(self):
+        self._circuit = list(reversed([g.dagger_me() for g in self._circuit]))
 
 class QiskitBuilder(CircuitBuilder):
     operators = QiskitFactory
 
     def get_qubits(self):
-        # The ``get_circuit`` should be called first
-        return self.circuit.qubits
+        # The ``reset`` should be called first
+        return self._circuit.qubits
 
-    def get_circuit(self):
+    def reset(self):
         qreg_size = self.n_qubits
         creg_size = qreg_size
-        return qiskit.QuantumCircuit(qreg_size, creg_size)
+        self._circuit = qiskit.QuantumCircuit(qreg_size, creg_size)
 
     def apply_gate(self, gate, *qubits, **params):
+        self._circuit.append(gate(**params), qubits)
 
-        self.circuit.append(gate(**params), qubits)
+    def inverse(self):
+        self._circuit = self._circuit.inverse()

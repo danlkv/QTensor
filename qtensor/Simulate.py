@@ -1,6 +1,7 @@
 import qtree
-from qtensor.ProcessingFrameworks import NumpyBackend
 import cirq
+from qtensor.ProcessingFrameworks import NumpyBackend
+
 from qtensor.optimisation.TensorNet import QtreeTensorNet
 from qtensor.optimisation.Optimizer import DefaultOptimizer
 from tqdm.auto import tqdm
@@ -14,8 +15,8 @@ class Simulator:
         pass
 
     def simulate(self, qc):
-       """ Factory method """
-       raise NotImplementedError()
+        """ Factory method """
+        raise NotImplementedError()
 
 
 class QtreeSimulator(Simulator):
@@ -34,6 +35,7 @@ class QtreeSimulator(Simulator):
 
     def _create_buckets(self):
         self.tn = QtreeTensorNet.from_qtree_gates(self.all_gates)
+        self.tn.bucket_backend = self.bucket_backend
 
     def _set_free_qubits(self, free_final_qubits):
         self.tn.free_vars = [self.tn.bra_vars[i] for i in free_final_qubits]
@@ -89,8 +91,7 @@ class QtreeSimulator(Simulator):
             sliced_buckets, self.bucket_backend.process_bucket,
             n_var_nosum=len(self.tn.free_vars)
         )
-        return result.data.flatten()
-        #return self.bucket_backend.get_result_data(result).flatten()
+        return self.bucket_backend.get_result_data(result).flatten()
 
     def simulate(self, qc):
         return self.simulate_state(qc)
