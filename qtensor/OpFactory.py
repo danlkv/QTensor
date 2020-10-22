@@ -28,7 +28,18 @@ class CirqFactory:
     cZ=cirq.CZ
 
 QtreeFactory = qtree.operators
+class ZZFull(qtree.operators.ParametricGate):
+    name = 'ZZ'
+    _changes_qubits=(0,1)
+    def gen_tensor(self):
+        alpha = self.parameters['alpha']
+        p = np.exp(1j*np.pi*alpha/2)
+        m = np.exp(-1j*np.pi*alpha/2)
+        tensor = np.diag([m, p ,p, m])
+        return tensor.reshape((2,)*4)
+
 QtreeFullFactory = qtree.operators_full_matrix
+QtreeFullFactory.ZZ = ZZFull
 
 class ZZ(qtree.operators.ParametricGate):
     name = 'ZZ'
@@ -144,3 +155,6 @@ class QiskitBuilder(CircuitBuilder):
 
     def inverse(self):
         self._circuit = self._circuit.inverse()
+
+class QtreeFullBuilder(QtreeBuilder):
+    operators = QtreeFullFactory

@@ -9,6 +9,7 @@ import networkx as nx
 
 from .CircuitComposer import QAOAComposer, OldQAOAComposer, ZZQAOAComposer
 from .OpFactory import CirqBuilder, QtreeBuilder, QiskitBuilder
+from .OpFactory import QtreeFullBuilder
 from qtensor.Simulate import CirqSimulator, QtreeSimulator
 from qtensor.QAOASimulator import QAOAQtreeSimulator
 from qtensor.QAOASimulator import QAOACirqSimulator
@@ -27,6 +28,10 @@ class QtreeQAOAComposer(QAOAComposer):
     def _get_builder_class(self):
         return QtreeBuilder
 
+class QtreeFullQAOAComposer(QAOAComposer):
+    def _get_builder_class(self):
+        return QtreeFullBuilder
+
 class OldQtreeQAOAComposer(OldQAOAComposer):
     def _get_builder_class(self):
         return QtreeBuilder
@@ -34,6 +39,11 @@ class OldQtreeQAOAComposer(OldQAOAComposer):
 class ZZQtreeQAOAComposer(ZZQAOAComposer):
     def _get_builder_class(self):
         return QtreeBuilder
+
+class ZZQtreeFullQAOAComposer(ZZQAOAComposer):
+    def _get_builder_class(self):
+        return QtreeFullBuilder
+
 
 # deprecated
 CCQtreeQAOAComposer = ZZQtreeQAOAComposer
