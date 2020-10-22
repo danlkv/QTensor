@@ -28,9 +28,10 @@ class CirqFactory:
     cZ=cirq.CZ
 
 QtreeFactory = qtree.operators
+QtreeFullFactory = qtree.operators_full_matrix
 
-class CC(qtree.operators.ParametricGate):
-    name = 'CC'
+class ZZ(qtree.operators.ParametricGate):
+    name = 'ZZ'
     _changes_qubits=tuple()
     def gen_tensor(self):
         alpha = self.parameters['alpha']
@@ -42,7 +43,7 @@ class CC(qtree.operators.ParametricGate):
         ])
         return tensor
 
-QtreeFactory.CC = CC
+QtreeFactory.ZZ = ZZ
 
 class QiskitFactory:
     H=qiskit_lib.HGate
