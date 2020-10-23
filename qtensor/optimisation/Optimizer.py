@@ -45,7 +45,7 @@ class OrderingOptimizer(Optimizer):
     def _get_ordering_ints(self, graph, free_vars=[]):
         #mapping = {a:b for a,b in zip(graph.nodes(), reversed(list(graph.nodes())))}
         #graph = nx.relabel_nodes(graph, mapping)
-        peo_ints, path = utils.get_locale_peo(graph, utils.n_neighbors)
+        peo_ints, path = utils.get_neighbours_peo(graph)
 
         return peo_ints, path
 
@@ -185,11 +185,11 @@ class TreeTrimSplitter(SlicesOptimizer):
             result += par_vars
             # -- dislabel
             pv_cnt = len(result)
-            log.debug('Parvars count: {}. Amps count: {}', pv_cnt, 2**pv_cnt)
+            log.info('Parvars count: {}. Amps count: {}', pv_cnt, 2**pv_cnt)
 
             peo_ints, path = self._get_ordering_ints(p_graph)
             tw = max(path)
-            log.debug('Treewidth: {}', tw)
+            log.info('Treewidth: {}', tw)
             self._slice_hist.append([pv_cnt, tw])
 
             delta = tw - max_tw

@@ -10,9 +10,11 @@ import qtree.operators as ops
 import qtensor.optimisation as qop
 from qtensor.FeynmanSimulator import FeynmanSimulator
 
+from qtensor.ProcessingFrameworks import PerfNumpyBackend
 from qtensor.toolbox import qaoa_energy_tw_from_graph
 from qtensor.optimisation.TensorNet import QtreeTensorNet
 from qtensor.optimisation.Optimizer import OrderingOptimizer, TamakiOptimizer, WithoutOptimizer
+from qtensor.optimisation.Optimizer import TamakiTrimSlicing, SlicesOptimizer
 from qtensor import QtreeQAOAComposer
 
 @click.group()
@@ -20,23 +22,61 @@ def cli():
     pass
 
 @cli.command()
-@click.argument('filename')
-def sim_file(filename):
-    n_qubits, circuit = ops.read_circuit_file(filename)
-    sim = FeynmanSimulator()
+@click.argument('filename', nargs=-1)
+@click.option('-p','--num-processes', default=1)
+@click.option('-P','--profile', default=False, is_flag=True)
+@click.option('-t','--max-tw', default=25)
+@click.option('-B','--backend', default='numpy')
+@click.option('-O','--optimizer', default='greedy')
+def sim_file(filename, profile=False, num_processes=1, max_tw=25, backend='numpy', optimizer='greedy'):
+    if not filename:
+        stream = sys.stdin
+    else:
+        stream = open(filename[0],'r')
+
+    n_qubits, circuit = ops.read_circuit_stream(stream)
+    kwargs = dict(
+        n_processes=num_processes
+        ,max_tw=max_tw
+        , pool_type='thread'
+    )
+    if profile:
+        if backend == 'numpy':
+            backend_obj = PerfNumpyBackend(print=False)
+        kwargs['bucket_backend'] = backend_obj
+    if optimizer=='tamaki':
+        kwargs['optimizer'] = TamakiTrimSlicing(wait_time=23)
+    else:
+        kwargs['optimizer'] = SlicesOptimizer()
+    kwargs['optimizer'].max_tw = max_tw
+
+
+
+    sim = FeynmanSimulator(**kwargs)
     circuit = sum(circuit, [])
-    result = sim.simulate(circuit, batch_vars=4, tw_bias=0)
+    result = sim.simulate(circuit, batch_vars=0, tw_bias=0)
     print(result)
 
+    if profile:
+        print('Profiling results')
+        backend_obj.gen_report()
+
 @cli.command()
-@click.argument('filename')
+@click.argument('filename', nargs=-1)
 @click.option('-t', '--tamaki-time', default=15)
 @click.option('-T', '--max-tw', default=32)
 @click.option('-s', '--slice-step', default=None, type=int)
 @click.option('-C', '--cost-type', default='length')
 def opt_file(filename, tamaki_time, max_tw, slice_step, cost_type):
-    tn = qop.TensorNet.QtreeTensorNet.from_qsim_file(filename)
-    fopt = qop.Optimizer.TamakiTrimSlicing()
+    if not filename:
+        stream = sys.stdin
+    else:
+        stream = open(filename[0],'r')
+
+    n_qubits, circuit = ops.read_circuit_stream(stream)
+    gates = sum(circuit, [])
+    tn = qop.TensorNet.QtreeTensorNet.from_qtree_gates(gates)
+    fopt = qop.Optimizer.TamakiTrimSlicing(wait_time=tamaki_time)
     fopt.max_tw = max_tw
     fopt.par_var_step = slice_step
     fopt.cost_type = cost_type
@@ -97,7 +137,7 @@ def generate_qaoa_ansatz_circuit(seed, degree, nodes, p, graph_type):
         G = nx.algorithms.core.k_core(G, k=degree)
     else:
         raise Exception('Unsupported graph type')
-    gamma, beta = [0]*p, [0]*p
+    gamma, beta = [0.1]*p, [0.2]*p
     composer = QtreeQAOAComposer(G, beta=beta, gamma=gamma)
     composer.ansatz_state()
     txt = qtree.operators.circuit_to_text([composer.circuit], nodes)
@@ -121,11 +161,11 @@ def generate_qaoa_energy_circuit(seed, degree, nodes, p, graph_type, edge_index)
         G = nx.algorithms.core.k_core(G, k=degree)
     else:
         raise Exception('Unsupported graph type')
-    gamma, beta = [0]*p, [0]*p
+    gamma, beta = [0.1]*p, [0.2]*p
     edge = list(G.edges())[edge_index]
     composer = QtreeQAOAComposer(G, beta=beta, gamma=gamma)
     composer.energy_expectation_lightcone(edge)
-    txt = qtree.operators.circuit_to_text([composer.circuit], nodes)
+    txt = qtree.operators.circuit_to_text([composer.circuit], composer.n_qubits)
     print(txt)
 
 @cli.command()

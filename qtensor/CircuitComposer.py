@@ -51,7 +51,7 @@ class CircuitComposer():
             self.apply_gate(self.operators.H, q)
 
 
-class QAOAComposer(CircuitComposer):
+class OldQAOAComposer(CircuitComposer):
     """ Abstract base class for QAOA Director """
     def __init__(self, graph, *args, **kwargs):
         self.n_qubits = graph.number_of_nodes()
@@ -67,26 +67,26 @@ class QAOAComposer(CircuitComposer):
         return cls(*args, **kwargs)
 
     def energy_expectation(self, i, j):
-        G = self.graph
+        # Will need to deprecate stateful API and return the circuit
         self.ansatz_state()
         self.energy_edge(i, j)
+        first_part = self.builder.circuit
 
-        beta, gamma = self.params['beta'], self.params['gamma']
-        conjugate = self._get_of_my_type(G, beta=beta, gamma=gamma)
-        conjugate.ansatz_state()
-        conjugate.conjugate()
+        self.builder.reset()
+        self.ansatz_state()
+        self.builder.inverse()
+        second_part = self.builder.circuit
 
-        self.circuit = self.circuit + list(reversed(conjugate.circuit ))
+        self.circuit = first_part + second_part
         return self.circuit
 
     def energy_expectation_lightcone(self, edge):
         G = self.graph
         gamma, beta = self.params['gamma'], self.params['beta']
         i,j = edge
-        # TODO: take only a neighbourhood part of the graph
         graph = get_edge_subgraph(G, edge, len(gamma))
         log.debug('Subgraph nodes: {}, edges: {}', graph.number_of_nodes(), graph.number_of_edges())
-        graph = get_edge_subgraph(G, edge, len(gamma))
+        self.n_qubits = graph.number_of_nodes()
         mapping = {v:i for i, v in enumerate(graph.nodes())}
         graph = nx.relabel_nodes(graph, mapping, copy=True)
 
@@ -101,22 +101,19 @@ class QAOAComposer(CircuitComposer):
         #self.circuit.append(self.operators.H(u))
         self.apply_gate(self.operators.XPhase, u, alpha=2*beta)
         #self.circuit.append(self.operators.H(u))
-    def mixer_operator(self, beta):
-        G = self.graph
-        for n in G:
+    def mixer_operator(self, beta, nodes=None):
+        if nodes is None: nodes = self.graph.nodes()
+        for n in nodes:
             qubit = self.qubits[n]
             self.x_term(qubit, beta)
 
     def append_zz_term(self, q1, q2, gamma):
-        try:
-            self.apply_gate(self.operators.CC, q1, q2, alpha=2*gamma)
-        except AttributeError:
-            pass
         self.apply_gate(self.operators.cX, q1, q2)
         self.apply_gate(self.operators.ZPhase, q2, alpha=2*gamma)
         self.apply_gate(self.operators.cX, q1, q2)
-    def cost_operator_circuit(self, gamma):
-        for i, j in self.graph.edges():
+    def cost_operator_circuit(self, gamma, edges=None):
+        if edges is None: edges = self.graph.edges()
+        for i, j in edges:
             u, v = self.qubits[i], self.qubits[j]
             self.append_zz_term(u, v, gamma)
 
@@ -139,3 +136,39 @@ class QAOAComposer(CircuitComposer):
         self.apply_gate(self.operators.Z, u)
         self.apply_gate(self.operators.Z, v)
 
+
+class QAOAComposer(OldQAOAComposer):
+    def cone_ansatz(self, edge):
+        beta, gamma = self.params['beta'], self.params['gamma']
+
+        assert(len(beta) == len(gamma))
+        p = len(beta) # infering number of QAOA steps from the parameters passed
+        self.layer_of_Hadamards()
+        # second, apply p alternating operators
+        cone_base = self.graph
+
+        for i, g, b in zip(range(p, 0, -1), gamma, beta):
+            self.graph = get_edge_subgraph(cone_base, edge, i)
+            self.cost_operator_circuit(g)
+            self.mixer_operator(b)
+        self.graph = cone_base
+        return self.circuit
+
+
+    def energy_expectation(self, i, j):
+        # Will need to deprecate stateful API and return the circuit
+        self.cone_ansatz(edge=(i, j))
+        self.energy_edge(i, j)
+        first_part = self.builder.circuit
+        self.builder.reset()
+
+        self.cone_ansatz(edge=(i, j))
+        self.builder.inverse()
+        second_part = self.builder.circuit
+
+        self.circuit = first_part + second_part
+        return self.circuit
+
+class CCQAOAComposer(QAOAComposer):
+    def append_zz_term(self, q1, q2, gamma):
+        self.apply_gate(self.operators.CC, q1, q2, alpha=2*gamma)
