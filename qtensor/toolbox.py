@@ -32,6 +32,39 @@ def random_graph(nodes, type='random', **kwargs):
     else:
         raise ValueError('Unsupported graph type')
 
+def get_tw(circ, ordering_algo='greedy'):
+
+    tn = QtreeTensorNet.from_qtree_gates(circ)
+
+    if ordering_algo=='greedy':
+        opt = OrderingOptimizer()
+    elif ordering_algo=='tamaki':
+        opt = TamakiOptimizer(wait_time=45)
+    elif ordering_algo=='without':
+        opt = WithoutOptimizer()
+    else:
+        raise ValueError("Ordering algorithm not supported")
+    peo, tn = opt.optimize(tn)
+    treewidth = opt.treewidth
+    return treewidth
+
+def get_cost_params(circ, ordering_algo='greedy'):
+
+    tn = QtreeTensorNet.from_qtree_gates(circ)
+
+    if ordering_algo=='greedy':
+        opt = OrderingOptimizer()
+    elif ordering_algo=='tamaki':
+        opt = TamakiOptimizer(wait_time=45)
+    elif ordering_algo=='without':
+        opt = WithoutOptimizer()
+    else:
+        raise ValueError("Ordering algorithm not supported")
+    peo, _ = opt.optimize(tn)
+    treewidth = opt.treewidth
+    mems, flops = tn.simulation_cost(peo)
+    return treewidth, max(mems), sum(flops)
+
 
 
 def optimize_circuit(circ, algo='greedy'):

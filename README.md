@@ -148,3 +148,14 @@ treewidth = opt.treewidth
 mems, flops = tn.simulation_cost(peo)
 print('Max memory=', max(mems), 'Total flops=', sum(flops))
 ```
+- get QAOA cost estimation
+
+```python
+from qtensor.toolbox import qaoa_energy_cost_params_from_graph
+
+costs_per_edge = qaoa_energy_cost_params_from_graph(graph, p,
+        ordering_algo='greedy', max_time=60)
+
+tws, mems, flops = zip(*costs_per_edge)
+print('Max treewidth=', max(tws), 'Max memory=', max(mems), 'Total flops=', sum(flops))
+```
