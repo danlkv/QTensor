@@ -14,8 +14,9 @@ from qtensor.ProcessingFrameworks import PerfNumpyBackend
 from qtensor.toolbox import qaoa_energy_tw_from_graph
 from qtensor.optimisation.TensorNet import QtreeTensorNet
 from qtensor.optimisation.Optimizer import OrderingOptimizer, TamakiOptimizer, WithoutOptimizer
+from qtensor.ProcessingFrameworks import PerfBackend
 from qtensor.optimisation.Optimizer import TamakiTrimSlicing, SlicesOptimizer
-from qtensor import QtreeQAOAComposer, QAOAQtreeSimulator
+from qtensor import DefaultQAOAComposer, QAOAQtreeSimulator
 import qtensor.ProcessingFrameworks as backends
 import qtensor.optimisation.Optimizer as optimizers
 
@@ -152,7 +153,7 @@ def generate_qaoa_ansatz_circuit(seed, degree, nodes, p, graph_type):
     else:
         raise Exception('Unsupported graph type')
     gamma, beta = [0.1]*p, [0.2]*p
-    composer = QtreeQAOAComposer(G, beta=beta, gamma=gamma)
+    composer = DefaultQAOAComposer(G, beta=beta, gamma=gamma)
     composer.ansatz_state()
     txt = qtree.operators.circuit_to_text([composer.circuit], nodes)
     print(txt)
@@ -177,7 +178,7 @@ def generate_qaoa_energy_circuit(seed, degree, nodes, p, graph_type, edge_index)
         raise Exception('Unsupported graph type')
     gamma, beta = [0.1]*p, [0.2]*p
     edge = list(G.edges())[edge_index]
-    composer = QtreeQAOAComposer(G, beta=beta, gamma=gamma)
+    composer = DefaultQAOAComposer(G, beta=beta, gamma=gamma)
     composer.energy_expectation_lightcone(edge)
     txt = qtree.operators.circuit_to_text([composer.circuit], composer.n_qubits)
     print(txt)
@@ -219,11 +220,12 @@ def qaoa_energy_tw(nodes, seed, degree, p, graph_type, max_time, max_tw, orderin
 @click.option('--n_processes', default=1)
 @click.option('-P','--profile', default=False, is_flag=True)
 @click.option('-C','--composer-type', default='cone')
+@click.option('-S','--simplify', default=True)
 def qaoa_energy_sim(nodes, seed,
                     degree, p, graph_type,
                     max_time, max_tw, ordering_algo, tamaki_time,
                     backend, n_processes, profile,
-                   composer_type='cone'):
+                    composer_type='cone'):
     np.random.seed(seed)
     if graph_type=='random_regular':
         G = nx.random_regular_graph(degree, nodes, seed=seed)
@@ -247,7 +249,7 @@ def qaoa_energy_sim(nodes, seed,
         backend_obj = PerfBackend(print=False)
         backend_obj.backend = Backend()
 
-    sim = QAOAQtreeSimulator(QtreeQAOAComposer, bucket_backend=backend_obj, optimizer=optimizer)
+    sim = QAOAQtreeSimulator(DefaultQAOAComposer, bucket_backend=backend_obj, optimizer=optimizer)
     start = time.time()
     if n_processes==1:
         result = sim.energy_expectation(G, gamma, beta)

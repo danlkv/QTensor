@@ -1,5 +1,6 @@
 # -- configure logging
 import sys
+from functools import lru_cache
 from loguru import logger as log
 log.remove()
 log.add(sys.stderr, level='INFO')
@@ -16,6 +17,7 @@ from qtensor.QAOASimulator import QAOACirqSimulator
 from qtensor.FeynmanSimulator import FeynmanSimulator
 from qtensor.ProcessingFrameworks import PerfNumpyBackend, NumpyBackend
 from qtensor import simplify_circuit
+from qtensor.simplify_circuit import simplify_qtree_circuit
 
 class CirqQAOAComposer(QAOAComposer):
     def _get_builder_class(self):
@@ -45,6 +47,15 @@ class ZZQtreeFullQAOAComposer(ZZQAOAComposer):
     def _get_builder_class(self):
         return QtreeFullBuilder
 
+class SimpZZQtreeComposer(ZZQtreeQAOAComposer):
+    @property
+    def circuit(self):
+        return simplify_qtree_circuit(self.builder.circuit)
+    @circuit.setter
+    def circuit(self, circuit):
+        self.builder.circuit = circuit
+
+DefaultQAOAComposer = SimpZZQtreeComposer
 
 # deprecated
 CCQtreeQAOAComposer = ZZQtreeQAOAComposer

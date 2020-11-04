@@ -1,5 +1,5 @@
 from qtensor.simplify_circuit import simplify_circuit
-from qtensor.simplify_circuit.gates import zzphase, xphase, yphase, zphase, hadamard, ident, cnot, toffoli
+from qtensor.simplify_circuit.gates import zzphase, xphase, yphase, zphase, hadamard, ident, cnot, toffoli, z
 
 from qtree.operators import XPhase, YPhase, ZPhase, H, cX, Z
 from qtree.operators import ParametricGate, Gate
@@ -67,10 +67,20 @@ GATE_MAP = {
     zphase: ZPhase,
     hadamard: H,
     cnot: cX,
+    z: Z
 }
 
 
 def simplify_qtree_circuit(qtreeCircuit):
+    """
+    Simplify circuit by using commutative relations on pairs of gates
+
+    Args:
+        qtreeCircuit (list[qtree.Gate]): circuit to simplify
+
+    Returns list[qtree.Gate]: simplified circuit
+
+    """
     circuit = []
     for qtreeGate in qtreeCircuit:
         inv_map = {v:k for k, v in GATE_MAP.items()}

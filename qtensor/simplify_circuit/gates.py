@@ -59,6 +59,14 @@ class zphase:
     def __repr__(self):
         return '>> Zphase on ({:0.0f})[{:0.2f}] <<'.format(self.index[0],self.angle)
 
+class z:
+    def __init__(self,index1):
+        self.index = (index1,)
+        self.eigenbasis = {index1:'Z'}
+        self.angle = 0
+    def __repr__(self):
+        return '>> Z on ({:0.0f}) <<'.format(self.index[0],self.angle)
+
 class hadamard:
     def __init__(self,index1,angle=0):
         self.index = (index1,)

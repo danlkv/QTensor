@@ -6,9 +6,7 @@ Created on Tue Oct 27 14:54:39 2020
 """
 from numpy import pi, argsort, sqrt, diff, array, random
 import time
-from qtensor.simplify_circuit.gates import *
-
-
+from qtensor.simplify_circuit.gates import zzphase, xphase, yphase, zphase, hadamard, ident, cnot, toffoli
 
 
 
@@ -78,6 +76,7 @@ def does_this_simplify(op1,op2,return_ops = True):
 
 
 def simplify_circuit(circuit_in):
+    if not len(circuit_in): return []
     cirq = [*circuit_in]
 
     '''
@@ -94,6 +93,8 @@ def simplify_circuit(circuit_in):
                 simplifications.append((i,j))
 
     
+    if simplifications == []:
+        return cirq
     
     
     
