@@ -2,18 +2,12 @@ from qtensor.simplify_circuit import simplify_circuit
 from qtensor.simplify_circuit.gates import zzphase, xphase, yphase, zphase, hadamard, ident, cnot, toffoli
 
 from qtree.operators import XPhase, YPhase, ZPhase, H, cX, Z
+from qtree.operators import ParametricGate, Gate
+
 from qtensor.OpFactory import ZZ
 from qtensor.OpFactory import CircuitBuilder
 from qtensor import ZZQAOAComposer
 
-GATE_MAP = {
-    zzphase:  ZZ,
-    xphase: XPhase,
-    yphase: YPhase,
-    zphase: ZPhase,
-    hadamard: H,
-    cnot: cX,
-}
 
 
 class SimpFactory:
@@ -64,6 +58,18 @@ def get_simplifiable_circuit_composer(N, p, d):
     return comp
 
 
+
+
+GATE_MAP = {
+    zzphase:  ZZ,
+    xphase: XPhase,
+    yphase: YPhase,
+    zphase: ZPhase,
+    hadamard: H,
+    cnot: cX,
+}
+
+
 def simplify_qtree_circuit(qtreeCircuit):
     circuit = []
     for qtreeGate in qtreeCircuit:
@@ -76,12 +82,18 @@ def simplify_qtree_circuit(qtreeCircuit):
             gate = GateClass(*qtreeGate.qubits)
         circuit.append(gate)
 
-    print(f'Before simplification num_gates={len(circuit)}')
     simplified = simplify_circuit(circuit)
-    print(f'Before simplification num_gates={len(simplified)}')
 
+    qtree_circuit = []
+    for gate in simplified:
+        GateClass = GATE_MAP[gate.__class__]
+        if issubclass(GateClass, ParametricGate):
+            qtree_gate = GateClass(*gate.index, alpha=gate.angle)
+        else:
+            qtree_gate = GateClass(*gate.index)
+        qtree_circuit.append(qtree_gate)
 
-    return simplified
+    return qtree_circuit
 
 
 
