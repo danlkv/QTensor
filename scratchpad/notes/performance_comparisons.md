@@ -20,6 +20,7 @@ n=100 p=4 d=3 n_edges =150 n_processes=56 lib=quimb   time=48.3 hyperopt_time=10
 
 n=54 p=4 d=3 n_edges=150 n_processes=56 lib=qtensor time=16
 n=54 p=4 d=3 n_edges=150 n_processes=56 lib=quimb  time=42     hyperopt_time=10
+n=54 p=4 d=3 n_edges=150 n_processes=56 lib=quimb  time=N/A     hyperopt_time=0.01
 
 n=500 p=4 d=3 n_edges=750 n_processes=56 lib=qtensor time=5.59
 n=500 p=4 d=3 n_edges=750 n_processes=56 lib=quimb   time=196.   hyperopt_time=10
