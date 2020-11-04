@@ -220,7 +220,6 @@ def qaoa_energy_tw(nodes, seed, degree, p, graph_type, max_time, max_tw, orderin
 @click.option('--n_processes', default=1)
 @click.option('-P','--profile', default=False, is_flag=True)
 @click.option('-C','--composer-type', default='cone')
-@click.option('-S','--simplify', default=True)
 def qaoa_energy_sim(nodes, seed,
                     degree, p, graph_type,
                     max_time, max_tw, ordering_algo, tamaki_time,

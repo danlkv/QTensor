@@ -2,6 +2,7 @@ import quimb as qu
 import quimb.tensor as qtn
 import networkx as nx
 from itertools import repeat
+import click
 
 import cotengra as ctg
 
@@ -23,13 +24,14 @@ def edge_simulate(args):
         max_repeats=10000,
         max_time=0.01
     )
+    #return circ.local_expectation(ZZ, edge, optimize=optimizer)
     return circ.local_expectation(ZZ, edge, optimize=optimizer)
 
-def simulate_one_parallel(N, p):
+def simulate_one_parallel(N, p, n_processes=28):
     G = nx.random_regular_graph(3, N, seed=SEED)
     args = list(zip(repeat(G), repeat(p), G.edges))
 
-    with Pool(processes=56) as pool:
+    with Pool(processes=n_processes) as pool:
         contributions = list(tqdm(pool.imap(edge_simulate, args), total=len(args)))
     return sum(contributions)
 
@@ -46,12 +48,15 @@ def simulate_one(N, p):
         contributions.append(circ.local_expectation(ZZ, edge))
     return sum(contributions)
 
-def bench_quimb():
-    N = 1000
-    p = 2
+@click.command()
+@click.option('-n', '--nodes', default=100)
+@click.option('-p', default=2)
+@click.option('-P', '--n-processes', default=1)
+def bench_quimb(nodes, p, n_processes):
+    N = nodes
     start = time.time()
     #E = simulate_one(N, p)
-    E = simulate_one_parallel(N, p)
+    E = simulate_one_parallel(N, p, n_processes=n_processes)
     end = time.time()
     print(f'Time for {N=}, {p=}; {E=}: {end-start}')
 

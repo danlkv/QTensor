@@ -103,7 +103,7 @@ def get_cost_params(circ, ordering_algo='greedy', overflow_tw=None):
     return treewidth, max(mems), sum(flops)
 
 
-def qaoa_energy_lightcone_iterator(G, p, max_time=None, composer_type='cone'):
+def qaoa_energy_lightcone_iterator(G, p, max_time=None, composer_type='default'):
     gamma, beta = [0.1]*p, [0.3]*p
     if max_time:
         start = time.time()
@@ -112,14 +112,14 @@ def qaoa_energy_lightcone_iterator(G, p, max_time=None, composer_type='cone'):
     for edge in G.edges():
         if composer_type=='default':
             composer = DefaultQAOAComposer(G, beta=beta, gamma=gamma)
-        if composer_type=='cylinder':
+        elif composer_type=='cylinder':
             composer = OldQtreeQAOAComposer(G, beta=beta, gamma=gamma)
         elif composer_type=='cone':
             composer = QtreeQAOAComposer(G, beta=beta, gamma=gamma)
         elif composer_type=='ZZ':
             composer = ZZQtreeQAOAComposer(G, beta=beta, gamma=gamma)
         else:
-            allowed_composers = ['cylinder', 'cone', 'ZZ']
+            allowed_composers = ['default', 'cylinder', 'cone', 'ZZ']
             raise Exception(f"Composer type not recognized, use one of: {allowed_composers}")
         composer.energy_expectation_lightcone(edge)
         subgraph = get_edge_subgraph(G, edge, len(beta))
@@ -154,7 +154,7 @@ def _twidth_parallel_unit(args):
 
 def qaoa_energy_tw_from_graph(G, p, max_time=0, max_tw=0,
                               ordering_algo='greedy', print_stats=False,
-                              tamaki_time=15, n_processes=1, composer_type='cone'):
+                              tamaki_time=15, n_processes=1, composer_type='default'):
 
     lightcone_gen = qaoa_energy_lightcone_iterator(G, p, max_time=max_time, composer_type=composer_type)
     arggen = zip(lightcone_gen, repeat(ordering_algo), repeat(tamaki_time), repeat(max_tw))
