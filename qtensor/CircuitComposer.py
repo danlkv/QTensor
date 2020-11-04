@@ -108,10 +108,6 @@ class OldQAOAComposer(CircuitComposer):
             self.x_term(qubit, beta)
 
     def append_zz_term(self, q1, q2, gamma):
-        try:
-            self.apply_gate(self.operators.CC, q1, q2, alpha=2*gamma)
-        except AttributeError:
-            pass
         self.apply_gate(self.operators.cX, q1, q2)
         self.apply_gate(self.operators.ZPhase, q2, alpha=2*gamma)
         self.apply_gate(self.operators.cX, q1, q2)
@@ -135,7 +131,6 @@ class OldQAOAComposer(CircuitComposer):
         return self.circuit
 
     def energy_edge(self, i, j):
-        #self.circuit.append(self.operators.CC(u, v))
         u, v = self.qubits[i], self.qubits[j]
         self.apply_gate(self.operators.Z, u)
         self.apply_gate(self.operators.Z, v)
@@ -152,7 +147,6 @@ class QAOAComposer(OldQAOAComposer):
         cone_base = self.graph
 
         for i, g, b in zip(range(p, 0, -1), gamma, beta):
-            i=3
             self.graph = get_edge_subgraph(cone_base, edge, i)
             self.cost_operator_circuit(g)
             self.mixer_operator(b)
@@ -174,3 +168,6 @@ class QAOAComposer(OldQAOAComposer):
         self.circuit = first_part + second_part
         return self.circuit
 
+class ZZQAOAComposer(QAOAComposer):
+    def append_zz_term(self, q1, q2, gamma):
+        self.apply_gate(self.operators.ZZ, q1, q2, alpha=2*gamma)

@@ -8,7 +8,7 @@ from multiprocessing.dummy import Pool
 from qtensor.optimisation.TensorNet import QtreeTensorNet
 from qtensor.optimisation.Optimizer import OrderingOptimizer, TamakiOptimizer, WithoutOptimizer
 from qtensor.utils import get_edge_subgraph
-from qtensor import QtreeQAOAComposer, OldQtreeQAOAComposer
+from qtensor import QtreeQAOAComposer, OldQtreeQAOAComposer, ZZQtreeQAOAComposer
 
 def random_graph(nodes, type='random', **kwargs):
     """
@@ -81,6 +81,11 @@ def qaoa_energy_lightcone_iterator(G, p, max_time=None, composer_type='cone'):
             composer = OldQtreeQAOAComposer(G, beta=beta, gamma=gamma)
         elif composer_type=='cone':
             composer = QtreeQAOAComposer(G, beta=beta, gamma=gamma)
+        elif composer_type=='ZZ':
+            composer = ZZQtreeQAOAComposer(G, beta=beta, gamma=gamma)
+        else:
+            allowed_composers = ['cylinder', 'cone', 'ZZ']
+            raise Exception(f"Composer type not recognized, use one of: {allowed_composers}")
         composer.energy_expectation_lightcone(edge)
         subgraph = get_edge_subgraph(G, edge, len(beta))
         yield composer.circuit, subgraph
