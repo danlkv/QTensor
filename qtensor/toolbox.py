@@ -1,7 +1,9 @@
 import networkx as nx
 import numpy as np
+from itertools import repeat
 from tqdm.auto import tqdm
 import time
+from multiprocessing.dummy import Pool
 
 from qtensor.optimisation.TensorNet import QtreeTensorNet
 from qtensor.optimisation.Optimizer import OrderingOptimizer, TamakiOptimizer, WithoutOptimizer
@@ -34,12 +36,14 @@ def random_graph(nodes, type='random', **kwargs):
 
 
 
-def optimize_circuit(circ, algo='greedy'):
+def optimize_circuit(circ, algo='greedy', tamaki_time=15):
 
+    # Should I somomehow generalize the tamaki-time argument? provide something like
+    # Optimizer-params argument? How would cli parse this?
     if algo=='greedy':
         opt = OrderingOptimizer()
     elif algo=='tamaki':
-        opt = TamakiOptimizer(wait_time=45)
+        opt = TamakiOptimizer(wait_time=tamaki_time)
     elif algo=='without':
         opt = WithoutOptimizer()
     else:
@@ -49,8 +53,8 @@ def optimize_circuit(circ, algo='greedy'):
     peo, tn = opt.optimize(tn)
     return peo, tn, opt
 
-def get_tw(circ, ordering_algo='greedy'):
-    peo, tn, opt = optimize_circuit(circ, algo=ordering_algo)
+def get_tw(circ, ordering_algo='greedy', tamaki_time=15):
+    peo, tn, opt = optimize_circuit(circ, algo=ordering_algo, tamaki_time=tamaki_time)
     treewidth = opt.treewidth
     return treewidth
 
@@ -98,23 +102,41 @@ def qaoa_energy_cost_params_stats_from_graph(G, p, max_time=0, max_tw=None,
     return tw, mem, flop
 
 
+def _twidth_parallel_unit(args):
+    circ_graph, ordering_algo, tamaki_time, max_tw = args
+    circuit, subgraph = circ_graph
+    tw = get_tw(circuit, ordering_algo=ordering_algo, tamaki_time=tamaki_time)
+    if max_tw:
+        if tw>max_tw:
+            print(f'Encountered treewidth of {tw}, which is larger {max_tw}')
+            raise ValueError(f'Encountered treewidth of {tw}, which is larger {max_tw}')
+    return tw
+
 def qaoa_energy_tw_from_graph(G, p, max_time=0, max_tw=0,
-                              ordering_algo='greedy', print_stats=False, composer_type='cone'):
-    twidths = []
-    with tqdm(total=G.number_of_edges(), desc='Edge iteration') as pbar:
-        for circuit, subgraph in qaoa_energy_lightcone_iterator(G, p, max_time=max_time, composer_type=composer_type):
-            tw = get_tw(circuit, ordering_algo=ordering_algo)
-            pbar.update()
-            pbar.set_postfix(current_tw=tw, subgraph_nodes=subgraph.number_of_nodes())
-            if max_tw:
-                if tw>max_tw:
-                    print(f'Encountered treewidth of {tw}, which is larger {max_tw}')
-                    break
-            twidths.append(tw)
+                              ordering_algo='greedy', print_stats=False,
+                              tamaki_time=15, n_processes=1, composer_type='cone'):
+
+    lightcone_gen = qaoa_energy_lightcone_iterator(G, p, max_time=max_time, composer_type=composer_type)
+    arggen = zip(lightcone_gen, repeat(ordering_algo), repeat(tamaki_time), repeat(max_tw))
+    if n_processes > 1:
+        print('n_processes', n_processes)
+        with Pool(n_processes) as p:
+            twidths = list(tqdm(p.imap(_twidth_parallel_unit, arggen), total=G.number_of_edges()))
+    else:
+        twidths = []
+        with tqdm(total=G.number_of_edges(), desc='Edge iteration') as pbar:
+            for args in arggen:
+                circ_graph, ordering_algo, tamaki_time, max_tw = args
+                circuit, subgraph = circ_graph
+                tw = _twidth_parallel_unit(args)
+                pbar.update()
+                pbar.set_postfix(current_tw=tw, subgraph_nodes=subgraph.number_of_nodes())
+                twidths.append(tw)
 
     if print_stats:
         print(f'med={np.median(twidths)} mean={round(np.mean(twidths), 2)} max={np.max(twidths)}')
     return twidths
+
 
 
 def qaoa_energy_cost_params_from_graph(G, p, max_time=0, max_tw=0,
