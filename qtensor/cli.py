@@ -4,6 +4,7 @@ import click
 import qtree
 import networkx as nx
 import numpy as np
+import random
 from tqdm import tqdm
 
 import qtree.operators as ops
@@ -143,6 +144,7 @@ def tw_heuristic(filename, tamaki_time):
 @click.option('-G','--graph-type', default='random_regular')
 def generate_qaoa_ansatz_circuit(seed, degree, nodes, p, graph_type):
     np.random.seed(seed)
+    random.seed(seed)
     if graph_type=='random_regular':
         G = nx.random_regular_graph(degree, nodes)
     elif graph_type=='erdos_renyi':
@@ -167,6 +169,7 @@ def generate_qaoa_ansatz_circuit(seed, degree, nodes, p, graph_type):
 @click.option('-E','--edge-index', default=0)
 def generate_qaoa_energy_circuit(seed, degree, nodes, p, graph_type, edge_index):
     np.random.seed(seed)
+    random.seed(seed)
     if graph_type=='random_regular':
         G = nx.random_regular_graph(degree, nodes)
     elif graph_type=='erdos_renyi':
@@ -196,6 +199,7 @@ def generate_qaoa_energy_circuit(seed, degree, nodes, p, graph_type, edge_index)
 @click.option('--n_processes', default=1, help='Number of processes.')
 def qaoa_energy_tw(nodes, seed, degree, p, graph_type, max_time, max_tw, ordering_algo, tamaki_time, n_processes):
     np.random.seed(seed)
+    random.seed(seed)
     if graph_type=='random_regular':
         G = nx.random_regular_graph(degree, nodes)
     elif graph_type=='erdos_renyi':
@@ -226,6 +230,7 @@ def qaoa_energy_sim(nodes, seed,
                     backend, n_processes, profile,
                     composer_type='cone'):
     np.random.seed(seed)
+    random.seed(seed)
     if graph_type=='random_regular':
         G = nx.random_regular_graph(degree, nodes, seed=seed)
     elif graph_type=='erdos_renyi':
