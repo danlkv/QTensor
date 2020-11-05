@@ -79,4 +79,14 @@ n=1000 p=2 d=3 n_edges=1500 n_processes=56 seed=13 lib=qtensor   time=1.649
 n=1000 p=2 d=3 n_edges=1500 n_processes=56 seed=14 lib=qtensor   time=1.450
 n=1000 p=2 d=3 n_edges=1500 n_processes=56 seed=14 lib=qtensor   time=1.440 
 
+n=1000 p=4 d=3 n_edges=1500 n_processes=56 seed=14 lib=qtensor   time=11.5
+n=1000 p=4 d=3 n_edges=1500 n_processes=56 seed=14 lib=qtensor   time=11.3
+n=1000 p=4 d=3 n_edges=1500 n_processes=56 seed=14 lib=qtensor   time=11.6
+
+n=1000 p=4 d=3 n_edges=1500 n_processes=56 seed=12 lib=qtensor   time=11.05
+n=1000 p=4 d=3 n_edges=1500 n_processes=56 seed=12 lib=qtensor   time=10.97
+
+n=1000 p=4 d=3 n_edges=1500 n_processes=56 seed=11 lib=qtensor   time=11.13
+n=1000 p=4 d=3 n_edges=1500 n_processes=56 seed=13 lib=qtensor   time=11.19
+n=1000 p=4 d=3 n_edges=1500 n_processes=56 seed=10 lib=qtensor   time=11.31
 ```
