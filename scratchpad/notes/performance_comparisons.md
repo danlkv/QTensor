@@ -38,3 +38,45 @@ n=1000 p=2 d=3 n_edges=1500 n_processes=56 lib=quimb   time=31      hyperopt_tim
 n=1000 p=2 d=3 n_edges=1500 n_processes=56 lib=acqdp   time=260
 
 ```
+
+## Dependence on seed and machine
+
+```
+
+n=1000 p=2 d=3 n_edges=1500 n_processes=56 seed=10 lib=quimb   time=35.05      hyperopt_time=.01
+n=1000 p=2 d=3 n_edges=1500 n_processes=56 seed=10 lib=quimb   time=37.51      hyperopt_time=.01
+n=1000 p=2 d=3 n_edges=1500 n_processes=56 seed=10 lib=quimb   time=38.18      hyperopt_time=.01
+n=1000 p=2 d=3 n_edges=1500 n_processes=56 seed=10 lib=quimb   time=35.63      hyperopt_time=.01
+n=1000 p=2 d=3 n_edges=1500 n_processes=28 seed=10 lib=quimb   time=60.14      hyperopt_time=.01
+
+n=1000 p=2 d=3 n_edges=1500 n_processes=56 seed=11 lib=quimb   time=33.96      hyperopt_time=.01
+n=1000 p=2 d=3 n_edges=1500 n_processes=56 seed=11 lib=quimb   time=34.01      hyperopt_time=.01
+n=1000 p=2 d=3 n_edges=1500 n_processes=56 seed=11 lib=quimb   time=33.93      hyperopt_time=.01
+n=1000 p=2 d=3 n_edges=1500 n_processes=56 seed=11 lib=quimb   time=34.85      hyperopt_time=.01
+
+n=1000 p=2 d=3 n_edges=1500 n_processes=56 seed=12 lib=quimb   time=33.92      hyperopt_time=.01
+n=1000 p=2 d=3 n_edges=1500 n_processes=56 seed=12 lib=quimb   time=34.03      hyperopt_time=.01
+
+n=1000 p=2 d=3 n_edges=1500 n_processes=56 seed=13 lib=quimb   time=34.45      hyperopt_time=.01
+n=1000 p=2 d=3 n_edges=1500 n_processes=56 seed=13 lib=quimb   time=35.65      hyperopt_time=.01
+
+n=1000 p=2 d=3 n_edges=1500 n_processes=56 seed=14 lib=quimb   time=35.08      hyperopt_time=.01
+n=1000 p=2 d=3 n_edges=1500 n_processes=56 seed=14 lib=quimb   time=37.65      hyperopt_time=.01
+
+n=1000 p=2 d=3 n_edges=1500 n_processes=56 seed=10 lib=qtensor   time=1.457 
+n=1000 p=2 d=3 n_edges=1500 n_processes=56 seed=10 lib=qtensor   time=1.457 
+
+n=1000 p=2 d=3 n_edges=1500 n_processes=56 seed=11 lib=qtensor   time=1.420 
+n=1000 p=2 d=3 n_edges=1500 n_processes=56 seed=11 lib=qtensor   time=1.650 
+n=1000 p=2 d=3 n_edges=1500 n_processes=56 seed=11 lib=qtensor   time=1.330 
+
+n=1000 p=2 d=3 n_edges=1500 n_processes=56 seed=12 lib=qtensor   time=1.393 
+n=1000 p=2 d=3 n_edges=1500 n_processes=56 seed=12 lib=qtensor   time=1.444 
+
+n=1000 p=2 d=3 n_edges=1500 n_processes=56 seed=13 lib=qtensor   time=1.479
+n=1000 p=2 d=3 n_edges=1500 n_processes=56 seed=13 lib=qtensor   time=1.649 
+
+n=1000 p=2 d=3 n_edges=1500 n_processes=56 seed=14 lib=qtensor   time=1.450
+n=1000 p=2 d=3 n_edges=1500 n_processes=56 seed=14 lib=qtensor   time=1.440 
+
+```
