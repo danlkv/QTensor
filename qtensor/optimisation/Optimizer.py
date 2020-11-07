@@ -3,6 +3,7 @@ import psutil
 import sys
 import numpy as np
 import networkx as nx
+import copy
 
 from qtensor import utils
 from qtensor.optimisation.Greedy import GreedyParvars
@@ -50,24 +51,34 @@ class OrderingOptimizer(Optimizer):
 
         return peo_ints, path
 
-    def optimize(self, tensor_net):
-        line_graph = tensor_net.get_line_graph()
-        free_vars = tensor_net.free_vars
-        ignored_vars = tensor_net.ket_vars + tensor_net. bra_vars
-        graph = line_graph
+    def _get_ordering(self, graph, inplace=True):
+        node_names = nx.get_node_attributes(graph, 'name')
+        node_sizes = nx.get_node_attributes(graph, 'size')
+        # performing ordering inplace reduces time for ordering by 60%
+        peo, path = utils.get_neighbours_peo_vars(graph, inplace=inplace)
 
-        if free_vars:
-            graph = qtree.graph_model.make_clique_on(graph, free_vars)
-
-        peo, path = self._get_ordering_ints(graph)
-        self.treewidth = max(path)
-        self.peo_ints = peo
-
-        peo = [qtree.optimizer.Var(var, size=graph.nodes[var]['size'],
-                        name=graph.nodes[var]['name'])
+        peo = [qtree.optimizer.Var(var, size=node_sizes[var],
+                        name=node_names[var])
                     for var in peo]
+        return peo, path
+
+    def optimize(self, tensor_net):
+        graph = tensor_net.get_line_graph()
+        free_vars = tensor_net.free_vars
+        ignored_vars = tensor_net.ket_vars + tensor_net.bra_vars
+
         if free_vars:
-            peo = qtree.graph_model.get_equivalent_peo(graph, peo, free_vars)
+            # It's more efficient to find ordering in-place to avoid copying
+            # We'll need the copy of a graph only if we have free_vars
+            graph = qtree.graph_model.make_clique_on(graph, free_vars)
+            graph_copy = copy.deepcopy(graph)
+
+        peo, path = self._get_ordering(graph, inplace=True)
+        self.treewidth = max(path)
+        self.peo_ints = [int(x) for x in peo]
+
+        if free_vars:
+            peo = qtree.graph_model.get_equivalent_peo(graph_copy, peo, free_vars)
 
         peo = ignored_vars + peo
         self.peo = peo
