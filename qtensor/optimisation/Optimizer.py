@@ -41,6 +41,7 @@ class WithoutOptimizer(Optimizer):
         self.ignored_vars = ignored_vars
         return peo, tensor_net
 
+
 class OrderingOptimizer(Optimizer):
     def _get_ordering_ints(self, graph, free_vars=[]):
         #mapping = {a:b for a,b in zip(graph.nodes(), reversed(list(graph.nodes())))}
@@ -73,6 +74,7 @@ class OrderingOptimizer(Optimizer):
         self.graph = graph
         self.ignored_vars = ignored_vars
         return peo, tensor_net
+
 
 class SlicesOptimizer(OrderingOptimizer):
 

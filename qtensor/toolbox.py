@@ -7,6 +7,7 @@ from multiprocessing.dummy import Pool
 
 from qtensor.optimisation.TensorNet import QtreeTensorNet
 from qtensor.optimisation.Optimizer import OrderingOptimizer, TamakiOptimizer, WithoutOptimizer
+from qtensor.optimisation import RGreedyOptimizer
 from qtensor.utils import get_edge_subgraph
 from qtensor import QtreeQAOAComposer, OldQtreeQAOAComposer, ZZQtreeQAOAComposer, DefaultQAOAComposer
 
@@ -34,21 +35,6 @@ def random_graph(nodes, type='random', **kwargs):
     else:
         raise ValueError('Unsupported graph type')
 
-def get_tw(circ, ordering_algo='greedy'):
-
-    tn = QtreeTensorNet.from_qtree_gates(circ)
-
-    if ordering_algo=='greedy':
-        opt = OrderingOptimizer()
-    elif ordering_algo=='tamaki':
-        opt = TamakiOptimizer(wait_time=45)
-    elif ordering_algo=='without':
-        opt = WithoutOptimizer()
-    else:
-        raise ValueError("Ordering algorithm not supported")
-    peo, tn = opt.optimize(tn)
-    treewidth = opt.treewidth
-    return treewidth
 
 def get_cost_params(circ, ordering_algo='greedy'):
 
@@ -75,6 +61,20 @@ def optimize_circuit(circ, algo='greedy', tamaki_time=15):
     # Optimizer-params argument? How would cli parse this?
     if algo=='greedy':
         opt = OrderingOptimizer()
+    elif 'rgreedy' in algo:
+        if '_' in algo:
+            params = algo.split('_')
+            if len(params) == 2:
+                _, temp = algo.split('_')
+                repeats = 10
+            else:
+                _, temp, repeats = algo.split('_')
+            repeats = int(repeats)
+            temp = float(temp)
+        else:
+            temp = 2
+            repeats = 10
+        opt = RGreedyOptimizer(temp=temp, repeats=repeats)
     elif algo=='tamaki':
         opt = TamakiOptimizer(wait_time=tamaki_time)
     elif algo=='without':
