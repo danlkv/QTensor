@@ -109,18 +109,21 @@ def qaoa_energy_lightcone_iterator(G, p, max_time=None, composer_type='default')
         start = time.time()
     else:
         start = np.inf
+
+    if composer_type=='default':
+        Composer = DefaultQAOAComposer
+    elif composer_type=='cylinder':
+        Composer = OldQtreeQAOAComposer
+    elif composer_type=='cone':
+        Composer = QtreeQAOAComposer
+    elif composer_type=='ZZ':
+        Composer = ZZQtreeQAOAComposer
+    else:
+        allowed_composers = ['default', 'cylinder', 'cone', 'ZZ']
+        raise Exception(f"Composer type not recognized, use one of: {allowed_composers}")
+
     for edge in G.edges():
-        if composer_type=='default':
-            composer = DefaultQAOAComposer(G, beta=beta, gamma=gamma)
-        elif composer_type=='cylinder':
-            composer = OldQtreeQAOAComposer(G, beta=beta, gamma=gamma)
-        elif composer_type=='cone':
-            composer = QtreeQAOAComposer(G, beta=beta, gamma=gamma)
-        elif composer_type=='ZZ':
-            composer = ZZQtreeQAOAComposer(G, beta=beta, gamma=gamma)
-        else:
-            allowed_composers = ['default', 'cylinder', 'cone', 'ZZ']
-            raise Exception(f"Composer type not recognized, use one of: {allowed_composers}")
+        composer = Composer(G, beta=beta, gamma=gamma)
         composer.energy_expectation_lightcone(edge)
         subgraph = get_edge_subgraph(G, edge, len(beta))
         yield composer.circuit, subgraph
