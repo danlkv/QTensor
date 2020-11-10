@@ -3,6 +3,8 @@ import copy, operator
 from qtensor.optimisation.Optimizer import OrderingOptimizer
 from qtensor import utils
 from functools import reduce
+import networkx as nx
+import qtree
 
 def reducelist(f, lst, x=0):
     prev = x
@@ -20,6 +22,17 @@ class RGreedyOptimizer(OrderingOptimizer):
         super().__init__(*args, **kwargs)
         self.temp = temp
         self.repeats = repeats
+
+    def _get_ordering(self, graph, **kwargs):
+        node_names = nx.get_node_attributes(graph, 'name')
+        node_sizes = nx.get_node_attributes(graph, 'size')
+        peo, path = self._get_ordering_ints(graph)
+
+        peo = [qtree.optimizer.Var(var, size=node_sizes[var],
+                        name=node_names[var])
+                    for var in peo]
+        #print('tw=', max(path))
+        return peo, path
 
     def _get_ordering_ints(self, old_graph, free_vars=[]):
         best_peo = None

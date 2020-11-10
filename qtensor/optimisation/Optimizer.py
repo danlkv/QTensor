@@ -160,10 +160,16 @@ class TamakiOptimizer(OrderingOptimizer):
         super().__init__(*args, **kwargs)
         self.wait_time = wait_time
 
-    def _get_ordering_ints(self, graph):
+    def _get_ordering(self, graph, inplace=True):
+        node_names = nx.get_node_attributes(graph, 'name')
+        node_sizes = nx.get_node_attributes(graph, 'size')
         peo, tw = qtree.graph_model.peo_calculation.get_upper_bound_peo_pace2017(
                 graph, method="tamaki", wait_time=self.wait_time)
 
+
+        peo = [qtree.optimizer.Var(var, size=node_sizes[var],
+                        name=node_names[var])
+                    for var in peo]
         return peo, [tw]
 
 class TreeTrimSplitter(SlicesOptimizer):

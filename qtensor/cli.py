@@ -15,11 +15,12 @@ from qtensor.ProcessingFrameworks import PerfNumpyBackend
 from qtensor.toolbox import qaoa_energy_tw_from_graph
 from qtensor.optimisation.TensorNet import QtreeTensorNet
 from qtensor.optimisation.Optimizer import OrderingOptimizer, TamakiOptimizer, WithoutOptimizer
-from qtensor.ProcessingFrameworks import PerfBackend
+from qtensor.ProcessingFrameworks import PerfBackend, CMKLExtendedBackend
 from qtensor.optimisation.Optimizer import TamakiTrimSlicing, SlicesOptimizer
 from qtensor import DefaultQAOAComposer, QAOAQtreeSimulator
 import qtensor.ProcessingFrameworks as backends
 import qtensor.optimisation.Optimizer as optimizers
+from qtensor.optimisation import RGreedyOptimizer
 
 @click.group()
 def cli():
@@ -141,6 +142,57 @@ def tw_heuristic(filename, tamaki_time):
 @click.option('-d','--degree', default=3)
 @click.option('-n','--nodes', default=10)
 @click.option('-p','--p', default=1)
+@click.option('-O','--ordering-algo', default='greedy')
+@click.option('-G','--graph-type', default='random_regular')
+def optimize_qaoa_ansatz_circuit(seed, degree, nodes, p, graph_type, ordering_algo):
+    np.random.seed(seed)
+    random.seed(seed)
+    if graph_type=='random_regular':
+        G = nx.random_regular_graph(degree, nodes)
+    elif graph_type=='erdos_renyi':
+        G = nx.erdos_renyi_graph(nodes, degree/(nodes-1))
+    elif graph_type=='erdos_renyi_core':
+        G = nx.erdos_renyi_graph(nodes, degree/(nodes-1))
+        G = nx.algorithms.core.k_core(G, k=degree)
+    else:
+        raise Exception('Unsupported graph type')
+
+    if ordering_algo=='tamaki_slice':
+        optimizer = TamakiTrimSlicing(max_tw=max_tw, wait_time=tamaki_time)
+    elif ordering_algo=='tamaki':
+        tamaki_time = 130
+        optimizer = optimizers.TamakiOptimizer(wait_time=tamaki_time)
+    elif 'rgreedy' in ordering_algo:
+        if '_' in ordering_algo:
+            params = ordering_algo.split('_')
+            if len(params) == 2:
+                _, temp = ordering_algo.split('_')
+                repeats = 10
+            else:
+                _, temp, repeats = ordering_algo.split('_')
+            repeats = int(repeats)
+            temp = float(temp)
+        else:
+            temp = 2
+            repeats = 10
+        optimizer = RGreedyOptimizer(temp=temp, repeats=repeats)
+    elif ordering_algo == 'greedy':
+        optimizer = optimizers.DefaultOptimizer()
+    else:
+        raise ValueError('Ordering algorithm not supported')
+    gamma, beta = [0.1]*p, [0.2]*p
+    composer = DefaultQAOAComposer(G, beta=beta, gamma=gamma)
+    composer.ansatz_state()
+    tn = qop.TensorNet.QtreeTensorNet.from_qtree_gates(composer.circuit)
+    print(optimizer)
+    optimizer.optimize(tn)
+    print('tw=', optimizer.treewidth)
+
+@cli.command()
+@click.option('-s','--seed', default=42)
+@click.option('-d','--degree', default=3)
+@click.option('-n','--nodes', default=10)
+@click.option('-p','--p', default=1)
 @click.option('-G','--graph-type', default='random_regular')
 def generate_qaoa_ansatz_circuit(seed, degree, nodes, p, graph_type):
     np.random.seed(seed)
@@ -223,12 +275,12 @@ def qaoa_energy_tw(nodes, seed, degree, p, graph_type, max_time, max_tw, orderin
 @click.option('-B','--backend', default='numpy')
 @click.option('--n_processes', default=1)
 @click.option('-P','--profile', default=False, is_flag=True)
-@click.option('-C','--composer-type', default='cone')
+@click.option('-C','--composer-type', default='default')
 def qaoa_energy_sim(nodes, seed,
                     degree, p, graph_type,
                     max_time, max_tw, ordering_algo, tamaki_time,
                     backend, n_processes, profile,
-                    composer_type='cone'):
+                    composer_type='default'):
     np.random.seed(seed)
     random.seed(seed)
     if graph_type=='random_regular':
@@ -244,8 +296,24 @@ def qaoa_energy_sim(nodes, seed,
         optimizer = TamakiTrimSlicing(max_tw=max_tw, wait_time=tamaki_time)
     elif ordering_algo=='tamaki':
         optimizer = optimizers.TamakiOptimizer(wait_time=tamaki_time)
-    else:
+    elif 'rgreedy' in ordering_algo:
+        if '_' in ordering_algo:
+            params = ordering_algo.split('_')
+            if len(params) == 2:
+                _, temp = ordering_algo.split('_')
+                repeats = 10
+            else:
+                _, temp, repeats = ordering_algo.split('_')
+            repeats = int(repeats)
+            temp = float(temp)
+        else:
+            temp = 2
+            repeats = 10
+        optimizer = RGreedyOptimizer(temp=temp, repeats=repeats)
+    elif ordering_algo == 'greedy':
         optimizer = optimizers.DefaultOptimizer()
+    else:
+        raise ValueError('Ordering algorithm not supported')
 
     Backend = choose_backend(backend)
     backend_obj = Backend()
