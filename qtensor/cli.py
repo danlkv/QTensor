@@ -12,7 +12,7 @@ import qtensor.optimisation as qop
 from qtensor.FeynmanSimulator import FeynmanSimulator
 
 from qtensor.ProcessingFrameworks import PerfNumpyBackend
-from qtensor.toolbox import qaoa_energy_tw_from_graph
+from qtensor.toolbox import qaoa_energy_tw_from_graph, get_ordering_algo
 from qtensor.optimisation.TensorNet import QtreeTensorNet
 from qtensor.optimisation.Optimizer import OrderingOptimizer, TamakiOptimizer, WithoutOptimizer
 from qtensor.ProcessingFrameworks import PerfBackend, CMKLExtendedBackend
@@ -271,14 +271,13 @@ def qaoa_energy_tw(nodes, seed, degree, p, graph_type, max_time, max_tw, orderin
 @click.option('-T','--max-time', default=0, help='Max time for every evaluation')
 @click.option('--max-tw', default=0, help='Max tw after wich no point to calculate')
 @click.option('-O','--ordering-algo', default='greedy', help='Algorithm for elimination order')
-@click.option('--tamaki_time', default=20, help='Algorithm for elimination order')
 @click.option('-B','--backend', default='numpy')
 @click.option('--n_processes', default=1)
 @click.option('-P','--profile', default=False, is_flag=True)
 @click.option('-C','--composer-type', default='default')
 def qaoa_energy_sim(nodes, seed,
                     degree, p, graph_type,
-                    max_time, max_tw, ordering_algo, tamaki_time,
+                    max_time, max_tw, ordering_algo,
                     backend, n_processes, profile,
                     composer_type='default'):
     np.random.seed(seed)
@@ -291,29 +290,7 @@ def qaoa_energy_sim(nodes, seed,
         raise Exception('Unsupported graph type')
     gamma, beta = [np.pi/3]*p, [np.pi/2]*p
 
-
-    if ordering_algo=='tamaki_slice':
-        optimizer = TamakiTrimSlicing(max_tw=max_tw, wait_time=tamaki_time)
-    elif ordering_algo=='tamaki':
-        optimizer = optimizers.TamakiOptimizer(wait_time=tamaki_time)
-    elif 'rgreedy' in ordering_algo:
-        if '_' in ordering_algo:
-            params = ordering_algo.split('_')
-            if len(params) == 2:
-                _, temp = ordering_algo.split('_')
-                repeats = 10
-            else:
-                _, temp, repeats = ordering_algo.split('_')
-            repeats = int(repeats)
-            temp = float(temp)
-        else:
-            temp = 2
-            repeats = 10
-        optimizer = RGreedyOptimizer(temp=temp, repeats=repeats)
-    elif ordering_algo == 'greedy':
-        optimizer = optimizers.DefaultOptimizer()
-    else:
-        raise ValueError('Ordering algorithm not supported')
+    optimizer = get_ordering_algo(ordering_algo)
 
     Backend = choose_backend(backend)
     backend_obj = Backend()

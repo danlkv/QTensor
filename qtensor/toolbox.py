@@ -6,7 +6,8 @@ import time
 from multiprocessing.dummy import Pool
 
 from qtensor.optimisation.TensorNet import QtreeTensorNet
-from qtensor.optimisation.Optimizer import OrderingOptimizer, TamakiOptimizer, WithoutOptimizer
+from qtensor.optimisation.Optimizer import OrderingOptimizer, TamakiOptimizer, WithoutOptimizer, TamakiTrimSlicing, DefaultOptimizer
+
 from qtensor.optimisation import RGreedyOptimizer
 from qtensor.utils import get_edge_subgraph
 from qtensor import QtreeQAOAComposer, OldQtreeQAOAComposer, ZZQtreeQAOAComposer, DefaultQAOAComposer
@@ -36,18 +37,45 @@ def random_graph(nodes, type='random', **kwargs):
         raise ValueError('Unsupported graph type')
 
 
+def get_ordering_algo(ordering_algo):
+    """ Get optimizer instance from its string specifier. """
+    if 'tamaki' in ordering_algo:
+        wait_time = 10
+        if '_' in ordering_algo:
+            params = ordering_algo.split('_')
+            wait_time = float(params[-1])
+        if 'slice' in ordering_algo:
+            max_tw = 25
+            optimizer = TamakiTrimSlicing(max_tw=max_tw, wait_time=wait_time)
+        else:
+            optimizer = TamakiOptimizer(wait_time=wait_time)
+    elif 'rgreedy' in ordering_algo:
+        if '_' in ordering_algo:
+            params = ordering_algo.split('_')
+            if len(params) == 2:
+                _, temp = ordering_algo.split('_')
+                repeats = 10
+            else:
+                _, temp, repeats = ordering_algo.split('_')
+            repeats = int(repeats)
+            temp = float(temp)
+        else:
+            temp = 2
+            repeats = 10
+        optimizer = RGreedyOptimizer(temp=temp, repeats=repeats)
+    elif ordering_algo == 'greedy':
+        optimizer = OrderingOptimizer()
+    elif ordering_algo == 'default':
+        optimizer = DefaultOptimizer()
+    else:
+        raise ValueError('Ordering algorithm not supported')
+    return optimizer
+
 def get_cost_params(circ, ordering_algo='greedy'):
 
     tn = QtreeTensorNet.from_qtree_gates(circ)
+    opt = get_ordering_algo(ordering_algo)
 
-    if ordering_algo=='greedy':
-        opt = OrderingOptimizer()
-    elif ordering_algo=='tamaki':
-        opt = TamakiOptimizer(wait_time=45)
-    elif ordering_algo=='without':
-        opt = WithoutOptimizer()
-    else:
-        raise ValueError("Ordering algorithm not supported")
     peo, _ = opt.optimize(tn)
     treewidth = opt.treewidth
     mems, flops = tn.simulation_cost(peo)
@@ -59,28 +87,7 @@ def optimize_circuit(circ, algo='greedy', tamaki_time=15):
 
     # Should I somomehow generalize the tamaki-time argument? provide something like
     # Optimizer-params argument? How would cli parse this?
-    if algo=='greedy':
-        opt = OrderingOptimizer()
-    elif 'rgreedy' in algo:
-        if '_' in algo:
-            params = algo.split('_')
-            if len(params) == 2:
-                _, temp = algo.split('_')
-                repeats = 10
-            else:
-                _, temp, repeats = algo.split('_')
-            repeats = int(repeats)
-            temp = float(temp)
-        else:
-            temp = 2
-            repeats = 10
-        opt = RGreedyOptimizer(temp=temp, repeats=repeats)
-    elif algo=='tamaki':
-        opt = TamakiOptimizer(wait_time=tamaki_time)
-    elif algo=='without':
-        opt = WithoutOptimizer()
-    else:
-        raise ValueError("Ordering algorithm not supported")
+    opt = get_ordering_algo(algo)
 
     tn = QtreeTensorNet.from_qtree_gates(circ)
     peo, tn = opt.optimize(tn)
