@@ -4,6 +4,9 @@ __all__ = ['cli']
 
 # Cell
 import click
+from qtensor_specs import speed_comparison
+from qtensor_specs import qaoa_bench
+from qtensor_specs import time_vs_flop
 
 @click.group()
 def cli():

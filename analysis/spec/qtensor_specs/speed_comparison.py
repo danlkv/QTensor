@@ -112,4 +112,3 @@ def time_comparison_xarray(filename, **kwargs):
     ps = [2, 3, 4]
     xar = gen_time_data(Ns, ps, **kwargs)
     xar.to_netcdf(filename)
-
