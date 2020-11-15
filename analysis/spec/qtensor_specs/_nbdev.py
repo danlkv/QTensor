@@ -2,12 +2,7 @@
 
 __all__ = ["index", "modules", "custom_doc_links", "git_url"]
 
-index = {"qaoa_energy_tws": "QAOA_bench.ipynb",
-         "qaoa_energy_max_tws": "QAOA_bench.ipynb",
-         "qaoa_energy_med_tws": "QAOA_bench.ipynb",
-         "qaoa_energy_min_tws": "QAOA_bench.ipynb",
-         "qaoa_simulate": "QAOA_bench.ipynb",
-         "ex": "Time_vs_FLOP.ipynb",
+index = {"ex": "Time_vs_FLOP.ipynb",
          "graph": "Time_vs_FLOP.ipynb",
          "qiskit_time": "Speed_comparison.ipynb",
          "quimb_time": "Speed_comparison.ipynb",
@@ -32,8 +27,7 @@ index = {"qaoa_energy_tws": "QAOA_bench.ipynb",
          "time_vs_flops_plot": "Time_vs_FLOP.ipynb",
          "cli": "index.ipynb"}
 
-modules = ["qaoa_bench.py",
-           "speed_comparison.py",
+modules = ["speed_comparison.py",
            "time_vs_flop.py",
            "__init__.py"]
 

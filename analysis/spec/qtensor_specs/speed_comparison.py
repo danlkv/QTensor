@@ -103,7 +103,7 @@ from qtensor_specs import cli, click
 # Cell
 @cli.command()
 @click.option('-O', '--qtn_ordering_algo', default='greedy')
-@click.argument(filename)
+@click.argument('filename')
 def time_comparison_xarray(filename, **kwargs):
     Ns = 2*(.5*np.pi**(np.arange(0, 11)/2)).astype(np.int) + 10
     ps = [2, 3, 4]
