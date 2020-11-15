@@ -2,7 +2,7 @@
 
 __all__ = ['ex', 'graph', 'circuit', 'tn', 'peo', 'sim_costs', 'sum_flops', 'step_flops', 'max_mem', 'SEED',
            'EDGE_IDX_FOR_SEED', 'EDGE_IDX_FOR_SEED_JLSE', 'sim_profile', 'step_sim_time', 'plot_with_filter',
-           'get_log_flops_vs_matmul', 'cli', 'time_vs_flops_plot']
+           'get_log_flops_vs_matmul', 'time_vs_flops_plot']
 
 # Cell
 import sys
@@ -135,11 +135,7 @@ def get_log_flops_vs_matmul(log_fit_coef):
     return FLOPS_logfit, FLOPS_matmul
 
 # Cell
-import click
-
-@click.group()
-def cli():
-    pass
+from qtensor_specs import cli, click
 
 @cli.command()
 @click.argument('filename')

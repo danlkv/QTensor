@@ -2,8 +2,19 @@
 
 __all__ = ["index", "modules", "custom_doc_links", "git_url"]
 
-index = {"ex": "Time_vs_FLOP.ipynb",
+index = {"qaoa_energy_tws": "QAOA_bench.ipynb",
+         "qaoa_energy_max_tws": "QAOA_bench.ipynb",
+         "qaoa_energy_med_tws": "QAOA_bench.ipynb",
+         "qaoa_energy_min_tws": "QAOA_bench.ipynb",
+         "qaoa_simulate": "QAOA_bench.ipynb",
+         "ex": "Time_vs_FLOP.ipynb",
          "graph": "Time_vs_FLOP.ipynb",
+         "qiskit_time": "Speed_comparison.ipynb",
+         "quimb_time": "Speed_comparison.ipynb",
+         "qtensor_time": "Speed_comparison.ipynb",
+         "gen_time_data": "Speed_comparison.ipynb",
+         "plot_xar_data": "Speed_comparison.ipynb",
+         "time_comparison_xarray": "Speed_comparison.ipynb",
          "circuit": "Time_vs_FLOP.ipynb",
          "tn": "Time_vs_FLOP.ipynb",
          "peo": "Time_vs_FLOP.ipynb",
@@ -18,10 +29,13 @@ index = {"ex": "Time_vs_FLOP.ipynb",
          "step_sim_time": "Time_vs_FLOP.ipynb",
          "plot_with_filter": "Time_vs_FLOP.ipynb",
          "get_log_flops_vs_matmul": "Time_vs_FLOP.ipynb",
-         "cli": "Time_vs_FLOP.ipynb",
-         "time_vs_flops_plot": "Time_vs_FLOP.ipynb"}
+         "time_vs_flops_plot": "Time_vs_FLOP.ipynb",
+         "cli": "index.ipynb"}
 
-modules = ["time_vs_flop.py"]
+modules = ["qaoa_bench.py",
+           "speed_comparison.py",
+           "time_vs_flop.py",
+           "__init__.py"]
 
 doc_url = "https://danlkv.github.io/qtensor-specs/"
 
