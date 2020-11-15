@@ -28,7 +28,8 @@ def qiskit_time(graph, p):
     start = time.time()
     try:
         _ = simulate_qiskit_amps(graph, gamma, beta)
-    except:
+    except Exception as e:
+        print('Exception:', e)
         return None
     end = time.time()
     return end - start
@@ -47,7 +48,8 @@ def quimb_time(graph, p,
                                   optimizer_time=qmb_optimizer_time,
                                   ordering_algo=qmb_ordering_algo
                                  )
-    except:
+    except Exception as e:
+        print('Exception:', e)
         return None
     end = time.time()
     return end - start
@@ -64,7 +66,8 @@ def qtensor_time(graph, p,
     start = time.time()
     try:
         _ = sim.energy_expectation_parallel(graph, gamma, beta, n_processes=n_processes)
-    except:
+    except Exception as e:
+        print('Exception:', e)
         return None
     end = time.time()
     return end - start
