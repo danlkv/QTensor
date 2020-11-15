@@ -103,9 +103,11 @@ from qtensor_specs import cli, click
 # Cell
 @cli.command()
 @click.option('-O', '--qtn_ordering_algo', default='greedy')
+@click.option('-N', '--n_processes', default='greedy')
 @click.argument('filename')
 def time_comparison_xarray(filename, **kwargs):
     Ns = 2*(.5*np.pi**(np.arange(0, 11)/2)).astype(np.int) + 10
     ps = [2, 3, 4]
+    kwargs = {k:[v] for k, v in kwargs.items()}
     xar = gen_time_data(Ns, ps, **kwargs)
     xar.to_netcdf(filename)
