@@ -114,7 +114,7 @@ def time_comparison_xarray(filename, n_len, p_len, **kwargs):
     Ns = 2*(.5*np.pi**(np.arange(0, 12)/2)).astype(np.int) + 10
     Ns = Ns[:n_len]
     ps = [2, 3, 4]
-    ps = ps[p_len]
+    ps = ps[:p_len]
     kwargs = {k:[v] for k, v in kwargs.items()}
     xar = gen_time_data(Ns, ps, **kwargs)
     xar.to_netcdf(filename)
