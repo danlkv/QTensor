@@ -105,12 +105,16 @@ from qtensor_specs import cli, click
 
 # Cell
 @cli.command()
+@click.option('--n_len', default=4)
+@click.option('--p_len', default=2)
 @click.option('-O', '--qtn_ordering_algo', default='greedy')
 @click.option('-N', '--n_processes', default='greedy')
 @click.argument('filename')
-def time_comparison_xarray(filename, **kwargs):
-    Ns = 2*(.5*np.pi**(np.arange(0, 11)/2)).astype(np.int) + 10
+def time_comparison_xarray(filename, n_len, p_len, **kwargs):
+    Ns = 2*(.5*np.pi**(np.arange(0, 12)/2)).astype(np.int) + 10
+    Ns = Ns[:n]
     ps = [2, 3, 4]
+    ps = ps[p_len]
     kwargs = {k:[v] for k, v in kwargs.items()}
     xar = gen_time_data(Ns, ps, **kwargs)
     xar.to_netcdf(filename)
