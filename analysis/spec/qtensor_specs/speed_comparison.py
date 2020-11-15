@@ -13,9 +13,6 @@ import time
 
 from cartesian_explorer import Explorer
 
-%load_ext autoreload
-%autoreload 2
-
 # Cell
 ex = Explorer()
 
