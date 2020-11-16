@@ -31,9 +31,10 @@ jobs:
         
     - name: Setup dependencies
       run: |
-        pip install .
+        pip install numpy
         pip install pytest mock
         cd qtree && pip install .
+        pip install .
   
     - name: Test
       run: cd qtensor && pytest
