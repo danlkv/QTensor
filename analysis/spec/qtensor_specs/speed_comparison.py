@@ -96,8 +96,13 @@ def plot_xar_data(xar_orig):
     axes[0].get_shared_x_axes().join(*axes)
     ps = [x.data for x in xar.coords['p']]
 
+
     [ax.autoscale() for ax in axes]
+    [ax.set_ylabel('Time, sec') for ax in axes]
     [ax.set_title(x) for ax, x in zip(axes, [f"p = {p}" for p in ps])]
+    fig.suptitle('Time for single energy query on a single Skylake node', fontfamily='serif', style='italic')
+    fig.set_size_inches(10.5, 4.5)
+    fig.tight_layout(rect=[0, 0.03, 1, 0.98])
 
 
 # Cell
