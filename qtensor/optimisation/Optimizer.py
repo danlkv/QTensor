@@ -89,9 +89,12 @@ class OrderingOptimizer(Optimizer):
 
 class SlicesOptimizer(OrderingOptimizer):
 
-    def __init__(self, tw_bias=2, max_tw=None):
+    def __init__(self, tw_bias=2, max_tw=None, **kwargs):
         self.tw_bias = tw_bias
         self.max_tw = max_tw
+        target_tw = kwargs.get('target_tw')
+        if target_tw:
+            self.max_tw = target_tw
 
     def _get_max_tw(self):
         if hasattr(self, 'max_tw') and self.max_tw is not None:

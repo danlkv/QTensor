@@ -8,7 +8,7 @@ from multiprocessing.dummy import Pool
 from qtensor.optimisation.TensorNet import QtreeTensorNet
 from qtensor.optimisation.Optimizer import OrderingOptimizer, TamakiOptimizer, WithoutOptimizer, TamakiTrimSlicing, DefaultOptimizer
 
-from qtensor.optimisation import RGreedyOptimizer
+from qtensor.optimisation import RGreedyOptimizer, LateParOptimizer
 from qtensor.utils import get_edge_subgraph
 from qtensor import QtreeQAOAComposer, OldQtreeQAOAComposer, ZZQtreeQAOAComposer, DefaultQAOAComposer
 
@@ -36,8 +36,22 @@ def random_graph(nodes, type='random', **kwargs):
     else:
         raise ValueError('Unsupported graph type')
 
+def get_slicing_algo(slicing_algo, par_vars, ordering_algo='default'):
+    if 'late-slice' in slicing_algo:
+        if '_' in slicing_algo:
+            _, bunch_size = slicing_algo.split('_')
+            bunches = int(bunch_size)
+        else:
+            bunches = 1
+        optimizer = LateParOptimizer(
+            n_bunches=bunches, par_vars=par_vars, ordering_algo=ordering_algo
+        )
+    else:
+        raise ValueError(f'Slicing algorithm not supported: {slicing_algo}')
+    return optimizer
 
-def get_ordering_algo(ordering_algo):
+
+def get_ordering_algo(ordering_algo, par_vars=0):
     """ Get optimizer instance from its string specifier. """
     if 'tamaki' in ordering_algo:
         wait_time = 10

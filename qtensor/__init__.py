@@ -18,6 +18,7 @@ from qtensor.FeynmanSimulator import FeynmanSimulator
 from qtensor.ProcessingFrameworks import PerfNumpyBackend, NumpyBackend
 from qtensor import simplify_circuit
 from qtensor.simplify_circuit import simplify_qtree_circuit
+from qtensor import optimisation
 
 class CirqQAOAComposer(QAOAComposer):
     def _get_builder_class(self):
