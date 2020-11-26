@@ -55,6 +55,8 @@ class ZZ(qtree.operators.ParametricGate):
         return tensor
 
 QtreeFactory.ZZ = ZZ
+# this is a bit ugly, but will work for now
+qtree.operators.LABEL_TO_GATE_DICT['zz'] = ZZ
 
 class QiskitFactory:
     H=qiskit_lib.HGate
