@@ -7,6 +7,7 @@ import numpy as np
 import random
 from tqdm import tqdm
 
+import qtensor
 import qtree.operators as ops
 import qtensor.optimisation as qop
 from qtensor.FeynmanSimulator import FeynmanSimulator
@@ -226,9 +227,8 @@ def generate_qaoa_energy_circuit(seed, degree, nodes, p, graph_type, edge_index)
         G = nx.random_regular_graph(degree, nodes)
     elif graph_type=='erdos_renyi':
         G = nx.erdos_renyi_graph(nodes, degree/(nodes-1))
-    elif graph_type=='erdos_renyi_core':
-        G = nx.erdos_renyi_graph(nodes, degree/(nodes-1))
-        G = nx.algorithms.core.k_core(G, k=degree)
+    elif graph_type=='bethe':
+        G = qtensor.toolbox.bethe_graph(p, degree)
     else:
         raise Exception('Unsupported graph type')
     gamma, beta = [0.1]*p, [0.2]*p
