@@ -14,7 +14,6 @@ def single_qaoa_query(graph, p, ordering_algo='oe'):
     q = QAOAOptimizer(a, num_layers=p)
     beta_gamma = np.random.randn(p*2)
     q.preprocess(order_finder_name=ordering_algo)
-    #q.preprocess()
     E = q.query(params=beta_gamma)
     return E
 
