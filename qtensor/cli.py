@@ -94,7 +94,7 @@ def opt_file(filename, tamaki_time, max_tw, slice_step, cost_type):
     n_qubits, circuit = ops.read_circuit_stream(stream)
     gates = sum(circuit, [])
     tn = qop.TensorNet.QtreeTensorNet.from_qtree_gates(gates)
-    fopt = qop.Optimizer.TamakiTrimSlicing(wait_time=tamaki_time)
+    fopt = TamakiTrimSlicing(wait_time=tamaki_time)
     fopt.max_tw = max_tw
     fopt.par_var_step = slice_step
     fopt.cost_type = cost_type

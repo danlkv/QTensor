@@ -44,6 +44,7 @@ QtreeFullFactory.ZZ = ZZFull
 class ZZ(qtree.operators.ParametricGate):
     name = 'ZZ'
     _changes_qubits=tuple()
+    parameter_count=1
     def gen_tensor(self):
         alpha = self.parameters['alpha']
         p = np.exp(1j*np.pi*alpha/2)
