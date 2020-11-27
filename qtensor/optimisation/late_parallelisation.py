@@ -56,6 +56,7 @@ class LateParOptimizer(Optimizer):
         self.target_tw = target_tw
 
         self.n_bunches = n_bunches
+        self.par_vars = par_vars
 
         if not n_bunches:
             self.p_bunch = 1
@@ -150,14 +151,20 @@ class LateParOptimizer(Optimizer):
 
         # --
         if self.n_bunches is not None:
-            n_iter = self.n_bunches
+            # Iterate for fixed par_vars
             self.target_tw = 0
+            bunches = [self.par_vars//self.n_bunches]*self.n_bunches
+            _remaining = self.par_vars%self.n_bunches
+            bunches = bunches + [_remaining]
+            bunches = [x for x in bunches if x != 0]
         else:
+            # Iterate until reach target_tw
             n_iter = len(current_ordering)
+            bunches = [self.p_bunch]*n_iter
         # --
-        for _ in range(n_iter):
+        for p_bunch in bunches:
             _a_bunch_of_stuff = self.find_slice_at_step(
-                current_ordering, current_graph, self.p_bunch
+                current_ordering, current_graph, p_bunch
             )
             current_graph, slice_vars, step, next_ordering, next_tw = _a_bunch_of_stuff
             contraction_schedule.append(
@@ -169,7 +176,7 @@ class LateParOptimizer(Optimizer):
             if next_tw <= self.target_tw:
                 break
 
-        log.info(f"Removed {n_iter*self.p_bunch} variables, reduced tw by {max(tw_path)-next_tw}")
+        log.info(f"Removed {sum(bunches)} variables, reduced tw by {max(tw_path)-next_tw}")
         # Contract leftovers
         if free_vars:
             if not all(x in current_ordering for x in free_vars):
