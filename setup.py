@@ -13,6 +13,7 @@ REQUIRED_PACKAGES = [
     ,'tqdm'
     ,'click'
     ,'qtensor-qtree'
+    ,'lazy-import'
 
 ]
 
