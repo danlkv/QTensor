@@ -12,6 +12,21 @@ from qtensor.optimisation import RGreedyOptimizer, LateParOptimizer
 from qtensor.utils import get_edge_subgraph
 from qtensor import QtreeQAOAComposer, OldQtreeQAOAComposer, ZZQtreeQAOAComposer, DefaultQAOAComposer
 
+def bethe_graph(p, degree):
+    def add_two_nodes_to_leafs(graph):
+        """ Works in-place """
+        leaves = [n for n in graph.nodes() if graph.degree(n) <= degree-2]
+        n = graph.number_of_nodes()
+        for leaf in leaves:
+            next_edges = [(leaf, n+x) for x in range(1, degree)]
+            graph.add_edges_from(next_edges)
+            n += 2
+    graph = nx.Graph()
+    graph.add_edges_from([(0,1)])
+    for i in range(p):
+        add_two_nodes_to_leafs(graph)
+    return graph
+
 def random_graph(nodes, type='random', **kwargs):
     """
     Generate a random graph

@@ -44,6 +44,7 @@ QtreeFullFactory.ZZ = ZZFull
 class ZZ(qtree.operators.ParametricGate):
     name = 'ZZ'
     _changes_qubits=tuple()
+    parameter_count=1
     def gen_tensor(self):
         alpha = self.parameters['alpha']
         p = np.exp(1j*np.pi*alpha/2)
@@ -55,6 +56,8 @@ class ZZ(qtree.operators.ParametricGate):
         return tensor
 
 QtreeFactory.ZZ = ZZ
+# this is a bit ugly, but will work for now
+qtree.operators.LABEL_TO_GATE_DICT['zz'] = ZZ
 
 class QiskitFactory:
     H=qiskit_lib.HGate
