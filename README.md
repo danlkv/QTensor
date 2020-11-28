@@ -13,6 +13,9 @@ cd qtree && pip install .
 pip install .
 ```
 
+### Docker image
+
+https://hub.docker.com/repository/docker/danlkv/qtensor
 
 ## Usage
 

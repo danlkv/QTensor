@@ -1,4 +1,4 @@
-from qtensor import CirqQAOAComposer, QtreeQAOAComposer
+from qtensor import CirqQAOAComposer, QtreeQAOAComposer, DefaultQAOAComposer
 from qtensor import QiskitQAOAComposer
 from qtensor import QtreeSimulator
 from qtree.operators import from_qiskit_circuit
@@ -28,6 +28,24 @@ def test_cirq_sim():
     assert result
     assert composer.n_qubits == G.number_of_nodes()
 
+def test_qtree_default_smoke():
+    G, gamma, beta = get_test_problem()
+
+    composer = DefaultQAOAComposer(
+        graph=G, gamma=[np.pi/3], beta=[np.pi/4])
+    composer.ansatz_state()
+
+    print(composer.circuit)
+    assert composer.circuit
+    assert composer.n_qubits == G.number_of_nodes()
+
+    composer = DefaultQAOAComposer(
+        graph=G, gamma=[np.pi/3], beta=[np.pi/4])
+    composer.energy_expectation_lightcone(list(G.edges())[0])
+
+    print(composer.circuit)
+    assert composer.circuit
+    assert composer.n_qubits == G.number_of_nodes()
 
 def test_qtree_smoke():
     G, gamma, beta = get_test_problem()

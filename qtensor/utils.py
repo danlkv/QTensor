@@ -9,6 +9,40 @@ import networkx as nx
 from tqdm.auto import tqdm
 import operator
 
+def get_neighbours_peo_vars(old_graph, inplace=False):
+    if inplace:
+        graph = old_graph
+    else:
+        graph = copy.deepcopy(old_graph)
+    graph.remove_edges_from(list(nx.selfloop_edges(old_graph)))
+    peo = []
+    nghs = []
+
+    while graph.number_of_nodes():
+        ###start = time.time()
+        costs = np.array(list(
+            map(len, map(operator.itemgetter(1), graph.adjacency()))
+        ))
+        #costs = list(graph.degree)
+        ###costtime = time.time() - start
+
+        ###start = time.time()
+        best_idx = np.argmin(costs)
+        best_degree = costs[best_idx]
+        best_node = list(graph.nodes())[best_idx]
+        del costs
+        peo.append(best_node)
+        nghs.append(best_degree)
+        #nodeiter_time = time.time() - start
+
+
+        #start = time.time()
+        #qtree.graph_model.eliminate_node(graph, best_node)
+        eliminate_node_no_structure(graph, best_node)
+        #eltime = time.time() - start
+        #pbar.set_postfix(costiter=1/costtime, nodeiter=1/nodeiter_time, eliter=1/eltime ,costtime=costtime, nodeiter_time=nodeiter_time, eltime=eltime)
+    return peo, nghs
+
 def get_neighbours_peo(old_graph):
     graph = copy.deepcopy(old_graph)
     graph.remove_edges_from(nx.selfloop_edges(old_graph))

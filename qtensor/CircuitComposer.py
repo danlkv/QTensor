@@ -78,7 +78,6 @@ class OldQAOAComposer(CircuitComposer):
         second_part = self.builder.circuit
 
         self.circuit = first_part + second_part
-        return self.circuit
 
     def energy_expectation_lightcone(self, edge):
         G = self.graph
@@ -128,10 +127,8 @@ class OldQAOAComposer(CircuitComposer):
         for i in range(p):
             self.cost_operator_circuit(gamma[i])
             self.mixer_operator(beta[i])
-        return self.circuit
 
     def energy_edge(self, i, j):
-        #self.circuit.append(self.operators.CC(u, v))
         u, v = self.qubits[i], self.qubits[j]
         self.apply_gate(self.operators.Z, u)
         self.apply_gate(self.operators.Z, v)
@@ -152,7 +149,6 @@ class QAOAComposer(OldQAOAComposer):
             self.cost_operator_circuit(g)
             self.mixer_operator(b)
         self.graph = cone_base
-        return self.circuit
 
 
     def energy_expectation(self, i, j):
@@ -167,8 +163,7 @@ class QAOAComposer(OldQAOAComposer):
         second_part = self.builder.circuit
 
         self.circuit = first_part + second_part
-        return self.circuit
 
-class CCQAOAComposer(QAOAComposer):
+class ZZQAOAComposer(QAOAComposer):
     def append_zz_term(self, q1, q2, gamma):
-        self.apply_gate(self.operators.CC, q1, q2, alpha=2*gamma)
+        self.apply_gate(self.operators.ZZ, q1, q2, alpha=2*gamma)

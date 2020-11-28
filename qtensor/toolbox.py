@@ -1,12 +1,31 @@
 import networkx as nx
 import numpy as np
+from itertools import repeat
 from tqdm.auto import tqdm
 import time
+from multiprocessing.dummy import Pool
 
 from qtensor.optimisation.TensorNet import QtreeTensorNet
-from qtensor.optimisation.Optimizer import OrderingOptimizer, TamakiOptimizer, WithoutOptimizer
+from qtensor.optimisation.Optimizer import OrderingOptimizer, TamakiOptimizer, WithoutOptimizer, TamakiTrimSlicing, DefaultOptimizer
+
+from qtensor.optimisation import RGreedyOptimizer, LateParOptimizer
 from qtensor.utils import get_edge_subgraph
-from qtensor import QtreeQAOAComposer, OldQtreeQAOAComposer, CCQtreeQAOAComposer
+from qtensor import QtreeQAOAComposer, OldQtreeQAOAComposer, ZZQtreeQAOAComposer, DefaultQAOAComposer
+
+def bethe_graph(p, degree):
+    def add_two_nodes_to_leafs(graph):
+        """ Works in-place """
+        leaves = [n for n in graph.nodes() if graph.degree(n) <= degree-2]
+        n = graph.number_of_nodes()
+        for leaf in leaves:
+            next_edges = [(leaf, n+x) for x in range(1, degree)]
+            graph.add_edges_from(next_edges)
+            n += 2
+    graph = nx.Graph()
+    graph.add_edges_from([(0,1)])
+    for i in range(p):
+        add_two_nodes_to_leafs(graph)
+    return graph
 
 def random_graph(nodes, type='random', **kwargs):
     """
@@ -32,34 +51,60 @@ def random_graph(nodes, type='random', **kwargs):
     else:
         raise ValueError('Unsupported graph type')
 
-def get_tw(circ, ordering_algo='greedy'):
-
-    tn = QtreeTensorNet.from_qtree_gates(circ)
-
-    if ordering_algo=='greedy':
-        opt = OrderingOptimizer()
-    elif ordering_algo=='tamaki':
-        opt = TamakiOptimizer(wait_time=45)
-    elif ordering_algo=='without':
-        opt = WithoutOptimizer()
+def get_slicing_algo(slicing_algo, par_vars, ordering_algo='default'):
+    if 'late-slice' in slicing_algo:
+        if '_' in slicing_algo:
+            _, bunch_size = slicing_algo.split('_')
+            bunches = int(bunch_size)
+        else:
+            bunches = 1
+        optimizer = LateParOptimizer(
+            n_bunches=bunches, par_vars=par_vars, ordering_algo=ordering_algo
+        )
     else:
-        raise ValueError("Ordering algorithm not supported")
-    peo, tn = opt.optimize(tn)
-    treewidth = opt.treewidth
-    return treewidth
+        raise ValueError(f'Slicing algorithm not supported: {slicing_algo}')
+    return optimizer
+
+
+def get_ordering_algo(ordering_algo, par_vars=0):
+    """ Get optimizer instance from its string specifier. """
+    if 'tamaki' in ordering_algo:
+        wait_time = 10
+        if '_' in ordering_algo:
+            params = ordering_algo.split('_')
+            wait_time = float(params[-1])
+        if 'slice' in ordering_algo:
+            max_tw = 25
+            optimizer = TamakiTrimSlicing(max_tw=max_tw, wait_time=wait_time)
+        else:
+            optimizer = TamakiOptimizer(wait_time=wait_time)
+    elif 'rgreedy' in ordering_algo:
+        if '_' in ordering_algo:
+            params = ordering_algo.split('_')
+            if len(params) == 2:
+                _, temp = ordering_algo.split('_')
+                repeats = 10
+            else:
+                _, temp, repeats = ordering_algo.split('_')
+            repeats = int(repeats)
+            temp = float(temp)
+        else:
+            temp = 2
+            repeats = 10
+        optimizer = RGreedyOptimizer(temp=temp, repeats=repeats)
+    elif ordering_algo == 'greedy':
+        optimizer = OrderingOptimizer()
+    elif ordering_algo == 'default':
+        optimizer = DefaultOptimizer()
+    else:
+        raise ValueError('Ordering algorithm not supported')
+    return optimizer
 
 def get_cost_params(circ, ordering_algo='greedy'):
 
     tn = QtreeTensorNet.from_qtree_gates(circ)
+    opt = get_ordering_algo(ordering_algo)
 
-    if ordering_algo=='greedy':
-        opt = OrderingOptimizer()
-    elif ordering_algo=='tamaki':
-        opt = TamakiOptimizer(wait_time=45)
-    elif ordering_algo=='without':
-        opt = WithoutOptimizer()
-    else:
-        raise ValueError("Ordering algorithm not supported")
     peo, _ = opt.optimize(tn)
     treewidth = opt.treewidth
     mems, flops = tn.simulation_cost(peo)
@@ -67,23 +112,18 @@ def get_cost_params(circ, ordering_algo='greedy'):
 
 
 
-def optimize_circuit(circ, algo='greedy'):
+def optimize_circuit(circ, algo='greedy', tamaki_time=15):
 
-    if algo=='greedy':
-        opt = OrderingOptimizer()
-    elif algo=='tamaki':
-        opt = TamakiOptimizer(wait_time=45)
-    elif algo=='without':
-        opt = WithoutOptimizer()
-    else:
-        raise ValueError("Ordering algorithm not supported")
+    # Should I somomehow generalize the tamaki-time argument? provide something like
+    # Optimizer-params argument? How would cli parse this?
+    opt = get_ordering_algo(algo)
 
     tn = QtreeTensorNet.from_qtree_gates(circ)
     peo, tn = opt.optimize(tn)
     return peo, tn, opt
 
-def get_tw(circ, ordering_algo='greedy'):
-    peo, tn, opt = optimize_circuit(circ, algo=ordering_algo)
+def get_tw(circ, ordering_algo='greedy', tamaki_time=15):
+    peo, tn, opt = optimize_circuit(circ, algo=ordering_algo, tamaki_time=tamaki_time)
     treewidth = opt.treewidth
     return treewidth
 
@@ -99,21 +139,27 @@ def get_cost_params(circ, ordering_algo='greedy', overflow_tw=None):
     return treewidth, max(mems), sum(flops)
 
 
-def qaoa_energy_lightcone_iterator(G, p, max_time=None, composer_type='cone'):
+def qaoa_energy_lightcone_iterator(G, p, max_time=None, composer_type='default'):
     gamma, beta = [0.1]*p, [0.3]*p
     if max_time:
         start = time.time()
     else:
         start = np.inf
+
+    if composer_type=='default':
+        Composer = DefaultQAOAComposer
+    elif composer_type=='cylinder':
+        Composer = OldQtreeQAOAComposer
+    elif composer_type=='cone':
+        Composer = QtreeQAOAComposer
+    elif composer_type=='ZZ':
+        Composer = ZZQtreeQAOAComposer
+    else:
+        allowed_composers = ['default', 'cylinder', 'cone', 'ZZ']
+        raise Exception(f"Composer type not recognized, use one of: {allowed_composers}")
+
     for edge in G.edges():
-        if composer_type=='cylinder':
-            composer = OldQtreeQAOAComposer(G, beta=beta, gamma=gamma)
-        elif composer_type=='cone':
-            composer = QtreeQAOAComposer(G, beta=beta, gamma=gamma)
-        elif composer_type=='CC':
-            composer = CCQtreeQAOAComposer(G, beta=beta, gamma=gamma)
-        else:
-            raise Exception("Composer type not recognized")
+        composer = Composer(G, beta=beta, gamma=gamma)
         composer.energy_expectation_lightcone(edge)
         subgraph = get_edge_subgraph(G, edge, len(beta))
         yield composer.circuit, subgraph
@@ -135,23 +181,41 @@ def qaoa_energy_cost_params_stats_from_graph(G, p, max_time=0, max_tw=None,
     return tw, mem, flop
 
 
+def _twidth_parallel_unit(args):
+    circ_graph, ordering_algo, tamaki_time, max_tw = args
+    circuit, subgraph = circ_graph
+    tw = get_tw(circuit, ordering_algo=ordering_algo, tamaki_time=tamaki_time)
+    if max_tw:
+        if tw>max_tw:
+            print(f'Encountered treewidth of {tw}, which is larger {max_tw}')
+            raise ValueError(f'Encountered treewidth of {tw}, which is larger {max_tw}')
+    return tw
+
 def qaoa_energy_tw_from_graph(G, p, max_time=0, max_tw=0,
-                              ordering_algo='greedy', print_stats=False, composer_type='cone'):
-    twidths = []
-    with tqdm(total=G.number_of_edges(), desc='Edge iteration') as pbar:
-        for circuit, subgraph in qaoa_energy_lightcone_iterator(G, p, max_time=max_time, composer_type=composer_type):
-            tw = get_tw(circuit, ordering_algo=ordering_algo)
-            pbar.update()
-            pbar.set_postfix(current_tw=tw, subgraph_nodes=subgraph.number_of_nodes())
-            if max_tw:
-                if tw>max_tw:
-                    print(f'Encountered treewidth of {tw}, which is larger {max_tw}')
-                    break
-            twidths.append(tw)
+                              ordering_algo='greedy', print_stats=False,
+                              tamaki_time=15, n_processes=1, composer_type='default'):
+
+    lightcone_gen = qaoa_energy_lightcone_iterator(G, p, max_time=max_time, composer_type=composer_type)
+    arggen = zip(lightcone_gen, repeat(ordering_algo), repeat(tamaki_time), repeat(max_tw))
+    if n_processes > 1:
+        print('n_processes', n_processes)
+        with Pool(n_processes) as p:
+            twidths = list(tqdm(p.imap(_twidth_parallel_unit, arggen), total=G.number_of_edges()))
+    else:
+        twidths = []
+        with tqdm(total=G.number_of_edges(), desc='Edge iteration') as pbar:
+            for args in arggen:
+                circ_graph, ordering_algo, tamaki_time, max_tw = args
+                circuit, subgraph = circ_graph
+                tw = _twidth_parallel_unit(args)
+                pbar.update()
+                pbar.set_postfix(current_tw=tw, subgraph_nodes=subgraph.number_of_nodes())
+                twidths.append(tw)
 
     if print_stats:
         print(f'med={np.median(twidths)} mean={round(np.mean(twidths), 2)} max={np.max(twidths)}')
     return twidths
+
 
 
 def qaoa_energy_cost_params_from_graph(G, p, max_time=0, max_tw=0,

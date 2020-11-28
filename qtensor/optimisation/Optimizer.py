@@ -3,6 +3,7 @@ import psutil
 import sys
 import numpy as np
 import networkx as nx
+import copy
 
 from qtensor import utils
 from qtensor.optimisation.Greedy import GreedyParvars
@@ -41,6 +42,7 @@ class WithoutOptimizer(Optimizer):
         self.ignored_vars = ignored_vars
         return peo, tensor_net
 
+
 class OrderingOptimizer(Optimizer):
     def _get_ordering_ints(self, graph, free_vars=[]):
         #mapping = {a:b for a,b in zip(graph.nodes(), reversed(list(graph.nodes())))}
@@ -49,36 +51,50 @@ class OrderingOptimizer(Optimizer):
 
         return peo_ints, path
 
-    def optimize(self, tensor_net):
-        line_graph = tensor_net.get_line_graph()
-        free_vars = tensor_net.free_vars
-        ignored_vars = tensor_net.ket_vars + tensor_net. bra_vars
-        graph = line_graph
+    def _get_ordering(self, graph, inplace=True):
+        node_names = nx.get_node_attributes(graph, 'name')
+        node_sizes = nx.get_node_attributes(graph, 'size')
+        # performing ordering inplace reduces time for ordering by 60%
+        peo, path = utils.get_neighbours_peo_vars(graph, inplace=inplace)
 
-        if free_vars:
-            graph = qtree.graph_model.make_clique_on(graph, free_vars)
-
-        peo, path = self._get_ordering_ints(graph)
-        self.treewidth = max(path)
-        self.peo_ints = peo
-
-        peo = [qtree.optimizer.Var(var, size=graph.nodes[var]['size'],
-                        name=graph.nodes[var]['name'])
+        peo = [qtree.optimizer.Var(var, size=node_sizes[var],
+                        name=node_names[var])
                     for var in peo]
+        return peo, path
+
+    def optimize(self, tensor_net):
+        graph = tensor_net.get_line_graph()
+        free_vars = tensor_net.free_vars
+        ignored_vars = tensor_net.ket_vars + tensor_net.bra_vars
+
         if free_vars:
-            peo = qtree.graph_model.get_equivalent_peo(graph, peo, free_vars)
+            # It's more efficient to find ordering in-place to avoid copying
+            # We'll need the copy of a graph only if we have free_vars
+            graph = qtree.graph_model.make_clique_on(graph, free_vars)
+            graph_copy = copy.deepcopy(graph)
+            self.graph = graph_copy
+
+        peo, path = self._get_ordering(graph, inplace=True)
+        self.treewidth = max(path)
+        self.peo_ints = [int(x) for x in peo]
+
+        if free_vars:
+            peo = qtree.graph_model.get_equivalent_peo(self.graph, peo, free_vars)
 
         peo = ignored_vars + peo
         self.peo = peo
-        self.graph = graph
         self.ignored_vars = ignored_vars
         return peo, tensor_net
 
+
 class SlicesOptimizer(OrderingOptimizer):
 
-    def __init__(self, tw_bias=2, max_tw=None):
+    def __init__(self, tw_bias=2, max_tw=None, **kwargs):
         self.tw_bias = tw_bias
         self.max_tw = max_tw
+        target_tw = kwargs.get('target_tw')
+        if target_tw:
+            self.max_tw = target_tw
 
     def _get_max_tw(self):
         if hasattr(self, 'max_tw') and self.max_tw is not None:
@@ -113,8 +129,11 @@ class SlicesOptimizer(OrderingOptimizer):
         return peo_ints, searcher.result
 
     def optimize(self, tensor_net):
-        peo, tensor_net = super().optimize(tensor_net)
-        graph = self.graph
+        peo, _ = super().optimize(tensor_net)
+        try:
+            graph = self.graph
+        except AttributeError:
+            graph = tensor_net.get_line_graph()
 
         p_graph = graph.copy()
         max_tw = self._get_max_tw()
@@ -144,10 +163,16 @@ class TamakiOptimizer(OrderingOptimizer):
         super().__init__(*args, **kwargs)
         self.wait_time = wait_time
 
-    def _get_ordering_ints(self, graph):
+    def _get_ordering(self, graph, inplace=True):
+        node_names = nx.get_node_attributes(graph, 'name')
+        node_sizes = nx.get_node_attributes(graph, 'size')
         peo, tw = qtree.graph_model.peo_calculation.get_upper_bound_peo_pace2017(
                 graph, method="tamaki", wait_time=self.wait_time)
 
+
+        peo = [qtree.optimizer.Var(var, size=node_sizes[var],
+                        name=node_names[var])
+                    for var in peo]
         return peo, [tw]
 
 class TreeTrimSplitter(SlicesOptimizer):
