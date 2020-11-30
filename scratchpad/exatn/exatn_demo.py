@@ -39,7 +39,14 @@ result_data = exatn.getTensorData(result_name)
 result_data
 
 # %%
+x_t = x.transpose((1,0))
+y_t = y.transpose((2,1,0))
+z_t = z.transpose((2,1,0))
+#%%
+x, x_t
+#%%
 einsum_data = np.einsum('ij,jkl,klm->im', x, y, z)
+einsum_data = np.einsum('ji,lkj,mlk->mi', x_t, y_t, z_t)
 # %% [markdown]
 """
 ## Compare results to einsum
@@ -73,4 +80,29 @@ eval_data
 # %%
 assert np.allclose(eval_data, result_data)
 
+# %%
+
+# %% [markdown]
+"""
+## Try to check matrix multiplication
+
+Use different dimensions for each axis to be sure that transpositions are correct.
+"""
+# %%
+N = 2
+a, b = np.random.randn(N, N+1), np.random.randn(N+1, N+2)
+
+exatn.createTensor('C1', [N, N+2], 0.)
+exatn.createTensor('A1', np.array(a, copy=True))
+exatn.createTensor('B1', np.array(b, copy=True))
+# %%
+exatn.evaluateTensorNetwork('test3', 'C1(a, c) = A1(a, b) * B1(b, c)')
+# %%
+c1_exatn = exatn.getLocalTensor('C1')
+# %%
+assert np.allclose(c1_exatn, a.dot(b))
+# %%
+a.dot(b)
+# %%
+c1_exatn
 # %%
