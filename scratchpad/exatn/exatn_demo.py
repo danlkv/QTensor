@@ -6,6 +6,24 @@ sys.path.append("/home/plate/.local/lib")
 import exatn
 import numpy as np
 #%%
+def S(x):
+    """ Flatten array,
+     then reshape to inverse shape,
+     then transpose to match the original shape
+     """
+    x = x.reshape(*reversed(x.shape))
+    x = x.transpose() # reverses order of axis by default
+    return x
+
+def inv_S(x):
+    """ Flatten array,
+     then reshape to inverse shape,
+     then transpose to match the original shape
+     """
+    x = x.transpose() # reverses order of axis by default
+    x = x.reshape(*reversed(x.shape))
+    return x
+
 def idempotent_tensor_create(name, value: np.array):
     """ Clears existing tensors before creation,
     protects original arrays from exatn's modification
@@ -18,7 +36,7 @@ def idempotent_tensor_create(name, value: np.array):
     else:
         # will produce a warning on non-existent tensor
         exatn.destroyTensor(name)
-    return exatn.createTensor(name, np.array(value, copy=True))
+    return exatn.createTensor(name, inv_S(np.array(value, copy=True)))
 # %% [markdown]
 """
 ## Try to run simplest thing, d=1
@@ -83,12 +101,12 @@ Use different dimensions for each axis to be sure that transpositions are correc
 a = np.array([
     [1., 0, 0],
     [0., 1, 1]
-])
+], order='F')
 b = np.array([
     [1., 0, 3, 0],
     [1,  1,  2, 2],
     [-1, 1, -2, 2],
-])
+], order='F')
 
 exatn.createTensor('C1', [2, 4], 0.)
 #%%
@@ -101,6 +119,8 @@ c1_exatn = exatn.getLocalTensor('C1')
 # %%
 assert np.allclose(c1_exatn, np.dot(a, b))
 # %%
+assert np.allclose(S(c1_exatn), np.dot(a, b))
+#%%
 print('c = a*b', np.dot(a, b))
 # %%
 print('c exatn', c1_exatn)
@@ -279,3 +299,9 @@ if not np.allclose(zr_exatn, adj_zr):
 else:
     print('Adjusted result matches exatn')
 # %%
+S(np.array([[0, -1], [1, 0]]))
+# %%
+S(np.array([
+    [1, 2, 3, 4],
+    [5, 6, 7, 8]
+]))
