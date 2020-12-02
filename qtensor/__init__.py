@@ -56,7 +56,8 @@ class SimpZZQtreeComposer(ZZQtreeQAOAComposer):
     def circuit(self, circuit):
         self.builder.circuit = circuit
 
-DefaultQAOAComposer = SimpZZQtreeComposer
+#DefaultQAOAComposer = SimpZZQtreeComposer
+DefaultQAOAComposer = ZZQtreeQAOAComposer
 
 # deprecated
 CCQtreeQAOAComposer = ZZQtreeQAOAComposer
