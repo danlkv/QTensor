@@ -1,4 +1,4 @@
-from mpi4py import MPI
+from qtensor.tools.lazy_import import mpi4py
 import numpy as np
 import sys
 import time
@@ -13,7 +13,7 @@ def mpi_map(f, arr, override_size=None, pbar=False, total=None):
 
 def _mpi_map(f, arr, override_size=None):
     """ Map function over array in parallel using MPI. """
-    comm = MPI.COMM_WORLD
+    comm = mpi4py.MPI.COMM_WORLD
     size = override_size or comm.Get_size()
     rank = comm.Get_rank()
     if rank==0:
@@ -75,6 +75,7 @@ def print_stats():
 
 
 def test():
+    print('Testing mpi map')
     @pbar_wrapper(total=100)
     def work(N, l=100_000):
         x = np.arange(l)*N

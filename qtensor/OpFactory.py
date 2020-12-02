@@ -1,10 +1,10 @@
 import cirq
 import qtree
-import qiskit
 # Qiskit >=0.19
 #import qiskit.circuit.library as qiskit_lib
-
-import qiskit.extensions.standard as qiskit_lib
+#qiskit_lib = qtensor.tools.LasyModule('qiskit.extensions.standard')
+from qtensor.tools.lazy_import import qiskit
+from qtensor.tools.lazy_import import qiskit_lib
 import numpy as np
 
 class OpFactory:
@@ -60,8 +60,16 @@ QtreeFactory.ZZ = ZZ
 qtree.operators.LABEL_TO_GATE_DICT['zz'] = ZZ
 
 class QiskitFactory:
-    H=qiskit_lib.HGate
-    cX=qiskit_lib.CnotGate
+    @staticmethod
+    @property
+    def H():
+        return qiskit_lib.HGate
+
+    @staticmethod
+    @property
+    def cX():
+        return qiskit_lib.CnotGate
+
 
     @staticmethod
     def ZPhase(alpha):
@@ -71,8 +79,16 @@ class QiskitFactory:
     def XPhase(alpha):
         return qiskit_lib.RXGate(theta=alpha*np.pi)
 
-    cZ=qiskit_lib.CzGate
-    Z=qiskit_lib.ZGate
+    @staticmethod
+    @property
+    def cZ():
+        return qiskit_lib.CzGate
+
+    @staticmethod
+    @property
+    def Z():
+        return qiskit_lib.ZGate
+
 
 class CircuitBuilder:
     """ ABC for creating a circuit."""
