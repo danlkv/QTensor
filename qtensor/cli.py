@@ -265,14 +265,16 @@ def qaoa_energy_tw(nodes, seed, degree, p, graph_type,
 
     start = time.time()
     if mpi:
-        qtensor.toolbox.qaoa_energy_tw_from_graph_mpi(G, p,
+        twds = qtensor.toolbox.qaoa_energy_tw_from_graph_mpi(G, p,
                                                       max_time, max_tw, ordering_algo,
                                                       print_stats=True, tamaki_time=tamaki_time
                                                      )
     else:
-        qaoa_energy_tw_from_graph(G, p, max_time, max_tw, ordering_algo, print_stats=True, tamaki_time=tamaki_time, n_processes=n_processes)
-    end = time.time()
-    print('Optimization time:', end-start)
+        twds = qaoa_energy_tw_from_graph(G, p, max_time, max_tw, ordering_algo, print_stats=True, tamaki_time=tamaki_time, n_processes=n_processes)
+
+    if twds:
+        end = time.time()
+        print('Optimization time:', end-start)
 
 
 @cli.command()
@@ -330,9 +332,10 @@ def qaoa_energy_sim(nodes, seed,
         else:
             result = sim.energy_expectation_parallel(G, gamma, beta, n_processes=n_processes)
 
-    end = time.time()
-    print(f"Simutation time: {end - start}")
-    print(result)
+    if result:
+        end = time.time()
+        print(f"Simutation time: {end - start}")
+        print(result)
 
 
 cli()

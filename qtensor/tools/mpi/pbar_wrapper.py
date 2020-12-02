@@ -1,4 +1,4 @@
-from qtensor.tools.lazy_import import mpi4py
+from qtensor.tools.lazy_import import MPI
 import time
 from functools import wraps, partial
 
@@ -6,7 +6,7 @@ from tqdm.auto import tqdm
 
 
 def pbar_wrapper(f=None, total=None):
-    comm = mpi4py.MPI.COMM_WORLD
+    comm = MPI.COMM_WORLD
     size = comm.Get_size()
     rank = comm.Get_rank()
     status_requests = []

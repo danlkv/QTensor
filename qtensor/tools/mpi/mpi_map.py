@@ -1,4 +1,4 @@
-from qtensor.tools.lazy_import import mpi4py
+from qtensor.tools.lazy_import import MPI
 import numpy as np
 import sys
 import time
@@ -13,26 +13,29 @@ def mpi_map(f, arr, override_size=None, pbar=False, total=None):
 
 def _mpi_map(f, arr, override_size=None):
     """ Map function over array in parallel using MPI. """
-    comm = mpi4py.MPI.COMM_WORLD
-    size = override_size or comm.Get_size()
-    rank = comm.Get_rank()
+    w = MPI.COMM_WORLD
+    comm = MPI.Comm
+    size = override_size or comm.Get_size(w)
+    rank = comm.Get_rank(w)
     if rank==0:
         inputs = [list(arr[x::size]) for x in range(size)]
+        lens = [len(x) for x in inputs]
+        print(f'I:: There are {size} workers, each will get {np.mean(lens)} tasks on average.', flush=True)
         if size>len(arr):
             print(f'W:: there are more workers than jobs, {size}>{len(arr)}')
     else:
         inputs = None
     p0 = time.time()
-    inputs = comm.scatter(inputs, root=0)
+    inputs = w.scatter(inputs, root=0)
     start = time.time()
     result = list(map(f, inputs))
     end = time.time()
-    result = comm.gather(result, root=0)
+    result = w.gather(result, root=0)
     p2 = time.time()
     work_time = end-start
     comm_time = p2-end+start-p0
-    work_time = comm.gather(work_time, root=0)
-    comm_time = comm.gather(comm_time, root=0)
+    work_time = w.gather(work_time, root=0)
+    comm_time = w.gather(comm_time, root=0)
 
     f._wall_time = end-start
     f._comm_size = size
