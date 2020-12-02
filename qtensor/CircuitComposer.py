@@ -167,3 +167,10 @@ class QAOAComposer(OldQAOAComposer):
 class ZZQAOAComposer(QAOAComposer):
     def append_zz_term(self, q1, q2, gamma):
         self.apply_gate(self.operators.ZZ, q1, q2, alpha=2*gamma)
+
+class WeightedZZQAOAComposer(ZZQAOAComposer):
+
+    def cost_operator_circuit(self, gamma, edges=None):
+        for i, j, w in self.graph.edges.data('weight', default=1):
+            u, v = self.qubits[i], self.qubits[j]
+            self.append_zz_term(u, v, gamma*w)

@@ -8,7 +8,7 @@ log.add(sys.stderr, level='INFO')
 from qtensor.utils import get_edge_subgraph
 import networkx as nx
 
-from .CircuitComposer import QAOAComposer, OldQAOAComposer, ZZQAOAComposer
+from .CircuitComposer import QAOAComposer, OldQAOAComposer, ZZQAOAComposer, WeightedZZQAOAComposer
 from .OpFactory import CirqBuilder, QtreeBuilder, QiskitBuilder
 from .OpFactory import QtreeFullBuilder
 from qtensor.Simulate import CirqSimulator, QtreeSimulator
@@ -48,6 +48,10 @@ class ZZQtreeFullQAOAComposer(ZZQAOAComposer):
     def _get_builder_class(self):
         return QtreeFullBuilder
 
+class WeightedZZQtreeQAOAComposer(WeightedZZQAOAComposer):
+    def _get_builder_class(self):
+        return QtreeBuilder
+
 class SimpZZQtreeComposer(ZZQtreeQAOAComposer):
     @property
     def circuit(self):
@@ -57,6 +61,7 @@ class SimpZZQtreeComposer(ZZQtreeQAOAComposer):
         self.builder.circuit = circuit
 
 DefaultQAOAComposer = SimpZZQtreeComposer
+WeightedQAOAComposer = WeightedZZQtreeQAOAComposer
 
 # deprecated
 CCQtreeQAOAComposer = ZZQtreeQAOAComposer
