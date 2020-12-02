@@ -7,6 +7,7 @@ import copy
 
 from qtensor import utils
 from qtensor.optimisation.Greedy import GreedyParvars
+from qtensor.optimisation.ordering import greedy_ordering_networkit
 from loguru import logger as log
 
 
@@ -55,7 +56,8 @@ class OrderingOptimizer(Optimizer):
         node_names = nx.get_node_attributes(graph, 'name')
         node_sizes = nx.get_node_attributes(graph, 'size')
         # performing ordering inplace reduces time for ordering by 60%
-        peo, path = utils.get_neighbours_peo_vars(graph, inplace=inplace)
+        #peo, path = utils.get_neighbours_peo_vars(graph, inplace=inplace)
+        peo, path = greedy_ordering_networkit(graph)
 
         peo = [qtree.optimizer.Var(var, size=node_sizes[var],
                         name=node_names[var])
