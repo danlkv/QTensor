@@ -11,6 +11,7 @@ from qtensor.optimisation.Optimizer import OrderingOptimizer, TamakiOptimizer, W
 from qtensor.optimisation import RGreedyOptimizer, LateParOptimizer
 from qtensor.utils import get_edge_subgraph
 from qtensor import QtreeQAOAComposer, OldQtreeQAOAComposer, ZZQtreeQAOAComposer, DefaultQAOAComposer
+from qtensor import tools
 
 def bethe_graph(p, degree):
     def add_two_nodes_to_leafs(graph):
@@ -190,6 +191,19 @@ def _twidth_parallel_unit(args):
             print(f'Encountered treewidth of {tw}, which is larger {max_tw}')
             raise ValueError(f'Encountered treewidth of {tw}, which is larger {max_tw}')
     return tw
+
+def qaoa_energy_tw_from_graph_mpi(G, p, max_time=0, max_tw=0,
+                              ordering_algo='greedy', print_stats=False,
+                              tamaki_time=15, composer_type='default'):
+
+    lightcone_gen = qaoa_energy_lightcone_iterator(G, p, max_time=max_time, composer_type=composer_type)
+    arggen = zip(lightcone_gen, repeat(ordering_algo), repeat(tamaki_time), repeat(max_tw))
+    twidths = tools.mpi.mpi_map(_twidth_parallel_unit, list(arggen), pbar=True, total=G.number_of_edges())
+    if twidths:
+        if print_stats:
+            print(f'med={np.median(twidths)} mean={round(np.mean(twidths), 2)} max={np.max(twidths)}')
+        return twidths
+
 
 def qaoa_energy_tw_from_graph(G, p, max_time=0, max_tw=0,
                               ordering_algo='greedy', print_stats=False,

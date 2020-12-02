@@ -249,7 +249,11 @@ def generate_qaoa_energy_circuit(seed, degree, nodes, p, graph_type, edge_index)
 @click.option('-O','--ordering-algo', default='greedy', help='Algorithm for elimination order')
 @click.option('--tamaki_time', default=20, help='Algorithm for elimination order')
 @click.option('--n_processes', default=1, help='Number of processes.')
-def qaoa_energy_tw(nodes, seed, degree, p, graph_type, max_time, max_tw, ordering_algo, tamaki_time, n_processes):
+@click.option('--mpi', default=False, is_flag=True)
+def qaoa_energy_tw(nodes, seed, degree, p, graph_type,
+                   max_time, max_tw, ordering_algo, tamaki_time, n_processes,
+                   mpi=False
+                  ):
     np.random.seed(seed)
     random.seed(seed)
     if graph_type=='random_regular':
@@ -259,7 +263,16 @@ def qaoa_energy_tw(nodes, seed, degree, p, graph_type, max_time, max_tw, orderin
     else:
         raise Exception('Unsupported graph type')
 
-    qaoa_energy_tw_from_graph(G, p, max_time, max_tw, ordering_algo, print_stats=True, tamaki_time=tamaki_time, n_processes=n_processes)
+    start = time.time()
+    if mpi:
+        qtensor.toolbox.qaoa_energy_tw_from_graph_mpi(G, p,
+                                                      max_time, max_tw, ordering_algo,
+                                                      print_stats=True, tamaki_time=tamaki_time
+                                                     )
+    else:
+        qaoa_energy_tw_from_graph(G, p, max_time, max_tw, ordering_algo, print_stats=True, tamaki_time=tamaki_time, n_processes=n_processes)
+    end = time.time()
+    print('Optimization time:', end-start)
 
 
 @cli.command()
@@ -316,9 +329,9 @@ def qaoa_energy_sim(nodes, seed,
                 backend_obj.gen_report()
         else:
             result = sim.energy_expectation_parallel(G, gamma, beta, n_processes=n_processes)
-            end = time.time()
-            print(f"Simutation time: {end - start}")
 
+    end = time.time()
+    print(f"Simutation time: {end - start}")
     print(result)
 
 
