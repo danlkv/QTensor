@@ -275,11 +275,14 @@ def qaoa_energy_tw(nodes, seed, degree, p, graph_type, max_time, max_tw, orderin
 @click.option('--n_processes', default=1)
 @click.option('-P','--profile', default=False, is_flag=True)
 @click.option('-C','--composer-type', default='default')
+@click.option('--mpi', default=False, is_flag=True)
 def qaoa_energy_sim(nodes, seed,
                     degree, p, graph_type,
                     max_time, max_tw, ordering_algo,
                     backend, n_processes, profile,
-                    composer_type='default'):
+                    composer_type='default',
+                    mpi=False
+                   ):
     np.random.seed(seed)
     random.seed(seed)
     if graph_type=='random_regular':
@@ -300,15 +303,22 @@ def qaoa_energy_sim(nodes, seed,
 
     sim = QAOAQtreeSimulator(DefaultQAOAComposer, bucket_backend=backend_obj, optimizer=optimizer)
     start = time.time()
-    if n_processes==1:
-        result = sim.energy_expectation(G, gamma, beta)
-        if profile:
-            print('Profiling results')
-            backend_obj.gen_report()
+    if mpi:
+        result = sim.energy_expectation_mpi(G, gamma, beta,
+                                            n_processes=n_processes, print_perf=True
+                                           )
     else:
-        result = sim.energy_expectation_parallel(G, gamma, beta, n_processes=n_processes)
-    end = time.time()
-    print(f"Simutation time: {end - start}")
+
+        if n_processes==1:
+            result = sim.energy_expectation(G, gamma, beta)
+            if profile:
+                print('Profiling results')
+                backend_obj.gen_report()
+        else:
+            result = sim.energy_expectation_parallel(G, gamma, beta, n_processes=n_processes)
+            end = time.time()
+            print(f"Simutation time: {end - start}")
+
     print(result)
 
 
