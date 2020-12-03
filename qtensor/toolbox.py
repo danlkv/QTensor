@@ -198,6 +198,9 @@ def _twidth_parallel_unit(args):
 
 def _mpi_parallel_unit(args):
     G, p, edge, composer_type, ordering_algo, tamaki_time, max_tw = args
+    #graph_arguments, p, edge_index, composer_type, ordering_algo, tamaki_time, max_tw = args
+    #G = random_graph(**graph_arguments)
+    #edge = list(G.edges)[edge_index]
     start = time.time()
     circuit = qaoa_energy_lightcone_circ(G, p, edge, composer_type=composer_type)
     p1 = time.time()
@@ -212,8 +215,10 @@ def qaoa_energy_tw_from_graph_mpi(G, p, max_time=0, max_tw=0,
 
     #print('before gen', flush=True)
     #lightcone_gen = qaoa_energy_lightcone_iterator(G, p, max_time=max_time, composer_type=composer_type)
-    #arggen = zip(G.edges(), repeat(ordering_algo), repeat(tamaki_time), repeat(max_tw))
+    arggen = zip(G.edges(), repeat(ordering_algo), repeat(tamaki_time), repeat(max_tw))
     arggen = zip(repeat(G), repeat(p), G.edges(), repeat(composer_type),
+    #edge indices = range(100_000_000) # should be enough for any reasonable calculation
+    #arggen = zip(repeat(graph_arguments), repeat(p), edge_indices, repeat(composer_type),
                 repeat(ordering_algo), repeat(tamaki_time), repeat(max_tw))
     twidths = tools.mpi.mpi_map(_mpi_parallel_unit, list(arggen), pbar=True, total=G.number_of_edges())
     if twidths:

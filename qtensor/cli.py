@@ -265,6 +265,8 @@ def qaoa_energy_tw(nodes, seed, degree, p, graph_type,
 
     start = time.time()
     if mpi:
+        #graph_arguments = {'type':graph_type, 'nodes':nodes, 'degree':degree, 'seed':seed}
+        #twds = qtensor.toolbox.qaoa_energy_tw_from_graph_mpi(graph_arguments, p,
         twds = qtensor.toolbox.qaoa_energy_tw_from_graph_mpi(G, p,
                                                       max_time, max_tw, ordering_algo,
                                                       print_stats=True, tamaki_time=tamaki_time
