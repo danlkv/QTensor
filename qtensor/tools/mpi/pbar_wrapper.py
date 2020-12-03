@@ -12,6 +12,12 @@ def pbar_wrapper(f=None, total=None):
     status_requests = []
     if rank==0:
         pbar = tqdm(total=total)
+        # There is usually a delay between calling the wrapper
+        # and actually starting work. 
+        # tqdm prints stuff when initializing pbar, so
+        # any prints after initializing will be on the same line, 
+        # which is ugly
+        print()
 
     def wrapper(f):
         n_call = 0

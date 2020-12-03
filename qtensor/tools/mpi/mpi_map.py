@@ -18,15 +18,26 @@ def _mpi_map(f, arr, override_size=None):
     size = override_size or comm.Get_size(w)
     rank = comm.Get_rank(w)
     if rank==0:
-        inputs = [list(arr[x::size]) for x in range(size)]
-        lens = [len(x) for x in inputs]
+        #indices = arr #list(range(len(arr)))
+        indices = list(range(len(arr)))
+        """
+        Instead of sending the data itself, we can just send indices that will be used,
+        since each mpi rank has its copy of input data
+        """
+        input_indices = [list(indices[x::size]) for x in range(size)]
+        lens = [len(x) for x in input_indices]
         print(f'I:: There are {size} workers, each will get {np.mean(lens)} tasks on average.', flush=True)
         if size>len(arr):
             print(f'W:: there are more workers than jobs, {size}>{len(arr)}')
     else:
-        inputs = None
+        input_indices = None
     p0 = time.time()
-    inputs = w.scatter(inputs, root=0)
+    input_indices = w.scatter(input_indices, root=0)
+    """
+    Get the input arguments assigned for current mpi rank
+    """
+    #inputs = input_indices 
+    inputs = [arr[i] for i in input_indices]
     start = time.time()
     result = list(map(f, inputs))
     end = time.time()
@@ -81,10 +92,12 @@ def test():
     print('Testing mpi map')
     @pbar_wrapper(total=100)
     def work(N, l=100_000):
-        x = np.arange(l)*N
+        x = np.arange(l)*N[0]
         return sum(np.sin(x)**2 + np.cos(x)**2)/l
 
-    x = range(100)
+    # the large inputs are emulated to check that 
+    # data is not sent, only indices
+    x = [np.ones(500_000)*i for i in range(100)]
     res = mpi_map(work, x)
     if res:
         print('Result:', sum(res))
