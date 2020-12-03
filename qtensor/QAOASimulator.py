@@ -5,6 +5,7 @@ import networkx as nx
 from tqdm.auto import tqdm
 from multiprocessing import Pool
 from loguru import logger as log
+from qtensor import tools
 
 class QAOASimulator(Simulator):
     def __init__(self, composer, profile=False, *args, **kwargs):
@@ -86,9 +87,38 @@ class QAOASimulator(Simulator):
 
         return C
 
+    def energy_expectation_mpi(self, G, gamma, beta, n_processes=4, print_perf=False):
+        """
+        Arguments:
+            G: MaxCut graph, Networkx
+            gamma, beta: list[float]
+
+        Returns: MaxCut energy expectation
+        """
+        args = [(G, gamma, beta, edge) for edge in G.edges()]
+
+        r = tools.mpi.mpi_map(self._parallel_unit_edge, args,
+                               pbar=True, total=G.number_of_edges())
+
+        if r:
+           total_E = sum(r)
+           C = self._post_process_energy(G, total_E)
+           if print_perf:
+               tools.mpi.print_stats()
+           return C
+
+
 
 class QAOAQtreeSimulator(QAOASimulator, QtreeSimulator):
     pass
+
+
+class WeightedQAOASimulator(QAOASimulator, QtreeSimulator):
+    def _get_edge_energy(self, G, gamma, beta, edge):
+        circuit = self._edge_energy_circuit(G, gamma, beta, edge)
+        weight = G.get_edge_data(edge)['weight']
+        return weight*self.simulate(circuit)
+
 
 class QAOACirqSimulator(QAOASimulator, CirqSimulator):
     def _get_edge_energy(self, G, gamma, beta, edge):
