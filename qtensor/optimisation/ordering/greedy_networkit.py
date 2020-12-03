@@ -1,4 +1,5 @@
-import networkit as nk
+#import networkit as nk
+from qtensor.tools.lazy_import import networkit as nk
 from itertools import combinations
 import numpy as np
 

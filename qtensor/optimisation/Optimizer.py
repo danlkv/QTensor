@@ -57,7 +57,15 @@ class OrderingOptimizer(Optimizer):
         node_sizes = nx.get_node_attributes(graph, 'size')
         # performing ordering inplace reduces time for ordering by 60%
         #peo, path = utils.get_neighbours_peo_vars(graph, inplace=inplace)
-        peo, path = greedy_ordering_networkit(graph)
+
+        # this may be ugly, but it is actually pythonic:)
+        # solves two problems: possible inconsistencies in api, and missing networkit.
+        # does not introduce overhead
+        try:
+            peo, path = greedy_ordering_networkit(graph)
+        except:
+            peo, path = utils.get_neighbours_peo_vars(graph, inplace=inplace)
+
 
         peo = [qtree.optimizer.Var(var, size=node_sizes[var],
                         name=node_names[var])
