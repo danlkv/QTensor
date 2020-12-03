@@ -59,15 +59,16 @@ QtreeFactory.ZZ = ZZ
 # this is a bit ugly, but will work for now
 qtree.operators.LABEL_TO_GATE_DICT['zz'] = ZZ
 
-class QiskitFactory:
-    @staticmethod
+class QiskitFactory_Metaclass(type):
+    def __init__(cls, *args, **kwargs):
+        pass
+
     @property
-    def H():
+    def H(cls):
         return qiskit_lib.HGate
 
-    @staticmethod
     @property
-    def cX():
+    def cX(cls):
         return qiskit_lib.CnotGate
 
 
@@ -79,16 +80,16 @@ class QiskitFactory:
     def XPhase(alpha):
         return qiskit_lib.RXGate(theta=alpha*np.pi)
 
-    @staticmethod
     @property
-    def cZ():
+    def cZ(cls):
         return qiskit_lib.CzGate
 
-    @staticmethod
     @property
-    def Z():
+    def Z(cls):
         return qiskit_lib.ZGate
 
+class QiskitFactory(metaclass=QiskitFactory_Metaclass):
+    pass
 
 class CircuitBuilder:
     """ ABC for creating a circuit."""
@@ -121,11 +122,6 @@ class CircuitBuilder:
     @circuit.setter
     def circuit(self, circuit):
         self._circuit = circuit
-
-    def inverse(self):
-        """ Reverse order and conjugate gates. """
-        raise NotImplementedError
-
 
 class CirqBuilder(CircuitBuilder):
     operators = CirqFactory
