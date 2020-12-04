@@ -91,13 +91,14 @@ def print_stats():
 def test():
     print('Testing mpi map')
     @pbar_wrapper(total=100)
-    def work(N, l=100_000):
+    def work(N, l=50_000):
+        l = l+ np.random.randint(l)
         x = np.arange(l)*N[0]
         return sum(np.sin(x)**2 + np.cos(x)**2)/l
 
     # the large inputs are emulated to check that 
     # data is not sent, only indices
-    x = [np.ones(500_000)*i for i in range(100)]
+    x = [np.ones(50_000)*i for i in range(100)]
     res = mpi_map(work, x)
     if res:
         print('Result:', sum(res))

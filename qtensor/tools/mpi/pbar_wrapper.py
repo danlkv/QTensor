@@ -1,6 +1,7 @@
 from qtensor.tools.lazy_import import MPI
 import time
 from functools import wraps, partial
+import numpy as np
 
 from tqdm.auto import tqdm
 
@@ -18,6 +19,8 @@ def pbar_wrapper(f=None, total=None):
         # any prints after initializing will be on the same line, 
         # which is ugly
         print()
+        server_recvs = [np.ones(1, dtype='i')*-1 for x in range(1, size)]
+    client_ack = np.array([0], dtype='i')
 
     def wrapper(f):
         n_call = 0
@@ -33,17 +36,32 @@ def pbar_wrapper(f=None, total=None):
                 # Receive acknowledgements of completing
                 for other in range(1, size):
                     status_requests.append(
-                        comm.irecv(source=other, tag=1)
+                        comm.Irecv([server_recvs[other-1], MPI.INT], source=other, tag=1)
+                        #comm.irecv(source=other, tag=2)
                     )
-                for req in status_requests:
-                    _, data = req.test()
-                    if data is not None:
+                for i in range(len(status_requests)):
+                    req = status_requests.pop(0)
+                    x = req.Test()
+                    #print(i, np.array(server_recvs).flatten())
+                    if x:
                         pbar.update(1)
                     else:
-                        pass
+                        status_requests.append(req)
+                 #  if server_recvs[i][0] is not -1:
+                 #      pbar.update(1)
+                 #      server_recvs[i][0] = -1
+                 #  else:
+                 #      pass
                 # --
             else:
-                req = comm.isend(n_call, dest=0, tag=1)
+                if len(status_requests):
+                    req = status_requests.pop()
+                    #req.wait()
+                client_ack[0] = n_call
+                req = comm.Isend([client_ack, MPI.INT], dest=0, tag=1)
+                req.Wait()
+                #req = comm.isend(n_call, dest=0, tag=1)
+                status_requests.append(req)
             end = time.time()
             wrapee._comm_overhead += end-start
 
