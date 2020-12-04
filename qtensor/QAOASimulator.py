@@ -112,6 +112,14 @@ class QAOASimulator(Simulator):
 class QAOAQtreeSimulator(QAOASimulator, QtreeSimulator):
     pass
 
+
+class WeightedQAOASimulator(QAOASimulator, QtreeSimulator):
+    def _get_edge_energy(self, G, gamma, beta, edge):
+        circuit = self._edge_energy_circuit(G, gamma, beta, edge)
+        weight = G.get_edge_data(*edge)['weight']
+        return weight*self.simulate(circuit)
+
+
 class QAOACirqSimulator(QAOASimulator, CirqSimulator):
     def _get_edge_energy(self, G, gamma, beta, edge):
         self.max_tw = 25

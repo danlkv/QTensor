@@ -185,3 +185,11 @@ class QAOAComposerChords(ZZQAOAComposer):
             self.cost_operator_circuit(g)
             self.mixer_operator(b)
         self.graph = cone_base
+
+
+class WeightedZZQAOAComposer(ZZQAOAComposer):
+
+    def cost_operator_circuit(self, gamma, edges=None):
+        for i, j, w in self.graph.edges.data('weight', default=1):
+            u, v = self.qubits[i], self.qubits[j]
+            self.append_zz_term(u, v, gamma*w)
