@@ -166,8 +166,8 @@ class TamakiOptimizer(OrderingOptimizer):
     def _get_ordering(self, graph, inplace=True):
         node_names = nx.get_node_attributes(graph, 'name')
         node_sizes = nx.get_node_attributes(graph, 'size')
-        peo, tw = qtree.graph_model.peo_calculation.get_upper_bound_peo_pace2017(
-                graph, method="tamaki", wait_time=self.wait_time)
+        peo, tw = qtree.graph_model.peo_calculation.get_upper_bound_peo_pace2017_interactive(
+                graph, method="tamaki", max_time=self.wait_time)
 
 
         peo = [qtree.optimizer.Var(var, size=node_sizes[var],
