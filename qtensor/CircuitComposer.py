@@ -1,5 +1,5 @@
 from loguru import logger as log
-from qtensor.utils import get_edge_subgraph
+from qtensor import utils
 import networkx as nx
 from .OpFactory import CircuitBuilder
 
@@ -83,7 +83,7 @@ class OldQAOAComposer(CircuitComposer):
         G = self.graph
         gamma, beta = self.params['gamma'], self.params['beta']
         i,j = edge
-        graph = get_edge_subgraph(G, edge, len(gamma))
+        graph = utils.get_edge_subgraph(G, edge, len(gamma))
         log.debug('Subgraph nodes: {}, edges: {}', graph.number_of_nodes(), graph.number_of_edges())
         self.n_qubits = graph.number_of_nodes()
         mapping = {v:i for i, v in enumerate(graph.nodes())}
@@ -145,8 +145,9 @@ class QAOAComposer(OldQAOAComposer):
         cone_base = self.graph
 
         for i, g, b in zip(range(p, 0, -1), gamma, beta):
-            self.graph = get_edge_subgraph(cone_base, edge, i)
+            self.graph = utils.get_edge_subgraph(cone_base, edge, i)
             self.cost_operator_circuit(g)
+            self.graph = utils.get_edge_subgraph(cone_base, edge, i-1)
             self.mixer_operator(b)
         self.graph = cone_base
 
@@ -164,6 +165,31 @@ class QAOAComposer(OldQAOAComposer):
 
         self.circuit = first_part + second_part
 
+
 class ZZQAOAComposer(QAOAComposer):
     def append_zz_term(self, q1, q2, gamma):
         self.apply_gate(self.operators.ZZ, q1, q2, alpha=2*gamma)
+
+class QAOAComposerChords(ZZQAOAComposer):
+    def cone_ansatz(self, edge):
+        beta, gamma = self.params['beta'], self.params['gamma']
+
+        assert(len(beta) == len(gamma))
+        p = len(beta) # infering number of QAOA steps from the parameters passed
+        self.layer_of_Hadamards()
+        # second, apply p alternating operators
+        cone_base = self.graph
+
+        for i, g, b in zip(range(p, 0, -1), gamma, beta):
+            self.graph = utils.get_edge_subgraph_old(cone_base, edge, i)
+            self.cost_operator_circuit(g)
+            self.mixer_operator(b)
+        self.graph = cone_base
+
+
+class WeightedZZQAOAComposer(ZZQAOAComposer):
+
+    def cost_operator_circuit(self, gamma, edges=None):
+        for i, j, w in self.graph.edges.data('weight', default=1):
+            u, v = self.qubits[i], self.qubits[j]
+            self.append_zz_term(u, v, gamma*w)

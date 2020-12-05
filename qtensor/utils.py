@@ -184,9 +184,42 @@ def nodes_at_distance(G, nodes, dist):
         nodes  = list(set(nodes))
     return set(nodes)
 
-def get_edge_subgraph(G, edge, dist):
+def get_edge_subgraph_old(G, edge, dist):
     nodes = nodes_at_distance(G, edge, dist)
     return G.subgraph(set(nodes))
+
+def nodes_group_by_distance(G, nodes, dist):
+    nodes_groups = { 0: list(nodes) }
+    inner_circle = list(nodes)
+
+    for d in range(1, dist+1):
+        range_d_nodes = []
+        for n in nodes_groups[d-1]:
+            neigh = list(G.neighbors(n))
+            range_d_nodes += neigh
+        range_d_set = set(range_d_nodes)
+        nodes_groups[d] = list(range_d_set - set(inner_circle))
+        inner_circle += nodes_groups[d]
+    return nodes_groups
+
+
+def get_edge_subgraph(G, edge, dist):
+    nodes_groups = nodes_group_by_distance(G, edge, dist)
+    all_nodes = sum(nodes_groups.values(), [])
+    subgraph = G.subgraph(all_nodes).copy()
+    farthest_nodes = nodes_groups[dist]
+    #   for v in farthest_nodes:
+    #       u, w = edge
+    #       shpu, shpw = nx.shortest_path(G, u, v), nx.shortest_path(G, w, v)
+    #       print('shp, dist', len(shpu), len(shpw), dist)
+    #       assert (len(shpu) == dist + 1) or (len(shpw) == dist+1)
+    edges_to_delete = []
+    for u, v in subgraph.edges():
+        if (u in farthest_nodes) and (v in farthest_nodes):
+            edges_to_delete.append((u,v))
+    #print('removing edges', edges_to_delete)
+    subgraph.remove_edges_from(edges_to_delete)
+    return subgraph
 
 
 class ReportTable():

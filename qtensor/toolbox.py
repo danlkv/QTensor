@@ -11,6 +11,7 @@ from qtensor.optimisation.Optimizer import OrderingOptimizer, TamakiOptimizer, W
 from qtensor.optimisation import RGreedyOptimizer, LateParOptimizer
 from qtensor.utils import get_edge_subgraph
 from qtensor import QtreeQAOAComposer, OldQtreeQAOAComposer, ZZQtreeQAOAComposer, DefaultQAOAComposer
+from qtensor import tools
 
 def bethe_graph(p, degree):
     def add_two_nodes_to_leafs(graph):
@@ -140,12 +141,20 @@ def get_cost_params(circ, ordering_algo='greedy', overflow_tw=None):
 
 
 def qaoa_energy_lightcone_iterator(G, p, max_time=None, composer_type='default'):
-    gamma, beta = [0.1]*p, [0.3]*p
     if max_time:
         start = time.time()
     else:
         start = np.inf
 
+    for edge in G.edges():
+        circ = qaoa_energy_lightcone_circ(G, p, edge, composer_type=composer_type)
+        subgraph = get_edge_subgraph(G, edge, p)
+        yield circ, subgraph
+        if time.time() - start > max_time:
+            break
+
+def qaoa_energy_lightcone_circ(G, p, edge, composer_type='default'):
+    gamma, beta = [0.1]*p, [0.3]*p
     if composer_type=='default':
         Composer = DefaultQAOAComposer
     elif composer_type=='cylinder':
@@ -158,13 +167,9 @@ def qaoa_energy_lightcone_iterator(G, p, max_time=None, composer_type='default')
         allowed_composers = ['default', 'cylinder', 'cone', 'ZZ']
         raise Exception(f"Composer type not recognized, use one of: {allowed_composers}")
 
-    for edge in G.edges():
-        composer = Composer(G, beta=beta, gamma=gamma)
-        composer.energy_expectation_lightcone(edge)
-        subgraph = get_edge_subgraph(G, edge, len(beta))
-        yield composer.circuit, subgraph
-        if time.time() - start > max_time:
-            break
+    composer = Composer(G, beta=beta, gamma=gamma)
+    composer.energy_expectation_lightcone(edge)
+    return composer.circuit
 
 
 def qaoa_energy_cost_params_stats_from_graph(G, p, max_time=0, max_tw=None,
@@ -190,6 +195,38 @@ def _twidth_parallel_unit(args):
             print(f'Encountered treewidth of {tw}, which is larger {max_tw}')
             raise ValueError(f'Encountered treewidth of {tw}, which is larger {max_tw}')
     return tw
+
+def _mpi_parallel_unit(args):
+    G, p, edge, composer_type, ordering_algo, tamaki_time, max_tw = args
+    #graph_arguments, p, edge_index, composer_type, ordering_algo, tamaki_time, max_tw = args
+    #G = random_graph(**graph_arguments)
+    #edge = list(G.edges)[edge_index]
+    start = time.time()
+    circuit = qaoa_energy_lightcone_circ(G, p, edge, composer_type=composer_type)
+    p1 = time.time()
+    tw = get_tw(circuit, ordering_algo=ordering_algo, tamaki_time=tamaki_time)
+    p2 = time.time()
+    #print(f'Time for circuit creation: {p1-start}, time to find order: {p2-p1}', flush=True)
+    return tw
+
+def qaoa_energy_tw_from_graph_mpi(G, p, max_time=0, max_tw=0,
+                              ordering_algo='greedy', print_stats=False,
+                              tamaki_time=15, composer_type='default'):
+
+    #print('before gen', flush=True)
+    #lightcone_gen = qaoa_energy_lightcone_iterator(G, p, max_time=max_time, composer_type=composer_type)
+    arggen = zip(G.edges(), repeat(ordering_algo), repeat(tamaki_time), repeat(max_tw))
+    arggen = zip(repeat(G), repeat(p), G.edges(), repeat(composer_type),
+    #edge indices = range(100_000_000) # should be enough for any reasonable calculation
+    #arggen = zip(repeat(graph_arguments), repeat(p), edge_indices, repeat(composer_type),
+                repeat(ordering_algo), repeat(tamaki_time), repeat(max_tw))
+    twidths = tools.mpi.mpi_map(_mpi_parallel_unit, list(arggen), pbar=True, total=G.number_of_edges())
+    if twidths:
+        if print_stats:
+            tools.mpi.print_stats()
+            print(f'med={np.median(twidths)} mean={round(np.mean(twidths), 2)} max={np.max(twidths)}')
+        return twidths
+
 
 def qaoa_energy_tw_from_graph(G, p, max_time=0, max_tw=0,
                               ordering_algo='greedy', print_stats=False,
