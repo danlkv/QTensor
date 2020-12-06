@@ -9,6 +9,17 @@ import networkx as nx
 from tqdm.auto import tqdm
 import operator
 
+def eliminate_low_degrees(graph, min_degree=3):
+    """ Eliminate all verticies in graph that have degree
+    smaller than `min_degree`
+    Works in-place
+    """
+
+    for node, degree in graph.degree:
+        if degree < min_degree:
+            eliminate_node_no_structure(graph, node)
+
+
 def get_neighbours_peo_vars(old_graph, inplace=False):
     if inplace:
         graph = old_graph
