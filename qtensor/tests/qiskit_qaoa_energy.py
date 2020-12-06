@@ -2,8 +2,24 @@ import qiskit
 import numpy as np
 import networkx as nx
 from functools import partial
-from qiskit.optimization.ising.max_cut import get_operator as get_maxcut_operator
-from qiskit.aqua.algorithms.adaptive.qaoa.var_form import QAOAVarForm
+
+import qiskit
+
+def qiskit_imports():
+    # pylint: disable-msg=no-name-in-module, import-error
+    # qiskit version workaround
+    if qiskit.__version__ > '0.15.0':
+        # new
+        from qiskit.aqua.algorithms.minimum_eigen_solvers.qaoa.var_form import QAOAVarForm
+        from qiskit.optimization.applications.ising.max_cut import get_operator as get_maxcut_operator
+    else:
+        # old
+        from qiskit.optimization.ising.max_cut import get_operator as get_maxcut_operator
+        from qiskit.aqua.algorithms.adaptive.qaoa.var_form import QAOAVarForm 
+    return get_maxcut_operator, QAOAVarForm
+
+get_maxcut_operator, QAOAVarForm = qiskit_imports()
+
 # Use these lines for import with new qiskit(>=0.19). The resulting QAOA energy will be wrong
 # The change is somewhere in this file: https://github.com/Qiskit/qiskit-aqua/blob/0.7.5/qiskit/aqua/algorithms/minimum_eigen_solvers/qaoa/var_form.py
 # It's ridiculous that nobody found this and never fixed, August 2020
@@ -79,21 +95,37 @@ def maxcut_obj(x,w):
     X = np.outer(x, (1 - x))
     return -np.sum(w * X)
 
+def simulate_qiskit_amps_new(G, gamma, beta):
+    # not working
+    assert len(gamma) == len(beta)
+    p = len(gamma)
+    parameters = np.concatenate([np.array(gamma), np.array(beta)])
+    w = nx.adjacency_matrix(G, nodelist=list(G.nodes())).toarray()
+    qubitOp, offset = get_maxcut_operator(w)
+    qc1 = QAOAVarForm(qubitOp.to_opflow(), p=p, initial_state=None).construct_circuit(parameters)
+    ex1=execute(qc1, backend=Aer.get_backend('statevector_simulator'))
+    E_0 = qubitOp.evaluate_with_statevector(ex1.result().get_statevector())[0].real
+    return -(E_0 + offset)
+
 def simulate_qiskit_amps(G, gamma, beta):
     assert len(gamma) == len(beta)
     p = len(gamma)
 
+    if qiskit.__version__ > '0.15.0':
+        return simulate_qiskit_amps_new(G, gamma, beta)
+
     w = nx.adjacency_matrix(G, nodelist=list(G.nodes())).toarray()
     obj = partial(maxcut_obj,w=w)
-    C, _ = get_maxcut_operator(w)
+    C, offset = get_maxcut_operator(w)
     parameters = np.concatenate([beta, -np.array(gamma)])
 
     # When transitioning to newer qiskit this raises error.
     # Adding C.to_opflow() removes the error, but the values are still wrong
+    # qiskit version workaround
     varform = QAOAVarForm(p=p,cost_operator=C)
     circuit = varform.construct_circuit(parameters)
 
-    circuit_qiskit = transpile(circuit, optimization_level=0,basis_gates=['u1', 'u2', 'u3', 'cx'])
+    #circuit_qiskit = transpile(circuit, optimization_level=0,basis_gates=['u1', 'u2', 'u3', 'cx'])
     #print(circuit_qiskit)
     sv = execute(circuit, backend=Aer.get_backend("statevector_simulator")).result().get_statevector()
 
