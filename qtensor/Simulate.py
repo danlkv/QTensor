@@ -1,6 +1,6 @@
 import qtree
 import cirq
-from qtensor.ProcessingFrameworks import NumpyBackend
+from qtensor.contraction_backends import NumpyBackend
 
 from qtensor.optimisation.TensorNet import QtreeTensorNet
 from qtensor.optimisation.Optimizer import DefaultOptimizer

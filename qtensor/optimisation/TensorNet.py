@@ -1,5 +1,5 @@
 import qtree
-from qtensor.ProcessingFrameworks import NumpyBackend
+from qtensor.contraction_backends import NumpyBackend
 from qtensor import utils
 from loguru import logger as log
 

@@ -4,7 +4,7 @@ from multiprocessing import Pool
 from multiprocessing.dummy import Pool as ThreadPool
 from tqdm import tqdm
 
-from qtensor.ProcessingFrameworks import NumpyBackend
+from qtensor.contraction_backends import NumpyBackend
 from qtensor.Simulate import Simulator, QtreeSimulator
 from qtensor.optimisation.Optimizer import SlicesOptimizer
 from qtensor.optimisation.TensorNet import QtreeTensorNet
