@@ -1,5 +1,5 @@
 from qtensor import QtreeQAOAComposer
-from qtensor.ProcessingFrameworks import PerfNumpyBackend
+from qtensor.contraction_backends import PerfNumpyBackend
 
 from qtensor.Simulate import CirqSimulator, QtreeSimulator
 import numpy as np
