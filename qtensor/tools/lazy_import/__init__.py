@@ -21,6 +21,7 @@ class LasyModule:
 
 
 tcontract = LasyModule('tcontract')
+torch = LasyModule('torch')
 qiskit = LasyModule('qiskit')
 qiskit_lib = LasyModule('qiskit.extensions.standard')
 mpi4py = LasyModule('mpi4py')

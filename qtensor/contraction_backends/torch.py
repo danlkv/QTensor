@@ -1,4 +1,4 @@
-import torch
+from qtensor.tools.lazy_import import torch
 from qtree import np_framework
 
 from qtensor.contraction_backends import ContractionBackend
