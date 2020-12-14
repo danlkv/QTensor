@@ -5,11 +5,14 @@ import qtree
 #qiskit_lib = qtensor.tools.LasyModule('qiskit.extensions.standard')
 from qtensor.tools.lazy_import import qiskit
 from qtensor.tools.lazy_import import qiskit_lib
+from qtensor.tools.lazy_import import torch
 import numpy as np
 
 class OpFactory:
     pass
 
+class TorchFactory:
+    pass
 
 class CirqFactory:
     H=cirq.H
@@ -56,6 +59,22 @@ class ZZ(qtree.operators.ParametricGate):
         return tensor
 
 QtreeFactory.ZZ = ZZ
+
+class ZZTorch(qtree.operators.ParametricGate):
+    name = 'ZZ'
+    _changes_qubits=tuple()
+    parameter_count=1
+    def gen_tensor(self):
+        alpha = self.parameters['alpha']
+        p = torch.exp(1j*np.pi*alpha/2)
+        m = np.exp(-1j*np.pi*alpha/2)
+        tensor = torch.tensor([
+             [m, p]
+            ,[p, m]
+        ])
+        return tensor
+TorchFactory.ZZ = ZZTorch
+
 # this is a bit ugly, but will work for now
 qtree.operators.LABEL_TO_GATE_DICT['zz'] = ZZ
 
