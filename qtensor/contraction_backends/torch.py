@@ -1,5 +1,6 @@
 from qtensor.tools.lazy_import import torch
 import qtree
+import numpy as np
 from qtree import np_framework
 
 from qtensor.contraction_backends import ContractionBackend
@@ -54,12 +55,42 @@ class TorchBackend(ContractionBackend):
         return result
 
     def get_sliced_buckets(self, buckets, data_dict, slice_dict):
-        np_buckets = np_framework.get_sliced_np_buckets(buckets, data_dict, slice_dict)
-        torch_buckets = [
-            [qtree2torch_tensor(x, data_dict) for x in bucket]
-            for bucket in np_buckets
-        ]
-        return torch_buckets
+        sliced_buckets = []
+        for bucket in buckets:
+            sliced_bucket = []
+            for tensor in bucket:
+                # get data
+                # sort tensor dimensions
+                transpose_order = np.argsort(list(map(int, tensor.indices)))
+                data = data_dict[tensor.data_key]
+                if not isinstance(data, torch.Tensor):
+                    data = torch.from_numpy(data)
+                data = data.permute(tuple(transpose_order))
+                # transpose indices
+                indices_sorted = [tensor.indices[pp]
+                                  for pp in transpose_order]
+
+                # slice data
+                slice_bounds = []
+                for idx in indices_sorted:
+                    try:
+                        slice_bounds.append(slice_dict[idx])
+                    except KeyError:
+                        slice_bounds.append(slice(None))
+
+                data = data[tuple(slice_bounds)]
+
+                # update indices
+                indices_sliced = [idx.copy(size=size) for idx, size in
+                                  zip(indices_sorted, data.shape)]
+                indices_sliced = [i for sl, i in zip(slice_bounds, indices_sliced) if not isinstance(sl, int)]
+                assert len(data.shape) == len(indices_sliced)
+
+                sliced_bucket.append(
+                    tensor.copy(indices=indices_sliced, data=data))
+            sliced_buckets.append(sliced_bucket)
+
+        return sliced_buckets
 
     def get_result_data(self, result):
         return result.data

@@ -60,19 +60,25 @@ class ZZ(qtree.operators.ParametricGate):
 
 QtreeFactory.ZZ = ZZ
 
+def torch_j_exp(z):
+    """
+    https://discuss.pytorch.org/t/complex-functions-exp-does-not-support-automatic-differentiation-for-outputs-with-complex-dtype/98039/3
+    """
+
+    z = -1j*z
+    return torch.cos(z) + 1j * torch.sin(z)
+
 class ZZTorch(qtree.operators.ParametricGate):
     name = 'ZZ'
     _changes_qubits=tuple()
     parameter_count=1
     def gen_tensor(self):
         alpha = self.parameters['alpha']
-        p = torch.exp(1j*np.pi*alpha/2)
-        m = np.exp(-1j*np.pi*alpha/2)
         tensor = torch.tensor([
-             [m, p]
-            ,[p, m]
+             [-1, +1]
+            ,[+1, -1]
         ])
-        return tensor
+        return torch_j_exp(1j*tensor*np.pi*alpha/2)
 
 class ZPhaseTorch(qtree.operators.ParametricGate):
     _changes_qubits = tuple()
@@ -82,7 +88,8 @@ class ZPhaseTorch(qtree.operators.ParametricGate):
     def _gen_tensor(**parameters):
         """Rotation along Z axis"""
         alpha = parameters['alpha']
-        return torch.tensor([1., torch.exp(1j * np.pi * alpha)])
+        t_ = torch.tensor([0, 1])
+        return torch_j_exp(1j*t_*np.pi*alpha)
 
 class XPhaseTorch(qtree.operators.ParametricGate):
 
@@ -94,17 +101,17 @@ class XPhaseTorch(qtree.operators.ParametricGate):
         """Rotation along X axis"""
         alpha = parameters['alpha']
 
-        c = torch.cos(np.pi*alpha/2)
-        s = torch.sin(np.pi*alpha/2)
-        g = torch.exp(1j*np.pi*alpha/2)
+        c = torch.cos(np.pi*alpha/2)*torch.tensor([[1,0],[0,1]])
+        s = torch.sin(np.pi*alpha/2)*torch.tensor([[0, -1j], [-1j, 0]])
+        g = torch_j_exp(1j*np.pi*alpha/2)
 
-        return torch.tensor([[g*c, -1j*g*s],
-                         [-1j*g*s, g*c]])
+        return g*c + g*s
 
 TorchFactory.ZZ = ZZTorch
 TorchFactory.XPhase = XPhaseTorch
 TorchFactory.ZPhase = ZPhaseTorch
 TorchFactory.H = QtreeFactory.H
+TorchFactory.Z = QtreeFactory.Z
 
 # this is a bit ugly, but will work for now
 qtree.operators.LABEL_TO_GATE_DICT['zz'] = ZZ

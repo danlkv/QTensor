@@ -1,4 +1,6 @@
 import qtensor
+import numpy as np
+
 
 def test_torch_sim():
     import torch
@@ -10,10 +12,18 @@ def test_torch_sim():
     circ = composer.circuit
 
     sim = qtensor.QtreeSimulator(backend=qtensor.contraction_backends.TorchBackend())
-    res = sim.simulate(circ)
-    assert isinstance(res, torch.Tensor)
+    restr = sim.simulate(circ)
+    assert isinstance(restr, torch.Tensor)
 
-def test_torch_composer():
+    composer = qtensor.DefaultQAOAComposer(G, gamma=gamma, beta=beta)
+    composer.ansatz_state()
+    circ = composer.circuit
+
+    sim = qtensor.QtreeSimulator()
+    resnp = sim.simulate(circ)
+    assert np.allclose(resnp, restr)
+
+def test_torch_composer__smoke():
     import torch
     p = 3
     gamma, beta = torch.tensor([0.1]*p), torch.tensor([0.2]*p)
@@ -23,13 +33,31 @@ def test_torch_composer():
     circ = composer.circuit
     assert len(circ)
 
+    composer.builder.reset()
+    composer.energy_expectation_lightcone(list(G.edges)[0])
+    assert len(composer.circuit)
 
 def test_torch_gates():
     import torch
-    alpha = torch.tensor(0.19)
-    ZZ = qtensor.OpFactory.TorchFactory.ZZ(0, 1, alpha=alpha)
-    tensor = ZZ.gen_tensor()
+    def compare_gates(a, b):
+        assert np.allclose(a.gen_tensor(), b.gen_tensor())
+    alphatr = torch.tensor(0.19)
+    alphanp = 0.19
+    ftr = qtensor.OpFactory.TorchFactory
+    fnp = qtensor.OpFactory.QtreeFactory
 
-    assert isinstance(tensor, torch.Tensor)
-    assert tensor.shape == (2,2)
+    compare_gates(
+        ftr.ZZ(0, 1, alpha=alphatr),
+        fnp.ZZ(0, 1, alpha=alphanp)
+    )
+
+    compare_gates(
+        ftr.ZPhase(0, alpha=alphatr),
+        fnp.ZPhase(0, alpha=alphanp)
+    )
+
+    compare_gates(
+        ftr.XPhase(0, alpha=alphatr),
+        fnp.XPhase(0, alpha=alphanp)
+    )
 
