@@ -21,13 +21,13 @@ class TensorNet:
 class QtreeTensorNet(TensorNet):
     def __init__(self, buckets, data_dict
                  , bra_vars, ket_vars, free_vars=[]
-                 , bucket_backend=NumpyBackend):
+                 , backend=NumpyBackend()):
         self.buckets = buckets
         self.data_dict = data_dict
         self.bra_vars = bra_vars
         self.ket_vars = ket_vars
         self.free_vars = free_vars
-        self.bucket_backend = bucket_backend()
+        self.backend = backend
 
     def set_free_qubits(self, free):
         self.free_vars = [self.bra_vars[i] for i in free]
@@ -45,7 +45,7 @@ class QtreeTensorNet(TensorNet):
         return sum(self.buckets, [])
 
     def slice(self, slice_dict):
-        sliced_buckets = self.bucket_backend.get_sliced_buckets(
+        sliced_buckets = self.backend.get_sliced_buckets(
             self.buckets, self.data_dict, slice_dict)
         self.buckets = sliced_buckets
         return self.buckets
@@ -58,26 +58,26 @@ class QtreeTensorNet(TensorNet):
         return graph
 
     @classmethod
-    def from_qtree_gates(cls, qc):
+    def from_qtree_gates(cls, qc, **kwargs):
         all_gates = qc
         n_qubits = len(set(sum([g.qubits for g in all_gates], tuple())))
         qtree_circuit = [[g] for g in qc]
         buckets, data_dict, bra_vars, ket_vars = qtree.optimizer.circ2buckets(
             n_qubits, qtree_circuit)
-        tn = cls(buckets, data_dict, bra_vars, ket_vars)
+        tn = cls(buckets, data_dict, bra_vars, ket_vars, **kwargs)
         return tn
 
     @classmethod
-    def from_qsim_file(cls, file):
+    def from_qsim_file(cls, file, **kwargs):
         n, qc = qtree.operators.read_circuit_file(file)
         all_gates = sum(qc, [])
-        tn = cls.from_qtree_gates(all_gates)
+        tn = cls.from_qtree_gates(all_gates, **kwargs)
         return tn
 
     @classmethod
-    def from_qiskit_circuit(cls, qiskit_circ):
+    def from_qiskit_circuit(cls, qiskit_circ, **kwargs):
         n, qc = qtree.operators.from_qiskit_circuit(qiskit_circ)
         all_gates = sum(qc, [])
-        tn = cls.from_qtree_gates(all_gates)
+        tn = cls.from_qtree_gates(all_gates, **kwargs)
         return tn
 

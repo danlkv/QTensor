@@ -23,7 +23,7 @@ def test_profiled(capsys):
 
     print(composer.circuit)
     backend = PerfNumpyBackend()
-    sim = QtreeSimulator(bucket_backend=backend)
+    sim = QtreeSimulator(backend=backend)
 
     result = sim.simulate(composer.circuit)
     print("Profile results")

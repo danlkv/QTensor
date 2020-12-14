@@ -50,10 +50,10 @@ class FeynmanSimulator(QtreeSimulator):
 
         sliced_buckets = self.tn.slice(slice_dict)
         result = qtree.optimizer.bucket_elimination(
-            sliced_buckets, self.bucket_backend.process_bucket
+            sliced_buckets, self.backend.process_bucket
         , n_var_nosum=len(self.tn.free_vars + self.parallel_vars))
 
-        return self.bucket_backend.get_result_data(result).flatten()
+        return self.backend.get_result_data(result).flatten()
 
     def simulate(self, qc, batch_vars=0, tw_bias=2):
         return self.simulate_batch_adaptive(qc, batch_vars, tw_bias=tw_bias)

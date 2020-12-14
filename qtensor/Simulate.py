@@ -21,8 +21,8 @@ class Simulator:
 
 class QtreeSimulator(Simulator):
     FallbackOptimizer = DefaultOptimizer
-    def __init__(self, bucket_backend=NumpyBackend(), optimizer=None, max_tw=None):
-        self.bucket_backend = bucket_backend
+    def __init__(self, backend=NumpyBackend(), optimizer=None, max_tw=None):
+        self.backend = backend
         if optimizer:
             self.optimizer = optimizer
         else:
@@ -34,8 +34,9 @@ class QtreeSimulator(Simulator):
         self.all_gates = qc
 
     def _create_buckets(self):
-        self.tn = QtreeTensorNet.from_qtree_gates(self.all_gates)
-        self.tn.bucket_backend = self.bucket_backend
+        self.tn = QtreeTensorNet.from_qtree_gates(self.all_gates,
+                                                 backend=self.backend)
+        self.tn.backend = self.backend
 
     def _set_free_qubits(self, free_final_qubits):
         self.tn.free_vars = [self.tn.bra_vars[i] for i in free_final_qubits]
@@ -82,16 +83,16 @@ class QtreeSimulator(Simulator):
         #log.info('batch slice {}', slice_dict)
 
         sliced_buckets = self.tn.slice(slice_dict)
-        #self.bucket_backend.pbar.set_total ( len(sliced_buckets))
+        #self.backend.pbar.set_total ( len(sliced_buckets))
 
         #with tqdm(total=len(sliced_buckets), desc='Bucket elimitation', leave=True) as pbar:
-            #self.bucket_backend.set_progress_bar(pbar)
+            #self.backend.set_progress_bar(pbar)
 
         result = qtree.optimizer.bucket_elimination(
-            sliced_buckets, self.bucket_backend.process_bucket,
+            sliced_buckets, self.backend.process_bucket,
             n_var_nosum=len(self.tn.free_vars)
         )
-        return self.bucket_backend.get_result_data(result).flatten()
+        return self.backend.get_result_data(result).flatten()
 
     def simulate(self, qc):
         return self.simulate_state(qc)

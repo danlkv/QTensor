@@ -2,6 +2,18 @@ import qtensor
 import torch
 import numpy as np
 from qtensor.contraction_backends import TorchBackend, NumpyBackend
+from qtensor import QtreeSimulator
+
+def get_test_qaoa_circ(n=10, p=2, d=3, type='random'):
+    G = qtensor.toolbox.random_graph(seed=10, degree=d, nodes=n, type=type)
+    print('Test problem: n, p, d', n, p, d)
+    gamma, beta = [np.pi/5]*p, [np.pi/2]*p
+
+    composer = qtensor.DefaultQAOAComposer(
+        graph=G, gamma=gamma, beta=beta)
+    composer.ansatz_state()
+    return composer.circuit
+
 
 def get_test_qaoa_tn(n=10, p=2, d=3, type='random'):
     G = qtensor.toolbox.random_graph(seed=10, degree=d, nodes=n, type=type)
@@ -13,6 +25,18 @@ def get_test_qaoa_tn(n=10, p=2, d=3, type='random'):
     composer.ansatz_state()
     tn = qtensor.optimisation.TensorNet.QtreeTensorNet.from_qtree_gates(composer.circuit)
     return tn
+
+
+def test_simulation():
+    circ = get_test_qaoa_circ(p=3)
+    btr = TorchBackend()
+    bnp = NumpyBackend()
+    simtr = QtreeSimulator(backend=btr)
+    simnp = QtreeSimulator(backend=bnp)
+    restr = simtr.simulate(circ)
+    resnp = simnp.simulate(circ)
+    assert np.allclose(restr, resnp)
+
 
 def test_torch_process_bucket():
     btr = TorchBackend()
