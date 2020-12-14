@@ -65,7 +65,9 @@ def torch_j_exp(z):
     https://discuss.pytorch.org/t/complex-functions-exp-does-not-support-automatic-differentiation-for-outputs-with-complex-dtype/98039/3
     """
 
-    z = -1j*z
+    z = -1j*z # this is a workarond to fix torch complaining
+    # on different types of gradient vs inputs.
+    # Just make input complex
     return torch.cos(z) + 1j * torch.sin(z)
 
 class ZZTorch(qtree.operators.ParametricGate):
