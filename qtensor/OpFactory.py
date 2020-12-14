@@ -73,7 +73,38 @@ class ZZTorch(qtree.operators.ParametricGate):
             ,[p, m]
         ])
         return tensor
+
+class ZPhaseTorch(qtree.operators.ParametricGate):
+    _changes_qubits = tuple()
+    parameter_count = 1
+
+    @staticmethod
+    def _gen_tensor(**parameters):
+        """Rotation along Z axis"""
+        alpha = parameters['alpha']
+        return torch.tensor([1., torch.exp(1j * np.pi * alpha)])
+
+class XPhaseTorch(qtree.operators.ParametricGate):
+
+    _changes_qubits = (0, )
+    parameter_count = 1
+
+    @staticmethod
+    def _gen_tensor(**parameters):
+        """Rotation along X axis"""
+        alpha = parameters['alpha']
+
+        c = torch.cos(np.pi*alpha/2)
+        s = torch.sin(np.pi*alpha/2)
+        g = torch.exp(1j*np.pi*alpha/2)
+
+        return torch.tensor([[g*c, -1j*g*s],
+                         [-1j*g*s, g*c]])
+
 TorchFactory.ZZ = ZZTorch
+TorchFactory.XPhase = XPhaseTorch
+TorchFactory.ZPhase = ZPhaseTorch
+TorchFactory.H = QtreeFactory.H
 
 # this is a bit ugly, but will work for now
 qtree.operators.LABEL_TO_GATE_DICT['zz'] = ZZ
@@ -192,3 +223,6 @@ class QiskitBuilder(CircuitBuilder):
 
 class QtreeFullBuilder(QtreeBuilder):
     operators = QtreeFullFactory
+
+class TorchBuilder(QtreeBuilder):
+    operators = TorchFactory

@@ -9,7 +9,7 @@ from qtensor.utils import get_edge_subgraph
 import networkx as nx
 
 from .CircuitComposer import QAOAComposer, OldQAOAComposer, ZZQAOAComposer, WeightedZZQAOAComposer
-from .OpFactory import CirqBuilder, QtreeBuilder, QiskitBuilder
+from .OpFactory import CirqBuilder, QtreeBuilder, QiskitBuilder, TorchBuilder
 from .OpFactory import QtreeFullBuilder
 from qtensor.Simulate import CirqSimulator, QtreeSimulator
 from qtensor.QAOASimulator import QAOAQtreeSimulator
@@ -60,9 +60,14 @@ class SimpZZQtreeComposer(ZZQtreeQAOAComposer):
     def circuit(self, circuit):
         self.builder.circuit = circuit
 
+class TorchQAOAComposer(ZZQtreeQAOAComposer):
+    def _get_builder_class(self):
+        return TorchBuilder
+
 #DefaultQAOAComposer = SimpZZQtreeComposer
 DefaultQAOAComposer = ZZQtreeQAOAComposer
 WeightedQAOAComposer = WeightedZZQtreeQAOAComposer
+
 
 # deprecated
 CCQtreeQAOAComposer = ZZQtreeQAOAComposer

@@ -5,6 +5,8 @@ from qtree import np_framework
 from qtensor.contraction_backends import ContractionBackend
 def qtree2torch_tensor(tensor, data_dict):
     """ Converts qtree tensor to pytorch tensor using data dict"""
+    if isinstance(tensor.data, torch.Tensor):
+        return tensor
     if tensor.data is not None:
         data = tensor.data
     else:
