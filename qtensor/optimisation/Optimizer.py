@@ -44,6 +44,7 @@ class WithoutOptimizer(Optimizer):
         return peo, tensor_net
 
 
+# TODO: rename to greedy
 class OrderingOptimizer(Optimizer):
     def _get_ordering_ints(self, graph, free_vars=[]):
         #mapping = {a:b for a,b in zip(graph.nodes(), reversed(list(graph.nodes())))}
@@ -237,6 +238,10 @@ class TreeTrimSplitter(SlicesOptimizer):
 class TamakiTrimSlicing(TamakiOptimizer, TreeTrimSplitter):
     pass
 
+
+# an alias that makes sense
+
+GreedyOptimizer = OrderingOptimizer
 # A convenience variable to use in other packages
 
 DefaultOptimizer = OrderingOptimizer
