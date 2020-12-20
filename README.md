@@ -3,7 +3,7 @@
 ## Installation
 
 ```bash
-pip install qtensor
+pip install qtensor # currently has a bug, do not use
 ```
 Or from source:
 ```bash

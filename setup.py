@@ -7,7 +7,7 @@ REQUIRED_PACKAGES = [
     'matplotlib>=3.1.3'
     ,'google-api-core[grpc]<=1.14.0'
     ,'cirq'
-    ,'qiskit==0.17.0'
+    ,'qiskit'
     ,'pyrofiler>=0.1.5'
     ,'loguru'
     ,'tqdm'

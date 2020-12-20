@@ -128,7 +128,11 @@ class QiskitFactory_Metaclass(type):
 
     @property
     def cX(cls):
-        return qiskit_lib.CnotGate
+        # Different versions of qiskit have different names
+        try:
+            return qiskit_lib.CnotGate
+        except:
+            return qiskit_lib.CXGate
 
 
     @staticmethod
