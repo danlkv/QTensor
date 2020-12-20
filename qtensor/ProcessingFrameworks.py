@@ -1,21 +1,11 @@
 from qtree import np_framework
+from qtensor.tools.lazy_import import tcontract
 import sys
 import numpy as np
 from functools import reduce
 import time
-import lazy_import
 from qtree import optimizer as opt
 from pyrofiler import timing
-class MockModule:
-    def __getattribute__(self, attr):
-        # Fail spectacularly
-        raise ImportError(f'Module tcontract is not imported! Please install it and try again.')
-
-tcontract = MockModule()
-try:
-    import tcontract
-except ImportError:
-    pass
 
 from qtensor.utils import ReportTable
 from tqdm import tqdm

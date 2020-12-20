@@ -1,10 +1,10 @@
 import cirq
 import qtree
-import qiskit
 # Qiskit >=0.19
 #import qiskit.circuit.library as qiskit_lib
-
-import qiskit.extensions.standard as qiskit_lib
+#qiskit_lib = qtensor.tools.LasyModule('qiskit.extensions.standard')
+from qtensor.tools.lazy_import import qiskit
+from qtensor.tools.lazy_import import qiskit_lib
 import numpy as np
 
 class OpFactory:
@@ -59,9 +59,22 @@ QtreeFactory.ZZ = ZZ
 # this is a bit ugly, but will work for now
 qtree.operators.LABEL_TO_GATE_DICT['zz'] = ZZ
 
-class QiskitFactory:
-    H=qiskit_lib.HGate
-    cX=qiskit_lib.CnotGate
+class QiskitFactory_Metaclass(type):
+    def __init__(cls, *args, **kwargs):
+        pass
+
+    @property
+    def H(cls):
+        return qiskit_lib.HGate
+
+    @property
+    def cX(cls):
+        # Different versions of qiskit have different names
+        try:
+            return qiskit_lib.CnotGate
+        except:
+            return qiskit_lib.CXGate
+
 
     @staticmethod
     def ZPhase(alpha):
@@ -71,8 +84,16 @@ class QiskitFactory:
     def XPhase(alpha):
         return qiskit_lib.RXGate(theta=alpha*np.pi)
 
-    cZ=qiskit_lib.CzGate
-    Z=qiskit_lib.ZGate
+    @property
+    def cZ(cls):
+        return qiskit_lib.CzGate
+
+    @property
+    def Z(cls):
+        return qiskit_lib.ZGate
+
+class QiskitFactory(metaclass=QiskitFactory_Metaclass):
+    pass
 
 class CircuitBuilder:
     """ ABC for creating a circuit."""
@@ -105,11 +126,6 @@ class CircuitBuilder:
     @circuit.setter
     def circuit(self, circuit):
         self._circuit = circuit
-
-    def inverse(self):
-        """ Reverse order and conjugate gates. """
-        raise NotImplementedError
-
 
 class CirqBuilder(CircuitBuilder):
     operators = CirqFactory
