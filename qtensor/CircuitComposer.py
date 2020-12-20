@@ -1,4 +1,5 @@
 from loguru import logger as log
+import numpy as np
 from qtensor import utils
 import networkx as nx
 from .OpFactory import CircuitBuilder
@@ -44,7 +45,7 @@ class CircuitComposer():
     def conjugate(self):
         # changes builder.circuit, hence self.circuit()
         self.builder.conjugate()
-    #--
+        #--
 
     def layer_of_Hadamards(self):
         for q in self.qubits:
@@ -193,3 +194,57 @@ class WeightedZZQAOAComposer(ZZQAOAComposer):
         for i, j, w in self.graph.edges.data('weight', default=1):
             u, v = self.qubits[i], self.qubits[j]
             self.append_zz_term(u, v, gamma*w)
+
+class WarmStartQAOAComposer(ZZQAOAComposer):
+    def __init__(self, *args, solution, **params):
+        super().__init__(*args, **params)
+        self.solution = solution
+
+    def ansatz_state(self):
+        beta, gamma = self.params['beta'], self.params['gamma']
+
+        assert(len(beta) == len(gamma))
+        p = len(beta) # infering number of QAOA steps from the parameters passed
+        self.warm_start(self.graph)
+        # second, apply p alternating operators
+        for i in range(p):
+            self.cost_operator_circuit(gamma[i])
+            self.mixer_operator(beta[i])
+
+
+    def cone_ansatz(self, edge):
+        beta, gamma = self.params['beta'], self.params['gamma']
+
+        assert(len(beta) == len(gamma))
+        p = len(beta) # infering number of QAOA steps from the parameters passed
+        self.warm_start(self.graph)
+        # second, apply p alternating operators
+        cone_base = self.graph
+
+        for i, g, b in zip(range(p, 0, -1), gamma, beta):
+            self.graph = utils.get_edge_subgraph_old(cone_base, edge, i)
+            self.cost_operator_circuit(g)
+            self.mixer_operator(b)
+        self.graph = cone_base
+
+    def warm_start(self, G):
+        X_rotations = [ self.solution[i][1] for i in range(len(self.solution)) ]
+        Z_rotations = [ self.solution[i][0] for i in range(len(self.solution)) ]
+        for (q,Xrot,Zrot) in zip(self.qubits, X_rotations, Z_rotations):
+            self.apply_gate(self.operators.rx, [Xrot], q)
+            self.apply_gate(self.operators.rz, [Zrot+np.pi/2], q) 
+
+    def energy_expectation_lightcone(self, edge):
+        G = self.graph
+        gamma, beta = self.params['gamma'], self.params['beta']
+        i,j = edge
+        graph = utils.get_edge_subgraph(G, edge, len(gamma))
+        log.debug('Subgraph nodes: {}, edges: {}', graph.number_of_nodes(), graph.number_of_edges())
+        self.n_qubits = graph.number_of_nodes()
+        mapping = {v:i for i, v in enumerate(graph.nodes())}
+        graph = nx.relabel_nodes(graph, mapping, copy=True)
+
+        i,j = mapping[i], mapping[j]
+        composer = self._get_of_my_type(graph, solution=self.solution, beta=beta, gamma=gamma)
+        composer.energy_expectation(i,j)
+        self.circuit = composer.circuit

@@ -119,6 +119,16 @@ class WeightedQAOASimulator(QAOASimulator, QtreeSimulator):
         weight = G.get_edge_data(*edge)['weight']
         return weight*self.simulate(circuit)
 
+class WarmStartQAOASimulator(QAOASimulator, QtreeSimulator):
+    def __init__(self, *args, solution, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.solution = solution
+
+    def _edge_energy_circuit(self, G, gamma, beta, edge):
+        composer = self.composer(G, gamma=gamma, beta=beta, solution=self.solution)
+        composer.energy_expectation_lightcone(edge)
+
+        return composer.circuit
 
 class QAOACirqSimulator(QAOASimulator, CirqSimulator):
     def _get_edge_energy(self, G, gamma, beta, edge):
