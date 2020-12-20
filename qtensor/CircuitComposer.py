@@ -238,13 +238,16 @@ class WarmStartQAOAComposer(ZZQAOAComposer):
         G = self.graph
         gamma, beta = self.params['gamma'], self.params['beta']
         i,j = edge
-        graph = utils.get_edge_subgraph(G, edge, len(gamma))
+        print('edge lc', edge)
+        graph =  utils.get_edge_subgraph(G, edge, len(gamma))
         log.debug('Subgraph nodes: {}, edges: {}', graph.number_of_nodes(), graph.number_of_edges())
-        self.n_qubits = graph.number_of_nodes()
-        mapping = {v:i for i, v in enumerate(graph.nodes())}
-        graph = nx.relabel_nodes(graph, mapping, copy=True)
+        #self.n_qubits = graph.number_of_nodes()
+        #mapping = {v:i for i, v in enumerate(graph.nodes())}
+        #graph = nx.relabel_nodes(graph, mapping, copy=True)
 
-        i,j = mapping[i], mapping[j]
+        #i,j = mapping[i], mapping[j]
         composer = self._get_of_my_type(graph, solution=self.solution, beta=beta, gamma=gamma)
+        composer.qubits = self.qubits
         composer.energy_expectation(i,j)
         self.circuit = composer.circuit
+        print(self.circuit)

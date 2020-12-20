@@ -42,7 +42,8 @@ def test_warm_simple():
     print(res_qtn)
     print(res_cq)
     print(res_cq/res_qtn)
-    assert False
+    ratios = (res_cq/res_qtn)[res_cq != 0]
+    assert np.isclose(np.sum(ratios - ratios[0]), 0 + 0j, atol=1e-6)
 
 
 
@@ -80,28 +81,38 @@ def test_warm_start():
     w = np.zeros([N,N])
     for i in range(N):
         for j in range(N):
-            temp = G.get_edge_data(i,j,default=0)
+            temp = G.get_edge_data(N-i-1,N-j-1,default=0)
             if temp != 0:
                 w[i,j] = 1#temp['weight'] 
+    print(w)
+    print(list(G.edges()))
     qubitOp, offset = max_cut.get_operator(w)
+    print('offset', offset)
+    print('Gedges', G.number_of_edges())
     qiskit_res = -(qubitOp.evaluate_with_statevector(warm_state)[0].real+offset)
 
     cirq_res = -(qubitOp.evaluate_with_statevector(sim.final_state_vector)[0].real+offset)
     comp = qtn.WarmStartQtreeQAOAComposer(G, gamma=[0], beta=[0], solution=rotated)
     comp.ansatz_state()
     print(comp.circuit)
-    print('qtensor circuit', comp.circuit[:2*N])
+    print('qtensor circuit', comp.circuit[:])
     print('circq circuit', cirq1)
-    state = qt_sim.simulate_batch(comp.circuit[:2*N], batch_vars=N)
+    state = qt_sim.simulate_batch(comp.circuit[:], batch_vars=N)
     print('cirq state', sim.final_state_vector)
     print('qtensor state', state)
     print('compare', state/sim.final_state_vector)
     print('qiskit state', warm_state)
+    print('offset', offset)
+    from functools import partial
+    obj = partial(qtn.tests.qiskit_qaoa_energy.maxcut_obj, w=w)
+    print('qiskit result obj', qtn.tests.qiskit_qaoa_energy.obj_from_statevector(warm_state, obj))
+    qtn_res_sv = -(qubitOp.evaluate_with_statevector(state)[0].real+offset)
+    print('qtn ressv', qtn_res_sv)
     print(warm_state/sim.final_state_vector)
     print(cirq_res)
-    assert qtn_res==cirq_res
-    assert qtn_res==qiskit_res
+    assert np.isclose(qtn_res, cirq_res)
 
     qiskit_res = -(qubitOp.evaluate_with_statevector(warm_state)[0].real+offset)
     print(qiskit_res)
+    assert np.isclose(qtn_res, qiskit_res)
 
