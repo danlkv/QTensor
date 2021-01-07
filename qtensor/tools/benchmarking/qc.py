@@ -6,8 +6,9 @@ import tarfile
 import qtree
 import io
 from pathlib import Path
+
 FILEDIR = Path(__file__).parent / 'circuits'
-print(FILEDIR)
+
 
 def read_tar_content_file(archive, filename):
     """
@@ -23,6 +24,20 @@ def read_tar_content_file(archive, filename):
     stream = io.StringIO(bts.decode())
     return stream
 
+
+
+def get_avail_bris_params(diag):
+    file = FILEDIR / 'bris' / f'bris_{diag}.tar.gz'
+    tf = tarfile.open(file)
+    members = tf.getmembers()
+    params = [ {
+        'diag':diag,
+        'layers':int(info.name.split('_')[2]),
+        'seed':int(info.name.split('_')[3][:-4]),
+    } for info in members]
+    return params
+
+
 def get_bris_circuit(diag=4, layers=24, seed=0):
     """
     Args:
@@ -34,6 +49,23 @@ def get_bris_circuit(diag=4, layers=24, seed=0):
     stream = read_tar_content_file(file, f'bris_{diag}_{layers}_{seed}.txt' )
     n, circ = qtree.operators.read_circuit_stream(stream)
     return n, circ
+
+
+def get_avail_rect_params(sidea, sideb=None):
+    if sideb is None:
+        sideb = sidea
+    size = f'{sidea}x{sideb}'
+    file = FILEDIR / 'rect' / f'{size}.tar.gz'
+    tf = tarfile.open(file)
+    members = tf.getmembers()
+    params = [ {
+        'sidea':int(info.name.split('_')[1].split('x')[0]),
+        'sideb':int(info.name.split('_')[1].split('x')[1]),
+        'layers':int(info.name.split('_')[2]),
+        'seed':int(info.name.split('_')[3][:-4]),
+    } for info in members]
+    return params
+
 
 def get_rect_circuit(sidea=4, sideb=None, layers=24, seed=0):
     """
