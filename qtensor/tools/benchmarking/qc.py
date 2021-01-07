@@ -9,6 +9,20 @@ from pathlib import Path
 FILEDIR = Path(__file__).parent / 'circuits'
 print(FILEDIR)
 
+def read_tar_content_file(archive, filename):
+    """
+    Args:
+        archive: name of the archive file
+        filename: file name within the archive
+    Returns:
+        StringIO
+    """
+    tf = tarfile.open(archive)
+    exf = tf.extractfile(tf.getmember(filename) )
+    bts = exf.read()
+    stream = io.StringIO(bts.decode())
+    return stream
+
 def get_bris_circuit(diag=4, layers=24, seed=0):
     """
     Args:
@@ -17,10 +31,7 @@ def get_bris_circuit(diag=4, layers=24, seed=0):
         seed (int): instance, 0 to 9
     """
     file = FILEDIR / 'bris' / f'bris_{diag}.tar.gz'
-    tf = tarfile.open(file)
-    exf = tf.extractfile(tf.getmember(f'bris_{diag}_{layers}_{seed}.txt' ) )
-    bts = exf.read()
-    stream = io.StringIO(bts.decode())
+    stream = read_tar_content_file(file, f'bris_{diag}_{layers}_{seed}.txt' )
     n, circ = qtree.operators.read_circuit_stream(stream)
     return n, circ
 
@@ -36,9 +47,6 @@ def get_rect_circuit(sidea=4, sideb=None, layers=24, seed=0):
         sideb = sidea
     size = f'{sidea}x{sideb}'
     file = FILEDIR / 'rect' / f'{size}.tar.gz'
-    tf = tarfile.open(file)
-    exf = tf.extractfile(tf.getmember(f'{size}/inst_{size}_{layers}_{seed}.txt' ) )
-    bts = exf.read()
-    stream = io.StringIO(bts.decode())
+    stream = read_tar_content_file(file, f'{size}/inst_{size}_{layers}_{seed}.txt' )
     n, circ = qtree.operators.read_circuit_stream(stream)
     return n, circ
