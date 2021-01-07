@@ -10,7 +10,7 @@ from qtensor import QAOAQtreeSimulator
 from qtensor.Simulate import CirqSimulator, QtreeSimulator
 from qtensor.FeynmanSimulator import FeynmanSimulator
 from qtensor.optimisation.Optimizer import TamakiTrimSlicing, TreeTrimSplitter
-from qtensor.tests.qiskit_qaoa_energy import simulate_qiskit_amps 
+from qtensor.tests.qiskit_qaoa_energy import simulate_qiskit_amps
 
 @lru_cache
 def get_test_problem(n=10, p=2, d=3, type='random'):
@@ -33,7 +33,7 @@ def test_problem(request):
 
 paramtest = [
     # n, p, degree, type
-    [4, 4, 3, 'random']
+     [4, 4, 3, 'random']
     ,[10, 5, 2, 'random']
     ,[14, 1, 3, 'random']
     ,[3, 3, 0, 'grid2d']

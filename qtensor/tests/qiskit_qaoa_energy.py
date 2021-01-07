@@ -15,7 +15,7 @@ def qiskit_imports():
     else:
         # old
         from qiskit.optimization.ising.max_cut import get_operator as get_maxcut_operator
-        from qiskit.aqua.algorithms.adaptive.qaoa.var_form import QAOAVarForm 
+        from qiskit.aqua.algorithms.adaptive.qaoa.var_form import QAOAVarForm
     return get_maxcut_operator, QAOAVarForm
 
 get_maxcut_operator, QAOAVarForm = qiskit_imports()
@@ -96,15 +96,17 @@ def maxcut_obj(x,w):
     return -np.sum(w * X)
 
 def simulate_qiskit_amps_new(G, gamma, beta):
-    # not working
     assert len(gamma) == len(beta)
     p = len(gamma)
-    parameters = np.concatenate([np.array(gamma), np.array(beta)])
+    # note the ordere of parameters
+    parameters = np.concatenate([-np.array(gamma), np.array(beta)])
     w = nx.adjacency_matrix(G, nodelist=list(G.nodes())).toarray()
     qubitOp, offset = get_maxcut_operator(w)
     qc1 = QAOAVarForm(qubitOp.to_opflow(), p=p, initial_state=None).construct_circuit(parameters)
     ex1=execute(qc1, backend=Aer.get_backend('statevector_simulator'))
-    E_0 = qubitOp.evaluate_with_statevector(ex1.result().get_statevector())[0].real
+    sv = ex1.result().get_statevector()
+    adj_sv = sv #get_adjusted_state(sv)
+    E_0 = qubitOp.evaluate_with_statevector(adj_sv)[0].real
     return -(E_0 + offset)
 
 def simulate_qiskit_amps(G, gamma, beta):
@@ -126,7 +128,6 @@ def simulate_qiskit_amps(G, gamma, beta):
     circuit = varform.construct_circuit(parameters)
 
     #circuit_qiskit = transpile(circuit, optimization_level=0,basis_gates=['u1', 'u2', 'u3', 'cx'])
-    #print(circuit_qiskit)
     sv = execute(circuit, backend=Aer.get_backend("statevector_simulator")).result().get_statevector()
 
     res = - obj_from_statevector(sv, obj)
@@ -136,7 +137,7 @@ def test_simulate_qiskit_amps():
     elist = [[0, 1], [1, 2], [2, 3], [3, 4], [4, 0], [0, 5], [1, 6], [2, 7], [3, 8], [4, 9], [5, 7], [5, 8], [6, 8], [6, 9], [7, 9]]
     G = nx.OrderedGraph()
     G.add_edges_from(elist)
-    parameters = np.array([5.192253984583296, 5.144373231492732, 5.9438949617723775, 5.807748946652058, 3.533458907810596, 6.006206583282401, 6.122313961527631, 6.218468942101044, 6.227704753217614, 
+    parameters = np.array([5.192253984583296, 5.144373231492732, 5.9438949617723775, 5.807748946652058, 3.533458907810596, 6.006206583282401, 6.122313961527631, 6.218468942101044, 6.227704753217614,
 
 0.3895570099244132, -0.1809282325810937, 0.8844522327007089, 0.7916086532373585, 0.21294534589417236, 0.4328896243354414, 0.8327451563500539, 0.7694639329585451, 0.4727893829336214])
     beta = parameters[:9]
