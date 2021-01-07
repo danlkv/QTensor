@@ -25,6 +25,10 @@ class CirqFactory:
         return cirq.ZPowGate(exponent=float(alpha)).on(x)
 
     @staticmethod
+    def YPhase(x, alpha):
+        return cirq.YPowGate(exponent=float(alpha)).on(x)
+
+    @staticmethod
     def XPhase(x, alpha):
         return cirq.XPowGate(exponent=float(alpha)).on(x)
 
@@ -93,6 +97,21 @@ class ZPhaseTorch(qtree.operators.ParametricGate):
         t_ = torch.tensor([0, 1])
         return torch_j_exp(1j*t_*np.pi*alpha)
 
+class YPhaseTorch(qtree.operators.ParametricGate):
+    parameter_count = 1
+    _changes_qubits = (0, )
+
+    @staticmethod
+    def _gen_tensor(**parameters):
+        """Rotation along Y axis"""
+        alpha = parameters['alpha']
+
+        c = torch.cos(np.pi * alpha / 2)*torch.tensor([[1,0],[0,1]])
+        s = torch.sin(np.pi * alpha / 2)*torch.tensor([[0, -1],[1,0]])
+        g = torch.exp(1j * np.pi * alpha / 2)
+
+        return g*(c + s)
+
 class XPhaseTorch(qtree.operators.ParametricGate):
 
     _changes_qubits = (0, )
@@ -111,6 +130,7 @@ class XPhaseTorch(qtree.operators.ParametricGate):
 
 TorchFactory.ZZ = ZZTorch
 TorchFactory.XPhase = XPhaseTorch
+TorchFactory.YPhase = YPhaseTorch
 TorchFactory.ZPhase = ZPhaseTorch
 TorchFactory.H = QtreeFactory.H
 TorchFactory.Z = QtreeFactory.Z
@@ -134,6 +154,10 @@ class QiskitFactory_Metaclass(type):
     @staticmethod
     def ZPhase(alpha):
         return qiskit_lib.RZGate(phi=alpha*np.pi)
+
+    @staticmethod
+    def YPhase(alpha):
+        return qiskit_lib.RYGate(phi=alpha*np.pi)
 
     @staticmethod
     def XPhase(alpha):
