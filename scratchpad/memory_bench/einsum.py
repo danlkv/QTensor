@@ -1,21 +1,56 @@
 import numpy as np
+import random
 from itertools import accumulate
+import pyrofiler
+import opt_einsum
 import sys
 import os, psutil
+import fire
+try:
+    import ctf
+except ImportError:
+    print('Can\'t import ctf')
+
+ELEMENT_SIZE = np.random.randn(1).itemsize
 
 CHARS = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ'
 
-def contract_random(contraction, d=2):
+
+def opt_einsum_checking(contraction, *tensors, optimize='random-greedy'):
+    uniq_ids = set(contraction) - {',', '-', '>'}
+    sizes_dict = {i:2 for i in uniq_ids}
+    views = opt_einsum.helpers.build_views(contraction, sizes_dict)
+
+    with pyrofiler.timing('optimization time'):
+        path, info = opt_einsum.contract_path(contraction, *views, optimize=optimize)
+
+    print('Largest memory', ELEMENT_SIZE*info.largest_intermediate)
+    expect = len(contraction.split('->')[1])
+    if 2**expect < info.largest_intermediate:
+        print(f'WARN: Optimizer {optimize} did not do a good job: '
+              f'expected {2**expect} got {info.largest_intermediate} for contraction')
+    return opt_einsum.contract(contraction, *tensors, optimize=path)
+
+def get_backend(backend):
+    return {
+        'opt_einsum': opt_einsum_checking,
+        'einsum': np.einsum,
+        'ctf': lambda c, *t: ctf.core.einsum(c, *[ctf.astensor(x) for x in t]),
+    }[backend]
+
+@pyrofiler.mem_util('memory to contract')
+def contract_random(contraction, dim=2, backend='opt_einsum'):
     inp, _ = contraction.split('->')
     sizes = inp.split(',')
-    tensors = [np.random.randn(*[d]*len(s)) for s in sizes]
+    tensors = [np.random.randn(*[dim]*len(s)) for s in sizes]
     print(f"Contracting {len(tensors)} tensors")
-    r = np.einsum(contraction, *tensors)
+    with pyrofiler.timing('time to contract:'):
+        r = get_backend(backend)(contraction, *tensors)
     print('Done')
     return r
 
 
-def test_mem(K, C=4, d=2, s=10):
+def test_mem(K, C=4, d=2, s=10, backend='opt_einsum', seed=10):
     """
     Performs a contraction that
     does not include hard optimization task.
@@ -28,18 +63,20 @@ def test_mem(K, C=4, d=2, s=10):
         d: number of dominating tensors
         s: number of small tensors
     """
+
+    np.random.seed(seed)
+    random.seed(seed)
     if K+C>len(CHARS):
         raise Exception('Too many indices')
     if C + np.ceil(K/d) > K:
         raise Exception('Too few indices')
 
     #-- Memory estimations
-    elsize = np.random.randn(1).itemsize
     process = psutil.Process(os.getpid())
     overhead = process.memory_info().rss
     print('Overhead:', overhead)
-    print('Should take:', elsize*2**K, 'Bytes')
-    print('Total expected Memory:', overhead+elsize*2**K, 'Bytes')
+    print('Should take:', ELEMENT_SIZE*2**K, 'Bytes')
+    print('Total expected Memory:', overhead+ELEMENT_SIZE*2**K, 'Bytes')
     #--
 
     all_indices = list(CHARS[:K+C])
@@ -85,9 +122,8 @@ def test_mem(K, C=4, d=2, s=10):
 
     print('contraction:', contraction)
 
-    contract_random(contraction)
+    contract_random(contraction, backend=backend)
 
 if __name__=="__main__":
-    K = int(sys.argv[1])
-    test_mem(K)
+    fire.Fire(test_mem)
 
