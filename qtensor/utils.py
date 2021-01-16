@@ -14,10 +14,14 @@ def eliminate_low_degrees(graph, min_degree=3):
     smaller than `min_degree`
     Works in-place
     """
+    to_eliminate = []
 
     for node, degree in graph.degree:
         if degree < min_degree:
-            eliminate_node_no_structure(graph, node)
+            to_eliminate.append(node)
+    for node in to_eliminate:
+        eliminate_node_no_structure(graph, node)
+    return len(to_eliminate)
 
 
 def get_neighbours_peo_vars(old_graph, inplace=False):
