@@ -25,6 +25,8 @@ def opt_einsum_checking(contraction, *tensors, optimize='random-greedy'):
         path, info = opt_einsum.contract_path(contraction, *views, optimize=optimize)
 
     print('Largest memory', ELEMENT_SIZE*info.largest_intermediate)
+    print('GFlops', float(info.opt_cost)/1e9)
+    print(info)
     expect = len(contraction.split('->')[1])
     if 2**expect < info.largest_intermediate:
         print(f'WARN: Optimizer {optimize} did not do a good job: '
@@ -40,8 +42,9 @@ def get_backend(backend):
 
 @pyrofiler.mem_util('memory to contract')
 def contract_random(contraction, dim=2, backend='opt_einsum'):
-    inp, _ = contraction.split('->')
+    inp, out = contraction.split('->')
     sizes = inp.split(',')
+    print([len(x) for x in sizes], len(out))
     tensors = [np.random.randn(*[dim]*len(s)) for s in sizes]
     print(f"Contracting {len(tensors)} tensors")
     with pyrofiler.timing('time to contract:'):
@@ -50,7 +53,7 @@ def contract_random(contraction, dim=2, backend='opt_einsum'):
     return r
 
 
-def test_mem(K, C=4, d=2, s=10, backend='opt_einsum', seed=10):
+def test_mem(K, C=4, d=2, s=10, backend='opt_einsum', seed=10, expr=None):
     """
     Performs a contraction that
     does not include hard optimization task.
@@ -63,6 +66,9 @@ def test_mem(K, C=4, d=2, s=10, backend='opt_einsum', seed=10):
         d: number of dominating tensors
         s: number of small tensors
     """
+    if expr is not None:
+        contract_random(expr, backend=backend)
+        return
 
     np.random.seed(seed)
     random.seed(seed)
