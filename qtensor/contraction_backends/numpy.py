@@ -32,7 +32,7 @@ class NumpyBackend(ContractionBackend):
             ''.join(CHARS[to_small_int(i)] for i in t.indices)
             for t in bucket) +\
                 '->'+''.join(CHARS[to_small_int(i)] for i in result_indices)
-        print(expr)
+        #print(expr)
         uniq_ids = set(expr) - {',', '-', '>'}
         sizes_dict = {i:2 for i in uniq_ids}
         views = opt_einsum.helpers.build_views(expr, sizes_dict)
