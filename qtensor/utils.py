@@ -7,7 +7,85 @@ from qtree.optimizer import Var
 import matplotlib.pyplot as plt
 import networkx as nx
 from tqdm.auto import tqdm
+import functools
 import operator
+
+
+def merge_sets(sets):
+    return functools.reduce(lambda x,y: x.union(y), sets, set())
+
+
+def find_mergeable_indices(peo, buckets):
+    """
+    Buckets should be ordered
+    Args:
+        peo: list of vertices
+        vsets: list of lists of lists of vertices
+    Returns:
+        merged_ix: list of lists
+        width: size of largest tensor
+    """
+    contraction_widths = []
+    vsets = [[set(t) for t in bucket] for bucket in buckets] + [set()]
+    merged_ix = []
+    i = 0
+    while i < len(peo):
+        merged_ix.append([i])
+        next_vset = merge_sets(vsets[i])
+        #print(next_vset)
+        while all(vs.issubset(next_vset) for vs in vsets[i+1]):
+            #break
+            merged_ix[-1].append(i+1)
+            i += 1
+            next_vset = merge_sets([next_vset] + vsets[i])
+            #print('m', peo[i], next_vset)
+            contraction_widths.append(0)
+            if i == len(peo)-1:
+                break
+        i += 1
+
+        next_vset -= set(peo[j] for j in merged_ix[-1])
+        contraction_widths.append(len(next_vset))
+        if len(next_vset):
+            min_ix = min(peo.index(v) for v in next_vset)
+            vsets[min_ix].append(next_vset)
+            #print('append', next_vset)
+
+    return merged_ix, contraction_widths
+
+
+def vertex_is_simplical(graph, vertex):
+    # Get neighbors with accounting for self-loops
+    neighbors = set(graph.neighbors(vertex)) - set((vertex, ))
+    clique = itertools.combinations(neighbors, 2)
+    edges = set(graph.edges(nbunch=neighbors))
+    return all(edge in edges for edge in clique)
+
+def contraction_steps(old_graph,  peo=None):
+    """ Eliminate all verticies in graph that have degree
+    smaller than `min_degree`
+    Works in-place
+    """
+    graph = old_graph.copy()
+    if peo is None:
+        peo = sorted(graph.nodes(), key=int)
+
+    steps = []
+    joinstr = lambda x: ''.join(str(y) for y in x)
+    for node in peo:
+        neighbors = joinstr(set(graph.neighbors(node))-set([node]))
+        ixs = set([joinstr(tensor['indices'])
+                   for *e, tensor
+                   in graph.edges(node, data='tensor')])
+        steps.append((
+            node
+           ,len(neighbors)
+           ,vertex_is_simplical(graph, node)
+           ,ixs
+           ,neighbors))
+        qtree.graph_model.eliminate_node(graph, node)
+    return steps
+
 
 def eliminate_low_degrees(graph, min_degree=3):
     """ Eliminate all verticies in graph that have degree

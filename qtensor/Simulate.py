@@ -77,6 +77,11 @@ class QtreeSimulator(Simulator):
                     raise ValueError(f'Treewidth {self.optimizer.treewidth} is larger than max_tw={self.max_tw}.')
         else:
             self.peo = peo
+        print('will have tw', self.optimizer.treewidth)
+
+        all_indices = sum([list(t.indices) for bucket in self.tn.buckets for t in bucket], [])
+        identity_map = {v.name: v for v in all_indices}
+        self.peo = [identity_map[i.name] for i in self.peo]
 
         self._reorder_buckets()
         slice_dict = self._get_slice_dict()
