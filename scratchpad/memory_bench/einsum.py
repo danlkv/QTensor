@@ -15,6 +15,46 @@ ELEMENT_SIZE = np.random.randn(1).itemsize
 
 CHARS = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ'
 
+def tcontract(contraction, *tensors, optimize='random-greedy'):
+    inp, out = contraction.split('->')
+    ixs = inp.split(',')
+    if len(ixs) > 2:
+        raise Exception('Not supported more than 2!')
+    # --
+    # \sum_k A_{kfm} * B_{kfn} = C_{fmn}
+    common = set(ixs[0]).intersection(set(ixs[1]))
+    mix = set(ixs[0]) - common
+    nix = set(ixs[1]) - common
+    kix = common - set(out)
+    fix = common - kix
+    common = list(kix) + list(fix)
+    print('t0', tensors[0].shape, len(tensors[0].shape))
+    print('common' , common)
+    print('mix' , mix)
+
+    a = tensors[0].transpose(*[
+        list(ixs[0]).index(x) for x in common + list(mix)
+    ])
+
+    b = tensors[1].transpose(*[
+        list(ixs[1]).index(x) for x in common + list(nix)
+    ])
+
+    k, f, m, n = 2**len(kix), 2**len(fix), 2**len(mix), 2**len(nix)
+    a = a.reshape(k, f, m)
+    b = b.reshape(k, f, n)
+
+    c = np.empty((f, m, n), dtype=np.complex128)
+
+    import tcontract
+    with pyrofiler.timing('contraction time'):
+        tcontract.debug_mkl_contract_sum(a, b, c)
+    print('> mkl first elem', c.flatten()[0])
+    with pyrofiler.timing('contraction time eins'):
+        G = np.einsum('ijk,ijl->jkl', a, b)
+    print('> eins first elem', G.flatten()[0])
+
+    return c
 
 def opt_einsum_checking(contraction, *tensors, optimize='random-greedy'):
     uniq_ids = set(contraction) - {',', '-', '>'}
@@ -37,6 +77,7 @@ def get_backend(backend):
     return {
         'opt_einsum': opt_einsum_checking,
         'einsum': np.einsum,
+        'tcontract': tcontract,
         'ctf': lambda c, *t: ctf.core.einsum(c, *[ctf.astensor(x) for x in t]),
     }[backend]
 
@@ -50,6 +91,7 @@ def contract_random(contraction, dim=2, backend='opt_einsum'):
     with pyrofiler.timing('time to contract:'):
         r = get_backend(backend)(contraction, *tensors)
     print('Done')
+    print(r.flatten()[0])
     return r
 
 
