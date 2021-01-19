@@ -5,6 +5,7 @@ from functools import partial
 from tqdm.auto import tqdm
 from qtensor.contraction_backends import TorchBackend
 import networkx as nx
+from functools import lru_cache
 
 
 def qaoa_maxcut_torch(G, gamma, beta, edge=None,
@@ -26,10 +27,19 @@ def qaoa_maxcut_torch(G, gamma, beta, edge=None,
         loss_history: array of losses with len=steps
         param_history: array of (gamma, beta) with len=steps
     """
+    params = [torch.tensor(x, requires_grad=True)
+              for x in [gamma, beta]]
+
+    ordering_algo = kwargs.pop('ordering_algo', 'greedy')
     if edge is not None:
-        loss = partial(_edge_loss, edge=edge, G=G)
+        peo = _edge_peo(p=len(gamma), G=G, edge=edge, ordering_algo=ordering_algo)
     else:
-        loss = partial(_energy_loss, G=G)
+        peo = _energy_peo(p=len(gamma), G=G, ordering_algo=ordering_algo)
+
+    if edge is not None:
+        loss = partial(_edge_loss, edge=edge, G=G, peo=peo)
+    else:
+        loss = partial(_energy_loss, G=G, peo=peo)
     params = [torch.tensor(x, requires_grad=True)
               for x in [gamma, beta]]
 
@@ -68,27 +78,40 @@ def optimize_params(get_loss, *params, steps=50,
     losses = np.array(losses).flatten()
     return losses, param_history
 
+@lru_cache
+def _edge_peo(p, G, edge, ordering_algo):
+    opt = qtensor.toolbox.get_ordering_algo(ordering_algo)
+    composer = qtensor.DefaultQAOAComposer(G, gamma=[0.1]*p, beta=[.3]*p)
+    composer.energy_expectation_lightcone(edge)
 
-def _energy_loss(gamma, beta, G):
+    tn = qtensor.optimisation.TensorNet.QtreeTensorNet.from_qtree_gates(composer.circuit)
+    peo, _ = opt.optimize(tn)
+    print('Treewidth', opt.treewidth)
+    return peo
+
+def _energy_loss(gamma, beta, G, peos=None):
     backend = TorchBackend()
     sim = qtensor.QtreeSimulator(backend=backend)
 
     composer = qtensor.TorchQAOAComposer(G, gamma=gamma, beta=beta)
     loss = torch.tensor([0.])
 
-    for edge in G.edges:
+    if peos is None:
+        peos = [None]*G.number_of_edges
+
+    for edge, peo in zip(G.edges, peos):
         composer.energy_expectation_lightcone(edge)
-        loss += - torch.real(sim.simulate(composer.circuit))
+        loss += - torch.real(sim.simulate_batch(composer.circuit, peo=peo))
         composer.builder.reset()
     return -(G.number_of_edges() - loss)/2
 
 
-def _edge_loss(gamma, beta, G, edge):
+def _edge_loss(gamma, beta, G, edge, peo=None):
     backend = TorchBackend()
     sim = qtensor.QtreeSimulator(backend=backend)
 
     composer = qtensor.TorchQAOAComposer(G, gamma=gamma, beta=beta)
     composer.energy_expectation_lightcone(edge)
-    loss = torch.real(sim.simulate(composer.circuit))
+    loss = torch.real(sim.simulate_batch(composer.circuit, peo=peo))
     return loss
 
