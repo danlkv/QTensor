@@ -9,7 +9,7 @@ Or from source:
 ```bash
 git clone --recurse-submodules https://github.com/DaniloZZZ/QTensor
 cd QTensor
-cd qtree && pip install .
+cd qtree && pip install . && cd ..
 pip install .
 ```
 
