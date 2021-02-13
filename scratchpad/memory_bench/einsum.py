@@ -44,15 +44,15 @@ def tcontract(contraction, *tensors, optimize='random-greedy'):
     a = a.reshape(k, f, m)
     b = b.reshape(k, f, n)
 
-    c = np.empty((f, m, n), dtype=np.complex128)
+    c = np.empty((f, m, n), dtype=np.float64)
 
     import tcontract
     with pyrofiler.timing('contraction time'):
-        tcontract.debug_mkl_contract_sum(a, b, c)
-    print('> mkl first elem', c.flatten()[0])
+        tcontract.debug_mkl_contract_sum_float(a, b, c)
+    print('> mkl first elem', c.ravel()[0])
     with pyrofiler.timing('contraction time eins'):
         G = np.einsum('ijk,ijl->jkl', a, b)
-    print('> eins first elem', G.flatten()[0])
+    print('> eins first elem', G.ravel()[0])
 
     return c
 
@@ -73,11 +73,39 @@ def opt_einsum_checking(contraction, *tensors, optimize='random-greedy'):
               f'expected {2**expect} got {info.largest_intermediate} for contraction')
     return opt_einsum.contract(contraction, *tensors, optimize=path)
 
+def exatn_contract(contraction, *tensors):
+    import sys
+    sys.path.append('/home/plate/.local/lib')
+    import exatn
+
+    inp, out = contraction.split('->')
+    ixs = inp.split(',')
+
+    _r_name = 'R'
+    exatn.createTensor(_r_name, [2]*len(out), 0.0)
+    _t_names = [f'T{i}' for i in range(len(tensors))]
+    print('tnames', _t_names)
+    [exatn.createTensor(name, t.copy(order='F'))
+     for name, t in zip(_t_names, tensors)
+    ]
+
+    _ix2exatn = lambda x: ','.join(x)
+    _exatn_expr = f'R({_ix2exatn(out)})='
+    _exatn_expr += '*'.join(f'{tname}({_ix2exatn(ix)})'
+                            for tname, ix in zip(_t_names, ixs))
+    print('exatn expr', _exatn_expr)
+    #exatn.contractTensors(_exatn_expr, 1.0)
+    exatn.evaluateTensorNetwork('ff', _exatn_expr)
+    res = exatn.getLocalTensor(_r_name)
+    return res.transpose()
+
+
 def get_backend(backend):
     return {
         'opt_einsum': opt_einsum_checking,
         'einsum': np.einsum,
         'tcontract': tcontract,
+        'exatn': exatn_contract,
         'ctf': lambda c, *t: ctf.core.einsum(c, *[ctf.astensor(x) for x in t]),
     }[backend]
 
@@ -91,7 +119,7 @@ def contract_random(contraction, dim=2, backend='opt_einsum'):
     with pyrofiler.timing('time to contract:'):
         r = get_backend(backend)(contraction, *tensors)
     print('Done')
-    print(r.flatten()[0])
+    print(r.ravel()[0])
     return r
 
 
@@ -165,7 +193,7 @@ def test_mem(K, C=4, d=2, s=10, backend='opt_einsum', seed=10, expr=None):
     ]
 
     contraction = ','.join(
-        ''.join(ix) for ix in dom_ix + sm_ix
+        ''.join(ix) for ix in sm_ix + dom_ix
     ) + '->' + ''.join(result_indices)
 
     print('contraction:', contraction)
