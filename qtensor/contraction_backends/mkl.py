@@ -1,36 +1,49 @@
 import numpy as np
 from functools import reduce
 from qtree import optimizer as opt
+import qtensor
 from qtensor.contraction_backends import ContractionBackend
 from qtree import np_framework
 from qtensor.tools.lazy_import import tcontract
+import pyrofiler
+
+import string
+
+CHARS = string.ascii_lowercase + string.ascii_uppercase
 
 class CMKLExtendedBackend(ContractionBackend):
+    times = []
+    times_all = []
+    times_post = []
+    times_pre = []
+    times_sre = []
     def get_sliced_buckets(self, buckets, data_dict, slice_dict):
         return np_framework.get_sliced_np_buckets(buckets, data_dict, slice_dict)
 
     def process_bucket(self, bucket, no_sum=False):
-        result_indices = bucket[0].indices
-        result_data = bucket[0].data
 
         # -- Contract first n-1 bucketns
         def merge_with_result(result_data, result_indices, tensor):
             # ---- Prepare inputs: transpose + reshape
-            ixa, ixb = result_indices, tensor.indices
-            common_ids = sorted(list(set.intersection(set(ixa), set(ixb))), key=int)
-            distinct_a = [x for x in ixa if x not in common_ids]
-            distinct_b = [x for x in ixb if x not in common_ids]
-            transp_a = [ixa.index(x) for x in common_ids+distinct_a]
-            transp_b = [ixb.index(x) for x in common_ids+distinct_b]
-            a = result_data.transpose(transp_a)
-            b = tensor.data.transpose(transp_b)
-            n, m, k = 2**len(common_ids), 2**len(distinct_a), 2**len(distinct_b)
-            a = a.reshape(n, m)
-            b = b.reshape(n, k)
+            with pyrofiler.timing(callback=lambda x: self.times_pre.append(x)):
+                ixa, ixb = result_indices, tensor.indices
+                with pyrofiler.timing(callback=lambda x: self.times_sre.append(x)):
+                    common_ids = sorted(list(set.intersection(set(ixa), set(ixb))), key=int)
+                distinct_a = [x for x in ixa if x not in common_ids]
+                distinct_b = [x for x in ixb if x not in common_ids]
+                transp_a = [ixa.index(x) for x in common_ids+distinct_a]
+                transp_b = [ixb.index(x) for x in common_ids+distinct_b]
+                a = result_data.transpose(transp_a)
+                b = tensor.data.transpose(transp_b)
+                n, m, k = 2**len(common_ids), 2**len(distinct_a), 2**len(distinct_b)
+                a = a.reshape(n, m)
+                b = b.reshape(n, k)
             # ----
 
-            c = np.empty((n, m, k), dtype=np.complex128)
-            tcontract.mkl_contract_complex(a, b, c)
+            with pyrofiler.timing(callback=lambda x: self.times_all.append(x)):
+                c = np.empty((n, m, k), dtype=np.complex128)
+            with pyrofiler.timing(callback=lambda x: self.times.append(x)):
+                tcontract.mkl_contract_complex(a, b, c)
 
             # ---- Post-process output
             result_indices = tuple(sorted(
@@ -45,7 +58,10 @@ class CMKLExtendedBackend(ContractionBackend):
             return result_data, result_indices
             # ----
 
-        for tensor in bucket[1:-1]:
+        result_indices = bucket[-1].indices
+        result_data = bucket[-1].data
+
+        for tensor in reversed(bucket[1:-1]):
             result_data, result_indices = merge_with_result(result_data, result_indices, tensor)
         # --
 
@@ -68,7 +84,7 @@ class CMKLExtendedBackend(ContractionBackend):
             result = opt.Tensor(f'E{tag}', result_indices[1:],
                                 data=np.sum(result_data, axis=0))
             return result
-        last_tensor = bucket[-1]
+        last_tensor = bucket[0]
 
         # -- Contract with summation
         ixa, ixb = result_indices, last_tensor.indices
@@ -93,24 +109,116 @@ class CMKLExtendedBackend(ContractionBackend):
         # ----
 
         # \sum_k A_{kfm} * B_{kfn} = C_{fmn}
-        c = np.empty((F, M, N), dtype=np.complex128)
-        tcontract.mkl_contract_sum(a, b, c)
+        with pyrofiler.timing(callback=lambda x: self.times_all.append(x)):
+            c = np.empty((F, M, N), dtype=np.complex128)
+        with pyrofiler.timing(callback=lambda x: self.times.append(x)):
+            tcontract.mkl_contract_sum(a, b, c)
 
-        # ---- Post-process output
-        result_indices = tuple(sorted(
-            set(result_indices + last_tensor.indices),
-            key=int)
+        with pyrofiler.timing(callback=lambda x: self.times_post.append(x)):
+            # ---- Post-process output
+            result_indices = tuple(sorted(
+                set(result_indices + last_tensor.indices),
+                key=int)
+            )
+            assert result_indices[0] == k[0], 'Broken ordering, please report'
+            result_indices = result_indices[1:]
+            ixc = f + m + n
+            assert len(result_indices) == len(ixc), 'Wrong transposition, please submit an issue'
+            result_data = c.reshape([shapes[i] for i in ixc])
+            transp_c = [ixc.index(x) for x in result_indices]
+            result_data = result_data.transpose(transp_c)
+            # ----
+            # --
+            result = opt.Tensor(f'E{tag}', result_indices, data=result_data)
+        return result
+
+    def _expr_to_ixs(self, expr):
+        if isinstance(expr, str):
+            inp, out = expr.split('->')
+        else:
+            pass
+        ixs = inp.split(',')
+        return ixs, out
+    def _to_letters(self, *ixs):
+        all_indices = list(qtensor.utils.merge_sets(set(x) for x in ixs))
+        mapping = {i:s for i,s in zip(all_indices, CHARS)}
+        convert = lambda x: [mapping[i] for i in x]
+        return list(map(convert, ixs))
+
+    def _get_index_sizes(self, *ixs):
+        try:
+            sizes = [ i.size for i in ixs ]
+        except AttributeError:
+            sizes = [2] * len(ixs)
+        return sizes
+
+    def _get_index_space_size(self, *ixs):
+        sizes = self._get_index_sizes(*ixs)
+        return reduce(np.multiply, sizes, 1)
+
+    #@profile
+    def pairwise_sum_contract(self, ixa, a, ixb, b, ixout):
+        out = ixout
+        ixs = ixa, ixb
+        tensors = a, b
+
+        # \sum_k A_{kfm} * B_{kfn} = C_{fmn}
+        common = set(ixs[0]).intersection(set(ixs[1]))
+        mix = set(ixs[0]) - common
+        nix = set(ixs[1]) - common
+        kix = common - set(out)
+        fix = common - kix
+        common = list(kix) + list(fix)
+        a = tensors[0].transpose(*[
+            list(ixs[0]).index(x) for x in common + list(mix)
+        ])
+
+        b = tensors[1].transpose(*[
+            list(ixs[1]).index(x) for x in common + list(nix)
+        ])
+
+        k, f, m, n = [self._get_index_space_size(*ix)
+                      for ix in (kix, fix, mix, nix)
+                     ]
+        with pyrofiler.timing(callback=lambda x: self.times_pre.append(x)):
+            a = a.reshape(k, f, m)
+            b = b.reshape(k, f, n)
+        with pyrofiler.timing(callback=lambda x: self.times_all.append(x)):
+            c = np.empty((f, m, n), dtype=np.complex128)
+        with pyrofiler.timing(callback=lambda x: self.times.append(x)):
+            tcontract.mkl_contract_sum(a,b,c)
+        if len(out):
+            #print('out ix', out, 'kfmnix', kix, fix, mix, nix)
+            c = c.reshape(*self._get_index_sizes(*out))
+
+        current_ord_ = list(fix) + list(mix) + list(nix)
+        c = c.transpose(*[current_ord_.index(i) for i in out])
+        return c
+
+
+    def process_bucket_merged(self, ixs, bucket, no_sum=False):
+        result_indices = bucket[0].indices
+        result_data = bucket[0].data
+        all_indices = set(sum((list(t.indices) for t in bucket), []))
+        result_indices = all_indices - set(ixs)
+
+        cum_data, cum_indices = bucket[0].data, bucket[0].indices
+        for tensor in bucket[1:-1]:
+            next_indices = set(cum_indices).union(tensor.indices)
+            cum_data = self.pairwise_sum_contract(
+                cum_indices, cum_data, tensor.indices, tensor.data, next_indices
+            )
+            cum_indices = next_indices
+
+        tensor = bucket[-1]
+        result_data = self.pairwise_sum_contract(
+            cum_indices, cum_data, tensor.indices, tensor.data, result_indices
         )
-        assert result_indices[0] == k[0], 'Broken ordering, please report'
-        result_indices = result_indices[1:]
-        ixc = f + m + n
-        assert len(result_indices) == len(ixc), 'Wrong transposition, please submit an issue'
-        result_data = c.reshape([shapes[i] for i in ixc])
-        transp_c = [ixc.index(x) for x in result_indices]
-        result_data = result_data.transpose(transp_c)
-        # ----
-        # --
-        result = opt.Tensor(f'E{tag}', result_indices, data=result_data)
+
+        tag = str(list(ixs)[0])
+
+        result = opt.Tensor(f'E{tag}', result_indices,
+                            data=result_data)
         return result
 
     def get_result_data(self, result):
