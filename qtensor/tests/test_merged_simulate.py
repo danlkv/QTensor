@@ -33,7 +33,7 @@ paramtest = [
     # n, p, degree, type
      [4, 4, 3, 'random']
     ,[10, 5, 2, 'random']
-    ,[30, 4, 3, 'random']
+    ,[20, 4, 3, 'random']
     ,[3, 3, 0, 'grid2d']
     ,[8, 4, 0, 'line']
 ]
@@ -45,7 +45,7 @@ def test_merged_ix(test_problem):
     print('default', G.number_of_nodes(), G.number_of_edges(), len(gamma))
     comp = qtensor.DefaultQAOAComposer(G, gamma=gamma, beta=beta)
     comp.ansatz_state()
-    opt  = qtensor.optimisation.RGreedyOptimizer(temp=0.03, repeats=150)
+    opt  = qtensor.optimisation.RGreedyOptimizer(temp=0.01, repeats=5)
     #opt  = qtensor.optimisation.OrderingOptimizer()
 
     backend = qtensor.contraction_backends.NumpyBackend()

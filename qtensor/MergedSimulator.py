@@ -36,23 +36,31 @@ class MergedSimulator(qtensor.QtreeSimulator):
                     ]
         # Indices are already permuted, adjust peo to this
         perm_peo = [new_permute[x] for x in self.peo]
-        print('Permuted peo:', perm_peo)
-        print('mat tw:', self.optimizer.treewidth)
-        merged_ix, width = qtensor.utils.find_mergeable_indices(perm_peo, bucket_ix)
+        #print('Permuted peo:', perm_peo)
+        #print('mat tw:', self.optimizer.treewidth)
+        with pyrofiler.timing('Finding mergeable'):
+            merged_ix, width = qtensor.utils.find_mergeable_indices(perm_peo, bucket_ix)
+        print('Width merged', max(width))
         merged_buckets = []
         ibunch = []
         for ixs in merged_ix:
             bbunch_ = [sliced_buckets[i] for i in ixs]
             ibunch.append([perm_peo[i] for i in ixs])
             merged_buckets.append(sum(bbunch_, []))
-        print('ibunch', ibunch)
-        print('merged largest', max(width))
-        with pyrofiler.timing('only contract'):
-            result = qtensor.merged_indices.bucket_elimination(
-                merged_buckets,
-                ibunch,
-                self.backend.process_bucket_merged,
-                n_var_nosum=len(self.tn.free_vars)
-            )
+        #print('ibunch', ibunch)
+        #print('merged largest', max(width))
+#       with pyrofiler.timing('only contract'):
+#           result = qtensor.merged_indices.bucket_elimination(
+#               merged_buckets,
+#               ibunch,
+#               self.backend.process_bucket_merged,
+#               n_var_nosum=len(self.tn.free_vars)
+#           )
+        result = qtensor.merged_indices.bucket_elimination(
+            merged_buckets,
+            ibunch,
+            self.backend.process_bucket_merged,
+            n_var_nosum=len(self.tn.free_vars)
+        )
         #--
         return self.backend.get_result_data(result).flatten()

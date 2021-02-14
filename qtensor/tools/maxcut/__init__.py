@@ -1,6 +1,8 @@
 import numpy as np
 import networkx as nx
 
+from .goemans_williamson import gw_cost
+
 
 def spectral_bound(G):
     """ Returns a spectral upper bound to MaxCut on graph G, fraction of edges. """

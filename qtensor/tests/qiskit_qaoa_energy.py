@@ -109,7 +109,7 @@ def simulate_qiskit_amps_new(G, gamma, beta):
     E_0 = qubitOp.evaluate_with_statevector(adj_sv)[0].real
     return -(E_0 + offset)
 
-def simulate_qiskit_amps(G, gamma, beta):
+def simulate_qiskit_amps(G, gamma, beta, method='automatic'):
     assert len(gamma) == len(beta)
     p = len(gamma)
 

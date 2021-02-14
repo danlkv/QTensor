@@ -22,4 +22,3 @@ class MeasureName:
         return hash(self._name + __file__)
 
 
-

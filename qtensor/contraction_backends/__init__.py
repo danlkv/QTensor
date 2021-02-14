@@ -13,4 +13,4 @@ def get_backend(name):
         'mkl':CMKLExtendedBackend,
         'tr_einsum': TransposedBackend,
         'opt_einsum': OptEinusmBackend,
-    }[name]
+    }[name]()

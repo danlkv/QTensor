@@ -26,7 +26,7 @@ class RGreedyOptimizer(OrderingOptimizer):
 
     def _get_ordering(self, graph, **kwargs):
         #mapping = {i:k for i, k in enumerate(graph.nodes)}
-        graph = nx.convert_node_labels_to_integers(graph)
+        #graph = nx.convert_node_labels_to_integers(graph)
         node_names = nx.get_node_attributes(graph, 'name')
         node_sizes = nx.get_node_attributes(graph, 'size')
         peo, path = self._get_ordering_ints(graph)

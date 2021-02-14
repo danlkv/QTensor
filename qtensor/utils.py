@@ -11,7 +11,12 @@ import functools
 import operator
 
 
+def bucket_indices(bucket):
+    return merge_sets(set(x.indices) for x in bucket)
+
+
 def merge_sets(sets):
+    """ Merges an iterable of sets. """
     return functools.reduce(lambda x,y: x.union(y), sets, set())
 
 
@@ -26,7 +31,8 @@ def find_mergeable_indices(peo, buckets):
         width: size of largest tensor
     """
     contraction_widths = []
-    vsets = [[set(t) for t in bucket] for bucket in buckets] + [set()]
+    to_peo_inds = lambda x: peo.index(x)
+    vsets = [[set(map(to_peo_inds, t)) for t in bucket] for bucket in buckets] + [set()]
     merged_ix = []
     i = 0
     while i < len(peo):
@@ -37,17 +43,17 @@ def find_mergeable_indices(peo, buckets):
             #break
             merged_ix[-1].append(i+1)
             i += 1
-            next_vset = merge_sets([next_vset] + vsets[i])
+            #next_vset = merge_sets([next_vset] + list(vsets[i]))
             #print('m', peo[i], next_vset)
             contraction_widths.append(0)
             if i == len(peo)-1:
                 break
         i += 1
 
-        next_vset -= set(peo[j] for j in merged_ix[-1])
+        next_vset -= set(merged_ix[-1])
         contraction_widths.append(len(next_vset))
         if len(next_vset):
-            min_ix = min(peo.index(v) for v in next_vset)
+            min_ix = min(next_vset)
             vsets[min_ix].append(next_vset)
             #print('append', next_vset)
 
@@ -72,6 +78,8 @@ def contraction_steps(old_graph,  peo=None):
 
     steps = []
     joinstr = lambda x: ''.join(str(y) for y in x)
+    if not isinstance(peo[0], str):
+        raise Exception('only chars are supported for now')
     for node in peo:
         neighbors = joinstr(set(graph.neighbors(node))-set([node]))
         ixs = set([joinstr(tensor['indices'])

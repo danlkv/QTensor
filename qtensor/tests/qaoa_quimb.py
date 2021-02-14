@@ -17,17 +17,18 @@ def edge_simulate(args):
 
     ZZ = qu.pauli('Z') & qu.pauli('Z')
     opt_type = kwargs.get('ordering_algo', 'uniform')
+    max_repeats = kwargs.get('max_repeats', 10)
     if opt_type == 'hyper':
         optimizer = ctg.HyperOptimizer(
             parallel=False,
-            max_repeats=10000,
+            max_repeats=max_repeats,
             max_time=kwargs.get('optimizer_time', 1)
         )
     elif opt_type == 'uniform':
         optimizer = ctg.UniformOptimizer(
             parallel=False,
             methods=['greedy'],
-            max_repeats=1_000_000,
+            max_repeats=max_repeats,
             max_time=kwargs.get('optimizer_time', 1)
         )
     else:

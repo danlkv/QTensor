@@ -67,7 +67,7 @@ def get_avail_rect_params(sidea, sideb=None):
     return params
 
 
-def get_rect_circuit(sidea=4, sideb=None, layers=24, seed=0):
+def get_rect_stream(sidea=4, sideb=None, layers=24, seed=0):
     """
     Args:
         sidea (int): side of rectangle
@@ -80,5 +80,17 @@ def get_rect_circuit(sidea=4, sideb=None, layers=24, seed=0):
     size = f'{sidea}x{sideb}'
     file = FILEDIR / 'rect' / f'{size}.tar.gz'
     stream = read_tar_content_file(file, f'{size}/inst_{size}_{layers}_{seed}.txt' )
+    return stream
+
+
+def get_rect_circuit(sidea=4, sideb=None, layers=24, seed=0):
+    """
+    Args:
+        sidea (int): side of rectangle
+        sideb (int): defaults to sidea
+        layers (int): num of layers, 10 to 80
+        seed (int): instance, 0 to 9
+    """
+    stream = get_rect_stream(sidea=sidea, sideb=sideb, layers=layers, seed=seed)
     n, circ = qtree.operators.read_circuit_stream(stream)
     return n, circ

@@ -48,6 +48,7 @@ qiskit_lib = FallbackLasyModule(['qiskit.circuit.library','qiskit.extensions.sta
 mpi4py = LasyModule('mpi4py')
 MPI = LasyModule('mpi4py.MPI')
 networkit = LasyModule('networkit')
+cvxgraphalgs = LasyModule('cvxgraphalgs')
 """ can this break something? need to think more
 
 What if user imports qtensor, and then networkit?
