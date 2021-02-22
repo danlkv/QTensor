@@ -6,7 +6,9 @@ from tqdm.auto import tqdm
 from qtensor.contraction_backends import TorchBackend
 import networkx as nx
 from functools import lru_cache
+from cartesian_explorer.caches import JobLibCache
 
+cache = JobLibCache('/tmp/qtensor_bethe_order')
 
 def qaoa_maxcut_torch(G, gamma, beta, edge=None,
                       **kwargs
@@ -78,7 +80,8 @@ def optimize_params(get_loss, *params, steps=50,
     losses = np.array(losses).flatten()
     return losses, param_history
 
-@lru_cache
+@cache
+#@lru_cache
 def _edge_peo(p, G, edge, ordering_algo):
     opt = qtensor.toolbox.get_ordering_algo(ordering_algo)
     composer = qtensor.DefaultQAOAComposer(G, gamma=[0.1]*p, beta=[.3]*p)

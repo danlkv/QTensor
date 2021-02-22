@@ -49,7 +49,6 @@ class NumpyBackend(ContractionBackend):
             params.append(list(map(to_small_int, tensor.indices)))
         params.append(list(map(to_small_int, result_indices)))
         #print(expr)
-
         expect = len(result_indices)
         # used to check how well optimizer performs
         #if 2**expect < 0:# info.largest_intermediate:

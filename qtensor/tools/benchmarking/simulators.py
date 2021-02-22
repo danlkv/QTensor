@@ -193,7 +193,7 @@ class QuimbSimulator(BenchSimulator):
                     ZZ, edge, optimize=optimizer, **simp_kwargs)
 
             times.append(t.result)
-            infos.append((rehs['info'], circuit))
+            infos.append((rehs['info'], rehs['tn']))
             ests.append(self._rehs2est(rehs))
 
         return infos, ests, sum(times)

@@ -184,6 +184,7 @@ class TamakiOptimizer(OrderingOptimizer):
         peo = [qtree.optimizer.Var(var, size=node_sizes[var],
                         name=node_names[var])
                     for var in peo]
+        self.treewidth = tw
         return peo, [tw]
 
 class TreeTrimSplitter(SlicesOptimizer):

@@ -40,7 +40,7 @@ def find_mergeable_indices(peo, buckets):
         next_vset = merge_sets(vsets[i])
         #print(next_vset)
         while all(vs.issubset(next_vset) for vs in vsets[i+1]):
-            #break
+            break
             merged_ix[-1].append(i+1)
             i += 1
             #next_vset = merge_sets([next_vset] + list(vsets[i]))
