@@ -172,7 +172,7 @@ class QuimbSimulator(BenchSimulator):
                                               **simp_kwargs)
 
         est = self._rehs2est(rehs)
-        return rehs['info'], est, t.result
+        return (rehs['info'], rehs['tn']), est, t.result
 
 
     def optimize_qaoa_energy(self, G, p, opt_type='hyper',
@@ -193,7 +193,7 @@ class QuimbSimulator(BenchSimulator):
                     ZZ, edge, optimize=optimizer, **simp_kwargs)
 
             times.append(t.result)
-            infos.append(rehs['info'])
+            infos.append((rehs['info'], circuit))
             ests.append(self._rehs2est(rehs))
 
         return infos, ests, sum(times)
@@ -203,20 +203,22 @@ class QuimbSimulator(BenchSimulator):
                              simp_kwargs={}, **kwargs):
         circuit = self._qaoa_circ(G, p)
         res = 0
+        print('simulating energy')
         with profiles.timing() as t:
             with profiles.mem_util() as m:
-                for edge, info in tqdm(zip(G.edges, opts)):
-                    ZZ = quimb.pauli('Z') & quimb.pauli('Z')
-                    res += circuit.local_expectation(
-                        ZZ, edge, optimize=info.path, **simp_kwargs)
+                for edge, opt in tqdm(zip(G.edges, opts)):
+                    info, tn = opt
+                    path = info.path
+                    res += tn.contract(output_inds=(), optimize=path, **kwargs)
 
         return res, t.result, m.result
 
 
     def simulate(self, circuit, opt,
                  **kwargs)  :
-        info = opt
-        return circuit.amplitude([0]*circuit.N, optimize=info.path, **kwargs)
+        info = opt['info']
+        tn = opt['tn']
+        return tn.contract(output_inds=(), optimize=info.path, **kwargs)
 
     def _rehs2est(self, rehs):
         tree = ctg.ContractionTree.from_info(rehs['info'])
