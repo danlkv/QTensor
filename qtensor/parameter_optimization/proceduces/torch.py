@@ -118,3 +118,28 @@ def _edge_loss(gamma, beta, G, edge, peo=None):
     loss = torch.real(sim.simulate_batch(composer.circuit, peo=peo))
     return loss
 
+def evaluate_edge_energy_with_grad(G, gamma, beta, edge, peo=None, ordering_algo='greedy'):
+    """
+    Args:
+        G (nx.Graph): QAOA MaxCut graph
+        gamma (np.array): gamma params for QAOA
+        beta (np.array): beta params for QAOA
+        edge (tuple): Edge from G
+        peo (list): Elimination order, if None (default) then use ``ordering_algo`` to find one
+        ordering_algo (str): ordering algorithm to use if ``peo`` is None
+
+    Returns:
+        tuple(loss, gamma_grad, beta_grad)
+    """
+    params = [torch.tensor(x, requires_grad=True)
+              for x in [gamma, beta]]
+
+    peo = _edge_peo(p=len(gamma), G=G, edge=edge, ordering_algo=ordering_algo)
+
+    get_loss = partial(_edge_loss, edge=edge, G=G, peo=peo)
+
+    loss = get_loss(*params)
+    loss.backward()
+
+    return loss.detach().numpy(), params[0].grad.detach().numpy(), params[1].grad.detach().numpy()
+
