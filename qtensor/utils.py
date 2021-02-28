@@ -28,7 +28,7 @@ def find_mergeable_indices(peo, buckets):
         vsets: list of lists of lists of vertices
     Returns:
         merged_ix: list of lists
-        width: size of largest tensor
+        width: list of sizes of tensor per contraction
     """
     contraction_widths = []
     to_peo_inds = lambda x: peo.index(x)

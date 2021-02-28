@@ -71,14 +71,19 @@ class QiskitSimulator(BenchSimulator):
 
 
 class QtensorSimulator(BenchSimulator):
+    def _get_simulator(self, backend='einsum'):
+        return qtensor.QAOAQtreeSimulator(
+            qtensor.DefaultQAOAComposer,
+            backend=qtensor.contraction_backends.get_backend(backend)
+        )
+
     def optimize_qaoa_energy(self, G, p,
-                                  merged=False,
                                   ordering_algo='greedy',
 
                                  ):
         opt = qtensor.toolbox.get_ordering_algo(ordering_algo)
         gamma, beta = [0.1]*p, [.2]*p
-        sim = qtensor.QAOAQtreeSimulator(qtensor.DefaultQAOAComposer)
+        sim = self._get_simulator()
         opt_time = 0
         ests = []
         peos = []
@@ -97,12 +102,9 @@ class QtensorSimulator(BenchSimulator):
             peos.append(peo)
         return peos, ests, opt_time
 
-    def simulate_qaoa_energy(self, G, p, opt, backend='greedy'):
+    def simulate_qaoa_energy(self, G, p, opt, backend='einsum'):
         gamma, beta = [0.1]*p, [.2]*p
-        sim = qtensor.QAOAQtreeSimulator(
-            qtensor.DefaultQAOAComposer,
-            backend=qtensor.contraction_backends.get_backend(backend)
-        )
+        sim = self._get_simulator(backend=backend)
         res = 0
         with profiles.timing() as t:
             with profiles.mem_util() as m:
@@ -130,6 +132,39 @@ class QtensorSimulator(BenchSimulator):
         )
         res = sim.simulate_batch(circuit, peo=opt)
         return res
+
+class MergedQtensorSimulator(QtensorSimulator):
+    def _get_simulator(self, backend='einsum'):
+        return qtensor.MergedSimulator.MergedQAOASimulator(
+            qtensor.DefaultQAOAComposer,
+            backend=qtensor.contraction_backends.get_backend(backend)
+        )
+
+    def optimize_qaoa_energy(self, G, p,
+                                  ordering_algo='greedy',
+
+                                 ):
+        opt = qtensor.toolbox.get_ordering_algo(ordering_algo)
+        gamma, beta = [0.1]*p, [.2]*p
+        sim = self._get_simulator()
+        sim.optimizer = opt
+        opt_time = 0
+        ests = []
+        peos = []
+        for edge in tqdm(G.edges):
+            with profiles.timing() as t:
+                circuit = sim._edge_energy_circuit(G, gamma, beta, edge)
+                peo, width = sim.simulate_batch(circuit, dry_run=True)
+            tn = qtensor.optimisation.TensorNet.QtreeTensorNet.from_qtree_gates(circuit)
+            opt_time += t.result
+            mems, flops = tn.simulation_cost(peo)
+            ests.append(ContractionEstimation(
+                width=width,
+                mems=16*2**width,
+                flops=sum(flops)
+            ))
+            peos.append(peo)
+        return peos, ests, opt_time
 
 
 class AcqdpSimulator(BenchSimulator):
@@ -161,11 +196,16 @@ class AcqdpSimulator(BenchSimulator):
 
 
 class QuimbSimulator(BenchSimulator):
+    def __init__(self, simplify_sequence='ADCRS'):
+        self.simplify_sequence = simplify_sequence
+
     def optimize(self, circuit, opt_type='hyper', simp_kwargs={}, **kwargs):
         optimizer = ctg.HyperOptimizer(
             parallel=False,
             **kwargs
         )
+        simp_kwargs['simplify_sequence'] = simp_kwargs.pop(
+            'simplify_sequence', self.simplify_sequence)
 
         with profiles.timing() as t:
             rehs = circuit.amplitude_rehearse(optimize=optimizer,
@@ -181,6 +221,10 @@ class QuimbSimulator(BenchSimulator):
         infos = []
         ests = []
         times = []
+        simp_kwargs['simplify_sequence'] = simp_kwargs.pop(
+            'simplify_sequence', self.simplify_sequence)
+        print('simp kw', simp_kwargs)
+
         for edge in tqdm(G.edges):
             with profiles.timing() as t:
                 #print('qmb kwargs', kwargs)

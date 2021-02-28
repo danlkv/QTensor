@@ -2,7 +2,7 @@ import qtensor
 import pyrofiler
 
 class MergedSimulator(qtensor.QtreeSimulator):
-    def simulate_batch(self, qc, batch_vars=0, peo=None):
+    def simulate_batch(self, qc, batch_vars=0, peo=None, dry_run=False):
         self._new_circuit(qc)
         self._create_buckets()
         free_final_qubits = list(range(batch_vars))
@@ -40,7 +40,8 @@ class MergedSimulator(qtensor.QtreeSimulator):
         #print('mat tw:', self.optimizer.treewidth)
         with pyrofiler.timing('Finding mergeable'):
             merged_ix, width = qtensor.utils.find_mergeable_indices(perm_peo, bucket_ix)
-        print('Width merged', max(width))
+        if dry_run:
+            return peo, max(width)
         merged_buckets = []
         ibunch = []
         for ixs in merged_ix:
@@ -56,6 +57,7 @@ class MergedSimulator(qtensor.QtreeSimulator):
 #               self.backend.process_bucket_merged,
 #               n_var_nosum=len(self.tn.free_vars)
 #           )
+
         result = qtensor.merged_indices.bucket_elimination(
             merged_buckets,
             ibunch,
@@ -64,3 +66,7 @@ class MergedSimulator(qtensor.QtreeSimulator):
         )
         #--
         return self.backend.get_result_data(result).flatten()
+
+
+class MergedQAOASimulator(qtensor.QAOASimulator.QAOASimulator, MergedSimulator):
+    pass
