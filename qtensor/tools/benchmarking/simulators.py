@@ -216,14 +216,16 @@ class QuimbSimulator(BenchSimulator):
 
 
     def optimize_qaoa_energy(self, G, p, opt_type='hyper',
-                             simp_kwargs={}, **kwargs):
+                             simp_kwargs=None, **kwargs):
         circuit = self._qaoa_circ(G, p)
         infos = []
         ests = []
         times = []
+        if simp_kwargs is None:
+            simp_kwargs = {}
         simp_kwargs['simplify_sequence'] = simp_kwargs.pop(
             'simplify_sequence', self.simplify_sequence)
-        print('simp kw', simp_kwargs)
+        print('simp kw', simp_kwargs, self.simplify_sequence)
 
         for edge in tqdm(G.edges):
             with profiles.timing() as t:
