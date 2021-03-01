@@ -6,7 +6,7 @@ import numpy as np
 from pathlib import Path
 
 from qtensor import QtreeQAOAComposer
-from qtensor.optimisation.Optimizer import OrderingOptimizer, TamakiOptimizer
+from qtensor.optimisation.Optimizer import GreedyOptimizer, TamakiOptimizer
 from qtensor.optimisation.TensorNet import QtreeTensorNet
 
 def print_row(*args):
@@ -19,7 +19,7 @@ def get_test_problem(n=14, p=2, d=3):
     return G, gamma, beta
 
 def test_orderings():
-    opt = OrderingOptimizer()
+    opt = GreedyOptimizer()
     tam = TamakiOptimizer(wait_time=5)
     seed = 43
     np.random.seed(seed)
@@ -43,7 +43,7 @@ def test_orderings():
         print_row(n, p, seed, 'tamaki', treewidth)
 
 def test_orderings_bristlecone():
-    opt = OrderingOptimizer()
+    opt = GreedyOptimizer()
     tam = TamakiOptimizer(wait_time=15)
     seed = 43
     np.random.seed(seed)

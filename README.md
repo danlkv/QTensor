@@ -31,7 +31,7 @@ E = QAOA_energy(G, gamma, beta)
 ## Get treewidth
 
 ```python
-from qtensor.optimisation.Optimizer import OrderingOptimizer
+from qtensor.optimisation.Optimizer import GreedyOptimizer
 from qtensor.optimisation.TensorNet import QtreeTensorNet
 from qtensor import QtreeQAOAComposer
 
@@ -42,7 +42,7 @@ composer.ansatz_state()
 
 tn = QtreeTensorNet.from_qtree_gates(composer.circuit)
 
-opt = OrderingOptimizer()
+opt = GreedyOptimizer()
 peo, tn = opt.optimize(tn)
 treewidth = opt.treewidth
 

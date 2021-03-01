@@ -1,7 +1,7 @@
 import numpy as np
 import networkx as nx
 
-from qtensor.optimisation.Optimizer import OrderingOptimizer
+from qtensor.optimisation.Optimizer import GreedyOptimizer
 from qtensor.optimisation.TensorNet import QtreeTensorNet
 from qtensor import QtreeQAOAComposer
 
@@ -37,7 +37,7 @@ for p in range(1, D+1):
     tn = QtreeTensorNet.from_qtree_gates(composer.circuit)
     print(f'{tn.get_line_graph().number_of_nodes()=}')
 
-    opt = OrderingOptimizer()
+    opt = GreedyOptimizer()
     peo, tn = opt.optimize(tn)
     treewidth = opt.treewidth
     print(f"{treewidth=}")
