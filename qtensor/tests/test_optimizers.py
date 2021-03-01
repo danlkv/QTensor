@@ -6,6 +6,7 @@ from qtensor.optimisation.Optimizer import SlicesOptimizer
 from qtensor.optimisation.TensorNet import QtreeTensorNet
 from qtensor.FeynmanSimulator import FeynmanSimulator
 import numpy as np
+import time
 import networkx as nx
 np.random.seed(42)
 import pytest
@@ -62,6 +63,22 @@ def test_cost_estimation():
 
         assert np.isclose(log_mem_diff, tw_diff, atol=1.4)
         assert np.isclose(log_flop_diff, tw_diff, atol=1.4)
+
+def test_rgreedy_time():
+    G, gamma, beta = get_test_problem(30, p=3, d=3)
+
+    composer = QtreeQAOAComposer(
+            graph=G, gamma=gamma, beta=beta)
+    composer.ansatz_state()
+    max_time = 0.5
+    opt = qtensor.toolbox.get_ordering_algo('rgreedy_0.02_10000', max_time=max_time)
+    tn  = qtensor.optimisation.QtreeTensorNet.from_qtree_gates(composer.circuit)
+    start = time.time()
+    opt.optimize(tn)
+    end = time.time()
+    atol = 0.3
+    assert end-start <= max_time + atol
+
 
 if __name__ == '__main__':
     test_tamaki_trimming_opt()

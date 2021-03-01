@@ -3,7 +3,6 @@ import time
 import numpy as np
 import itertools
 import qtree
-from qtree.optimizer import Var
 import matplotlib.pyplot as plt
 import networkx as nx
 from tqdm.auto import tqdm
@@ -234,7 +233,7 @@ def plot_cost(mems, flops):
 
 
 def nodes_to_vars(old_graph, peo):
-    peo_vars = [Var(v, size=old_graph.nodes[v]['size'],
+    peo_vars = [qtree.optimizer.Var(v, size=old_graph.nodes[v]['size'],
                     name=old_graph.nodes[v]['name']) for v in peo]
     return peo_vars
 

@@ -1,5 +1,6 @@
 import numpy as np
 import copy, operator
+import time
 from qtensor.optimisation.Optimizer import GreedyOptimizer
 from qtensor.optimisation.networkit import greedy_ordering_networkit
 from qtensor import utils
@@ -19,10 +20,13 @@ class RGreedyOptimizer(GreedyOptimizer):
     using boltzman probabilities.
 
     """
-    def __init__(self, *args, temp=0.002, repeats=10, **kwargs):
+    def __init__(self, *args, temp=0.002, repeats=10,
+                 max_time=np.inf,
+                 **kwargs):
         super().__init__(*args, **kwargs)
         self.temp = temp
         self.repeats = repeats
+        self.max_time = max_time
 
     def _get_ordering(self, graph, **kwargs):
         #mapping = {i:k for i, k in enumerate(graph.nodes)}
@@ -41,6 +45,7 @@ class RGreedyOptimizer(GreedyOptimizer):
         best_peo = None
         best_width = np.inf
         best_widths = None
+        start_time = time.time()
 
         for i in range(self.repeats):
             graph = copy.deepcopy(old_graph)
@@ -76,6 +81,9 @@ class RGreedyOptimizer(GreedyOptimizer):
                 best_peo = peo
                 best_widths = widths
                 best_width = max(widths)
+
+            if time.time() - start_time > self.max_time:
+                break
 
         return best_peo, best_widths
 
@@ -85,6 +93,7 @@ class RGreedyOptimizerNk(RGreedyOptimizer):
         best_peo = None
         best_width = np.inf
         best_widths = None
+        start_time = time.time()
 
         for i in range(self.repeats):
             graph = copy.deepcopy(old_graph)
@@ -120,5 +129,8 @@ class RGreedyOptimizerNk(RGreedyOptimizer):
                 best_peo = peo
                 best_widths = widths
                 best_width = max(widths)
+
+            if time.time() - start_time > self.max_time:
+                break
 
         return best_peo, best_widths
