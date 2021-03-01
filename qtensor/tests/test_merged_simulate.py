@@ -46,7 +46,7 @@ def test_merged_ix(test_problem):
     comp = qtensor.DefaultQAOAComposer(G, gamma=gamma, beta=beta)
     comp.ansatz_state()
     opt  = qtensor.optimisation.RGreedyOptimizer(temp=0.01, repeats=5)
-    #opt  = qtensor.optimisation.OrderingOptimizer()
+    #opt  = qtensor.optimisation.GreedyOptimizer()
 
     backend = qtensor.contraction_backends.NumpyBackend()
     m_sim = qtensor.MergedSimulator.MergedSimulator(backend=backend, optimizer=opt)

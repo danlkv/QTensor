@@ -1,7 +1,7 @@
 import numpy as np
 import copy, operator
-from qtensor.optimisation.Optimizer import OrderingOptimizer
-from qtensor.optimisation.ordering import greedy_ordering_networkit
+from qtensor.optimisation.Optimizer import GreedyOptimizer
+from qtensor.optimisation.networkit import greedy_ordering_networkit
 from qtensor import utils
 from functools import reduce
 import networkx as nx
@@ -13,7 +13,7 @@ def reducelist(f, lst, x=0):
         prev = f(prev, i)
         yield prev
 
-class RGreedyOptimizer(OrderingOptimizer):
+class RGreedyOptimizer(GreedyOptimizer):
     """
     An orderer that greedy selects vertices
     using boltzman probabilities.

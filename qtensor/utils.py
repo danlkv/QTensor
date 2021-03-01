@@ -32,7 +32,7 @@ def find_mergeable_indices(peo, buckets):
     """
     contraction_widths = []
     to_peo_inds = lambda x: peo.index(x)
-    vsets = [[set(map(to_peo_inds, t)) for t in bucket] for bucket in buckets] + [set()]
+    vsets = [[set(map(to_peo_inds, t)) for t in bucket] for bucket in buckets] + [[set()]]
     merged_ix = []
     i = 0
     while i < len(peo):
@@ -40,7 +40,6 @@ def find_mergeable_indices(peo, buckets):
         next_vset = merge_sets(vsets[i])
         #print(next_vset)
         while all(vs.issubset(next_vset) for vs in vsets[i+1]):
-            break
             merged_ix[-1].append(i+1)
             i += 1
             #next_vset = merge_sets([next_vset] + list(vsets[i]))

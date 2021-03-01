@@ -7,7 +7,7 @@ import copy
 
 from qtensor import utils
 from qtensor.optimisation.Greedy import GreedyParvars
-from qtensor.optimisation.ordering import greedy_ordering_networkit
+from qtensor.optimisation.networkit import greedy_ordering_networkit
 from loguru import logger as log
 
 
@@ -45,7 +45,7 @@ class WithoutOptimizer(Optimizer):
 
 
 # TODO: rename to greedy
-class OrderingOptimizer(Optimizer):
+class GreedyOptimizer(Optimizer):
     def _get_ordering_ints(self, graph, free_vars=[]):
         #mapping = {a:b for a,b in zip(graph.nodes(), reversed(list(graph.nodes())))}
         #graph = nx.relabel_nodes(graph, mapping)
@@ -98,7 +98,7 @@ class OrderingOptimizer(Optimizer):
         return peo, tensor_net
 
 
-class SlicesOptimizer(OrderingOptimizer):
+class SlicesOptimizer(GreedyOptimizer):
 
     def __init__(self, tw_bias=2, max_tw=None, **kwargs):
         self.tw_bias = tw_bias
@@ -169,7 +169,7 @@ class SlicesOptimizer(OrderingOptimizer):
         #log.info('peo {}', self.peo)
         return self.peo, self.parallel_vars, tensor_net
 
-class TamakiOptimizer(OrderingOptimizer):
+class TamakiOptimizer(GreedyOptimizer):
     def __init__(self, *args, wait_time=5, **kwargs):
         super().__init__(*args, **kwargs)
         self.wait_time = wait_time
@@ -242,7 +242,5 @@ class TamakiTrimSlicing(TamakiOptimizer, TreeTrimSplitter):
 
 # an alias that makes sense
 
-GreedyOptimizer = OrderingOptimizer
-# A convenience variable to use in other packages
 
-DefaultOptimizer = OrderingOptimizer
+DefaultOptimizer = GreedyOptimizer

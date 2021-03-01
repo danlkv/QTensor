@@ -28,4 +28,3 @@ def test_mergeable_indices():
     print(f'width={width}')
     assert len(merged_ix) > 0
     assert [0,1,2,3] in merged_ix
-    assert False

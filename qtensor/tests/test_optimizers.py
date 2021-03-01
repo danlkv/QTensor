@@ -1,7 +1,7 @@
 import qtensor
 from qtensor import CirqQAOAComposer, QtreeQAOAComposer
 from qtensor import QAOAQtreeSimulator
-from qtensor.optimisation.Optimizer import OrderingOptimizer, TamakiTrimSlicing, TreeTrimSplitter
+from qtensor.optimisation.Optimizer import GreedyOptimizer, TamakiTrimSlicing, TreeTrimSplitter
 from qtensor.optimisation.Optimizer import SlicesOptimizer
 from qtensor.optimisation.TensorNet import QtreeTensorNet
 from qtensor.FeynmanSimulator import FeynmanSimulator
@@ -45,7 +45,7 @@ def test_cost_estimation():
                 graph=G, gamma=gamma, beta=beta)
         composer.energy_expectation_lightcone(list(G.edges())[0])
         tn = QtreeTensorNet.from_qtree_gates(composer.circuit)
-        opt = OrderingOptimizer()
+        opt = GreedyOptimizer()
         peo, _= opt.optimize(tn)
         tw = opt.treewidth
         mems, flops = tn.simulation_cost(peo)

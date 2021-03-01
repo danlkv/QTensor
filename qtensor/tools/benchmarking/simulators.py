@@ -1,7 +1,6 @@
-import cotengra as ctg
 import numpy as np
-import quimb
-import acqdp
+from qtensor.tools.lazy_import import quimb, acqdp
+from qtensor.tools.lazy_import import cotengra as ctg
 import qtensor
 from qtensor.tests.acqdp_qaoa import qaoa as acqdp_qaoa
 import pyrofiler.c as profiles

@@ -27,15 +27,15 @@ def test_profiler():
 
     f.bark_bark('test')
     print(prof._measures)
-    assert repr('test') == prof._measures['bark_bark'][-1][0]
+    assert id('test') == prof._measures['bark_bark'][-1][0]
 
     f.bark_bark('test', 'test2')
     print(prof._measures)
-    assert repr('test2') == prof._measures['bark_bark'][-1][1]
+    assert id('test2') == prof._measures['bark_bark'][-1][1]
     f.bark_bark('test', vol=15)
     print(prof._measures)
     assert 'vol' in prof._measures['bark_bark'][-1]
-    assert repr(15) == prof._measures['bark_bark'][-1]['vol']
+    assert id(15) == prof._measures['bark_bark'][-1]['vol']
 
 def test_tracks():
     prof = Profiler()

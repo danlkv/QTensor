@@ -57,3 +57,7 @@ What if user imports qtensor, and then networkit?
 if sys.modules.get('networkit') is None:
     sys.modules['networkit'] = networkit
 """
+
+acqdp = LasyModule('acqdp')
+quimb = LasyModule('quimb')
+cotengra = LasyModule('cotengra')
