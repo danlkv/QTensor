@@ -34,7 +34,12 @@ def edge_simulate(args):
     else:
         raise ValueError('Ordering algorithm not supported')
     #return circ.local_expectation(ZZ, edge, optimize=optimizer)
-    return circ.local_expectation(ZZ, edge, optimize=optimizer)
+    simplify_sequence = kwargs.get('simplify_sequence', 'ADCRS')
+    dry_run = kwargs.get('dry_run', False)
+    if dry_run:
+        return circ.local_expectation_rehearse(ZZ, edge, optimize=optimizer, simplify_sequence=simplify_sequence)
+    else:
+        return circ.local_expectation(ZZ, edge, optimize=optimizer, simplify_sequence=simplify_sequence)
 
 def simulate_one_parallel(G, p, n_processes=28, **kwargs):
     terms = {(i, j):1 for i, j in G.edges}
@@ -54,7 +59,11 @@ def simulate_one(G, p, **kwargs):
     contributions = []
     for edge in tqdm(G.edges):
         contributions.append(edge_simulate((circ, kwargs, edge)))
-    return sum(contributions)
+    dry_run = kwargs.get('dry_run', False)
+    if dry_run:
+        return contributions
+    else:
+        return sum(contributions)
 
 @click.command()
 @click.option('-n', '--nodes', default=100)
