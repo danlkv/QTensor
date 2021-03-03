@@ -1,4 +1,5 @@
 import numpy as np
+import qtree
 from qtensor.tools.lazy_import import quimb, acqdp
 from qtensor.tools.lazy_import import cotengra as ctg
 import qtensor
@@ -85,12 +86,14 @@ class QtensorSimulator(BenchSimulator):
         sim = self._get_simulator()
         opt_time = 0
         ests = []
-        peos = []
+        opts = []
         for edge in tqdm(G.edges):
             with profiles.timing() as t:
                 circuit = sim._edge_energy_circuit(G, gamma, beta, edge)
                 tn = qtensor.optimisation.TensorNet.QtreeTensorNet.from_qtree_gates(circuit)
                 peo, _ = opt.optimize(tn)
+                sim._prepare_contraction(circuit, peo=peo)
+
             opt_time += t.result
             mems, flops = tn.simulation_cost(peo)
             ests.append(ContractionEstimation(
@@ -98,8 +101,8 @@ class QtensorSimulator(BenchSimulator):
                 mems=max(mems),
                 flops=sum(flops)
             ))
-            peos.append(peo)
-        return peos, ests, opt_time
+            opts.append(sim.sliced_buckets)
+        return opts, ests, opt_time
 
     def simulate_qaoa_energy(self, G, p, opt, backend='einsum'):
         gamma, beta = [0.1]*p, [.2]*p
@@ -107,9 +110,13 @@ class QtensorSimulator(BenchSimulator):
         res = 0
         with profiles.timing() as t:
             with profiles.mem_util() as m:
-                for edge, peo in tqdm(zip(G.edges, opt)):
+                for edge, buckets in tqdm(zip(G.edges, opt)):
                     circuit = sim._edge_energy_circuit(G, gamma, beta, edge)
-                    res += sim.simulate_batch(circuit, peo=peo)
+                    result = qtree.optimizer.bucket_elimination(
+                        buckets, sim.backend.process_bucket,
+                        n_var_nosum=0
+                    )
+                    res += sim.backend.get_result_data(result).flatten()
         return res, t.result, m.result
 
     def optimize(self, circuit, ordering_algo='greedy'):

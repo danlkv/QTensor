@@ -59,5 +59,6 @@ if sys.modules.get('networkit') is None:
 """
 
 acqdp = LasyModule('acqdp')
+acqdp_tn = LasyModule('acqdp.tensor_network')
 quimb = LasyModule('quimb')
 cotengra = LasyModule('cotengra')
