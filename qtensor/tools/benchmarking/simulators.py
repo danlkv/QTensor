@@ -1,9 +1,9 @@
 import numpy as np
-import qtree
 from qtensor.tools.lazy_import import quimb, acqdp
 from qtensor.tools.lazy_import import cotengra as ctg
 import qtensor
 from qtensor.tests.acqdp_qaoa import qaoa as acqdp_qaoa
+from qtensor.tests import qaoa_quimb
 import pyrofiler.c as profiles
 from tqdm.auto import tqdm
 
@@ -92,8 +92,6 @@ class QtensorSimulator(BenchSimulator):
                 circuit = sim._edge_energy_circuit(G, gamma, beta, edge)
                 tn = qtensor.optimisation.TensorNet.QtreeTensorNet.from_qtree_gates(circuit)
                 peo, _ = opt.optimize(tn)
-                sim._prepare_contraction(circuit, peo=peo)
-
             opt_time += t.result
             mems, flops = tn.simulation_cost(peo)
             ests.append(ContractionEstimation(
@@ -101,7 +99,7 @@ class QtensorSimulator(BenchSimulator):
                 mems=max(mems),
                 flops=sum(flops)
             ))
-            opts.append(sim.sliced_buckets)
+            opts.append(peo)
         return opts, ests, opt_time
 
     def simulate_qaoa_energy(self, G, p, opt, backend='einsum'):
@@ -110,13 +108,9 @@ class QtensorSimulator(BenchSimulator):
         res = 0
         with profiles.timing() as t:
             with profiles.mem_util() as m:
-                for edge, buckets in tqdm(zip(G.edges, opt)):
+                for edge, peo in tqdm(zip(G.edges, opt)):
                     circuit = sim._edge_energy_circuit(G, gamma, beta, edge)
-                    result = qtree.optimizer.bucket_elimination(
-                        buckets, sim.backend.process_bucket,
-                        n_var_nosum=0
-                    )
-                    res += sim.backend.get_result_data(result).flatten()
+                    res += sim.simulate_batch(circuit, peo=peo)
         return res, t.result, m.result
 
     def optimize(self, circuit, ordering_algo='greedy'):
@@ -253,12 +247,27 @@ class QuimbSimulator(BenchSimulator):
 
     def simulate_qaoa_energy(self, G, p, opts,
                              simp_kwargs={}, **kwargs):
-        circuit = self._qaoa_circ(G, p)
         res = 0
+        circuit = self._qaoa_circ(G, p)
         print('simulating energy')
+        ZZ = quimb.pauli('Z') & quimb.pauli('Z')
         with profiles.timing() as t:
             with profiles.mem_util() as m:
                 for edge, opt in tqdm(zip(G.edges, opts)):
+                    ## --
+                    # The process of generating TN is for some reason
+                    # non-deterministic, i.e. the simplification result can be 
+                    # different for same arguments. Because of that caching should be
+                    # done on TN level, not on the circuit level.
+                    #
+                    # Hovewer, in real-world simulations, when \gamma, \beta changes
+                    # one will have to re-generate the TN (the tensor data is generated
+                    # in Tensor.gate() method, on-the-fly). Hence, this dummy line.
+                    _ = qaoa_quimb.get_lightcone_tn(circuit, ZZ,
+                                                where=edge,
+                                                simplify_sequence=self.simplify_sequence
+                                               )
+                    ## --
                     info, tn = opt
                     path = info.path
                     res += tn.contract(output_inds=(), optimize=path, **kwargs)
