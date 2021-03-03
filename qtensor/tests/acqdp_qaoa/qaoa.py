@@ -1,4 +1,4 @@
-from qtensor.tools.lazy_import import acqdp
+from qtensor.tools.lazy_import import acqdp_tn
 from scipy import optimize
 import numpy
 import tqdm.auto as tqdm
@@ -88,7 +88,7 @@ class QAOAOptimizer:
         of qubits."""
         qubits_set = set(qubits)
         turns = {}
-        tn = acqdp.tensor_network.TensorNetwork(dtype=complex)
+        tn = acqdp_tn.TensorNetwork(dtype=complex)
         for i in range(num_layers):
             for qubit in qubits_set:
                 tn.add_node((2 * i + 1, qubit), [(i, qubit), (i + 1, qubit)], None)
