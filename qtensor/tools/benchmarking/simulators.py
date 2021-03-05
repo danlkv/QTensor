@@ -71,7 +71,11 @@ class QiskitSimulator(BenchSimulator):
 
 
 class QtensorSimulator(BenchSimulator):
-    def _get_simulator(self, backend='einsum'):
+    def __init__(self, backend='einsum'):
+        self.backend = backend
+
+    def _get_simulator(self):
+        backend = self.backend
         return qtensor.QAOAQtreeSimulator(
             qtensor.DefaultQAOAComposer,
             backend=qtensor.contraction_backends.get_backend(backend)
@@ -102,9 +106,9 @@ class QtensorSimulator(BenchSimulator):
             opts.append(peo)
         return opts, ests, opt_time
 
-    def simulate_qaoa_energy(self, G, p, opt, backend='einsum'):
+    def simulate_qaoa_energy(self, G, p, opt):
         gamma, beta = [0.1]*p, [.2]*p
-        sim = self._get_simulator(backend=backend)
+        sim = self._get_simulator()
         res = 0
         with profiles.timing() as t:
             with profiles.mem_util() as m:
@@ -134,7 +138,8 @@ class QtensorSimulator(BenchSimulator):
         return res
 
 class MergedQtensorSimulator(QtensorSimulator):
-    def _get_simulator(self, backend='einsum'):
+    def _get_simulator(self):
+        backend = self.backend
         return qtensor.MergedSimulator.MergedQAOASimulator(
             qtensor.DefaultQAOAComposer,
             backend=qtensor.contraction_backends.get_backend(backend)
