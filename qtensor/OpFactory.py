@@ -235,6 +235,11 @@ class QtreeBuilder(CircuitBuilder):
         self._circuit = []
 
     def apply_gate(self, gate, *qubits, **params):
+        if len(qubits)>gate.n_qubits:
+            if 'alpha' in params.keys():
+                raise Exception(f'Expected {gate.n_qubits} qubits, got {qubits}')
+            params['alpha'] = qubits[gate.n_qubits]
+            qubits = qubits[:gate.n_qubits]
         self._circuit.append(gate(*qubits, **params))
 
     def inverse(self):
