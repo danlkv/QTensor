@@ -37,6 +37,7 @@ class CirqFactory:
 QtreeFactory = qtree.operators
 class ZZFull(qtree.operators.ParametricGate):
     name = 'ZZ'
+    n_qubits = 2
     _changes_qubits=(0,1)
     def gen_tensor(self):
         alpha = self.parameters['alpha']
@@ -50,6 +51,7 @@ QtreeFullFactory.ZZ = ZZFull
 
 class ZZ(qtree.operators.ParametricGate):
     name = 'ZZ'
+    n_qubits = 2
     _changes_qubits=tuple()
     parameter_count=1
     def gen_tensor(self):
@@ -86,6 +88,7 @@ class CXTorch(qtree.operators.Gate):
 
 class ZZTorch(qtree.operators.ParametricGate):
     name = 'ZZ'
+    n_qubits = 2
     _changes_qubits=tuple()
     parameter_count=1
     def gen_tensor(self):
