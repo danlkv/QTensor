@@ -74,6 +74,16 @@ def torch_j_exp(z):
     # Just make input complex
     return torch.cos(z) + 1j * torch.sin(z)
 
+class CXTorch(qtree.operators.Gate):
+    name = 'ZZ'
+    _changes_qubits=(1, )
+
+    def gen_tensor(self):
+        return torch.tensor([[[1., 0.],
+                          [0., 1.]],
+                         [[0., 1.],
+                          [1., 0.]]])
+
 class ZZTorch(qtree.operators.ParametricGate):
     name = 'ZZ'
     _changes_qubits=tuple()
@@ -108,7 +118,7 @@ class YPhaseTorch(qtree.operators.ParametricGate):
 
         c = torch.cos(np.pi * alpha / 2)*torch.tensor([[1,0],[0,1]])
         s = torch.sin(np.pi * alpha / 2)*torch.tensor([[0, -1],[1,0]])
-        g = torch.exp(1j * np.pi * alpha / 2)
+        g = torch_j_exp(1j * np.pi * alpha / 2)
 
         return g*(c + s)
 
@@ -134,6 +144,7 @@ TorchFactory.YPhase = YPhaseTorch
 TorchFactory.ZPhase = ZPhaseTorch
 TorchFactory.H = QtreeFactory.H
 TorchFactory.Z = QtreeFactory.Z
+TorchFactory.cX = QtreeFactory.cX
 
 # this is a bit ugly, but will work for now
 qtree.operators.LABEL_TO_GATE_DICT['zz'] = ZZ
