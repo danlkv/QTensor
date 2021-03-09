@@ -177,7 +177,7 @@ def bench_quimb(nodes, p, n_processes, seed=10, optimizer_time=1):
     else:
         E = simulate_one_parallel(G, p, n_processes=n_processes, optimizer_time=optimizer_time)
     end = time.time()
-    print(f'Time for {N=}, {p=}; {E=}: {end-start}')
+    print(f"Time for N={N}, p={p}; E={E}: {end-start}")
 
 
 if __name__=='__main__':
