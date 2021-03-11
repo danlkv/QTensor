@@ -37,7 +37,6 @@ class CirqFactory:
 QtreeFactory = qtree.operators
 class ZZFull(qtree.operators.ParametricGate):
     name = 'ZZ'
-    n_qubits = 2
     _changes_qubits=(0,1)
     def gen_tensor(self):
         alpha = self.parameters['alpha']
@@ -51,7 +50,6 @@ QtreeFullFactory.ZZ = ZZFull
 
 class ZZ(qtree.operators.ParametricGate):
     name = 'ZZ'
-    n_qubits = 2
     _changes_qubits=tuple()
     parameter_count=1
     def gen_tensor(self):
@@ -88,7 +86,6 @@ class CXTorch(qtree.operators.Gate):
 
 class ZZTorch(qtree.operators.ParametricGate):
     name = 'ZZ'
-    n_qubits = 2
     _changes_qubits=tuple()
     parameter_count=1
     def gen_tensor(self):
@@ -147,15 +144,13 @@ TorchFactory.YPhase = YPhaseTorch
 TorchFactory.ZPhase = ZPhaseTorch
 TorchFactory.H = QtreeFactory.H
 TorchFactory.Z = QtreeFactory.Z
-TorchFactory.cX = QtreeFactory.cX
+TorchFactory.cZ = QtreeFactory.cZ
+TorchFactory.cX = CXTorch
 
 # this is a bit ugly, but will work for now
 qtree.operators.LABEL_TO_GATE_DICT['zz'] = ZZ
 
-class QiskitFactory_Metaclass(type):
-    def __init__(cls, *args, **kwargs):
-        pass
-
+class QiskitFactory:
     @property
     def H(cls):
         return qiskit_lib.HGate
@@ -168,29 +163,25 @@ class QiskitFactory_Metaclass(type):
         except:
             return qiskit_lib.CXGate
 
+    @property
+    def cZ(cls):
+        return qiskit_lib.CZGate
 
+    @property
+    def Z(cls):
+        return qiskit_lib.ZGate
+    
     @staticmethod
     def ZPhase(alpha):
         return qiskit_lib.RZGate(phi=alpha*np.pi)
 
     @staticmethod
     def YPhase(alpha):
-        return qiskit_lib.RYGate(phi=alpha*np.pi)
+        return qiskit_lib.RYGate(theta=alpha*np.pi)
 
     @staticmethod
     def XPhase(alpha):
         return qiskit_lib.RXGate(theta=alpha*np.pi)
-
-    @property
-    def cZ(cls):
-        return qiskit_lib.CzGate
-
-    @property
-    def Z(cls):
-        return qiskit_lib.ZGate
-
-class QiskitFactory(metaclass=QiskitFactory_Metaclass):
-    pass
 
 class CircuitBuilder:
     """ ABC for creating a circuit."""
@@ -249,18 +240,13 @@ class QtreeBuilder(CircuitBuilder):
         self._circuit = []
 
     def apply_gate(self, gate, *qubits, **params):
-        if len(qubits)>gate.n_qubits:
-            if 'alpha' in params.keys():
-                raise Exception(f'Expected {gate.n_qubits} qubits, got {qubits}')
-            params['alpha'] = qubits[gate.n_qubits]
-            qubits = qubits[:gate.n_qubits]
         self._circuit.append(gate(*qubits, **params))
 
     def inverse(self):
         self._circuit = list(reversed([g.dagger_me() for g in self._circuit]))
 
 class QiskitBuilder(CircuitBuilder):
-    operators = QiskitFactory
+    operators = QiskitFactory()
 
     def get_qubits(self):
         # The ``reset`` should be called first
