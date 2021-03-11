@@ -53,6 +53,8 @@ class QtreeSimulator(Simulator):
         return perm_dict
 
     def _get_slice_dict(self, initial_state=0, target_state=0):
+        if hasattr(self, 'target_state'):
+            target_state = self.target_state
         slice_dict = qtree.utils.slice_from_bits(initial_state, self.tn.ket_vars)
         slice_dict.update(qtree.utils.slice_from_bits(target_state, self.tn.bra_vars))
         slice_dict.update({var: slice(None) for var in self.tn.free_vars})
@@ -68,7 +70,11 @@ class QtreeSimulator(Simulator):
         self._new_circuit(qc)
         self._create_buckets()
         # Collect free qubit variables
-        free_final_qubits = list(range(batch_vars))
+        if isinstance(batch_vars, int):
+            free_final_qubits = list(range(batch_vars))
+        else:
+            free_final_qubits = batch_vars
+
         self._set_free_qubits(free_final_qubits)
         if peo is None:
             self._optimize_buckets()
