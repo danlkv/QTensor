@@ -3,7 +3,7 @@ import networkx as nx
 from itertools import repeat
 import click
 
-import cotengra as ctg
+from qtensor.tools.lazy_import import cotengra as ctg
 
 from multiprocessing import Pool
 
