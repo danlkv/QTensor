@@ -3,6 +3,10 @@ __pycache__/
 *.py[cod]
 *$py.class
 
+.vscode
+
+analysis/data
+analysis/caex_cache
 # C extensions
 *.so
 
@@ -71,6 +75,7 @@ target/
 
 # Jupyter Notebook
 .ipynb_checkpoints
+.jupyter
 
 # pyenv
 .python-version
