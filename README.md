@@ -117,6 +117,23 @@ return res
 
 ```
 
+#### Use lightcone symmetry to accelerate the energy evaluation
+
+Requires `pynauty 0.6.0`, which can be installed by following the instructions [here](https://web.cs.dal.ca/~peter/software/pynauty/html/install.html)
+
+```
+import networkx as nx
+import numpy as np
+from qtensor import QAOAQtreeSimulatorSymmetryAccelerated, QtreeQAOAComposer
+
+G = nx.random_regular_graph(3, 100)
+gamma, beta = [np.pi/3], [np.pi/2]
+
+sym = QAOAQtreeSimulatorSymmetryAccelerated(QtreeQAOAComposer)
+
+E = sym.energy_expectation(G, gamma, beta)
+```
+
 ### Useful features
 
 - raise ValueError if treewidth is too large:
