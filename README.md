@@ -121,7 +121,7 @@ return res
 
 Requires `pynauty 0.6.0`, which can be installed by following the instructions [here](https://web.cs.dal.ca/~peter/software/pynauty/html/install.html)
 
-```
+```python
 import networkx as nx
 import numpy as np
 from qtensor import QAOAQtreeSimulatorSymmetryAccelerated, QtreeQAOAComposer
