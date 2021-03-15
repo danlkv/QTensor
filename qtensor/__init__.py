@@ -21,6 +21,7 @@ from qtensor import simplify_circuit
 from qtensor.simplify_circuit import simplify_qtree_circuit
 from qtensor import optimisation
 from qtensor import merged_indices
+from qtensor import problems
 from qtensor import MergedSimulator
 
 class CirqQAOAComposer(QAOAComposer):

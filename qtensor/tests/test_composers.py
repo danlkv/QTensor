@@ -142,5 +142,38 @@ def test_qiskit_convert():
     assert np.allclose(*[np.abs(x) for x in (first_amp_from_qiskit, first_amp_orig)])
     assert np.allclose(first_amp_from_qiskit, first_amp_orig)
 
+def test_view():
+    G, gamma, beta = get_test_problem()
+    composer = QtreeQAOAComposer(
+        graph=G, gamma=gamma, beta=beta)
+    composer.ansatz_state()
+
+    print(composer.circuit)
+    assert composer.circuit
+    other_builder = composer.builder.view()
+    assert other_builder.circuit == composer.circuit
+
+def test_copy():
+    G, gamma, beta = get_test_problem()
+    composer = QtreeQAOAComposer(
+        graph=G, gamma=gamma, beta=beta)
+    composer.ansatz_state()
+
+    print(composer.circuit)
+    assert composer.circuit
+    other_builder = composer.builder.copy()
+    assert other_builder.circuit == composer.circuit
+
+
+def test_expectation():
+    G, gamma, beta = get_test_problem()
+    composer = QtreeQAOAComposer(
+        graph=G, gamma=gamma, beta=beta)
+    composer.ansatz_state()
+
+    circ = composer.expectation(composer.builder.operators.H, 0)
+    assert circ
+    assert len(circ) == len(composer.circuit)*2 + 1
+
 if __name__ =='__main__':
     test_qtree_smoke()

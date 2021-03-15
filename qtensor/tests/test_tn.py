@@ -77,3 +77,46 @@ def test_init_state():
     print('matrix⋅init_state\n', ref)
 
     assert np.allclose(res, ref)
+
+def get_test_problem(n=14, p=2, d=3):
+    G = qtensor.toolbox.random_graph(n, type='random', seed=13, degree=3)
+    gamma, beta = [np.pi/3]*p, [np.pi/2]*p
+    return G, gamma, beta
+
+def test_match_qaoa():
+    N = 10
+    G, gamma, beta = get_test_problem(n=N)
+
+    composer = qtensor.QtreeQAOAComposer(graph=G, gamma=gamma, beta=beta)
+    composer.ansatz_state()
+
+    sim1 = qtensor.QtreeSimulator()
+    result_reference = sim1.simulate(composer.circuit)
+
+    sim2 = InitSim()
+    x = np.zeros(2**N)
+    x[0] = 1
+    sim2.set_init_state(x)
+    result = sim2.simulate(composer.circuit)
+
+    assert np.allclose(result, result_reference)
+
+    x[-1] = 1
+    x[0] = 0
+    sim2.set_init_state(x)
+    result = sim2.simulate(composer.circuit)
+
+    assert not np.allclose(result, result_reference)
+
+    sim1.set_init_state(2)
+    result_reference = sim1.simulate(composer.circuit)
+
+    sim2 = InitSim()
+    x = np.zeros(2**N)
+    x[2] = 1
+    sim2.set_init_state(x)
+    result = sim2.simulate(composer.circuit)
+
+    assert np.allclose(result, result_reference)
+
+

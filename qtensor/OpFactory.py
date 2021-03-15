@@ -1,5 +1,6 @@
 import cirq
 import qtree
+from functools import partial
 # Qiskit >=0.19
 #import qiskit.circuit.library as qiskit_lib
 #qiskit_lib = qtensor.tools.LasyModule('qiskit.extensions.standard')
@@ -187,7 +188,7 @@ class CircuitBuilder:
     """ ABC for creating a circuit."""
     operators = OpFactory
 
-    def __init__(self, n_qubits, **params):
+    def __init__(self, n_qubits):
         self.n_qubits = n_qubits
         self.reset()
         self.qubits = self.get_qubits()
@@ -214,6 +215,17 @@ class CircuitBuilder:
     @circuit.setter
     def circuit(self, circuit):
         self._circuit = circuit
+
+    def view(self):
+        other = type(self)(self.n_qubits)
+        other.circuit = self.circuit
+        return other
+
+    def copy(self):
+        other = type(self)(self.n_qubits)
+        other.circuit = self.circuit.copy()
+        return other
+
 
 class CirqBuilder(CircuitBuilder):
     operators = CirqFactory
@@ -243,7 +255,21 @@ class QtreeBuilder(CircuitBuilder):
         self._circuit.append(gate(*qubits, **params))
 
     def inverse(self):
-        self._circuit = list(reversed([g.dagger_me() for g in self._circuit]))
+        # --
+        # this in-place creature is to be sure that
+        # a new gate is creaded on inverse
+        def dagger_gate(gate):
+            if hasattr(gate, '_parameters'):
+                params = gate._parameters
+            else:
+                params = {}
+            new = type(gate)(*gate._qubits, **params)
+            new.name = gate.name + '+'
+            new.gen_tensor = partial(gate.dag_tensor, gate)
+            return new
+        #--
+
+        self._circuit = list(reversed([dagger_gate(g) for g in self._circuit]))
 
 class QiskitBuilder(CircuitBuilder):
     operators = QiskitFactory()

@@ -1,6 +1,7 @@
 from loguru import logger as log
-from qtensor import utils
 import networkx as nx
+import qtensor
+from qtensor import utils
 from .OpFactory import CircuitBuilder
 
 class CircuitComposer():
@@ -49,6 +50,34 @@ class CircuitComposer():
     def layer_of_Hadamards(self):
         for q in self.qubits:
             self.apply_gate(self.operators.H, q)
+
+    def expectation(self, operator, *qubits, **params):
+        """
+        Args:
+            operator: an element from OpFactory
+            qubits: qubits to apply the gate to
+            params: params to pass on application gate
+
+        Returns:
+            a circuit, 0th amplitude of which evaluates to expectation value
+        """
+
+        # TODO: should return a tensor network,
+        # no circuit returns expectations
+        first_part = self.builder.copy()
+        first_part.apply_gate(operator, *qubits, **params)
+        second_part = self.builder.copy()
+        second_part.inverse()
+
+        circ = first_part.circuit + second_part.circuit
+        do_simplify = len(circ) < 100
+        if do_simplify:
+            try:
+                circ = qtensor.simplify_circuit.simplify_qtree_circuit(circ)
+            except Exception as e:
+                print('failed to simplify:', type(e), e)
+
+        return circ
 
 
 class OldQAOAComposer(CircuitComposer):

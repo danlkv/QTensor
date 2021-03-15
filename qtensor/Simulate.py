@@ -52,9 +52,25 @@ class QtreeSimulator(Simulator):
         self.tn.buckets = perm_buckets
         return perm_dict
 
+    def set_init_state(self, state):
+        """
+        Set initial state of system.
+        Args:
+            state (int): index of state in computation basis in big-endian numeration
+
+        Example:
+            sets state ...010 as initial state
+
+            >>> simulator.set_init_state(2)
+        """
+
+        self._initial_state = state
+
     def _get_slice_dict(self, initial_state=0, target_state=0):
         if hasattr(self, 'target_state'):
             target_state = self.target_state
+        if hasattr(self, '_initial_state'):
+            initial_state = self._initial_state
         slice_dict = qtree.utils.slice_from_bits(initial_state, self.tn.ket_vars)
         slice_dict.update(qtree.utils.slice_from_bits(target_state, self.tn.bra_vars))
         slice_dict.update({var: slice(None) for var in self.tn.free_vars})
