@@ -20,6 +20,8 @@ https://hub.docker.com/repository/docker/danlkv/qtensor
 ## Usage
 
 ```python
+import networkx as nx
+import numpy as np
 from qtensor import QAOA_energy
 
 G = nx.random_regular_graph(3, 10)
@@ -113,6 +115,23 @@ else:
     res = sim.energy_expectation(G, gamma=gamma, beta=beta)
 return res
 
+```
+
+#### Use lightcone symmetry to accelerate the energy evaluation
+
+Requires `pynauty 0.6.0`, which can be installed by following the instructions [here](https://web.cs.dal.ca/~peter/software/pynauty/html/install.html)
+
+```python
+import networkx as nx
+import numpy as np
+from qtensor import QAOAQtreeSimulatorSymmetryAccelerated, QtreeQAOAComposer
+
+G = nx.random_regular_graph(3, 100)
+gamma, beta = [np.pi/3], [np.pi/2]
+
+sym = QAOAQtreeSimulatorSymmetryAccelerated(QtreeQAOAComposer)
+
+E = sym.energy_expectation(G, gamma, beta)
 ```
 
 ### Useful features
