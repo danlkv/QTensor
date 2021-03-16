@@ -1,5 +1,5 @@
 from collections import defaultdict
-import pynauty
+from qtensor.tools.lazy_import import pynauty
 import networkx as nx
 
 from qtensor.utils import get_edge_subgraph
