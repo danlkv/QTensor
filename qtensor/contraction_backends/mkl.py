@@ -159,11 +159,27 @@ class CMKLExtendedBackend(ContractionBackend):
     #@profile
     def pairwise_sum_contract(self, ixa, a, ixb, b, ixout):
         out = ixout
-        ixs = ixa, ixb
+        common = set(ixa).intersection(set(ixb))
+        # -- sum indices that are in one tensor only
+        all_ix = set(ixa+ixb)
+        sum_ix = all_ix - set(out)
+        a_sum = sum_ix.intersection(set(ixa) - common)
+        b_sum = sum_ix.intersection(set(ixb) - common)
+        #print('ab', ixa, ixb)
+        #print('all sum', sum_ix, 'a/b_sum', a_sum, b_sum)
+        if len(a_sum):
+            a = a.sum(axis=tuple(ixa.index(x) for x in a_sum))
+            ixa = [x for x in ixa if x not in a_sum]
+        if len(b_sum):
+            b = b.sum(axis=tuple(ixb.index(x) for x in b_sum))
+            ixb = [x for x in ixb if x not in b_sum]
         tensors = a, b
+        # --
+
+        ixs = ixa, ixb
+        common = set(ixs[0]).intersection(set(ixs[1]))
 
         # \sum_k A_{kfm} * B_{kfn} = C_{fmn}
-        common = set(ixs[0]).intersection(set(ixs[1]))
         mix = set(ixs[0]) - common
         nix = set(ixs[1]) - common
         kix = common - set(out)
@@ -190,6 +206,7 @@ class CMKLExtendedBackend(ContractionBackend):
         if len(out):
             #print('out ix', out, 'kfmnix', kix, fix, mix, nix)
             c = c.reshape(*self._get_index_sizes(*out))
+        #print('outix', out, 'res', c.shape, 'kfmn',kix, fix, mix, nix)
 
         current_ord_ = list(fix) + list(mix) + list(nix)
         c = c.transpose(*[current_ord_.index(i) for i in out])
@@ -203,12 +220,29 @@ class CMKLExtendedBackend(ContractionBackend):
         result_indices = all_indices - set(ixs)
 
         cum_data, cum_indices = bucket[0].data, bucket[0].indices
-        for tensor in bucket[1:-1]:
+        for i, tensor in enumerate(bucket[1:-1]):
             next_indices = set(cum_indices).union(tensor.indices)
+
+            #-- contract indices specific to this pair, if any
+            # note that it may be better to reorder pairs of tensors
+            # sorting by largest set of pair-specific indices
+            _seta, _setb = set(cum_indices), set(tensor.indices)
+            _intersec = _seta.intersection(_setb)
+            _others = set(sum((list(t.indices) for t in bucket[i+2:]),[]))
+            specific_indices = _intersec - _others
+            #print('specific indices', specific_indices, 'intersection', _intersec)
+
+            # allow to contract only those indices that are not requested in resutlt
+            specific_indices = specific_indices.intersection(set(ixs))
+
+            if len(specific_indices):
+                print('[D] Found specific_indices', specific_indices, 'ixs', ixs)
+            #--
+            next_indices = next_indices - specific_indices
             cum_data = self.pairwise_sum_contract(
                 cum_indices, cum_data, tensor.indices, tensor.data, next_indices
             )
-            cum_indices = next_indices
+            cum_indices = tuple(next_indices)
 
         tensor = bucket[-1]
         result_data = self.pairwise_sum_contract(

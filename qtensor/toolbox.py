@@ -92,11 +92,14 @@ def get_ordering_algo(ordering_algo, par_vars=0, **kwargs):
         else:
             temp = 2
             repeats = 10
+        repeats = kwargs.pop('repeats', repeats)
         optimizer = RGreedyOptimizer(temp=temp, repeats=repeats, **kwargs)
     elif ordering_algo == 'greedy':
         optimizer = GreedyOptimizer()
     elif ordering_algo == 'default':
         optimizer = DefaultOptimizer()
+    elif ordering_algo == 'naive':
+        optimizer = WithoutOptimizer()
     else:
         raise ValueError('Ordering algorithm not supported')
     return optimizer

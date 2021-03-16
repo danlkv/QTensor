@@ -60,7 +60,7 @@ class NumpyBackend(ContractionBackend):
         #print('result_indices',len(result_indices),  result_indices)
         #print('einsumparams', params)
         #result_data = np.einsum(*params)
-        if expect > 34:
+        if expect > 33:
             result_data = opt_einsum.contract(*params)
         else:
             result_data = np.einsum(*params)

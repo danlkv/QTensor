@@ -13,7 +13,16 @@ def single_qaoa_query(graph, p, ordering_algo='oe'):
     a = {e: [[1,-1],[-1,1]] for e in graph.edges}
     q = QAOAOptimizer(a, num_layers=p)
     beta_gamma = np.random.randn(p*2)
-    q.preprocess(order_finder_name=ordering_algo)
+
+    # make sure to not throw an error at optimization
+    # by artificially setting a larger memory
+    memory_mult = 2**12
+    compiler_params = dict(
+        memory=16*memory_mult
+    )
+
+    q.preprocess(order_finder_name=ordering_algo,
+                 compiler_params=compiler_params)
     E = q.query(params=beta_gamma)
     return E
 

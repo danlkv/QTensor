@@ -173,13 +173,20 @@ class MergedQtensorSimulator(QtensorSimulator):
 
 
 class AcqdpSimulator(BenchSimulator):
-    def optimize_qaoa_energy(self, G, p, ordering_algo='oe',
+    def __init__(self, ordering_algo='oe', order_finder_params={}):
+        self.ordering_algo = ordering_algo
+        self.order_finder_params = order_finder_params
+
+    def optimize_qaoa_energy(self, G, p,
                              simp_kwargs={}, **kwargs):
         a = {e: [[1,-1],[-1,1]] for e in G.edges}
         beta_gamma = np.random.randn(p*2)
         with profiles.timing() as t:
             self.q = acqdp_qaoa.QAOAOptimizer(a, num_layers=p)
-            self.q.preprocess(order_finder_name=ordering_algo)
+            self.q.preprocess(
+                order_finder_name=self.ordering_algo,
+                order_finder_params=self.order_finder_params
+            )
 
         ests = []
         for flops, mems in self.q.lightcone_flops_mems:
