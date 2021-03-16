@@ -49,6 +49,7 @@ mpi4py = LasyModule('mpi4py')
 MPI = LasyModule('mpi4py.MPI')
 networkit = LasyModule('networkit')
 cvxgraphalgs = LasyModule('cvxgraphalgs')
+pynauty = LasyModule('pynauty')
 """ can this break something? need to think more
 
 What if user imports qtensor, and then networkit?

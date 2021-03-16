@@ -5,7 +5,10 @@ import networkx as nx
 from tqdm.auto import tqdm
 from multiprocessing import Pool
 from loguru import logger as log
+import warnings
 from qtensor import tools
+from qtensor.tools.lazy_import import pynauty
+from qtensor.tools.lightcone_orbits import get_edge_orbits_lightcones
 
 class QAOASimulator(Simulator):
     def __init__(self, composer, profile=False, *args, **kwargs):
@@ -107,9 +110,44 @@ class QAOASimulator(Simulator):
                tools.mpi.print_stats()
            return C
 
+class QAOASimulatorSymmetryAccelerated(QAOASimulator):
+    def energy_expectation(self, G, gamma, beta):
+        """
+        Arguments:
+            G: MaxCut graph, Networkx
+            gamma, beta: list[float]
+
+        Returns: MaxCut energy expectation
+        """
+
+        p = len(gamma)
+        assert(len(beta) == p)
+
+        eorbits, maxnnodes_lightcone = get_edge_orbits_lightcones(G,p)
+        if len(eorbits) == G.number_of_edges():
+            warnings.warn(f"There is no speedup from leveraging the symmetries in lightcone structure, size of the largest lightcone: {maxnnodes_lightcone}\n Use QAOASimulator instead", RuntimeWarning)
+
+        total_E = 0
+
+        with tqdm(total=len(eorbits), desc='Lightcone class of equivalence iteration', ) as pbar:
+            for orb_idx, orb_edges in eorbits.items():
+                E = self._get_edge_energy(G, gamma, beta, orb_edges[0])
+                pbar.set_postfix(Treewidth=self.optimizer.treewidth)
+                pbar.update(1)
+                total_E += len(orb_edges) * E
+
+            if self.profile:
+                print(self.backend.gen_report())
+
+        C = self._post_process_energy(G, total_E)
+        return C
 
 
 class QAOAQtreeSimulator(QAOASimulator, QtreeSimulator):
+    pass
+
+
+class QAOAQtreeSimulatorSymmetryAccelerated(QAOASimulatorSymmetryAccelerated, QtreeSimulator):
     pass
 
 
