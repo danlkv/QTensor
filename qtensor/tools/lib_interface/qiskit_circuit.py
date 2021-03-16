@@ -1,3 +1,4 @@
+import sys
 
 QTENSOR_2_QISKIT_NAMES = {
     'XPhase': 'rx',
@@ -17,13 +18,14 @@ QTENSOR_2_QISKIT_NAMES = {
 }
 
 def get_name_to_gate_dict(ops):
-    gate_names = set.intersection(
-        set(ops.__dict__.keys()), set(QTENSOR_2_QISKIT_NAMES.keys())
-    )
+    name_to_gate_dict = {}
+    for name, name_qiskit in QTENSOR_2_QISKIT_NAMES.items():
+        try:
+            gate = getattr(ops, name)
+            name_to_gate_dict[name_qiskit] = gate
+        except AttributeError:
+            pass
 
-    name_to_gate_dict = {v: ops.__dict__[k] for k, v in QTENSOR_2_QISKIT_NAMES.items()
-                        if k in gate_names
-                        }
     return name_to_gate_dict
 
 def build_from_qiskit(builder, qiskit_circuit):
@@ -43,15 +45,9 @@ def build_from_qiskit(builder, qiskit_circuit):
 
     # for each operation, append the resulting internal gate representation(s)
     for circuit_operation in indexed_circuit:
-        operations = _apply_qiskit_op(builder, circuit_operation)
-        output_circuit.append(operations)
+        _apply_qiskit_op(builder, circuit_operation)
 
-    # flatten the list. It may be of arbitrary depth due to nested gate definitions
-    output_circuit = list(_flatten(output_circuit))
-
-    return_circuit = []
-    for gate in output_circuit:
-        return_circuit.append([gate])
+    return_circuit = builder.circuit
 
     qubit_count = len(qiskit_circuit.qubits)
     return qubit_count, return_circuit
@@ -89,7 +85,10 @@ def _apply_qiskit_op(builder, circuit_operation):
                 raise Exception('Parameter does not have value. assign .value to it')
             return x.value
         elif isinstance(x, circuit.ParameterExpression):
-            return float(x._symbol_expr.evalf())
+            try:
+                return float(x._symbol_expr.evalf())
+            except:
+                return x
         else:
             return x
     # if the operation is part of the qiskit standard gate set
@@ -98,7 +97,9 @@ def _apply_qiskit_op(builder, circuit_operation):
         if instruction.params:
             pex2num = lambda x: float(x._symbol_expr.evalf())
             params = [unpack_parameter(x) for x in instruction.params ]
-            builder.apply_gate(op_cls, *instruction_qubits, *params)
+            param_args = ['alpha', 'beta', 'gamma']
+            param_dict = dict(zip(param_args, params))
+            builder.apply_gate(op_cls, *instruction_qubits, **param_dict)
         else:
             builder.apply_gate(op_cls, *instruction_qubits)
 
@@ -116,6 +117,9 @@ def _apply_qiskit_op(builder, circuit_operation):
 
                 # recursively call the function until all nested custom gates are defined
                 _apply_qiskit_op(builder, defined_operation)
+            else:
+                print('instruction not found in current builder!', instruction.name, instruction, file=sys.stderr)
+                print('available names:', name_to_gate_dict.keys(), file=sys.stderr)
 
 
 

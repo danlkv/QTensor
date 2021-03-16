@@ -1,10 +1,9 @@
-import quimb as qu
-import quimb.tensor as qtn
+from qtensor.tools.lazy_import import quimb as qu
 import networkx as nx
 from itertools import repeat
 import click
 
-import cotengra as ctg
+from qtensor.tools.lazy_import import cotengra as ctg
 
 from multiprocessing import Pool
 
@@ -46,7 +45,7 @@ def edge_simulate(args):
 def simulate_one_parallel(G, p, n_processes=28, **kwargs):
     terms = {(i, j):1 for i, j in G.edges}
     gammas, betas = [0.1]*p, [.2]*p
-    circ = qtn.circ_qaoa(terms, p, gammas, betas)
+    circ = qu.tensor.circ_qaoa(terms, p, gammas, betas)
     args = list(zip(repeat(circ), repeat(kwargs), G.edges))
 
     with Pool(processes=n_processes) as pool:
@@ -57,7 +56,7 @@ def simulate_one_parallel(G, p, n_processes=28, **kwargs):
 def simulate_one(G, p, **kwargs):
     terms = {(i, j):1 for i, j in G.edges}
     gammas, betas = [0.1]*p, [.2]*p
-    circ = qtn.circ_qaoa(terms, p, gammas, betas)
+    circ = qu.tensor.circ_qaoa(terms, p, gammas, betas)
 
     contributions = []
     for edge in tqdm(G.edges):
@@ -139,14 +138,14 @@ def get_lightcone_tn(self,
         if isinstance(G, (list, tuple)):
             # if we have multiple expectations create an extra indexed stack
             nG = len(G)
-            G_data = qtn.tensor_core.do('stack', G, like=G[0])
-            G_data = qtn.tensor_core.reshape(G_data, (nG,) + (2,) * 2 * len(where))
-            output_inds = (qtn.tensor_core.rand_uuid(),)
+            G_data = qu.tensor.tensor_core.do('stack', G, like=G[0])
+            G_data = qu.tensor.tensor_core.reshape(G_data, (nG,) + (2,) * 2 * len(where))
+            output_inds = (qu.tensor.tensor_core.rand_uuid(),)
         else:
-            G_data = qtn.tensor_core.reshape(G, (2,) * 2 * len(where))
+            G_data = qu.tensor.tensor_core.reshape(G, (2,) * 2 * len(where))
             output_inds = ()
 
-        TG = qtn.tensor_core.Tensor(data=G_data, inds=output_inds + b_inds + k_inds)
+        TG = qu.tensor.tensor_core.Tensor(data=G_data, inds=output_inds + b_inds + k_inds)
 
         rhoG = rho | TG
 

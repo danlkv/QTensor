@@ -4,10 +4,9 @@ import qtree
 import qtree.optimizer as opt
 import qtensor
 from qtree import np_framework
-import opt_einsum
 import numpy as np
 import string
-import opt_einsum
+from qtensor.tools.lazy_import import opt_einsum
 
 CHARS = string.ascii_lowercase + string.ascii_uppercase
 

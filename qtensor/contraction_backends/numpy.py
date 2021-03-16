@@ -1,7 +1,7 @@
 from qtensor.contraction_backends import ContractionBackend
 import qtree.optimizer as opt
 from qtree import np_framework
-import opt_einsum
+from qtensor.tools.lazy_import import opt_einsum
 import numpy as np
 import string
 

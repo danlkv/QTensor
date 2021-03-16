@@ -16,8 +16,8 @@ def test_name_to_gate_dict():
 def test_builder():
     import qiskit
     from qiskit.circuit.library import TwoLocal
+    N = 5
 
-    N = 8
     builder = qtensor.QtreeBuilder(N)
     circ = TwoLocal(N, 'ry', 'cz', 'full', skip_final_rotation_layer=True, reps=3)
     circ = circ.assign_parameters([0.6]*len(circ.parameters))
@@ -35,5 +35,33 @@ def test_builder():
     qc = builder.circuit
     print(qc)
     assert isinstance(qc[0], builder.operators.YPhase)
-    assert False
 
+def test_qiskit_to_qiskit():
+    import qiskit
+    from qiskit.circuit.library import TwoLocal
+    N = 5
+
+    builder = qtensor.QiskitBuilder(N)
+    circ = TwoLocal(N, 'ry', 'cz', 'full', skip_final_rotation_layer=True, reps=3)
+    from qiskit.circuit import ParameterVector
+    parameters = ParameterVector('theta', N * (3))
+    param_iter = iter(parameters)
+
+    import numpy as np
+    for p in parameters:
+        p.value = next(param_iter)
+    import sympy
+    circ = circ.assign_parameters(parameters)
+    qic.build_from_qiskit(builder, circ)
+    circ = TwoLocal(N, 'ry', 'cz', 'full', skip_final_rotation_layer=True, reps=3)
+    circ = circ.assign_parameters([x*np.pi for x in parameters])
+    circ.add_register(qiskit.ClassicalRegister(N,name='c'))
+    qc = builder.circuit
+    print('qcorig\n', circ)
+    print('qc\n', qc)
+    # note: .draw() returns a ``Drawing`` object, not string
+    assert str(circ.draw()) == str(qc.draw())
+
+
+if __name__=='__main__':
+    test_builder()

@@ -1,6 +1,7 @@
 from qtensor import CirqQAOAComposer, QtreeQAOAComposer, DefaultQAOAComposer
 from qtensor import QiskitQAOAComposer, ZZQtreeQAOAComposer
 from qtensor import QtreeSimulator
+import qtensor
 from qtree.operators import from_qiskit_circuit
 from functools import lru_cache
 
@@ -68,11 +69,13 @@ def test_qtree_default_smoke():
 
     composer = DefaultQAOAComposer(
         graph=G, gamma=gamma, beta=beta)
-    composer.energy_expectation_lightcone(list(G.edges())[0])
+    edge = list(G.edges())[0]
+    composer.energy_expectation_lightcone(edge)
+    subg = qtensor.utils.get_edge_subgraph(G, edge, dist=len(gamma))
 
     print(composer.circuit)
     assert composer.circuit
-    assert composer.n_qubits == G.number_of_nodes()
+    assert composer.n_qubits == subg.number_of_nodes()
 
 def test_qtree_smoke():
     G, gamma, beta = get_test_problem()
@@ -87,11 +90,13 @@ def test_qtree_smoke():
 
     composer = QtreeQAOAComposer(
         graph=G, gamma=gamma, beta=beta)
-    composer.energy_expectation_lightcone(list(G.edges())[0])
+    edge = list(G.edges())[0]
+    composer.energy_expectation_lightcone(edge)
+    subg = qtensor.utils.get_edge_subgraph(G, edge, dist=len(gamma))
 
     print(composer.circuit)
     assert composer.circuit
-    assert composer.n_qubits == G.number_of_nodes()
+    assert composer.n_qubits == subg.number_of_nodes()
 
 def test_cirq_smoke():
     G, gamma, beta = get_test_problem()
@@ -136,6 +141,39 @@ def test_qiskit_convert():
     first_amp_orig = sim.simulate(com.circuit)
     assert np.allclose(*[np.abs(x) for x in (first_amp_from_qiskit, first_amp_orig)])
     assert np.allclose(first_amp_from_qiskit, first_amp_orig)
+
+def test_view():
+    G, gamma, beta = get_test_problem()
+    composer = QtreeQAOAComposer(
+        graph=G, gamma=gamma, beta=beta)
+    composer.ansatz_state()
+
+    print(composer.circuit)
+    assert composer.circuit
+    other_builder = composer.builder.view()
+    assert other_builder.circuit == composer.circuit
+
+def test_copy():
+    G, gamma, beta = get_test_problem()
+    composer = QtreeQAOAComposer(
+        graph=G, gamma=gamma, beta=beta)
+    composer.ansatz_state()
+
+    print(composer.circuit)
+    assert composer.circuit
+    other_builder = composer.builder.copy()
+    assert other_builder.circuit == composer.circuit
+
+
+def test_expectation():
+    G, gamma, beta = get_test_problem()
+    composer = QtreeQAOAComposer(
+        graph=G, gamma=gamma, beta=beta)
+    composer.ansatz_state()
+
+    circ = composer.expectation(composer.builder.operators.H, 0)
+    assert circ
+    assert len(circ) == len(composer.circuit)*2 + 1
 
 if __name__ =='__main__':
     test_qtree_smoke()

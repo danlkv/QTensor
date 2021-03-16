@@ -38,7 +38,7 @@ def test_qtree():
     sim = CirqSimulator()
     result = sim.simulate(composer.circuit)
     print(result)
-    final_cirq = result.final_state
+    final_cirq = result.final_state_vector
     assert final_cirq[0] - qtree_amp < 1e-5
 
     assert result

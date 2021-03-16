@@ -62,11 +62,11 @@ class GreedyOptimizer(Optimizer):
         # this may be ugly, but it is actually pythonic:)
         # solves two problems: possible inconsistencies in api, and missing networkit.
         # does not introduce overhead
+
         try:
             peo, path = greedy_ordering_networkit(graph)
         except:
             peo, path = utils.get_neighbours_peo_vars(graph, inplace=inplace)
-
 
         peo = [qtree.optimizer.Var(var, size=node_sizes[var],
                         name=node_names[var])
