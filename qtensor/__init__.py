@@ -14,6 +14,7 @@ from .OpFactory import QtreeFullBuilder
 from qtensor.Simulate import CirqSimulator, QtreeSimulator
 from qtensor.QAOASimulator import QAOAQtreeSimulator
 from qtensor.QAOASimulator import QAOACirqSimulator
+from qtensor.QAOASimulator import QAOAQtreeSimulatorSymmetryAccelerated
 from qtensor.FeynmanSimulator import FeynmanSimulator
 from qtensor.contraction_backends import PerfNumpyBackend, NumpyBackend
 from qtensor import simplify_circuit
