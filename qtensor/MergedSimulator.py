@@ -70,3 +70,6 @@ class MergedSimulator(qtensor.QtreeSimulator):
 
 class MergedQAOASimulator(qtensor.QAOASimulator.QAOASimulator, MergedSimulator):
     pass
+
+class MergedQAOASimulatorSymmetryAccelerated(MergedSimulator, qtensor.QAOASimulator.QAOAQtreeSimulatorSymmetryAccelerated):
+    pass

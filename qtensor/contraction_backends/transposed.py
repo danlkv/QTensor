@@ -131,6 +131,45 @@ class TransposedBackend(ContractionBackend):
 
 
     def process_bucket_merged(self, ixs, bucket, no_sum=False):
+        #--
+        bucket = sorted(bucket, key=lambda x: len(x.indices))
+        bucket_tweaked_order = []
+        for i, t in enumerate(bucket):
+            if len(t.indices)<3:
+                bucket_tweaked_order.append(t)
+            else:
+                bucket_tweaked_order += reversed(bucket[i:])
+                break
+        #bucket = bucket_tweaked_order
+
+        pairs = []
+
+        for i, sm in enumerate(bucket):
+            for j, lg in enumerate(bucket[i+1:]):
+                if set(sm.indices).issubset(set(lg.indices)):
+                    if len(lg.indices)>2:
+                        pairs.append((i, i+j+1))
+                        break
+
+        for pair in pairs:
+            smi, lgi = pair
+            sm, lg = bucket[smi], bucket[lgi]
+            #print('merging', sm, lg)
+            merg = self.pairwise_sum_contract(
+                lg.indices, lg.data, sm.indices, sm.data, lg.indices
+            )
+            mergt = opt.Tensor(lg.name+'t', lg.indices,
+                                data=merg)
+            bucket[lgi] = mergt
+
+        removed =[sm for sm, lg in pairs]
+        #print('removed', removed)
+        bucket = [x for i, x in enumerate(bucket) if i not in removed]
+        bucket = list(reversed(bucket))
+        if len(removed):
+            #print('cobucket', bucket, 'removed', removed)
+            pass
+        #--
         #bucket = list(reversed(bucket))
         result_indices = bucket[0].indices
         result_data = bucket[0].data
@@ -141,10 +180,11 @@ class TransposedBackend(ContractionBackend):
         #print('bucket', [len(t.indices) for t in bucket])
         #print('subsets', [set(t.indices).issubset(all_indices) for t in bucket])
         #print('contracted', len(ixs), ixs)
+
         for i, tensor in enumerate(bucket[1:-1]):
             next_indices = set(cum_indices).union(tensor.indices)
             #print('next ix size', len(next_indices), len(cum_indices), len(tensor.indices))
-            if len(next_indices)>30:
+            if len(next_indices)>35:
                 print('next size:', len(next_indices), 'bucket result', result_indices, 'merged', ixs)
                 print('bucket', bucket)
             #-- contract indices specific to this pair, if any
@@ -160,9 +200,14 @@ class TransposedBackend(ContractionBackend):
             specific_indices = specific_indices.intersection(set(ixs))
 
             if len(specific_indices):
-                print('[D] Found specific_indices', specific_indices, 'ixs', ixs)
+                #print('[D] Found specific_indices', specific_indices, 'ixs', ixs)
+                pass
             #--
             next_indices = next_indices - specific_indices
+            if len(next_indices) > 210:
+                print('len next indices', len(next_indices), 'specific indices', specific_indices)
+                print('next size:', len(next_indices), 'bucket result', result_indices, 'merged', ixs)
+                print('bucket', bucket)
 
             cum_data = self.pairwise_sum_contract(
                 cum_indices, cum_data, tensor.indices, tensor.data, next_indices

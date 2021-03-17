@@ -1,6 +1,7 @@
 import numpy as np
 from qtensor.tools.lazy_import import quimb, acqdp
 from qtensor.tools.lazy_import import cotengra as ctg
+from qtensor.tools.lightcone_orbits import get_edge_orbits_lightcones
 import qtensor
 from qtensor.tests.acqdp_qaoa import qaoa as acqdp_qaoa
 from qtensor.tests import qaoa_quimb
@@ -71,8 +72,26 @@ class QiskitSimulator(BenchSimulator):
 
 
 class QtensorSimulator(BenchSimulator):
-    def __init__(self, backend='einsum'):
+    def __init__(self, backend='einsum', accelerated=False):
         self.backend = backend
+        self.accelerated = accelerated
+
+    def _iterate_edges_accelerated(self, G, p):
+        with profiles.timing() as t:
+            eorbits, _ = get_edge_orbits_lightcones(G,p)
+        print('eorbits time', t.result)
+
+        return [x[0] for x in eorbits.values()]
+
+    def _iterate_edges(self, G, p):
+        return G.edges
+
+    def iterate_edges(self, G, p):
+        if self.accelerated:
+            gen = self._iterate_edges_accelerated(G, p)
+        else:
+            gen = self._iterate_edges(G, p)
+        return tqdm(gen)
 
     def _get_simulator(self):
         backend = self.backend
@@ -91,7 +110,7 @@ class QtensorSimulator(BenchSimulator):
         opt_time = 0
         ests = []
         opts = []
-        for edge in tqdm(G.edges):
+        for edge in self.iterate_edges(G, p):
             with profiles.timing() as t:
                 circuit = sim._edge_energy_circuit(G, gamma, beta, edge)
                 tn = qtensor.optimisation.TensorNet.QtreeTensorNet.from_qtree_gates(circuit)
@@ -100,7 +119,7 @@ class QtensorSimulator(BenchSimulator):
             mems, flops = tn.simulation_cost(peo)
             ests.append(ContractionEstimation(
                 width=opt.treewidth,
-                mems=max(mems),
+                mems=16*max(mems),
                 flops=sum(flops)
             ))
             opts.append(peo)
@@ -112,7 +131,7 @@ class QtensorSimulator(BenchSimulator):
         res = 0
         with profiles.timing() as t:
             with profiles.mem_util() as m:
-                for edge, peo in tqdm(zip(G.edges, opt)):
+                for edge, peo in tqdm(list(zip(self.iterate_edges(G, p), opt))):
                     circuit = sim._edge_energy_circuit(G, gamma, beta, edge)
                     res += sim.simulate_batch(circuit, peo=peo)
         return res, t.result, m.result
@@ -126,7 +145,7 @@ class QtensorSimulator(BenchSimulator):
         est = ContractionEstimation(
             width=opt.treewidth,
             flops=sum(flops),
-            mems=max(mems)
+            mems=16*max(mems)
         )
         return peo, est, t.result
 
@@ -138,6 +157,7 @@ class QtensorSimulator(BenchSimulator):
         return res
 
 class MergedQtensorSimulator(QtensorSimulator):
+
     def _get_simulator(self):
         backend = self.backend
         return qtensor.MergedSimulator.MergedQAOASimulator(
@@ -156,7 +176,7 @@ class MergedQtensorSimulator(QtensorSimulator):
         opt_time = 0
         ests = []
         peos = []
-        for edge in tqdm(G.edges):
+        for edge in self.iterate_edges(G, p):
             with profiles.timing() as t:
                 circuit = sim._edge_energy_circuit(G, gamma, beta, edge)
                 peo, width = sim.simulate_batch(circuit, dry_run=True)
@@ -181,11 +201,15 @@ class AcqdpSimulator(BenchSimulator):
                              simp_kwargs={}, **kwargs):
         a = {e: [[1,-1],[-1,1]] for e in G.edges}
         beta_gamma = np.random.randn(p*2)
+        # make sure to not throw an error at optimization
+        # by artificially setting a larger memory (default = 16)
+        compiler_params = dict( memory=16 * 2**20 )
         with profiles.timing() as t:
             self.q = acqdp_qaoa.QAOAOptimizer(a, num_layers=p)
             self.q.preprocess(
                 order_finder_name=self.ordering_algo,
-                order_finder_params=self.order_finder_params
+                order_finder_params=self.order_finder_params,
+                compiler_params=compiler_params
             )
 
         ests = []
@@ -193,7 +217,7 @@ class AcqdpSimulator(BenchSimulator):
             ests.append(ContractionEstimation(
                 width=np.log2(float(mems)),
                 flops=flops,
-                mems=mems
+                mems=16*mems
             ))
         return self.q, ests, t.result
 
@@ -298,7 +322,7 @@ class QuimbSimulator(BenchSimulator):
         return ContractionEstimation(
             width = rehs['W'],
             flops = tree.total_flops(),
-            mems = rehs['info'].largest_intermediate
+            mems = 16*rehs['info'].largest_intermediate
         )
 
     def _qaoa_circ(self, G, p):
