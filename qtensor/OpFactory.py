@@ -145,6 +145,8 @@ TorchFactory.YPhase = YPhaseTorch
 TorchFactory.ZPhase = ZPhaseTorch
 TorchFactory.H = QtreeFactory.H
 TorchFactory.Z = QtreeFactory.Z
+TorchFactory.X = QtreeFactory.X
+TorchFactory.Y = QtreeFactory.Y
 TorchFactory.cZ = QtreeFactory.cZ
 TorchFactory.cX = CXTorch
 

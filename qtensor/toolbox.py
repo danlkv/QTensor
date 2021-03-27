@@ -12,6 +12,7 @@ from qtensor.optimisation import RGreedyOptimizer, LateParOptimizer
 from qtensor.utils import get_edge_subgraph
 from qtensor import QtreeQAOAComposer, OldQtreeQAOAComposer, ZZQtreeQAOAComposer, DefaultQAOAComposer
 from qtensor import tools
+import qtensor
 
 def bethe_graph(p, degree):
     def add_two_nodes_to_leafs(graph):
@@ -67,7 +68,7 @@ def get_slicing_algo(slicing_algo, par_vars, ordering_algo='default'):
     return optimizer
 
 
-def get_ordering_algo(ordering_algo, par_vars=0, **kwargs):
+def get_ordering_algo(ordering_algo, par_vars=0, **kwargs) -> qtensor.optimisation.Optimizer:
     """ Get optimizer instance from its string specifier. """
     if 'tamaki' in ordering_algo:
         wait_time = 10

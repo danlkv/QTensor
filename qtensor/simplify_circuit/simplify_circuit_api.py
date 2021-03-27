@@ -1,7 +1,7 @@
 from qtensor.simplify_circuit import simplify_circuit
-from qtensor.simplify_circuit.gates import zzphase, xphase, yphase, zphase, hadamard, ident, cnot, toffoli, z
+from qtensor.simplify_circuit.gates import zzphase, xphase, yphase, zphase, hadamard, ident, cnot, toffoli, z, cz, x, y
 
-from qtree.operators import XPhase, YPhase, ZPhase, H, cX, Z
+from qtree.operators import XPhase, YPhase, ZPhase, H, cX, Z, cZ, X, Y
 from qtree.operators import ParametricGate, Gate
 
 from qtensor.OpFactory import ZZ
@@ -67,7 +67,10 @@ GATE_MAP = {
     zphase: ZPhase,
     hadamard: H,
     cnot: cX,
-    z: Z
+    cz: cZ,
+    z: Z,
+    x: X,
+    y: Y,
 }
 
 

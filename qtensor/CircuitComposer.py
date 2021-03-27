@@ -75,7 +75,9 @@ class CircuitComposer():
             try:
                 circ = qtensor.simplify_circuit.simplify_qtree_circuit(circ)
             except Exception as e:
-                print('failed to simplify:', type(e), e)
+
+                pass
+                #print('failed to simplify:', type(e), e)
 
         return circ
 
