@@ -88,6 +88,31 @@ class QtreeTensorNet(TensorNet):
         return tn
 
 
+#-- These functions can be members of tn, but I'm not sure 
+# that would be a good place for them, maybe something like 
+# TensorContractor is a better place
+def reorder_tn(tn, peo):
+    perm_buckets, perm_dict = qtree.optimizer.reorder_buckets(tn.buckets, peo)
+    tn.ket_vars = sorted([perm_dict[idx] for idx in tn.ket_vars], key=str)
+    tn.bra_vars = sorted([perm_dict[idx] for idx in tn.bra_vars], key=str)
+    tn.buckets = perm_buckets
+
+
+def slice_tn(tn, initial_state=0, target_state=0):
+    slice_dict = qtree.utils.slice_from_bits(initial_state, tn.ket_vars)
+    slice_dict.update(qtree.utils.slice_from_bits(target_state, tn.bra_vars))
+    slice_dict.update({var: slice(None) for var in tn.free_vars})
+    sliced_buckets = tn.backend.get_sliced_buckets(
+        tn.buckets, tn.data_dict, slice_dict)
+    return sliced_buckets
+
+def repopulate_data(tn, circ):
+    for op in circ:
+        data_key = (op.name, hash((op.name, tuple(op.parameters.items()))))
+        tn.data_dict[data_key] = op.gen_tensor(**op.parameters)
+
+# --
+
 def circ2buckets_init(qubit_count, circuit, init_vector):
     max_depth = len(circuit)
 
