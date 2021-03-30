@@ -40,14 +40,22 @@ class MergedSimulator(qtensor.QtreeSimulator):
         #print('mat tw:', self.optimizer.treewidth)
         with pyrofiler.timing('Finding mergeable'):
             merged_ix, width = qtensor.utils.find_mergeable_indices(perm_peo, bucket_ix)
-        if dry_run:
-            return peo, max(width)
+
         merged_buckets = []
         ibunch = []
         for ixs in merged_ix:
             bbunch_ = [sliced_buckets[i] for i in ixs]
             ibunch.append([perm_peo[i] for i in ixs])
             merged_buckets.append(sum(bbunch_, []))
+
+        #-- 
+        # A dirty workaround to pass the merged buckets to benchmark optimizaiton code
+        # TODO: decompose the functions to be able to get buckets
+        self.merged_buckets = merged_buckets
+        self.ibunch = ibunch
+
+        if dry_run:
+            return peo, max(width)
         #print('ibunch', ibunch)
         #print('merged largest', max(width))
 #       with pyrofiler.timing('only contract'):
