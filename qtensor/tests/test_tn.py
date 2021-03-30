@@ -119,11 +119,11 @@ def test_match_qaoa():
 
     assert np.allclose(result, result_reference)
 
-class TorchComposer(qtensor.CircuitComposer.CircuitComposer):
+class TorchComposer(qtensor.CircuitComposer):
     def _get_builder(self):
         return qtensor.TorchBuilder(n_qubits=self.params['n_qubits'])
 
-class QtreeCaomposer(qtensor.CircuitComposer.CircuitComposer):
+class QtreeCaomposer(qtensor.CircuitComposer):
     def _get_builder(self):
         return qtensor.QtreeBuilder(n_qubits=self.params['n_qubits'])
 
