@@ -41,7 +41,7 @@ def qaoa_maxcut_torch(G, gamma, beta, edge=None,
     if edge is not None:
         loss = partial(_edge_loss, edge=edge, G=G, peo=peo)
     else:
-        loss = partial(_energy_loss, G=G, peo=peo)
+        loss = partial(_energy_loss, G=G, peos=peo)
     params = [torch.tensor(x, requires_grad=True)
               for x in [gamma, beta]]
 
@@ -92,6 +92,12 @@ def _edge_peo(p, G, edge, ordering_algo):
     print('Treewidth', opt.treewidth)
     return peo
 
+@cache
+#@lru_cache
+def _energy_peo(p, G, ordering_algo):
+    # this means that peo will be re-calculated on each optimisation step
+    return None
+
 def _energy_loss(gamma, beta, G, peos=None):
     backend = TorchBackend()
     sim = qtensor.QtreeSimulator(backend=backend)
@@ -100,11 +106,11 @@ def _energy_loss(gamma, beta, G, peos=None):
     loss = torch.tensor([0.])
 
     if peos is None:
-        peos = [None]*G.number_of_edges
+        peos = [None]*G.number_of_edges()
 
     for edge, peo in zip(G.edges, peos):
         composer.energy_expectation_lightcone(edge)
-        loss += - torch.real(sim.simulate_batch(composer.circuit, peo=peo))
+        loss += torch.real(sim.simulate_batch(composer.circuit, peo=peo))
         composer.builder.reset()
     return -(G.number_of_edges() - loss)/2
 

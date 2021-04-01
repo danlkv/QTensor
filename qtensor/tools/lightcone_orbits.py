@@ -38,6 +38,14 @@ def relabel_edge_first(G, e):
     return nx.relabel_nodes(G, mapping)
 
 
+def graph_cert(G):
+    g = pynauty.Graph(number_of_vertices=G.number_of_nodes(), directed=nx.is_directed(G),
+                adjacency_dict = get_adjacency_dict(G),
+                vertex_coloring = [set([0,1]), set(range(2, G.number_of_nodes()))])
+    cert = pynauty.certificate(g)
+    return cert
+
+
 def get_edge_orbits_lightcones(G,p):
     """Takes graph G and number of QAOA steps p
     returns unique subgraphs that QAOA sees
@@ -51,11 +59,7 @@ def get_edge_orbits_lightcones(G,p):
     # for each edge construct the light cone subgraph and compute certificate  
     for e in G.edges():
         subgraph = relabel_edge_first(get_edge_subgraph(G, e, p), e)
-        maxnnodes = max(maxnnodes, subgraph.number_of_nodes())
-        g = pynauty.Graph(number_of_vertices=subgraph.number_of_nodes(), directed=nx.is_directed(subgraph),
-                    adjacency_dict = get_adjacency_dict(subgraph),
-                    vertex_coloring = [set([0,1]), set(range(2, subgraph.number_of_nodes()))])
-        cert = pynauty.certificate(g)
+        cert = graph_cert(subgraph)
         eorbits[cert].append(e)
 
     eorbits_integer_keys = {}
