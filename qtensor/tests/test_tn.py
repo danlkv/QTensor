@@ -119,4 +119,55 @@ def test_match_qaoa():
 
     assert np.allclose(result, result_reference)
 
+class TorchComposer(qtensor.CircuitComposer):
+    def _get_builder(self):
+        return qtensor.TorchBuilder(n_qubits=self.params['n_qubits'])
+
+class QtreeCaomposer(qtensor.CircuitComposer):
+    def _get_builder(self):
+        return qtensor.QtreeBuilder(n_qubits=self.params['n_qubits'])
+
+def test_substitute_parameters():
+    import torch
+    import qtensor.optimisation.TensorNet as TN
+    N = 2
+    composer = QtreeCaomposer(n_qubits=N)
+    backend = qtensor.contraction_backends.NumpyBackend()
+    parameters = np.random.rand(N)
+    def gen_circuit(composer, parameters):
+        for i, x in enumerate(parameters):
+            composer.apply_gate(composer.operators.XPhase, i, alpha=x)
+
+    gen_circuit(composer, parameters)
+    assert len(composer.circuit) == N
+    tn = qtensor.optimisation.QtreeTensorNet.from_qtree_gates(composer.circuit)
+    print('tn.buckets', tn.buckets)
+    opt = qtensor.toolbox.get_ordering_algo('greedy')
+    peo, _ = opt.optimize(tn)
+    print('peo', peo)
+    print('len peo', len(peo), 'len tn', len(tn.buckets))
+    TN.reorder_tn(tn, peo)
+    print('tn_opt.buckets', tn.buckets)
+
+    #--
+    tn.backend = backend
+    print('tdata', [t.data for b in tn.buckets for t in b])
+    sliced = TN.slice_tn(tn)
+    print('tdata', [t.data for b in sliced for t in b])
+    res = qtree.optimizer.bucket_elimination(sliced, tn.backend.process_bucket)
+    A = tn.backend.get_result_data(res).flatten()
+    print('A', A)
+
+    #--
+    parameters[0] = .5
+    print('taparams', [t.parameters for b in tn.buckets for t in b if hasattr(t,'parameters')])
+    sliced = TN.repopulate_data(tn, composer.circuit)
+    sliced = TN.slice_tn(tn)
+    print('Btdata', [t.data for b in sliced for t in b])
+    res = qtree.optimizer.bucket_elimination(sliced, tn.backend.process_bucket)
+    B = tn.backend.get_result_data(res).flatten()
+    print('B', B)
+    assert not np.allclose(A, B)
+    assert False
+
 

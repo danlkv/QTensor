@@ -72,7 +72,7 @@ def maxcut_optimal(G, print_stats=False):
     t3 = time.time()
     # MAXCUT normally wants the max cut (huh.)
     maxdex = np.argmax(ZZcost)
-    maxstate = concatenate((index2state(maxdex),[1]))
+    maxstate = np.concatenate((index2state(maxdex),[1]))
 
     t4 = time.time()
 

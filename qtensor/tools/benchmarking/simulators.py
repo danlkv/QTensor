@@ -180,16 +180,33 @@ class MergedQtensorSimulator(QtensorSimulator):
             with profiles.timing() as t:
                 circuit = sim._edge_energy_circuit(G, gamma, beta, edge)
                 peo, width = sim.simulate_batch(circuit, dry_run=True)
-            tn = qtensor.optimisation.TensorNet.QtreeTensorNet.from_qtree_gates(circuit)
             opt_time += t.result
+            peos.append((sim.ibunch, sim.merged_buckets))
+
+            tn = qtensor.optimisation.TensorNet.QtreeTensorNet.from_qtree_gates(circuit)
             mems, flops = tn.simulation_cost(peo)
             ests.append(ContractionEstimation(
                 width=width,
                 mems=16*2**width,
                 flops=sum(flops)
             ))
-            peos.append(peo)
         return peos, ests, opt_time
+
+    def simulate_qaoa_energy(self, G, p, opt):
+        gamma, beta = [0.1]*p, [.2]*p
+        sim = self._get_simulator()
+        res = 0
+        with profiles.timing() as t:
+            with profiles.mem_util() as m:
+                for edge, (ibunch, merged_buckets) in tqdm(list(zip(self.iterate_edges(G, p), opt))):
+                    result = qtensor.merged_indices.bucket_elimination(
+                        merged_buckets,
+                        ibunch,
+                        sim.backend.process_bucket_merged,
+                        n_var_nosum=0
+                    )
+
+        return res, t.result, m.result
 
 
 class AcqdpSimulator(BenchSimulator):
