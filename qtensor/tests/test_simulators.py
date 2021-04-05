@@ -5,17 +5,10 @@ from qtensor.Simulate import CirqSimulator, QtreeSimulator
 from qtensor.FeynmanSimulator import FeynmanSimulator
 import numpy as np
 import networkx as nx
+from qtensor.tests import get_test_problem
 
 np.random.seed(42)
 
-
-def get_test_problem(n=14, p=2, d=3):
-    w = np.array([[0,1,1,0],[1,0,1,1],[1,1,0,1],[0,1,1,0]])
-    G = nx.from_numpy_matrix(w)
-
-    G = nx.random_regular_graph(d, n)
-    gamma, beta = [np.pi/3]*p, [np.pi/2]*p
-    return G, gamma, beta
 
 def test_qtree():
     G, gamma, beta = get_test_problem()
@@ -39,7 +32,7 @@ def test_qtree():
     result = sim.simulate(composer.circuit)
     print(result)
     final_cirq = result.final_state_vector
-    assert final_cirq[0] - qtree_amp < 1e-5
+    assert np.allclose(final_cirq[0], qtree_amp)
 
     assert result
 

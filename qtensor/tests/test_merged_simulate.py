@@ -9,20 +9,7 @@ from qtensor import QtreeQAOAComposer
 from qtensor.contraction_backends import PerfNumpyBackend
 
 from qtensor.Simulate import CirqSimulator, QtreeSimulator
-
-@lru_cache
-def get_test_problem(n=10, p=2, d=3, type='random'):
-    print('Test problem: n, p, d', n, p, d)
-    if type == 'random':
-        G = nx.random_regular_graph(d, n)
-    elif type == 'grid2d':
-        G = nx.grid_2d_graph(n,n)
-    elif type == 'line':
-        G = nx.Graph()
-        G.add_edges_from(zip(range(n-1), range(1, n)))
-    G = nx.convert_node_labels_to_integers(G)
-    gamma, beta = [np.pi/5]*p, [np.pi/2]*p
-    return G, gamma, beta
+from qtensor.tests import get_test_problem
 
 @pytest.fixture
 def test_problem(request):

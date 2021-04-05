@@ -5,6 +5,18 @@ from functools import lru_cache
 
 @lru_cache
 def get_test_problem(n=10, p=2, d=3, type='random'):
+    """
+    Get test QAOA problem
+
+    Args:
+        n: number of nodes in graph
+        p: number of qaoa cycles
+        d: degree of graph
+        type: type of graph
+
+    Returns
+        (nx.Graph, gamma, beta)
+    """
     print('Test problem: n, p, d', n, p, d)
     if type == 'random':
         G = nx.random_regular_graph(d, n)
