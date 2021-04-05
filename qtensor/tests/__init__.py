@@ -25,6 +25,7 @@ def get_test_problem(n=10, p=2, d=3, type='random'):
     elif type == 'line':
         G = nx.Graph()
         G.add_edges_from(zip(range(n-1), range(1, n)))
+    G = nx.convert_node_labels_to_integers(G)
     gamma, beta = [np.pi/5]*p, [np.pi/2]*p
     return G, gamma, beta
 
