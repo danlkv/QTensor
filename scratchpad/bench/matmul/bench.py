@@ -88,17 +88,9 @@ class TorchCuda(Torch):
         torch.cuda.synchronize()
         res.result = start.elapsed_time(end)/1000
 
-    @classmethod
-    def gen_tensor(cls, *sizes, dtype='float'):
-        import torch
-        dtype = cls.get_dtype(dtype)
-        return torch.rand(*sizes, dtype=dtype).to('cuda')
-
     @staticmethod
-    def get_result(x):
-        import torch
-        torch.cuda.synchronize()
-        return x
+    def prepare(x):
+        return x.to('cuda')
 
 
 class Cupy(Backend):
