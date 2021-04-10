@@ -7,17 +7,10 @@ from qtensor.optimisation.TensorNet import QtreeTensorNet
 from qtensor.FeynmanSimulator import FeynmanSimulator
 import numpy as np
 import time
-import networkx as nx
-np.random.seed(42)
 import pytest
+from qtensor.tests import get_test_problem
+np.random.seed(42)
 
-def get_test_problem(n=14, p=2, d=3):
-    w = np.array([[0,1,1,0],[1,0,1,1],[1,1,0,1],[0,1,1,0]])
-    G = nx.from_numpy_matrix(w)
-
-    G = nx.random_regular_graph(d, n)
-    gamma, beta = [np.pi/3]*p, [np.pi/2]*p
-    return G, gamma, beta
 
 @pytest.mark.skip()
 def test_tamaki_trimming_opt():

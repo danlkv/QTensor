@@ -41,15 +41,40 @@ def state_reverse(basis_state_as_num, nqubits):
     new_str = basis_state_as_str[::-1]
     return state_str2num(new_str)
 
-def get_adjusted_state(state):
+def change_state_qubit_order(basis_state_as_num, mapper):
+    """
+    Converts state order as described by mapper.
+    Args:
+        basis_state_as_num (int): index of state in order
+        mapper (dict): mapper[old qubit index] = new qubit index,
+            should have unique values
+    Returns:
+        int
+    """
+    nqubits = len(mapper)
+    _new2old = {v:k for k,v in mapper.items()}
+    assert len(_new2old) == len(mapper), "Mapper should have unique vaues"
+    basis_state_as_str = state_num2str(basis_state_as_num, nqubits)
+    new_str = ''.join(basis_state_as_str[_new2old[i]] for i in range(nqubits))
+    return state_str2num(new_str)
+
+def get_adjusted_state(state, endian='little', index_map=None):
     nqubits = np.log2(state.shape[0])
     if nqubits % 1:
         raise ValueError("Input vector is not a valid statevector for qubits.")
     nqubits = int(nqubits)
 
+    if index_map is None:
+        if endian == 'little':
+            index_map = {i:j for i,j in enumerate(reversed(range(nqubits)))}
+        else:
+            index_map = {i:j for i,j in enumerate(range(nqubits))}
+
     adjusted_state = np.zeros(2**nqubits, dtype=complex)
     for basis_state in range(2**nqubits):
-         adjusted_state[state_reverse(basis_state, nqubits)] = state[basis_state]
+        _new_state_ix = change_state_qubit_order(basis_state, mapper=index_map)
+        adjusted_state[_new_state_ix] = state[basis_state]
+
     return adjusted_state
 
 
@@ -70,14 +95,14 @@ def state_to_ampl_counts(vec, eps=1e-15):
     return counts
 
 
-def obj_from_statevector(sv, obj_f, precomputed=None):
+def obj_from_statevector(sv, obj_f, precomputed=None, endian='little'):
     """Compute objective from Qiskit statevector
     For large number of qubits, this is slow. 
     To speed up for larger qubits, pass a vector of precomputed energies
     for QAOA, precomputed should be the same as the diagonal of the cost Hamiltonian
     """
     if precomputed is None:
-        adj_sv = get_adjusted_state(sv)
+        adj_sv = get_adjusted_state(sv, endian=endian)
         counts = state_to_ampl_counts(adj_sv)
         assert(np.isclose(sum(np.abs(v)**2 for v in counts.values()), 1))
         return sum(obj_f(np.array([int(x) for x in k])) * (np.abs(v)**2) for k, v in counts.items())

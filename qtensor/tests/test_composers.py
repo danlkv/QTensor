@@ -9,25 +9,7 @@ import networkx as nx
 import numpy as np
 
 import cirq
-
-def get_test_problem_():
-    w = np.array([[0,1,1,0],[1,0,1,1],[1,1,0,1],[0,1,1,0]])
-    G = nx.from_numpy_matrix(w)
-    gamma, beta = [np.pi/3], [np.pi/2]
-    return G, gamma, beta
-@lru_cache
-def get_test_problem(n=10, p=2, d=3, type='random'):
-    print('Test problem: n, p, d', n, p, d)
-    if type == 'random':
-        G = nx.random_regular_graph(d, n)
-    elif type == 'grid2d':
-        G = nx.grid_2d_graph(n,n)
-    elif type == 'line':
-        G = nx.Graph()
-        G.add_edges_from(zip(range(n-1), range(1, n)))
-    gamma, beta = [np.pi/5]*p, [np.pi/2]*p
-    return G, gamma, beta
-
+from qtensor.tests import get_test_problem
 
 
 def test_cirq_sim():
@@ -42,6 +24,7 @@ def test_cirq_sim():
     print(result)
     assert result
     assert composer.n_qubits == G.number_of_nodes()
+
 
 def test_non_chordal_lightcones():
     G, gamma, beta = get_test_problem()
