@@ -21,7 +21,7 @@ torch = LasyModule('torch')
 cupy = LasyModule('cupy')
 import sys
 import os
-sys.path.append(os.environ['HOME']+"/.local/lib")
+sys.path.append(os.environ['HOME']+"/.local")
 exatn = LasyModule('exatn')
 
 @dataclass
@@ -248,9 +248,12 @@ def obj2dict(obj):
 
 @lru_cache
 def get_gpu_props_json():
-    import torch
-    devprops = torch.cuda.get_device_properties(torch.cuda.current_device())
-    return obj2dict(devprops)
+    try:
+        import torch
+        devprops = torch.cuda.get_device_properties(torch.cuda.current_device())
+        return obj2dict(devprops)
+    except:
+        return None
 
 
 def print_results_csv(backend, size, dtype, results: List[BenchResult]):
@@ -298,13 +301,17 @@ def print_results_json(task_type, backend, size, dtype, results: List[BenchResul
 
 def main():
 
-    sizes = [4093, 4096]
+    sizes = [2093, 2096]
     backends = {
         'numpy':Numpy
         ,'exatn': Exatn
-        ,'torch':TorchCuda
-        ,'cupy':Cupy
     }
+    if get_gpu_props_json():
+        backends.update({
+            'torch':TorchCuda
+            ,'cupy':Cupy
+        })
+
     repeats = 5
     task_type = 'matmul'
     dtypes = ['float', 'double', 'complex64', 'complex128']

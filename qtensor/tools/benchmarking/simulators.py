@@ -249,14 +249,32 @@ class AcqdpSimulator(BenchSimulator):
 
 
 class QuimbSimulator(BenchSimulator):
-    def __init__(self, simplify_sequence='ADCRS'):
+    def __init__(self, simplify_sequence='ADCRS', opt_kwargs={}, opt_type='hyper'):
         self.simplify_sequence = simplify_sequence
+        self.opt_kwargs = {}
+        self.opt_type = opt_type
 
-    def optimize(self, circuit, opt_type='hyper', simp_kwargs={}, **kwargs):
-        optimizer = ctg.HyperOptimizer(
-            parallel=False,
-            **kwargs
-        )
+    def _get_optimizer(self, opt_type=None, **kwargs):
+        kwargs = {**self.opt_kwargs, **kwargs}
+        if opt_type is None:
+            opt_type = self.opt_type
+
+        if opt_type == 'hyper':
+            optimizer = ctg.HyperOptimizer(
+                parallel=False,
+                **kwargs
+            )
+        elif opt_type == 'uniform':
+            optimizer = ctg.UniformOptimizer(
+                parallel=False,
+                **kwargs
+            )
+        else:
+            raise ValueError('Opt type not supported! Received {} should be one of `hyper` or `uniform`'.format(opt_type))
+        return optimizer
+
+    def optimize(self, circuit, opt_type=None, simp_kwargs={}, **kwargs):
+        optimizer = self._get_optimizer(opt_type=opt_type, **kwargs)
         simp_kwargs['simplify_sequence'] = simp_kwargs.pop(
             'simplify_sequence', self.simplify_sequence)
 
@@ -268,7 +286,7 @@ class QuimbSimulator(BenchSimulator):
         return (rehs['info'], rehs['tn']), est, t.result
 
 
-    def optimize_qaoa_energy(self, G, p, opt_type='hyper',
+    def optimize_qaoa_energy(self, G, p, opt_type=None,
                              simp_kwargs=None, **kwargs):
         circuit = self._qaoa_circ(G, p)
         infos = []
@@ -279,14 +297,12 @@ class QuimbSimulator(BenchSimulator):
         simp_kwargs['simplify_sequence'] = simp_kwargs.pop(
             'simplify_sequence', self.simplify_sequence)
         print('simp kw', simp_kwargs, self.simplify_sequence)
+        kwargs = {**self.opt_kwargs, **kwargs}
 
         for edge in tqdm(G.edges):
             with profiles.timing() as t:
                 #print('qmb kwargs', kwargs)
-                optimizer = ctg.HyperOptimizer(
-                    parallel=False,
-                    **kwargs
-                )
+                optimizer = self._get_optimizer(opt_type=opt_type, **kwargs)
                 ZZ = quimb.pauli('Z') & quimb.pauli('Z')
                 rehs = circuit.local_expectation_rehearse(
                     ZZ, edge, optimize=optimizer, **simp_kwargs)
