@@ -162,6 +162,8 @@ class Cupy(Backend):
 
     @staticmethod
     def get_matmul():
+        with pyrofiler.timing('cblas handler', callback=print):
+            cupy.cuda.device.get_cublas_handle()
         return cupy.matmul
 
 @dataclass
@@ -270,13 +272,28 @@ def get_dtype_size(dtype):
     x = np.ones(10, dtype=dtype_t)
     return x.itemsize
 
+
+def mean_mmax(x: list):
+    mx, mn = max(x), min(x)
+    x.remove(mx)
+    x.remove(mn)
+    return np.mean(x)
+
+#whether to use the removal of max and min before mean
+# does not affect standard deviation or other times, only matmul
+use_strip = True
+
 def print_results_json(task_type, backend, size, dtype, results: List[BenchResult]):
     import json
     GPU_PROPS = get_gpu_props_json()
     tt1 = [r.gen_time for r in results]
     tt2 = [r.mult_time for r in results]
     tt3 = [r.transfer_time for r in results]
-    m1, m2, m3 = np.mean(tt1), np.mean(tt2), np.mean(tt3)
+    m1, m3 = np.mean(tt1), np.mean(tt3)
+    if use_strip:
+        m2 = mean_mmax(tt2)
+    else:
+        m2 = np.mean(tt2)
     s1, s2, s3 = np.std(tt1), np.std(tt2), np.std(tt3)
     flops = size**3/m2
     res = dict(
@@ -299,9 +316,11 @@ def print_results_json(task_type, backend, size, dtype, results: List[BenchResul
     print(json.dumps(res), flush=True)
 
 
+
 def main():
 
-    sizes = [2093, 2096]
+    sizes = [10, 100, 1000, 1024, 1025, 2000, 4090, 4096]
+    #sizes = [2000, 3000]
     backends = {
         'numpy':Numpy
         ,'exatn': Exatn
@@ -313,6 +332,8 @@ def main():
         })
 
     repeats = 5
+    if use_strip:
+        repeats += 2
     task_type = 'matmul'
     dtypes = ['float', 'double', 'complex64', 'complex128']
 
