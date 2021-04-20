@@ -3,7 +3,7 @@ import numpy as np
 from functools import lru_cache
 
 
-@lru_cache
+@lru_cache(maxsize=2**12)
 def get_test_problem(n=10, p=2, d=3, type='random'):
     """
     Get test QAOA problem
