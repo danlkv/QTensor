@@ -95,8 +95,16 @@ def _edge_peo(p, G, edge, ordering_algo):
 @cache
 #@lru_cache
 def _energy_peo(p, G, ordering_algo):
-    # this means that peo will be re-calculated on each optimisation step
-    return None
+    opt = qtensor.toolbox.get_ordering_algo(ordering_algo)
+    peos = []
+    for edge in G.edges():
+        composer = qtensor.DefaultQAOAComposer(G, gamma=[0.1]*p, beta=[.3]*p)
+        composer.energy_expectation_lightcone(edge)
+        tn = qtensor.optimisation.TensorNet.QtreeTensorNet.from_qtree_gates(composer.circuit)
+        peo, _ = opt.optimize(tn)
+        print('tw', opt.treewidth)
+        peos.append(peo)
+    return peos
 
 def _energy_loss(gamma, beta, G, peos=None):
     backend = TorchBackend()
@@ -110,6 +118,7 @@ def _energy_loss(gamma, beta, G, peos=None):
 
     for edge, peo in zip(G.edges, peos):
         composer.energy_expectation_lightcone(edge)
+        print('peo', peo)
         loss += torch.real(sim.simulate_batch(composer.circuit, peo=peo))
         composer.builder.reset()
     return -(G.number_of_edges() - loss)/2

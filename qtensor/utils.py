@@ -8,15 +8,56 @@ import networkx as nx
 from tqdm.auto import tqdm
 import functools
 import operator
+from collections import defaultdict
+from typing import List, Tuple, Collection, TypeVar, Iterable
 
 
 def bucket_indices(bucket):
     return merge_sets(set(x.indices) for x in bucket)
 
 
-def merge_sets(sets):
+T = TypeVar('T', set, frozenset)
+def merge_sets(sets: Iterable[T]) -> T:
     """ Merges an iterable of sets. """
-    return functools.reduce(lambda x,y: x.union(y), sets, set())
+    first, *other = sets
+    return first.union(*other)
+
+# -- Merged indices
+
+T = TypeVar('T', bound=Collection)
+def largest_merges(vsets: List[T], merged_ix: List) -> Tuple[List[T], set]:
+    """ Finds a largest set of indices such that index is 
+    1. specific to exactly 2 tensors
+    2. part of merged_ix
+    """
+    vsets = sorted(vsets, key=len, reverse=True) # from large to small
+    vsets = [vs for vs in vsets if len(vs)>1]
+    v_to_t = defaultdict(list)
+    for t in vsets:
+        for v in t:
+            if v in merged_ix:
+                v_to_t[v].append(t)
+    #print('vtot', v_to_t)
+
+    tt_to_vv = defaultdict(list)
+    for v, tt in v_to_t.items():
+        tt_to_vv[tuple(tt)].append(v)
+
+    #print('tt to vv', tt_to_vv)
+
+    have_two = [tt for tt in tt_to_vv if len(tt)<3]
+    verts_2t = [tt_to_vv[tt] for tt in have_two]
+    merged_ix_set = set(merged_ix)
+    verts_2t_contr = [set(x).intersection(merged_ix_set) for x in verts_2t]
+    #print('vsets', vsets, merged_ix)
+    #print('have two or 1', verts_2t, have_two)
+    if len(verts_2t)==0:
+        return [set(), set()], set()
+    sorted_mergeable = sorted(verts_2t_contr, key=len, reverse=True)
+    selected = sorted_mergeable[0]
+    # just take the tensors that correspond to arbitrary index in selected
+    tensors_contr = v_to_t[next(iter(selected))]
+    return tensors_contr, selected
 
 
 def find_mergeable_indices(peo, buckets):
@@ -31,15 +72,17 @@ def find_mergeable_indices(peo, buckets):
     """
     contraction_widths = []
     to_peo_inds = lambda x: peo.index(x)
-    vsets = [[set(map(to_peo_inds, t)) for t in bucket] for bucket in buckets] + [[set()]]
+    vsets = [[frozenset(map(to_peo_inds, t)) for t in bucket] for bucket in buckets] + [[frozenset()]]
     merged_ix = []
     i = 0
     while i < len(peo):
         merged_ix.append([i])
+        merged_bucket = vsets[i]
         next_vset = merge_sets(vsets[i])
         #print(next_vset)
         while all(vs.issubset(next_vset) for vs in vsets[i+1]):
             merged_ix[-1].append(i+1)
+            merged_bucket += vsets[i+1]
             i += 1
             #next_vset = merge_sets([next_vset] + list(vsets[i]))
             #print('m', peo[i], next_vset)
@@ -48,14 +91,21 @@ def find_mergeable_indices(peo, buckets):
                 break
         i += 1
 
+        if len(merged_ix[-1])>1:
+            _, contracted = largest_merges(merged_bucket, merged_ix[-1])
+            contraction_widths.append(len(next_vset) - len(contracted))
+        else:
+            contraction_widths.append(len(next_vset))
         next_vset -= set(merged_ix[-1])
-        contraction_widths.append(len(next_vset))
+        #contraction_widths.append(len(next_vset))
         if len(next_vset):
             min_ix = min(next_vset)
             vsets[min_ix].append(next_vset)
             #print('append', next_vset)
 
     return merged_ix, contraction_widths
+
+# -- 
 
 
 def vertex_is_simplical(graph, vertex):
@@ -81,7 +131,7 @@ def contraction_steps(old_graph,  peo=None):
     for node in peo:
         neighbors = joinstr(set(graph.neighbors(node))-set([node]))
         ixs = set([joinstr(tensor['indices'])
-                   for *e, tensor
+                   for *_, tensor
                    in graph.edges(node, data='tensor')])
         steps.append((
             node

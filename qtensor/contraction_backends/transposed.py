@@ -88,7 +88,7 @@ class TransposedBackend(ContractionBackend):
         sum_ix = all_ix - set(out)
         a_sum = sum_ix.intersection(set(ixa) - common)
         b_sum = sum_ix.intersection(set(ixb) - common)
-        #print('ab', ixa, ixb)
+        #print('ab', ixa, ixb, 'shape', a.shape, b.shape, 'sizes', [i.size for i in ixa], [i.size for i in ixb])
         #print('all sum', sum_ix, 'a/b_sum', a_sum, b_sum)
         if len(a_sum):
             a = a.sum(axis=tuple(ixa.index(x) for x in a_sum))
@@ -96,13 +96,20 @@ class TransposedBackend(ContractionBackend):
         if len(b_sum):
             b = b.sum(axis=tuple(ixb.index(x) for x in b_sum))
             ixb = [x for x in ixb if x not in b_sum]
+            #print('ixb', ixb)
         tensors = a, b
+        ixs = ixa, ixb
         # --
 
 
         mix = set(ixs[0]) - common
         nix = set(ixs[1]) - common
         common = list(kix) + list(fix)
+
+        k, f, m, n = [self._get_index_space_size(*ix)
+                      for ix in (kix, fix, mix, nix)
+                     ]
+        #print('kfmn', k, f, m, n)
         a = tensors[0].transpose(*[
             list(ixs[0]).index(x) for x in common + list(mix)
         ])
@@ -110,17 +117,13 @@ class TransposedBackend(ContractionBackend):
         b = tensors[1].transpose(*[
             list(ixs[1]).index(x) for x in common + list(nix)
         ])
-
-        k, f, m, n = [self._get_index_space_size(*ix)
-                      for ix in (kix, fix, mix, nix)
-                     ]
-        #print('kfmn', k, f, m, n)
         #print('ixa', ixa, 'ixb', ixb)
         a = a.reshape(k, f, m)
         b = b.reshape(k, f, n)
-        if len(out)>30:
-            print('ax/bx', ixa, ixb, 'out ix', out, 'kfmnix', kix, fix, mix, nix, 'summed', sum_ix)
         G = np.einsum('ijk,ijl->jkl', a, b)
+        if len(out)>17:
+            print('lg', G.nbytes)
+            #print('ax/bx', ixa, ixb, 'out ix', out, 'kfmnix', kix, fix, mix, nix, 'summed', sum_ix)
         if len(out):
             #print('out ix', out, 'kfmnix', kix, fix, mix, nix)
             G = G.reshape(*self._get_index_sizes(*out))
@@ -131,7 +134,7 @@ class TransposedBackend(ContractionBackend):
 
 
     def process_bucket_merged(self, ixs, bucket, no_sum=False):
-        #--
+        #-- merge small tensors with large
         bucket = sorted(bucket, key=lambda x: len(x.indices))
         bucket_tweaked_order = []
         for i, t in enumerate(bucket):
@@ -147,7 +150,7 @@ class TransposedBackend(ContractionBackend):
         for i, sm in enumerate(bucket):
             for j, lg in enumerate(bucket[i+1:]):
                 if set(sm.indices).issubset(set(lg.indices)):
-                    if len(lg.indices)>2:
+                    if len(lg.indices):
                         pairs.append((i, i+j+1))
                         break
 
@@ -170,22 +173,51 @@ class TransposedBackend(ContractionBackend):
             #print('cobucket', bucket, 'removed', removed)
             pass
         #--
-        #bucket = list(reversed(bucket))
-        result_indices = bucket[0].indices
-        result_data = bucket[0].data
+
         all_indices = set(sum((list(t.indices) for t in bucket), []))
         result_indices = all_indices - set(ixs)
+        #-- find good first merge
 
-        cum_data, cum_indices = bucket[0].data, bucket[0].indices
+        vtup = [tuple(t.indices) for t in bucket]
+        #print('vtup', vtup)
+        tensors, sum_ix = qtensor.utils.largest_merges(
+            vtup , ixs
+        )
+        if len(sum_ix):
+            ia = vtup.index(tensors[0])
+            pop_ix = [ia]
+            if len(tensors)==1:
+                tensor = bucket[ia]
+                contr_axes = tuple(tensor.indices.index(x) for x in sum_ix)
+                cum_data = np.sum(tensor.data, axis=contr_axes)
+                cum_indices = tuple(x for x in tensor.indices if x not in sum_ix)
+            else:
+                ib = vtup.index(tensors[1])
+                pop_ix.append(ib)
+                a, b = bucket[ia], bucket[ib]
+                cum_indices = tuple(set(a.indices).union(b.indices) - set(sum_ix))
+                cum_data = self.pairwise_sum_contract(
+                    a.indices, a.data, b.indices, b.data, cum_indices
+                )
+
+        else:
+            pop_ix = [0]
+            cum_data, cum_indices = bucket[0].data, bucket[0].indices
+        # pop the tensors from bucket
+        #print('pop ix', pop_ix)
+        bucket = [x for i,x in enumerate(bucket) if i not in pop_ix]
+
+        #--
+
         #print('bucket', [len(t.indices) for t in bucket])
         #print('subsets', [set(t.indices).issubset(all_indices) for t in bucket])
         #print('contracted', len(ixs), ixs)
 
-        for i, tensor in enumerate(bucket[1:-1]):
+        for i, tensor in enumerate(bucket[0:-1]):
             next_indices = set(cum_indices).union(tensor.indices)
             #print('next ix size', len(next_indices), len(cum_indices), len(tensor.indices))
             if len(next_indices)>35:
-                print('next size:', len(next_indices), 'bucket result', result_indices, 'merged', ixs)
+                print('next size:', len(next_indices), 'bucket result', cum_indices, 'merged', ixs)
                 print('bucket', bucket)
             #-- contract indices specific to this pair, if any
             # note that it may be better to reorder pairs of tensors
@@ -214,10 +246,13 @@ class TransposedBackend(ContractionBackend):
             )
             cum_indices = tuple(next_indices)
 
-        tensor = bucket[-1]
-        result_data = self.pairwise_sum_contract(
-            cum_indices, cum_data, tensor.indices, tensor.data, result_indices
-        )
+        if len(bucket):
+            tensor = bucket[-1]
+            result_data = self.pairwise_sum_contract(
+                cum_indices, cum_data, tensor.indices, tensor.data, result_indices
+            )
+        else:
+            result_data = cum_data
 
         tag = str(list(ixs)[0])
 

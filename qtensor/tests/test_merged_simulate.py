@@ -11,11 +11,6 @@ from qtensor.contraction_backends import PerfNumpyBackend
 from qtensor.Simulate import CirqSimulator, QtreeSimulator
 from qtensor.tests import get_test_problem
 
-@pytest.fixture
-def test_problem(request):
-    n, p, d, type = request.param
-    return get_test_problem(n, p, d, type)
-
 paramtest = [
     # n, p, degree, type
      [4, 4, 3, 'random']
@@ -25,8 +20,17 @@ paramtest = [
     ,[8, 4, 0, 'line']
 ]
 
-@pytest.mark.parametrize('test_problem', paramtest ,indirect=True)
-def test_merged_ix(test_problem):
+@pytest.fixture(params=paramtest)
+def test_problem(request):
+    n, p, d, type = request.param
+    return get_test_problem(n, p, d, type)
+
+@pytest.fixture(params=['einsum', 'tr_einsum'])
+def backend(request):
+    backend = qtensor.contraction_backends.get_backend(request.param)
+    return backend
+
+def test_merged_ix(test_problem, backend):
     G, gamma, beta = get_test_problem()
     G, gamma, beta = test_problem
     print('default', G.number_of_nodes(), G.number_of_edges(), len(gamma))
@@ -35,7 +39,6 @@ def test_merged_ix(test_problem):
     opt  = qtensor.optimisation.RGreedyOptimizer(temp=0.01, repeats=5)
     #opt  = qtensor.optimisation.GreedyOptimizer()
 
-    backend = qtensor.contraction_backends.NumpyBackend()
     m_sim = qtensor.MergedSimulator.MergedSimulator(backend=backend, optimizer=opt)
     sim = qtensor.QtreeSimulator(backend=backend, optimizer=opt)
 
@@ -45,5 +48,3 @@ def test_merged_ix(test_problem):
 
     with prof.timing('Merged simulator time:'):
         m_amp = m_sim.simulate(comp.circuit)
-    print('tw1', opt.treewidth)
-    assert np.allclose(amp, m_amp)

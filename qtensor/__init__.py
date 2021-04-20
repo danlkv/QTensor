@@ -5,6 +5,7 @@ from loguru import logger as log
 log.remove()
 log.add(sys.stderr, level='INFO')
 # --
+from qtensor import utils
 from qtensor.utils import get_edge_subgraph
 import networkx as nx
 
