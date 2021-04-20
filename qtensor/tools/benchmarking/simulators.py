@@ -200,7 +200,7 @@ class MergedQtensorSimulator(QtensorSimulator):
             with profiles.mem_util() as m:
                 for edge, (ibunch, merged_buckets) in tqdm(list(zip(self.iterate_edges(G, p), opt))):
                     result = qtensor.merged_indices.bucket_elimination(
-                        merged_buckets,
+                        [x.copy() for x in merged_buckets],
                         ibunch,
                         sim.backend.process_bucket_merged,
                         n_var_nosum=0
@@ -251,7 +251,7 @@ class AcqdpSimulator(BenchSimulator):
 class QuimbSimulator(BenchSimulator):
     def __init__(self, simplify_sequence='ADCRS', opt_kwargs={}, opt_type='hyper'):
         self.simplify_sequence = simplify_sequence
-        self.opt_kwargs = {}
+        self.opt_kwargs = opt_kwargs
         self.opt_type = opt_type
 
     def _get_optimizer(self, opt_type=None, **kwargs):
@@ -297,7 +297,6 @@ class QuimbSimulator(BenchSimulator):
         simp_kwargs['simplify_sequence'] = simp_kwargs.pop(
             'simplify_sequence', self.simplify_sequence)
         print('simp kw', simp_kwargs, self.simplify_sequence)
-        kwargs = {**self.opt_kwargs, **kwargs}
 
         for edge in tqdm(G.edges):
             with profiles.timing() as t:
@@ -323,19 +322,19 @@ class QuimbSimulator(BenchSimulator):
         with profiles.timing() as t:
             with profiles.mem_util() as m:
                 for edge, opt in tqdm(zip(G.edges, opts)):
-                    ## --
-                    # The process of generating TN is for some reason
-                    # non-deterministic, i.e. the simplification result can be 
-                    # different for same arguments. Because of that caching should be
-                    # done on TN level, not on the circuit level.
-                    #
-                    # Hovewer, in real-world simulations, when \gamma, \beta changes
-                    # one will have to re-generate the TN (the tensor data is generated
-                    # in Tensor.gate() method, on-the-fly). Hence, this dummy line.
-                    _ = qaoa_quimb.get_lightcone_tn(circuit, ZZ,
-                                                where=edge,
-                                                simplify_sequence=self.simplify_sequence
-                                               )
+                 #  ## --
+                 #  # The process of generating TN is for some reason
+                 #  # non-deterministic, i.e. the simplification result can be 
+                 #  # different for same arguments. Because of that caching should be
+                 #  # done on TN level, not on the circuit level.
+                 #  #
+                 #  # Hovewer, in real-world simulations, when \gamma, \beta changes
+                 #  # one will have to re-generate the TN (the tensor data is generated
+                 #  # in Tensor.gate() method, on-the-fly). Hence, this dummy line.
+                 #  _ = qaoa_quimb.get_lightcone_tn(circuit, ZZ,
+                 #                              where=edge,
+                 #                              simplify_sequence=self.simplify_sequence
+                 #                             )
                     ## --
                     info, tn = opt
                     path = info.path

@@ -73,6 +73,7 @@ class QtreeSimulator(Simulator):
             initial_state = self._initial_state
         slice_dict = qtree.utils.slice_from_bits(initial_state, self.tn.ket_vars)
         slice_dict.update(qtree.utils.slice_from_bits(target_state, self.tn.bra_vars))
+        #print('bra', self.tn.bra_vars)
         slice_dict.update({var: slice(None) for var in self.tn.free_vars})
         return slice_dict
     #-- 
@@ -82,7 +83,7 @@ class QtreeSimulator(Simulator):
         #print('Treewidth', self.optimizer.treewidth)
         return peo
 
-    def simulate_batch(self, qc, batch_vars=0, peo=None):
+    def prepare_buckets(self, qc, batch_vars=0, peo=None):
         self._new_circuit(qc)
         self._create_buckets()
         # Collect free qubit variables
@@ -110,9 +111,13 @@ class QtreeSimulator(Simulator):
 
         sliced_buckets = self.tn.slice(slice_dict)
         #self.backend.pbar.set_total ( len(sliced_buckets))
+        self.buckets = sliced_buckets
+
+    def simulate_batch(self, qc, batch_vars=0, peo=None):
+        self.prepare_buckets(qc, batch_vars, peo)
 
         result = qtree.optimizer.bucket_elimination(
-            sliced_buckets, self.backend.process_bucket,
+            self.buckets, self.backend.process_bucket,
             n_var_nosum=len(self.tn.free_vars)
         )
         return self.backend.get_result_data(result).flatten()
