@@ -12,14 +12,14 @@ import qtree.operators as ops
 import qtensor.optimisation as qop
 from qtensor.FeynmanSimulator import FeynmanSimulator
 
-from qtensor.ProcessingFrameworks import PerfNumpyBackend
+from qtensor.contraction_backends import PerfNumpyBackend
 from qtensor.toolbox import qaoa_energy_tw_from_graph, get_ordering_algo
 from qtensor.optimisation.TensorNet import QtreeTensorNet
 from qtensor.optimisation.Optimizer import TamakiOptimizer, WithoutOptimizer
-from qtensor.ProcessingFrameworks import PerfBackend, CMKLExtendedBackend
+from qtensor.contraction_backends import CMKLExtendedBackend
 from qtensor.optimisation.Optimizer import TamakiTrimSlicing, SlicesOptimizer
 from qtensor import DefaultQAOAComposer, QAOAQtreeSimulator
-import qtensor.ProcessingFrameworks as backends
+import qtensor.contraction_backends as backends
 import qtensor.optimisation.Optimizer as optimizers
 from qtensor.optimisation import RGreedyOptimizer
 
@@ -59,9 +59,9 @@ def sim_file(filename, profile=False, num_processes=1, max_tw=25, backend='numpy
         class DynamicallyGeneratedBackend(PerfBackend):
             Backend = Backend
         backend_obj = DynamicallyGeneratedBackend(print=False)
-        kwargs['bucket_backend'] = backend_obj
+        kwargs['backend'] = backend_obj
     else:
-        kwargs['bucket_backend'] = Backend()
+        kwargs['backend'] = Backend()
 
     if optimizer=='tamaki':
         kwargs['optimizer'] = TamakiTrimSlicing(max_tw=max_tw, wait_time=23)
@@ -308,7 +308,13 @@ def qaoa_energy_sim(nodes, seed,
         G = nx.erdos_renyi_graph(nodes, degree/(nodes-1), seed=seed)
     else:
         raise Exception('Unsupported graph type')
-    gamma, beta = [np.pi/3]*p, [np.pi/2]*p
+    try:
+        gb = qtensor.tools.BETHE_QAOA_VALUES[str(p)]["angles"]
+        gb = np.array(gb) / np.pi
+        gamma, beta = gb[:p], gb[p:]
+    except KeyError:
+        gamma, beta = [np.pi/3]*p, [np.pi/2]*p
+
 
     optimizer = get_ordering_algo(ordering_algo)
 
@@ -318,7 +324,7 @@ def qaoa_energy_sim(nodes, seed,
         backend_obj = PerfBackend(print=False)
         backend_obj.backend = Backend()
 
-    sim = QAOAQtreeSimulator(DefaultQAOAComposer, bucket_backend=backend_obj, optimizer=optimizer)
+    sim = QAOAQtreeSimulator(DefaultQAOAComposer, backend=backend_obj, optimizer=optimizer)
     start = time.time()
     if mpi:
         result = sim.energy_expectation_mpi(G, gamma, beta,
