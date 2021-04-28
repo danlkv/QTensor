@@ -118,7 +118,7 @@ def _energy_loss(gamma, beta, G, peos=None):
 
     for edge, peo in zip(G.edges, peos):
         composer.energy_expectation_lightcone(edge)
-        print('peo', peo)
+        #print('peo', peo)
         loss += torch.real(sim.simulate_batch(composer.circuit, peo=peo))
         composer.builder.reset()
     return -(G.number_of_edges() - loss)/2
