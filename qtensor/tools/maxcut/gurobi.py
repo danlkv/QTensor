@@ -10,7 +10,7 @@ def solve_maxcut(G: nx.Graph) -> Tuple[float, list]:
     """
 
     p = gb.Model()
-    p.setParam('PreQLinearize', 1)
+    #p.setParam('PreQLinearize', 1)
 
     vdict = {}
     for n in G.nodes:
