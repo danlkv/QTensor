@@ -58,7 +58,7 @@ The tamaki solver repository should be already cloned into
 To compile it, go to the directory and run `make heuristic`.
 
 ```bash
-> cd Qtensor/qtree/thirdparty/tamaki_treewidth
+> cd QTensor/qtree/thirdparty/tamaki_treewidth
 > make heuristic 
 javac tw/heuristic/*.java
 ```
