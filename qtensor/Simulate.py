@@ -46,9 +46,23 @@ class QtreeSimulator(Simulator):
         self.peo = self.optimize_buckets()
 
     def _reorder_buckets(self):
+        """
+        Permutes indices in the tensor network and peo
+
+        Modifies:
+            self.tn.ket_vars
+            self.tn.bra_vars
+            self.peo
+            self.tn.buckets
+
+        Returns:
+            perm dict {from:to}
+        """
         perm_buckets, perm_dict = qtree.optimizer.reorder_buckets(self.tn.buckets, self.peo)
         self.tn.ket_vars = sorted([perm_dict[idx] for idx in self.tn.ket_vars], key=str)
         self.tn.bra_vars = sorted([perm_dict[idx] for idx in self.tn.bra_vars], key=str)
+        if self.peo:
+            self.peo = [perm_dict[idx] for idx in self.peo]
         self.tn.buckets = perm_buckets
         return perm_dict
 

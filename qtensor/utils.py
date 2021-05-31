@@ -80,15 +80,16 @@ def find_mergeable_indices(peo, buckets):
         merged_bucket = vsets[i]
         next_vset = merge_sets(vsets[i])
         #print(next_vset)
-        while all(vs.issubset(next_vset) for vs in vsets[i+1]):
-            merged_ix[-1].append(i+1)
-            merged_bucket += vsets[i+1]
-            i += 1
-            #next_vset = merge_sets([next_vset] + list(vsets[i]))
-            #print('m', peo[i], next_vset)
-            contraction_widths.append(0)
-            if i == len(peo)-1:
-                break
+        if i<len(peo)-1:
+            while all(vs.issubset(next_vset) for vs in vsets[i+1]):
+                merged_ix[-1].append(i+1)
+                merged_bucket += vsets[i+1]
+                i += 1
+                #next_vset = merge_sets([next_vset] + list(vsets[i]))
+                #print('m', peo[i], next_vset)
+                contraction_widths.append(0)
+                if i == len(peo)-1:
+                    break
         i += 1
 
         if len(merged_ix[-1])>1:

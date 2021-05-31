@@ -100,9 +100,10 @@ class GreedyOptimizer(Optimizer):
 
 class SlicesOptimizer(GreedyOptimizer):
 
-    def __init__(self, tw_bias=2, max_tw=None, **kwargs):
+    def __init__(self, tw_bias=2, max_tw=None, max_slice=None, **kwargs):
         self.tw_bias = tw_bias
         self.max_tw = max_tw
+        self.max_slice = max_slice
         target_tw = kwargs.get('target_tw')
         if target_tw:
             self.max_tw = target_tw
@@ -127,6 +128,9 @@ class SlicesOptimizer(GreedyOptimizer):
             if tw < max_tw:
                 log.info('Found parvars: {}', searcher.result)
                 break
+            if self.max_slice is not None:
+                if len(searcher.result) > self.max_slice:
+                    break
             error = searcher.step()
             pv_cnt = len(searcher.result)
             log.debug('Parvars count: {}. Amps count: {}', pv_cnt, 2**pv_cnt)
