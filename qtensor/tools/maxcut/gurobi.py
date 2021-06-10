@@ -2,7 +2,7 @@ import networkx as nx
 from qtensor.tools.lazy_import import gurobipy as gb
 from typing import Tuple
 
-def solve_maxcut(G: nx.Graph) -> Tuple[float, list]:
+def solve_maxcut(G: nx.Graph, max_time=10*60, max_cost=None) -> Tuple[float, list]:
     """
 
     Some piece of info:
@@ -10,7 +10,9 @@ def solve_maxcut(G: nx.Graph) -> Tuple[float, list]:
     """
 
     p = gb.Model()
-    #p.setParam('PreQLinearize', 1)
+    p.setParam('TimeLimit', max_time)
+    if max_cost is not None:
+        p.setParam('BestObjStop', max_cost)
 
     vdict = {}
     for n in G.nodes:
