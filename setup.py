@@ -2,9 +2,9 @@ import setuptools
 
 # Configure the required packages and scripts to install.
 REQUIRED_PACKAGES = [
-    'numpy>=1.18.1',
+    'numpy',
     'networkx>=2.3',
-    'matplotlib>=3.1.3'
+    'matplotlib'
     ,'google-api-core[grpc]<=1.14.0'
     ,'cirq'
     ,'qiskit'

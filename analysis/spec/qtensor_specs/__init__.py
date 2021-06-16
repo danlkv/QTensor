@@ -12,3 +12,4 @@ def cli():
 from qtensor_specs import speed_comparison
 from qtensor_specs import qaoa_bench
 from qtensor_specs import time_vs_flop
+from qtensor_specs import compare_merged_ix

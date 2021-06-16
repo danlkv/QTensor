@@ -56,7 +56,7 @@ class QAOASimulator(Simulator):
         total_E = 0
 
         with tqdm(total=G.number_of_edges(), desc='Edge iteration', ) as pbar:
-            for edge in G.edges():
+            for i, edge in enumerate(G.edges()):
                 E = self._get_edge_energy(G, gamma, beta, edge)
                 pbar.set_postfix(Treewidth=self.optimizer.treewidth)
                 pbar.update(1)

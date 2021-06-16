@@ -7,7 +7,7 @@ import copy
 
 from qtensor import utils
 from qtensor.optimisation.Greedy import GreedyParvars
-from qtensor.optimisation.ordering import greedy_ordering_networkit
+from qtensor.optimisation.networkit import greedy_ordering_networkit
 from loguru import logger as log
 
 
@@ -45,7 +45,7 @@ class WithoutOptimizer(Optimizer):
 
 
 # TODO: rename to greedy
-class OrderingOptimizer(Optimizer):
+class GreedyOptimizer(Optimizer):
     def _get_ordering_ints(self, graph, free_vars=[]):
         #mapping = {a:b for a,b in zip(graph.nodes(), reversed(list(graph.nodes())))}
         #graph = nx.relabel_nodes(graph, mapping)
@@ -62,11 +62,11 @@ class OrderingOptimizer(Optimizer):
         # this may be ugly, but it is actually pythonic:)
         # solves two problems: possible inconsistencies in api, and missing networkit.
         # does not introduce overhead
+
         try:
             peo, path = greedy_ordering_networkit(graph)
         except:
             peo, path = utils.get_neighbours_peo_vars(graph, inplace=inplace)
-
 
         peo = [qtree.optimizer.Var(var, size=node_sizes[var],
                         name=node_names[var])
@@ -98,11 +98,12 @@ class OrderingOptimizer(Optimizer):
         return peo, tensor_net
 
 
-class SlicesOptimizer(OrderingOptimizer):
+class SlicesOptimizer(GreedyOptimizer):
 
-    def __init__(self, tw_bias=2, max_tw=None, **kwargs):
+    def __init__(self, tw_bias=2, max_tw=None, max_slice=None, **kwargs):
         self.tw_bias = tw_bias
         self.max_tw = max_tw
+        self.max_slice = max_slice
         target_tw = kwargs.get('target_tw')
         if target_tw:
             self.max_tw = target_tw
@@ -127,6 +128,9 @@ class SlicesOptimizer(OrderingOptimizer):
             if tw < max_tw:
                 log.info('Found parvars: {}', searcher.result)
                 break
+            if self.max_slice is not None:
+                if len(searcher.result) > self.max_slice:
+                    break
             error = searcher.step()
             pv_cnt = len(searcher.result)
             log.debug('Parvars count: {}. Amps count: {}', pv_cnt, 2**pv_cnt)
@@ -169,7 +173,7 @@ class SlicesOptimizer(OrderingOptimizer):
         #log.info('peo {}', self.peo)
         return self.peo, self.parallel_vars, tensor_net
 
-class TamakiOptimizer(OrderingOptimizer):
+class TamakiOptimizer(GreedyOptimizer):
     def __init__(self, *args, wait_time=5, **kwargs):
         super().__init__(*args, **kwargs)
         self.wait_time = wait_time
@@ -184,6 +188,7 @@ class TamakiOptimizer(OrderingOptimizer):
         peo = [qtree.optimizer.Var(var, size=node_sizes[var],
                         name=node_names[var])
                     for var in peo]
+        self.treewidth = tw
         return peo, [tw]
 
 class TreeTrimSplitter(SlicesOptimizer):
@@ -241,7 +246,5 @@ class TamakiTrimSlicing(TamakiOptimizer, TreeTrimSplitter):
 
 # an alias that makes sense
 
-GreedyOptimizer = OrderingOptimizer
-# A convenience variable to use in other packages
 
-DefaultOptimizer = OrderingOptimizer
+DefaultOptimizer = GreedyOptimizer

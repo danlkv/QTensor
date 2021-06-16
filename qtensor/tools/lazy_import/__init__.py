@@ -48,6 +48,7 @@ qiskit_lib = FallbackLasyModule(['qiskit.circuit.library','qiskit.extensions.sta
 mpi4py = LasyModule('mpi4py')
 MPI = LasyModule('mpi4py.MPI')
 networkit = LasyModule('networkit')
+cvxgraphalgs = LasyModule('cvxgraphalgs')
 pynauty = LasyModule('pynauty')
 """ can this break something? need to think more
 
@@ -57,3 +58,10 @@ What if user imports qtensor, and then networkit?
 if sys.modules.get('networkit') is None:
     sys.modules['networkit'] = networkit
 """
+
+acqdp = LasyModule('acqdp')
+acqdp_tn = LasyModule('acqdp.tensor_network')
+quimb = LasyModule('quimb')
+cotengra = LasyModule('cotengra')
+opt_einsum = LasyModule('opt_einsum')
+gurobipy = LasyModule('gurobipy')

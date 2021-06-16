@@ -2,11 +2,19 @@
 
 __all__ = ["index", "modules", "custom_doc_links", "git_url"]
 
-index = {"ex": "Time_vs_FLOP.ipynb",
-         "graph": "Time_vs_FLOP.ipynb",
+index = {"cache": "qaoa_ansatz_complexity.ipynb",
+         "ex": "qaoa_ansatz_complexity.ipynb",
+         "graph": "qaoa_ansatz_complexity.ipynb",
+         "quimb_time_energy": "Compare merged ix.ipynb",
+         "qtensor_time_ansatz_merged": "Compare merged ix.ipynb",
+         "qtensor_time_ansatz": "Compare merged ix.ipynb",
+         "qtensor_time_energy": "Compare merged ix.ipynb",
+         "QAOAMergedSimulator": "Compare merged ix.ipynb",
+         "qtensor_time_energy_merged": "Compare merged ix.ipynb",
+         "cli": "index.ipynb",
          "qiskit_time": "Speed_comparison.ipynb",
          "quimb_time": "Speed_comparison.ipynb",
-         "qtensor_time": "Speed_comparison.ipynb",
+         "qtensor_time": "qaoa_ansatz_complexity.ipynb",
          "gen_time_data": "Speed_comparison.ipynb",
          "plot_xar_data": "Speed_comparison.ipynb",
          "time_comparison_xarray": "Speed_comparison.ipynb",
@@ -26,11 +34,16 @@ index = {"ex": "Time_vs_FLOP.ipynb",
          "plot_with_filter": "Time_vs_FLOP.ipynb",
          "get_log_flops_vs_matmul": "Time_vs_FLOP.ipynb",
          "time_vs_flops_plot": "Time_vs_FLOP.ipynb",
-         "cli": "index.ipynb"}
+         "parallel": "qaoa_ansatz_complexity.ipynb",
+         "ansatz_circ": "qaoa_ansatz_complexity.ipynb",
+         "qtensor_tw": "qaoa_ansatz_complexity.ipynb",
+         "qaoa_ansatz_time": "qaoa_ansatz_complexity.ipynb"}
 
-modules = ["speed_comparison.py",
+modules = ["compare_merged_ix.py",
+           "speed_comparison.py",
            "time_vs_flop.py",
-           "__init__.py"]
+           "__init__.py",
+           "qaoa_ansatz_complexity.py"]
 
 doc_url = "https://danlkv.github.io/qtensor-specs/"
 

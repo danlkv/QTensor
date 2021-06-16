@@ -6,12 +6,13 @@ import time
 from multiprocessing.dummy import Pool
 
 from qtensor.optimisation.TensorNet import QtreeTensorNet
-from qtensor.optimisation.Optimizer import OrderingOptimizer, TamakiOptimizer, WithoutOptimizer, TamakiTrimSlicing, DefaultOptimizer
+from qtensor.optimisation.Optimizer import GreedyOptimizer, TamakiOptimizer, WithoutOptimizer, TamakiTrimSlicing, DefaultOptimizer
 
 from qtensor.optimisation import RGreedyOptimizer, LateParOptimizer
 from qtensor.utils import get_edge_subgraph
 from qtensor import QtreeQAOAComposer, OldQtreeQAOAComposer, ZZQtreeQAOAComposer, DefaultQAOAComposer
 from qtensor import tools
+import qtensor
 
 def bethe_graph(p, degree):
     def add_two_nodes_to_leafs(graph):
@@ -67,7 +68,7 @@ def get_slicing_algo(slicing_algo, par_vars, ordering_algo='default'):
     return optimizer
 
 
-def get_ordering_algo(ordering_algo, par_vars=0):
+def get_ordering_algo(ordering_algo, par_vars=0, **kwargs) -> qtensor.optimisation.Optimizer:
     """ Get optimizer instance from its string specifier. """
     if 'tamaki' in ordering_algo:
         wait_time = 10
@@ -76,9 +77,9 @@ def get_ordering_algo(ordering_algo, par_vars=0):
             wait_time = float(params[-1])
         if 'slice' in ordering_algo:
             max_tw = 25
-            optimizer = TamakiTrimSlicing(max_tw=max_tw, wait_time=wait_time)
+            optimizer = TamakiTrimSlicing(max_tw=max_tw, wait_time=wait_time, **kwargs)
         else:
-            optimizer = TamakiOptimizer(wait_time=wait_time)
+            optimizer = TamakiOptimizer(wait_time=wait_time, **kwargs)
     elif 'rgreedy' in ordering_algo:
         if '_' in ordering_algo:
             params = ordering_algo.split('_')
@@ -92,11 +93,14 @@ def get_ordering_algo(ordering_algo, par_vars=0):
         else:
             temp = 2
             repeats = 10
-        optimizer = RGreedyOptimizer(temp=temp, repeats=repeats)
+        repeats = kwargs.pop('repeats', repeats)
+        optimizer = RGreedyOptimizer(temp=temp, repeats=repeats, **kwargs)
     elif ordering_algo == 'greedy':
-        optimizer = OrderingOptimizer()
+        optimizer = GreedyOptimizer()
     elif ordering_algo == 'default':
         optimizer = DefaultOptimizer()
+    elif ordering_algo == 'naive':
+        optimizer = WithoutOptimizer()
     else:
         raise ValueError('Ordering algorithm not supported')
     return optimizer

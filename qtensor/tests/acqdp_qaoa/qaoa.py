@@ -1,7 +1,7 @@
-from acqdp.tensor_network import TensorNetwork
+from qtensor.tools.lazy_import import acqdp_tn
 from scipy import optimize
 import numpy
-import tqdm
+import tqdm.auto as tqdm
 import time
 import itertools
 
@@ -13,7 +13,16 @@ def single_qaoa_query(graph, p, ordering_algo='oe'):
     a = {e: [[1,-1],[-1,1]] for e in graph.edges}
     q = QAOAOptimizer(a, num_layers=p)
     beta_gamma = np.random.randn(p*2)
-    q.preprocess(order_finder_name=ordering_algo)
+
+    # make sure to not throw an error at optimization
+    # by artificially setting a larger memory
+    memory_mult = 2**12
+    compiler_params = dict(
+        memory=16*memory_mult
+    )
+
+    q.preprocess(order_finder_name=ordering_algo,
+                 compiler_params=compiler_params)
     E = q.query(params=beta_gamma)
     return E
 
@@ -60,6 +69,7 @@ class QAOAOptimizer:
         if params is None:
             params = 2 * numpy.pi * numpy.random.rand(2 * num_layers)
         self.set_task(csp, num_layers, params)
+        self.lightcone_flops_mems = []
         assert checkinstance(self.csp) == 0
 
     def set_task(self, csp, num_layers, params=None, **kwargs):
@@ -87,7 +97,7 @@ class QAOAOptimizer:
         of qubits."""
         qubits_set = set(qubits)
         turns = {}
-        tn = TensorNetwork(dtype=complex)
+        tn = acqdp_tn.TensorNetwork(dtype=complex)
         for i in range(num_layers):
             for qubit in qubits_set:
                 tn.add_node((2 * i + 1, qubit), [(i, qubit), (i + 1, qubit)], None)
@@ -129,7 +139,12 @@ class QAOAOptimizer:
         multiplier = kwargs.get('multiplier', 1)
         multiplier *= 2 ** (-len(set_qubits))
         tn.add_node((0, clause), [(0, i) for i in clause], None)
-        task = tn.compile(tn.find_order(**kwargs), **kwargs)
+        contraction_scheme = tn.find_order(**kwargs)
+        # DL: add cost accumulation
+        self.lightcone_flops_mems.append(
+            (contraction_scheme.cost.s, contraction_scheme.cost.t)
+        )
+        task = tn.compile(contraction_scheme, **kwargs)
         dic = {}
         for k in tn.nodes_by_name:
             if k[0] == 0:

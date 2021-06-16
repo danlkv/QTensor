@@ -1,4 +1,3 @@
-from qtensor.optimisation.Optimizer import OrderingOptimizer
 from qtensor.optimisation.TensorNet import QtreeTensorNet
 from qtensor import QtreeQAOAComposer
 from qtensor import QAOAQtreeSimulator

@@ -1,6 +1,20 @@
 import numpy as np
 import networkx as nx
 
+from .goemans_williamson import gw_cost
+from .gurobi import solve_maxcut as gurobi_maxcut
+
+def check_sol(G: nx.Graph, sol: list):
+    """
+    Solution values should be 0 or 1
+    """
+    assert len(sol) == G.number_of_nodes()
+    valmap = {n: v for n, v in zip(G.nodes, sol)}
+    cost = 0
+    for i, j in G.edges:
+        a, b = valmap[i], valmap[j]
+        cost += a + b - 2*a*b
+    return cost
 
 def spectral_bound(G):
     """ Returns a spectral upper bound to MaxCut on graph G, fraction of edges. """
@@ -70,7 +84,8 @@ def maxcut_optimal(G, print_stats=False):
     t3 = time.time()
     # MAXCUT normally wants the max cut (huh.)
     maxdex = np.argmax(ZZcost)
-    maxstate = index2state(maxdex)
+    maxstate = np.concatenate((index2state(maxdex),[1]))
+
     t4 = time.time()
 
     if print_stats:

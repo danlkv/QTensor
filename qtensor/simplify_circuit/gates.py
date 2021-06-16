@@ -59,6 +59,22 @@ class zphase:
     def __repr__(self):
         return '>> Zphase on ({:0.0f})[{:0.2f}] <<'.format(self.index[0],self.angle)
 
+class x:
+    def __init__(self,index1):
+        self.index = (index1,)
+        self.eigenbasis = {index1:'X'}
+        self.angle = 0
+    def __repr__(self):
+        return '>> X on ({:0.0f}) <<'.format(self.index[0],self.angle)
+
+class y:
+    def __init__(self,index1):
+        self.index = (index1,)
+        self.eigenbasis = {index1:'Y'}
+        self.angle = 0
+    def __repr__(self):
+        return '>> Y on ({:0.0f}) <<'.format(self.index[0],self.angle)
+
 class z:
     def __init__(self,index1):
         self.index = (index1,)
@@ -79,6 +95,14 @@ class cnot:
     def __init__(self,index1,index2,angle=0):
         self.index = (index1,index2)
         self.eigenbasis = {index1:'cnot_A',index2:'cnot_B'} # Basis is entangled; this is one way to describe it...
+        self.angle = 0
+    def __repr__(self):
+        return '>> CNOT on ({:0.0f} : {:0.0f}) <<'.format(self.index[0],self.index[1])
+
+class cz:
+    def __init__(self,index1,index2,angle=0):
+        self.index = (index1,index2)
+        self.eigenbasis = {index1:'cz_A',index2:'Z'} 
         self.angle = 0
     def __repr__(self):
         return '>> CNOT on ({:0.0f} : {:0.0f}) <<'.format(self.index[0],self.index[1])

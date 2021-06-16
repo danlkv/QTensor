@@ -1,5 +1,6 @@
 import cirq
 import qtree
+from functools import partial
 # Qiskit >=0.19
 #import qiskit.circuit.library as qiskit_lib
 #qiskit_lib = qtensor.tools.LasyModule('qiskit.extensions.standard')
@@ -23,6 +24,10 @@ class CirqFactory:
     @staticmethod
     def ZPhase(x, alpha):
         return cirq.ZPowGate(exponent=float(alpha)).on(x)
+
+    @staticmethod
+    def YPhase(x, alpha):
+        return cirq.YPowGate(exponent=float(alpha)).on(x)
 
     @staticmethod
     def XPhase(x, alpha):
@@ -70,6 +75,16 @@ def torch_j_exp(z):
     # Just make input complex
     return torch.cos(z) + 1j * torch.sin(z)
 
+class CXTorch(qtree.operators.Gate):
+    name = 'ZZ'
+    _changes_qubits=(1, )
+
+    def gen_tensor(self):
+        return torch.tensor([[[1., 0.],
+                          [0., 1.]],
+                         [[0., 1.],
+                          [1., 0.]]])
+
 class ZZTorch(qtree.operators.ParametricGate):
     name = 'ZZ'
     _changes_qubits=tuple()
@@ -93,6 +108,21 @@ class ZPhaseTorch(qtree.operators.ParametricGate):
         t_ = torch.tensor([0, 1])
         return torch_j_exp(1j*t_*np.pi*alpha)
 
+class YPhaseTorch(qtree.operators.ParametricGate):
+    parameter_count = 1
+    _changes_qubits = (0, )
+
+    @staticmethod
+    def _gen_tensor(**parameters):
+        """Rotation along Y axis"""
+        alpha = parameters['alpha']
+
+        c = torch.cos(np.pi * alpha / 2)*torch.tensor([[1,0],[0,1]])
+        s = torch.sin(np.pi * alpha / 2)*torch.tensor([[0, -1],[1,0]])
+        g = torch_j_exp(1j * np.pi * alpha / 2)
+
+        return g*(c + s)
+
 class XPhaseTorch(qtree.operators.ParametricGate):
 
     _changes_qubits = (0, )
@@ -111,17 +141,19 @@ class XPhaseTorch(qtree.operators.ParametricGate):
 
 TorchFactory.ZZ = ZZTorch
 TorchFactory.XPhase = XPhaseTorch
+TorchFactory.YPhase = YPhaseTorch
 TorchFactory.ZPhase = ZPhaseTorch
 TorchFactory.H = QtreeFactory.H
 TorchFactory.Z = QtreeFactory.Z
+TorchFactory.X = QtreeFactory.X
+TorchFactory.Y = QtreeFactory.Y
+TorchFactory.cZ = QtreeFactory.cZ
+TorchFactory.cX = CXTorch
 
 # this is a bit ugly, but will work for now
 qtree.operators.LABEL_TO_GATE_DICT['zz'] = ZZ
 
-class QiskitFactory_Metaclass(type):
-    def __init__(cls, *args, **kwargs):
-        pass
-
+class QiskitFactory:
     @property
     def H(cls):
         return qiskit_lib.HGate
@@ -134,31 +166,31 @@ class QiskitFactory_Metaclass(type):
         except:
             return qiskit_lib.CXGate
 
+    @property
+    def cZ(cls):
+        return qiskit_lib.CZGate
 
+    @property
+    def Z(cls):
+        return qiskit_lib.ZGate
+    
     @staticmethod
     def ZPhase(alpha):
         return qiskit_lib.RZGate(phi=alpha*np.pi)
 
     @staticmethod
+    def YPhase(alpha):
+        return qiskit_lib.RYGate(theta=alpha*np.pi)
+
+    @staticmethod
     def XPhase(alpha):
         return qiskit_lib.RXGate(theta=alpha*np.pi)
-
-    @property
-    def cZ(cls):
-        return qiskit_lib.CzGate
-
-    @property
-    def Z(cls):
-        return qiskit_lib.ZGate
-
-class QiskitFactory(metaclass=QiskitFactory_Metaclass):
-    pass
 
 class CircuitBuilder:
     """ ABC for creating a circuit."""
     operators = OpFactory
 
-    def __init__(self, n_qubits, **params):
+    def __init__(self, n_qubits):
         self.n_qubits = n_qubits
         self.reset()
         self.qubits = self.get_qubits()
@@ -185,6 +217,17 @@ class CircuitBuilder:
     @circuit.setter
     def circuit(self, circuit):
         self._circuit = circuit
+
+    def view(self):
+        other = type(self)(self.n_qubits)
+        other.circuit = self.circuit
+        return other
+
+    def copy(self):
+        other = type(self)(self.n_qubits)
+        other.circuit = self.circuit.copy()
+        return other
+
 
 class CirqBuilder(CircuitBuilder):
     operators = CirqFactory
@@ -214,10 +257,24 @@ class QtreeBuilder(CircuitBuilder):
         self._circuit.append(gate(*qubits, **params))
 
     def inverse(self):
-        self._circuit = list(reversed([g.dagger_me() for g in self._circuit]))
+        # --
+        # this in-place creature is to be sure that
+        # a new gate is creaded on inverse
+        def dagger_gate(gate):
+            if hasattr(gate, '_parameters'):
+                params = gate._parameters
+            else:
+                params = {}
+            new = type(gate)(*gate._qubits, **params)
+            new.name = gate.name + '+'
+            new.gen_tensor = partial(gate.dag_tensor, gate)
+            return new
+        #--
+
+        self._circuit = list(reversed([dagger_gate(g) for g in self._circuit]))
 
 class QiskitBuilder(CircuitBuilder):
-    operators = QiskitFactory
+    operators = QiskitFactory()
 
     def get_qubits(self):
         # The ``reset`` should be called first
