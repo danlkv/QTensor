@@ -1,6 +1,5 @@
 import numpy as np
 import time
-from typing import Union
 from qtensor.tools.lazy_import import quimb, acqdp
 from qtensor.tools.lazy_import import cotengra as ctg
 from qtensor.tools.lightcone_orbits import get_edge_orbits_lightcones
@@ -8,7 +7,6 @@ from dataclasses import dataclass
 import qtensor.tests.qiskit_qaoa_energy
 import qtensor
 from qtensor.tests.acqdp_qaoa import qaoa as acqdp_qaoa
-from qtensor.tests import qaoa_quimb
 import pyrofiler.c as profiles
 from tqdm.auto import tqdm
 
@@ -37,6 +35,14 @@ class TimeExceeded(RuntimeError):
 class MemoryWillExceed(RuntimeError):
     """Raised when width of a contrcaction will be larger than max_width"""
     pass
+
+@dataclass
+class ContractionEstimation:
+    def __init__(self, width, flops, mems):
+        # Quimb return a strange Decimal object that doesn't pickle
+        self.width = int(width)
+        self.flops = int(flops)
+        self.mems = int(mems)
 
 class BenchSimulator:
     _max_time: float
@@ -87,13 +93,6 @@ class BenchSimulator:
                 res = self.simulate(circuit, opt, *args, **kwargs)
         return res, t.result, m.result
 
-@dataclass
-class ContractionEstimation:
-    def __init__(self, width, flops, mems):
-        # Quimb return a strange Decimal object that doesn't pickle
-        self.width = int(width)
-        self.flops = int(flops)
-        self.mems = int(mems)
 
 
 class QiskitSimulator(BenchSimulator):
@@ -120,11 +119,10 @@ class QiskitSimulator(BenchSimulator):
 
 
 class QtensorSimulator(BenchSimulator):
-    def __init__(self, backend='einsum', accelerated=False, max_time=None, max_width=None):
+    def __init__(self, backend='einsum', accelerated=False, **kwargs):
+        super().__init__(**kwargs)
         self.backend = backend
         self.accelerated = accelerated
-        self.max_time = max_time
-        self.max_width = max_width
 
     def _iterate_edges_accelerated(self, G, p):
         with profiles.timing() as t:
@@ -276,7 +274,8 @@ class MergedQtensorSimulator(QtensorSimulator):
 
 
 class AcqdpSimulator(BenchSimulator):
-    def __init__(self, ordering_algo='oe', order_finder_params={}):
+    def __init__(self, ordering_algo='oe', order_finder_params={}, **kwargs):
+        super().__init__(**kwargs)
         self.ordering_algo = ordering_algo
         self.order_finder_params = order_finder_params
 
@@ -334,7 +333,8 @@ class AcqdpSimulator(BenchSimulator):
 class QuimbSimulator(BenchSimulator):
     def __init__(self, simplify_sequence='ADCRS',
                  opt_kwargs=dict(max_repeats=3),
-                 opt_type='uniform'):
+                 opt_type='uniform', **kwargs):
+        super().__init__(**kwargs)
         self.simplify_sequence = simplify_sequence
         self.opt_kwargs = opt_kwargs
         self.opt_type = opt_type
