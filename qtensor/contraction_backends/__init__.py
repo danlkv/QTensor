@@ -1,6 +1,7 @@
 from .base_class import ContractionBackend
 from .numpy import NumpyBackend
 from .torch import TorchBackend
+from .cupy import CuPyBackend
 from .mkl import CMKLExtendedBackend
 from .transposed import TransposedBackend
 from .opt_einsum import OptEinusmBackend
@@ -13,4 +14,5 @@ def get_backend(name):
         'mkl':CMKLExtendedBackend,
         'tr_einsum': TransposedBackend,
         'opt_einsum': OptEinusmBackend,
+        'cupy': CuPyBackend
     }[name]()
