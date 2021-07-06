@@ -330,7 +330,7 @@ def mean_mmax(x: list):
 # does not affect standard deviation or other times, only matmul
 use_strip = True
 
-def print_results_json(task_type, backend, size_m, size_n, size_l, dtype, results: List[BenchResult]):
+def print_results_json(task_type, backend, size_m, size_n, size_l, dtype, results: List[BenchResult], experiment_group="default group"):
     import json
     GPU_PROPS = get_gpu_props_json()
     tt1 = [r.gen_time for r in results]
@@ -361,7 +361,7 @@ def print_results_json(task_type, backend, size_m, size_n, size_l, dtype, result
         , mult_relstd=s2
         , flops=flops
         , flops_str=format_flops(flops)
-        , experiment_group="Angela_pod_matrix_size_test"
+        , experiment_group=experiment_group
     )
     print(json.dumps(res), flush=True)
     return res
@@ -372,6 +372,7 @@ def main():
     sizes_m = [10, 100, 1000, 1024, 1025, 2000, 4090, 4096]
     sizes_n = [10, 100, 1000, 1024, 1025, 2000, 4090, 4096]
     sizes_l = [2, 2, 2, 2, 2, 2, 2, 2]
+    experiment_group = "Angela_pod_matmul"
     #sizes = [2000, 3000]
     backends = {
         'numpy':Numpy
@@ -405,9 +406,7 @@ def main():
                         _, bench_result = b.benchmark_matmul(size_m, size_n, size_l, dtype)
                         results.append(bench_result)
 
-                    json_result = print_results_json(task_type, backend, size_m, size_n, size_l, dtype, results)
-                    # f.write(json.dumps(json_result))
-                    # f.write(",")
+                    json_result = print_results_json(task_type, backend, size_m, size_n, size_l, dtype, results, experiment_group)
 
 if __name__ == "__main__":
     main()
