@@ -212,6 +212,43 @@ class QtensorSimulator(BenchSimulator):
         res = sim.simulate_batch(circuit, peo=opt)
         return res
 
+class QtensorSimulatorParallel(QtensorSimulator):
+    def get_parallel(self, n_processes):
+        import cartesian_explorer.parallels as par
+        parallel = par.Multiprocess(processes=n_processes)
+
+        return parallel
+
+    def parallel_unit(self, sim, G, gamma, beta, edge, peo):
+        circuit = sim._edge_energy_circuit(G, gamma, beta, edge)
+        return sim.simulate_batch(circuit, peo=peo)
+
+    def simulate_qaoa_energy(self, G, p, opt, n_processes=4):
+        gamma, beta = get_test_gamma_beta(p)
+        # convert gamma beta to qtensor format
+        gamma = np.array(gamma)/np.pi
+        beta = np.array(beta)/np.pi
+
+        sim = self._get_simulator()
+        res = 0
+        args = []
+        for edge, peo in zip(self.iterate_edges(G, p), opt):
+            args.append(dict(
+                edge = edge,
+                peo = peo,
+                G = G,
+                sim = sim,
+                gamma = gamma,
+                beta = beta
+            ))
+
+        with profiles.timing() as t:
+            with profiles.mem_util() as m:
+                parallel = self.get_parallel(n_processes)
+                contributions = parallel.starstarmap(self.parallel_unit, args)
+        res = sum(contributions)
+        return res, t.result, m.result
+
 class MergedQtensorSimulator(QtensorSimulator):
 
     def _get_simulator(self):
@@ -325,8 +362,10 @@ class AcqdpSimulator(BenchSimulator):
                         iter_orig = super().__iter__()
                         return self._iterate_with_time(iter_orig)
 
+                _query_dict = opts.query_dict
                 opts.query_dict = FancyTimeDict(opts.query_dict.items())
                 res = opts.query(params=beta_gamma)
+                opts.query_dict = _query_dict
         return res, t.result, m.result
 
 
