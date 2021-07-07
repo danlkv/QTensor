@@ -371,8 +371,9 @@ def main():
 
     sizes_m = [10, 100, 1000, 1024, 1025, 2000, 4090, 4096]
     sizes_n = [10, 100, 1000, 1024, 1025, 2000, 4090, 4096]
-    sizes_l = [2, 2, 2, 2, 2, 2, 2, 2]
-    experiment_group = "Angela_pod_matmul"
+    sizes_l = [10, 100, 1000, 1024, 1025, 2000, 4090, 4096]
+    # sizes_l = [2, 2, 2, 2, 2, 2, 2, 2]
+    experiment_group = "default_pod_matmul"
     #sizes = [2000, 3000]
     backends = {
         'numpy':Numpy
@@ -407,6 +408,8 @@ def main():
                         results.append(bench_result)
 
                     json_result = print_results_json(task_type, backend, size_m, size_n, size_l, dtype, results, experiment_group)
+                    # f.write(json.dumps(json_result))
+                    # f.write(",")
 
 if __name__ == "__main__":
     main()

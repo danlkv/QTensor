@@ -323,7 +323,7 @@ def main():
     #sizes = [2000, 3000]
     backends = {
         'numpy':Numpy
-        ,'exatn': Exatn
+        # ,'exatn': Exatn
     }
     if get_gpu_props_json():
         backends.update({
