@@ -1,13 +1,15 @@
+from types import DynamicClassAttribute
 from numpy.core.fromnumeric import shape, size
 import pyrofiler
 from typing import List
-from contextlib import contextmanager
+from contextlib import contextmanager, nullcontext
 from dataclasses import dataclass
 from functools import lru_cache
 import itertools
 import platform
 import importlib
 import os, psutil
+from cupy import cutensor as cupy_cutensor
 
 class LasyModule:
     def __init__(self, modulename):
@@ -21,9 +23,6 @@ class LasyModule:
 np = LasyModule('numpy')
 torch = LasyModule('torch')
 cupy = LasyModule('cupy')
-opt_einsum = LasyModule('opt_einsum')
-
-from cupy import cutensor as cupy_cutensor
 
 import sys
 import os
@@ -34,13 +33,12 @@ exatn = LasyModule('exatn')
 class BenchResult:
     gen_time: float
     transfer_time: float
-    mult_time: float
+    operation_time: float
 
-class Backend:
+class Backend():
     @staticmethod
     def prepare(x):
         return x
-
 
     @staticmethod
     def get_result(x):
@@ -49,9 +47,22 @@ class Backend:
     timing=pyrofiler.timing
 
     @classmethod
-    def gen_tensor(cls, size_x, size_y, dtype='float'):
-        raise NotImplementedError
+    def gen_tensors(cls, num_tensors, *size, dtype='float', contraction=''):
+        tensors = []
+        assert num_tensors == len(size), "number of tensors does not match input size array"
+        for i in range(num_tensors):
+            tensor = cls.gen_tensor(*size[i], dtype=dtype)
+            tensors.append(tensor)
+        return tensors
 
+    @classmethod
+    def gen_tensor(cls, *size, dtype='float'):
+        raise NotImplementedError
+    
+    @classmethod
+    def update_params(self, num_tensors, *size):
+        return num_tensors, *size
+    
     @classmethod
     def get_operation(cls, task_type):
         if task_type == "matmul":
@@ -59,47 +70,22 @@ class Backend:
         elif task_type == "tncontract":
             return cls.get_tncontract()
 
-    @staticmethod
-    def get_matmul():
-        raise NotImplementedError
-
-    @staticmethod
-    def get_tncontract():
-        raise NotImplementedError
-
-
     @classmethod
-    def benchmark(cls, task_type, size_x, size_y, dtype, contraction=''):
+    def benchmark(cls, task_type, num_tensors, *size, dtype='float', contraction=''):
         # this line will also trigger lazy import
-        import psutil
-        process = psutil.Process(os.getpid())
-        overhead = process.memory_info().rss
-        # print(overhead)
+        num_tensors, size = cls.update_params(num_tensors, *size)
         operation = cls.get_operation(task_type)
-        
         with cls.timing(callback=lambda x: None) as gen:
-            x = cls.gen_tensor(*size_x, dtype=dtype)
-            y = cls.gen_tensor(*size_y, dtype=dtype)
-            if cls == CuTensor:
-                # size_z = tuple([size_x[0], size_x[2],size_y[2]])
-                size_z = tuple([size_x[0], size_x[2],size_y[3]])
-                z = cls.gen_tensor(*size_z, dtype=dtype)
+            tensors = cls.gen_tensors(num_tensors, *size, dtype=dtype, contraction=contraction)
         with cls.timing(callback=lambda x: None) as prep:
-            x = cls.prepare(x)
-            y = cls.prepare(y)
-            if cls == CuTensor:
-                z = cls.prepare(z)
-        with cls.timing(callback=lambda x: None) as mm:
-            if cls == CuTensor:
-                z = operation(x,y,z)
-            else:
-                if task_type == "tncontract":
-                    z = operation(contraction,x,y)
-                elif task_type == "matmul":
-                    z = operation(x,y)
+            for i in range(len(tensors)):
+                tensors[i] = cls.prepare(tensors[i])
+        with cls.timing(callback=lambda x: None) as op:
+            out_tensor = operation(contraction,*tensors)
         with cls.timing(callback=lambda x: None) as get:
-            zr = cls.get_result(z)
-        return zr, BenchResult(gen_time=gen.result, transfer_time=prep.result+get.result, mult_time=mm.result)
+            zr = cls.get_result(out_tensor)
+        return zr, BenchResult(gen_time=gen.result, transfer_time=prep.result+get.result, operation_time=op.result)
+
 
 class Numpy(Backend):
     @staticmethod
@@ -124,14 +110,7 @@ class Numpy(Backend):
     def get_tncontract():
         return np.einsum
 
-class OptEinsum(Numpy):
-    @staticmethod
-    def get_matmul():
-        raise NotImplementedError
 
-    @staticmethod
-    def get_tncontract():
-        return opt_einsum.contract
 
 class Torch(Backend):
     @staticmethod
@@ -174,6 +153,8 @@ class TorchCuda(Torch):
     @staticmethod
     def prepare(x):
         return x.to('cuda')
+
+
 
 class Cupy(Backend):
     @classmethod
@@ -220,20 +201,27 @@ class Cupy(Backend):
             cupy.cuda.device.get_cublas_handle()
         return cupy.einsum
 
+
+
 class CuTensor(Cupy):
     @classmethod
     def gen_tensor(cls, *sizes, dtype='float'):
         dtype_t = cls.get_dtype(dtype)
         return cupy.random.rand(*sizes).astype(dtype_t)
+    
+    @classmethod
+    def update_params(self, num_tensors, *size):
+        size = size[0]
+        num_tensors += 1
+        unit_size = size[0][0]
+        size.append([unit_size for i in range(3)])  # Hardcode
+        return num_tensors, size
 
     @classmethod
-    def tncontract(cls, x, y, z):
-        [x, desc_x] = x
-        [y, desc_y] = y
-        [z, desc_z] = z
-        # return cupy_cutensor.contraction(1, x, desc_x, cls.mode_x, 
-        #                         y, desc_y, cls.mode_y, 0, 
-        #                         z, desc_z, cls.mode_z)
+    def tncontract(cls, contraction, *tensors):
+        [x, desc_x] = tensors[0]
+        [y, desc_y] = tensors[1]
+        [z, desc_z] = tensors[2]
         return cupy_cutensor.contraction(1.0, x, desc_x, ('A', 'B', 'C', 'D'), 
                         y, desc_y, ('B', 'C', 'D', 'F'), 0, 
                         z, desc_z, ('A', 'C', 'F'))
@@ -252,16 +240,25 @@ class CuTensor(Cupy):
     
     @classmethod
     def prepare(cls, x):
-        if not hasattr(cls, 'mode_x'):
-            cls.mode_x = ('a', 'b', 'c', 'd')
-            # cls.mode_y = ('c', 'd', 'f', 'e')
-            cls.mode_y = ('b', 'c', 'd', 'f')
-            cls.mode_z = ('a', 'c', 'f')
-            cls.mode_x = cupy_cutensor.create_mode(*cls.mode_x)
-            cls.mode_y = cupy_cutensor.create_mode(*cls.mode_y)
-            cls.mode_z = cupy_cutensor.create_mode(*cls.mode_z)
         desc_x = cupy_cutensor.create_tensor_descriptor(x)
         return [x, desc_x]
+
+
+
+# class Operation:
+#     def __init__(self, backend:Backend):
+#         self.operation = None
+#         pass
+
+# class Matmul(Operation):
+#     def __init__(self, backend:Backend):
+#         self.operation = backend.get_matmul
+
+# class Tncontract(Operation):
+#     def __init__(self, backend:Backend):
+#         self.operation = backend.get_tncontract
+
+
 
 def format_flops(flops):
     ord = 3*int(np.log10(flops)/3)
@@ -302,33 +299,35 @@ def mean_mmax(x: list):
 # does not affect standard deviation or other times, only matmul
 use_strip = True
 
-def print_results_json(task_type, backend, size_x, size_y, dtype, results: List[BenchResult], experiment_group="default group"):
+def print_results_json(task_type, backend, *size, dtype, results: List[BenchResult], experiment_group="default group"):
     import json
     GPU_PROPS = get_gpu_props_json()
     tt1 = [r.gen_time for r in results]
-    tt2 = [r.mult_time for r in results]
+    tt2 = [r.operation_time for r in results]
     tt3 = [r.transfer_time for r in results]
-    m1, m3 = np.mean(tt1), np.mean(tt3)
     if use_strip:
+        m1 = mean_mmax(tt1)
         m2 = mean_mmax(tt2)
+        m3 = mean_mmax(tt3)
     else:
-        m2 = np.mean(tt2)
+        m1, m2, m3 = np.mean(tt1), np.mean(tt2), np.mean(tt3)
     s1, s2, s3 = np.std(tt1), np.std(tt2), np.std(tt3)
+    size = size[0]
     if task_type == "matmul":
-        ops = np.prod(size_x) * size_y[1]
-        size = [x for x in size_x]
-        size.append(size_y[1])
-        bytes = get_dtype_size(dtype)*ops.item()
+        pass
+
     elif task_type == "tncontract":
-        ops = np.prod(size_x) * size_y[3] # Hardcode
-        size = size_x[0]
-        bytes = get_dtype_size(dtype)*size**6 # Hardcode
 
-        # ops = np.prod(size_x) * np.prod(size_y[2:4]) # Hardcode
-        # size.append(size_y[2].item())
-        # bytes = get_dtype_size(dtype)*size_x[0].item()*size_x[2].item()*size_y[2].item() # Hardcode
+        # 'abcd,bcdf->acf'
+        # size = [[n, n, n, n],
+        #          [n, n, n, n]]
+        # ops = n**5
+        # bytes = dtype_size 2 * n**4
+
+        ops = np.prod(size[0]) * size[1][3]
+        size = size[0][0]
+        bytes = get_dtype_size(dtype)*2*size**4
         
-
     ops = ops.item()
     flops = ops/m2
 
@@ -337,7 +336,6 @@ def print_results_json(task_type, backend, size_x, size_y, dtype, results: List[
         , backend=backend
         , size=size
         , itemsize=get_dtype_size(dtype)
-        # , overhead=overhead
         , bytes=bytes 
         , dtype=dtype
         , device_props=dict(name=platform.node(), gpu=GPU_PROPS)
@@ -345,8 +343,8 @@ def print_results_json(task_type, backend, size_x, size_y, dtype, results: List[
         , transfer_relstd=s3
         , gen_time=m1
         , gen_relstd=s1
-        , mult_time=m2
-        , mult_relstd=s2
+        , operation_time=m2
+        , operation_relstd=s2
         , ops=ops
         , flops=flops
         , flops_str=format_flops(flops)
@@ -357,71 +355,62 @@ def print_results_json(task_type, backend, size_x, size_y, dtype, results: List[
     return res
 
 
+
+
 def main():
-    # args
-    # task_type = "matmul"
-    task_type = "tncontract"
-    experiment_group = "Angela_pod_tncontract_fake_test_fixed_size"
-    num_size = 10
-    max_size = 64 #64
-    # contraction = 'abcd,cdfe->acf'
-    contraction = 'abcd,bcdf->acf'
-    repeats = 5
-    if use_strip:
-        repeats += 2
-    
-    if task_type == "matmul":
-        sizes_x = [
-            [10, 10], [100, 100], [1000, 1000], [1024, 1024], [1025, 1025],
-            [2000, 2000], [4090, 4090], [4096, 4096]
-        ]
-        sizes_y = [
-            [10, 10], [100, 100], [1000, 1000], [1024, 1024], [1025, 1025],
-            [2000, 2000], [4090, 4090], [4096, 4096]
-        ]
-    elif task_type == "tncontract":
-        sizes_x = []
-        sizes_y = []
 
-        for size in [2, 4, 8, 10, 16, 20, 32, 40, 60, 64, 70, 100, 128, 250, 256, 300]:
-            sizes_x.append([size for i in range(4)])
-            sizes_y.append([size for i in range(4)])
-        
-        # for i in range(num_size):
-        #     sizes = list(np.random.randint(1,max_size+1,size=6))
-        #     sizes_x.append(tuple(sizes[0:4])) # a b c d
-        #     # sizes_y.append(tuple(sizes[2:6]))
-        #     sizes_y.append(tuple(sizes[1:5])) # b c d e
+    experiment_group = "Angela_pod_tncontract_restructure_test2"
 
+    task_types = [
+        # "matmul",
+        "tncontract"
+    ]
+    contraction = 'abcd,bcdf->acf' # tensor
 
+    # Backend
     backends = {
         'numpy':Numpy
-        , 'opt_einsum':OptEinsum
         # , 'exatn': Exatn
     }
     if get_gpu_props_json():
         backends.update({
             'torch':TorchCuda
-            , 'cupy':Cupy
+            ,  'cupy':Cupy
             , 'cutensor': CuTensor
         })
-
-    dtypes = ['float', 'double', 'complex64', 'complex128']
     
-    import json
+    # Tensor properties
+    num_tensors = 2
+    dim = 4 # tensor
+    sizes = [2, 4, 8, 10, 16, 20, 30, 32, 40, 50, 60, 64, 70, 80, 100, 120, 128, 130, 150]  # tensor
+    # dim = 2 # matrix
+    # sizes = [10, 100, 1000, 1024, 1025, 2000, 4090, 4096] # matrix  
+    dtypes = ['float', 'double', 'complex64', 'complex128']
 
+    # Test properties
+    repeats = 5
+    use_strip = True
+    if use_strip:
+        repeats += 2
+    
+    # Bechmark
+    import json
     with open('data.json', mode='w') as f:
-        for backend in backends:
-            for [size_x, size_y] in zip(sizes_x, sizes_y):
-                results = []
-                for dtype in dtypes:
-                    for _ in range(repeats):
-                        b = backends[backend]
-                        _, bench_result = b.benchmark(task_type, size_x, size_y, dtype=dtype, contraction=contraction)
-                        results.append(bench_result)
-                    json_result = print_results_json(task_type, backend, size_x, size_y, dtype, results, experiment_group)
-                    f.write(json.dumps(json_result))
-                    f.write(",")
+        for task in task_types:
+            for backend in backends:
+                for size in sizes:
+                    input_sizes = [size for i in range(dim)] # square tensors
+                    results = []
+                    for dtype in dtypes:
+                        for _ in range(repeats):
+                            b = backends[backend]
+                            _, bench_result = b.benchmark(task, num_tensors, [input_sizes, input_sizes], dtype=dtype, contraction=contraction)
+                            results.append(bench_result)
+                        json_result = print_results_json(task, backend, [input_sizes, input_sizes], dtype=dtype, results=results, experiment_group=experiment_group)
+                          
+                        # f.write(json.dumps(json_result))
+                        # f.write(",")
+
 
 if __name__ == "__main__":
     main()
