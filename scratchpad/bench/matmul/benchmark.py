@@ -350,7 +350,7 @@ def print_results_json(task_type, backend, size_m, size_n, size_l, dtype, result
         , size_n=size_n
         , size_l=size_l
         , itemsize=get_dtype_size(dtype)
-        , bytes=get_dtype_size(dtype)*size_m*size_l**2
+        , bytes=get_dtype_size(dtype)*(size_m*size_n+size_n*size_l)
         , dtype=dtype
         , device_props=dict(name=platform.node(), gpu=GPU_PROPS)
         , transfer_time=m3
