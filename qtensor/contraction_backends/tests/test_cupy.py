@@ -118,9 +118,3 @@ def test_cupy_get_sliced_smoke():
     buckets = backend.get_sliced_buckets(test_buckets, {}, {})
     assert buckets == []
 
-test_cupy_numpy()
-test_cupy_vanilla()
-test_cupy_process_bucket()
-test_cupy_get_sliced__slice()
-test_cupy_get_sliced__noslice()
-test_cupy_get_sliced_smoke()

@@ -94,7 +94,8 @@ class QtreeSimulator(Simulator):
 
     def optimize_buckets(self):
         peo, self.tn = self.optimizer.optimize(self.tn)
-        #print('Treewidth', self.optimizer.treewidth)
+        # print('Treewidth', self.optimizer.treewidth)
+        # print(peo)
         return peo
 
     def prepare_buckets(self, qc, batch_vars=0, peo=None):
@@ -126,6 +127,8 @@ class QtreeSimulator(Simulator):
         sliced_buckets = self.tn.slice(slice_dict)
         #self.backend.pbar.set_total ( len(sliced_buckets))
         self.buckets = sliced_buckets
+        # print("Buckets:")
+        # print(sliced_buckets)
 
     def simulate_batch(self, qc, batch_vars=0, peo=None):
         self.prepare_buckets(qc, batch_vars, peo)

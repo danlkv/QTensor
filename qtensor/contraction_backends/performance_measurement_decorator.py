@@ -37,19 +37,34 @@ class PerfBackend(ContractionBackend):
         return self.backend.get_result_data(result)
 
     def _perfect_bucket_flop(self, bucket_indices):
+        # L46 taking all indices that are invilved in current bucket contraction
+
+
+        # r_i is arr of index objects
+        # each index object has a size
+        # SO, I want a list of the sizes; si
+
+
         resulting_indices = list(set.union(*[set(ixs) for ixs in bucket_indices]))
         # The first index is contracted
         resulting_indices = resulting_indices[1:]
         # don't take index size into account
-        n_multiplications = len(bucket_indices)
-        size_of_result = 2**len(resulting_indices)
-        summation_index_size = 2
-        n_summations = summation_index_size - 1
-        op = size_of_result*( n_summations + n_multiplications )
+        sizes = [x.size for x in resulting_indices]
+        # n_multiplications = len(bucket_indices)
+        # size_of_result = 2**len(resulting_indices)
+        # summation_index_size = 2
+        # n_summations = summation_index_size - 1
+
+        # A list of lists of indices
+        # Each list of indices is description of tensor
+        # To get the total number of memory use, is 
+        op = 1
+        for size in sizes:
+            op = op * size
         return op
 
 
-    def gen_report(self):
+    def gen_report(self, show = True):
         data = self._profile_results.values()
         # -- sotrt data with respect to time
         data = sorted(data, key= lambda pair: pair[1], reverse=True)
@@ -62,7 +77,8 @@ class PerfBackend(ContractionBackend):
             rep += f'\n ... and {len(data)-max_lines} lines more...'
 
         # -- report on totals
-        for indices, time in  data[:max_lines]:
+        # max_line should not be inolved for recording
+        for indices, time in  data:
             self.report_table.record(
                 bucket_len = len(indices)
                 , time = time
@@ -72,8 +88,9 @@ class PerfBackend(ContractionBackend):
                 , min_size = min([len(ixs) for ixs in indices])
                 , result_size = len(set.union(*[set(i) for i in indices])) - 1
             )
-
-        print(self.report_table.markdown())
+        
+        if show:
+            print(self.report_table.markdown())
 
 
         # -- report on totals

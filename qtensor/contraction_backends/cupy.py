@@ -1,7 +1,7 @@
 import qtree
-import numpy as np
-import cupy as cp
-from qtree import np_framework
+#import numpy as np
+from qtensor.tools.lazy_import import cupy as cp
+#from qtree import np_framework
 from qtensor.contraction_backends import ContractionBackend
 
 class CuPyBackend(ContractionBackend):
