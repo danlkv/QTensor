@@ -1,6 +1,6 @@
 import qtensor
 import numpy as np
-import cupy as cp
+from qtensor.tools.lazy_import import cupy as cp
 from qtensor.contraction_backends import CuPyBackend, NumpyBackend
 from qtensor import QtreeSimulator
 
@@ -52,10 +52,6 @@ def test_cupy_process_bucket():
     btr = CuPyBackend()
     bnp = NumpyBackend()
     def contract_tn(backend, search_len=1, test_problem_kwargs={}):
-        """
-        search_len is used to select non-trivial buckets.
-        test_problem_kwargs is used to generate custom graph for test_problem
-        """
         tn = get_test_qaoa_tn(**test_problem_kwargs)
         sliced_buckets = backend.get_sliced_buckets(tn.buckets, tn.data_dict, {})
         good_buckets = [x for x in sliced_buckets if len(x) >= search_len]
@@ -67,19 +63,10 @@ def test_cupy_process_bucket():
         result = backend.process_bucket(selected_bucket)
         return result.data
 
-    # First test only simple buckets
     restr = contract_tn(btr, 1)
     resnp = contract_tn(bnp, 1)
     assert type(restr) is cp.ndarray
-    '''
-        Issue One: restr.type is printed to be complex64
-                   But the assertion says neither cp.complex64 nor np.complex64
-    '''
-    # assert restr.dtype is np.complex64
-    print("The data type for restr is {}".format(restr.dtype))
     assert np.allclose(restr, resnp)
-
-    # Then test more advanced
     restr = contract_tn(btr, 2, dict(n=10, p=4, d=3))
     resnp = contract_tn(bnp, 2, dict(n=10, p=4, d=3))
 
@@ -117,4 +104,3 @@ def test_cupy_get_sliced_smoke():
     test_buckets = []
     buckets = backend.get_sliced_buckets(test_buckets, {}, {})
     assert buckets == []
-

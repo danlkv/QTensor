@@ -1,7 +1,5 @@
 import json
 from functools import lru_cache
-from networkx.algorithms.shortest_paths.weighted import all_pairs_dijkstra
-from networkx.utils.misc import iterable
 import numpy as np
 import networkx as nx
 import pytest
