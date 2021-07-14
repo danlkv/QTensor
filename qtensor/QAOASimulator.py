@@ -28,7 +28,7 @@ class QAOASimulator(Simulator):
 
 
     def _post_process_energy(self, G, E):
-        if np.imag(E)>1e-6:
+        if np.imag(E).any()>1e-6:
             print(f"Warning: Energy result imaginary part was: {np.imag(E)}")
 
         """
