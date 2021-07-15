@@ -1,7 +1,11 @@
+from torch._C import device
 from qtensor.tools.lazy_import import torch
 import qtree
 import numpy as np
 from qtree import np_framework
+cuda = torch.device('cuda')
+
+
 
 from qtensor.contraction_backends import ContractionBackend
 def qtree2torch_tensor(tensor, data_dict):
@@ -64,7 +68,7 @@ class TorchBackend(ContractionBackend):
                 transpose_order = np.argsort(list(map(int, tensor.indices)))
                 data = data_dict[tensor.data_key]
                 if not isinstance(data, torch.Tensor):
-                    data = torch.from_numpy(data)
+                    data = torch.from_numpy(data).to(cuda)
                 data = data.permute(tuple(transpose_order))
                 # transpose indices
                 indices_sorted = [tensor.indices[pp]
