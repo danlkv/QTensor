@@ -1,5 +1,6 @@
 import json
 from functools import lru_cache
+from attr import asdict
 from networkx.readwrite.gml import LIST_START_VALUE
 import numpy as np
 import networkx as nx
@@ -171,7 +172,12 @@ def cook_raw_report(backend_name: str, problem: list, raw_report: dict, task_typ
         bytes = medium_report["bytes"],
         gen_time = medium_report["gen_time"],
         num_buckets = medium_report["bucket_num"],
-        problem = problem
+        problem = {
+                    "n" :pt[0] , 
+                    "p" :pt[1] ,
+                    "d" :pt[2] ,
+                    'type': pt[3]
+                    }
     )
 
     return res
@@ -183,7 +189,7 @@ if __name__ == '__main__':
     backends= ["cupy", "einsum", "torch", 'tr_einsum','opt_einsum']
     for be in backends:
         for pt in paramtest:
-            raw_report = collect_process_be_pt_report(7, be, pt)
+            raw_report = collect_process_be_pt_report(4, be, pt)
             cooked = cook_raw_report(be, pt, raw_report)
             total_report.append(cooked)
 
