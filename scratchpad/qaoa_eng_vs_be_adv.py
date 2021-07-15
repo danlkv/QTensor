@@ -186,13 +186,13 @@ if __name__ == '__main__':
 
 
     total_report = []
-    backends= ["cupy", "einsum", "torch", 'tr_einsum','opt_einsum']
-    for be in ["torch"]:
-        for pt in [paramtest[0]]:
-            raw_report = collect_process_be_pt_report(4, be, pt)
+    backends= ["cupy", "einsum", "torch","torch_gpu", 'tr_einsum','opt_einsum']
+    for be in backends:
+        for pt in paramtest:
+            raw_report = collect_process_be_pt_report(7, be, pt)
             cooked = cook_raw_report(be, pt, raw_report)
             total_report.append(cooked)
-    print(total_report)
+    print(json.dumps(total_report, indent = 4))
 
     # G, gamma, beta = get_test_problem(4,4,3, type = "random")
     # curr_backend = get_perf_backend("torch")
