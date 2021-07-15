@@ -173,10 +173,10 @@ def cook_raw_report(backend_name: str, problem: list, raw_report: dict, task_typ
         gen_time = medium_report["gen_time"],
         num_buckets = medium_report["bucket_num"],
         problem = {
-                    "n" :pt[0] , 
-                    "p" :pt[1] ,
-                    "d" :pt[2] ,
-                    'type': pt[3]
+                    "n" :problem[0] , 
+                    "p" :problem[1] ,
+                    "d" :problem[2] ,
+                    'type': problem[3]
                     }
     )
 
@@ -187,11 +187,16 @@ if __name__ == '__main__':
 
     total_report = []
     backends= ["cupy", "einsum", "torch", 'tr_einsum','opt_einsum']
-    for be in backends:
-        for pt in paramtest:
+    for be in ["torch"]:
+        for pt in [paramtest[0]]:
             raw_report = collect_process_be_pt_report(4, be, pt)
             cooked = cook_raw_report(be, pt, raw_report)
             total_report.append(cooked)
+    print(total_report)
 
-    with open("adv_sample.json", "w") as outfile:
-        json.dump(total_report, outfile, indent = 4, sort_keys = True)
+    # G, gamma, beta = get_test_problem(4,4,3, type = "random")
+    # curr_backend = get_perf_backend("torch")
+    # print(curr_backend.backend.device)
+    # print(curr_backend.backend.cuda_available)
+    # sim = QAOAQtreeSimulator(QtreeQAOAComposer, backend = curr_backend)
+    # print(sim.energy_expectation(G, gamma=gamma, beta=beta))

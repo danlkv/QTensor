@@ -1,9 +1,6 @@
-from torch._C import device
 from qtensor.tools.lazy_import import torch
 import qtree
 import numpy as np
-from qtree import np_framework
-cuda = torch.device('cuda')
 
 
 
@@ -22,6 +19,12 @@ def qtree2torch_tensor(tensor, data_dict):
 
 
 class TorchBackend(ContractionBackend):
+
+    def __init__(self, device = "cpu"):
+        self.device = device
+        self.cuda_available = torch.cuda.is_available()
+
+
     def process_bucket(self, bucket, no_sum=False):
         result_indices = bucket[0].indices
         result_data = bucket[0].data
@@ -68,7 +71,14 @@ class TorchBackend(ContractionBackend):
                 transpose_order = np.argsort(list(map(int, tensor.indices)))
                 data = data_dict[tensor.data_key]
                 if not isinstance(data, torch.Tensor):
-                    data = torch.from_numpy(data).to(cuda)
+                    if self.device == "cpu":
+                        data = torch.from_numpy(data)
+                    else:
+                        if self.cuda_available:
+                            cuda = torch.device('cuda')
+                            data = torch.from_numpy(data).to(cuda)
+                        else:
+                            raise Exception("cuda is not available on this machine")
                 data = data.permute(tuple(transpose_order))
                 # transpose indices
                 indices_sorted = [tensor.indices[pp]
