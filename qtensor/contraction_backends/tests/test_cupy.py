@@ -1,8 +1,11 @@
 import qtensor
 import numpy as np
-from qtensor.tools.lazy_import import cupy as cp
+
 from qtensor.contraction_backends import CuPyBackend, NumpyBackend
 from qtensor import QtreeSimulator
+
+import pytest
+cp = pytest.importorskip('cupy')
 
 
 def get_test_qaoa_circ(n=10, p=2, d=3, type='random'):

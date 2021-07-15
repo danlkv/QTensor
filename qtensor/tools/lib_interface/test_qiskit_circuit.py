@@ -36,6 +36,33 @@ def test_builder():
     print(qc)
     assert isinstance(qc[0], builder.operators.YPhase)
 
+
+def compare_circuits(qc1, qc2):
+    from qiskit.compiler import transpile
+    basis_gates = [ "id", "x", "y", "z", "h", "s", "t", "sdg", "tdg", "rx", "ry", "rz", "rxx", "ryy", "cx", "cy", "cz", "ch", "crx", "cry", "crz", "swap", "cswap", "ccx", "cu1", "cu3", "u1", "u2", "u3", ]
+
+    # One would think that comparing two objecs in Python should be as simple as
+    # `a==b`, since every developer knows that if you override __eq__ method 
+    # you should write something that works well
+
+    # Not in qiskit
+
+    # The __eq__ method uses circuit_to_dag, but circuit_to_dag doesn't correctly
+    # handle the TwoLocal circuit, which is displayed as one giant gate on all
+    # qubits. str(circuit) returns different stuff. However, the drawing script
+    # handles it well, but you have to transpile the circuit to a basis set
+    # Comparing unitaries is not an option here since the circuit has parameters
+    # without values.
+
+    def circ2id(qc):
+        return (
+            str(transpile(qc, basis_gates=basis_gates, optimization_level=0)
+            .draw(output='text', fold=-1))
+        )
+
+    assert circ2id(qc1)==circ2id(qc2)
+
+
 def test_qiskit_to_qiskit():
     import qiskit
     from qiskit.circuit.library import TwoLocal
@@ -57,10 +84,10 @@ def test_qiskit_to_qiskit():
     circ = circ.assign_parameters([x*np.pi for x in parameters])
     circ.add_register(qiskit.ClassicalRegister(N,name='c'))
     qc = builder.circuit
-    print('qcorig\n', circ)
-    print('qc\n', qc)
-    # note: .draw() returns a ``Drawing`` object, not string
-    assert str(circ.draw()) == str(qc.draw())
+    print('qcorig\n', str(circ.draw(fold=-1, output='text')))
+    print('qcorig2\n', circ)
+    print('qc\n', str(qc.draw(fold=-1, output='text')))
+    compare_circuits(circ, qc)
 
 
 if __name__=='__main__':
