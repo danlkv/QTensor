@@ -204,7 +204,6 @@ if __name__ == '__main__':
     problems = param_gen(5,10,"random")
     for be in [backends[1]]:
         for pt in problems:
-            print(pt)
             raw_report = collect_process_be_pt_report(7, be, pt)
             cooked = cook_raw_report(be, pt, raw_report)
             total_report.append(cooked)
