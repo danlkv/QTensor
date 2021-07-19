@@ -1,10 +1,7 @@
 import json
 from functools import lru_cache
-from attr import asdict
-from networkx.readwrite.gml import LIST_START_VALUE
 import numpy as np
 import networkx as nx
-import pytest
 import platform
 import pyrofiler
 from qtensor import QtreeQAOAComposer
@@ -24,12 +21,6 @@ def get_test_problem(n=10, p=2, d=3, type='random'):
     gamma, beta = [np.pi/5]*p, [np.pi/2]*p
     return G, gamma, beta
 
-@pytest.fixture
-def test_problem(request):
-    n, p, d, type = request.param
-    return get_test_problem(n, p, d, type)
-
-
 paramtest = [
     # n, p, degree, type
      [4, 4, 3, 'random']
@@ -38,6 +29,29 @@ paramtest = [
     ,[3, 3, 0, 'grid2d']
     ,[8, 4, 0, 'line']
 ]
+
+paramtest_p = [
+    [10, 1, 3, 'random'],
+    [20, 2, 3, 'random'],
+    [30, 3, 3, 'random'],
+    [40, 4, 3, 'random'],
+    [10, 5, 3, 'random'],
+]
+
+def param_gen(p_max, n_max, type:str):
+    result = []
+    for i in range(1,p_max+1):
+        for n in range(10, n_max+10, 10):
+            result.append([n,i, 3, type])
+    return result   
+
+
+
+
+
+
+
+
 
 def mean_mmax(x: list):
     mx, mn = max(x), min(x)
@@ -187,12 +201,14 @@ if __name__ == '__main__':
 
     total_report = []
     backends= ["cupy", "einsum", "torch","torch_gpu", 'tr_einsum','opt_einsum']
-    for be in backends:
-        for pt in paramtest:
+    problems = param_gen(5,10,"random")
+    for be in [backends[1]]:
+        for pt in problems:
+            print(pt)
             raw_report = collect_process_be_pt_report(7, be, pt)
             cooked = cook_raw_report(be, pt, raw_report)
             total_report.append(cooked)
-    print(json.dumps(total_report, indent = 4))
+            print(json.dumps(cooked))
 
     # G, gamma, beta = get_test_problem(4,4,3, type = "random")
     # curr_backend = get_perf_backend("torch")
@@ -200,3 +216,11 @@ if __name__ == '__main__':
     # print(curr_backend.backend.cuda_available)
     # sim = QAOAQtreeSimulator(QtreeQAOAComposer, backend = curr_backend)
     # print(sim.energy_expectation(G, gamma=gamma, beta=beta))
+
+
+
+
+# TODO:
+# 1. increase n, increase complexity
+# 2. n = 30, p = 5, d = 3, "random", p = 5 is the hard cap for p
+#
