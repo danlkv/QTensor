@@ -25,6 +25,7 @@ import sys
 import os
 sys.path.append(os.environ['HOME']+"/.local")
 exatn = LasyModule('exatn')
+from cupy import cutensor as cupy_cutensor
 
 @dataclass
 class BenchResult:
@@ -34,29 +35,6 @@ class BenchResult:
 
 
 class Backend:
-    @staticmethod
-    def get_task_type():
-        raise NotImplementedError
-
-    @staticmethod
-    def prepare(x):
-        return x
-
-    @staticmethod
-    def get_result(x):
-        return x
-
-    timing=pyrofiler.timing
-
-    @classmethod
-    def gen_tensors(cls, num_tensors, *sizes, dtype='float'):
-        tensors = []
-        assert num_tensors == len(sizes), "number of tensors does not match input size array"
-        for i in range(num_tensors):
-            tensor = cls.gen_tensor(*sizes[i], dtype=dtype)
-            tensors.append(tensor)
-        return tensors
-    
     @classmethod
     def gen_tensor(cls, *sizes, dtype='float'):
         raise NotImplementedError
@@ -66,26 +44,51 @@ class Backend:
         return num_tensors, *sizes
 
     @staticmethod
-    def get_operation():
+    def prepare(x):
+        return x
+
+    @staticmethod
+    def get_result(x):
+        return x
+    
+    @classmethod
+    def gen_tensors(cls, num_tensors, *sizes, dtype='float'):
+        tensors = []
+        assert num_tensors == len(sizes), "number of tensors does not match input size array"
+        for i in range(num_tensors):
+            tensor = cls.gen_tensor(*sizes[i], dtype=dtype)
+            tensors.append(tensor)
+        return tensors
+    
+
+
+class Benchmark:
+    timing=pyrofiler.timing
+
+    @staticmethod
+    def get_task_type():
         raise NotImplementedError
-        
 
     @classmethod
-    def benchmark(cls, num_tensors, *sizes, dtype='float', **args):
-        num_tensors, *sizes = cls.get_ready(num_tensors, *sizes)
+    def get_operation(cls):
+        raise NotImplementedError
+        
+    @classmethod
+    def benchmark(cls, backend:Backend, num_tensors, *sizes, dtype='float', **args):
+        num_tensors, *sizes = backend.get_ready(num_tensors, *sizes)
         operation = cls.get_operation()
         with cls.timing(callback=lambda x: None) as gen:
-            tensors = cls.gen_tensors(num_tensors, *sizes, dtype=dtype)
+            tensors = backend.gen_tensors(num_tensors, *sizes, dtype=dtype)
         with cls.timing(callback=lambda x: None) as prep:
             for i in range(len(tensors)):
-                tensors[i] = cls.prepare(tensors[i])
+                tensors[i] = backend.prepare(tensors[i])
         with cls.timing(callback=lambda x: None) as op:
             if 'contraction' in args:
                 out_tensor = operation(args['contraction'], *tensors)
             else:
                 out_tensor = operation(*tensors)
         with cls.timing(callback=lambda x: None) as get:
-            zr = cls.get_result(out_tensor)
+            zr = backend.get_result(out_tensor)
         return zr, BenchResult(gen_time=gen.result, transfer_time=prep.result+get.result, operation_time=op.result)
 
 
@@ -97,6 +100,7 @@ class Backend:
             ,6: 'M'
             ,9: 'G'
             , 12: 'T'
+            , 15: 'P'
         }[ord]
         return f'{(flops/10**ord).round(2)}{suffix}'
 
@@ -117,6 +121,7 @@ class Backend:
         return np.mean(x)
 
 
+    @classmethod
     def get_params(cls, **args):
         raise NotImplementedError
 
@@ -163,6 +168,168 @@ class Backend:
         )
         print(json.dumps(res), flush=True)
         return res
+
+
+class Numpy(Backend):
+    @staticmethod
+    def get_dtype(dtype):
+        return {
+            'float':np.float32
+            ,'double': np.float64
+            ,'complex64': np.complex64
+            ,'complex128': np.complex128
+        }[dtype]
+
+    @classmethod
+    def gen_tensor(cls, *sizes, dtype='float'):
+        dtype_t = cls.get_dtype(dtype)
+        return np.random.rand(*sizes).astype(dtype_t)
+
+    @staticmethod
+    def get_matmul():
+        return np.matmul
+    
+    @staticmethod
+    def get_tncontract():
+        return np.einsum
+
+
+class Torch(Backend):
+    torch.backends.cuda.matmul.allow_tf32 = False
+    gpu_tensor = ['float', 'double']
+
+    @staticmethod
+    def get_dtype(dtype):
+        return {
+            'float':torch.cuda.FloatTensor
+            ,'double': torch.cuda.DoubleTensor
+            ,'complex64': torch.complex64
+            ,'complex128': torch.complex128
+        }[dtype]
+
+    @classmethod
+    def gen_tensor(cls, *sizes, dtype='float'):
+        if dtype in cls.gpu_tensor:
+            dtype = cls.get_dtype(dtype)
+            return dtype(*sizes).normal_()
+        else:
+            dtype = cls.get_dtype(dtype)
+            return torch.rand(*sizes, dtype=dtype, device='cuda')
+
+    @staticmethod
+    def get_matmul():
+        return torch.matmul
+    
+    @staticmethod
+    def get_tncontract():
+        return torch.einsum
+
+
+class TorchCuda(Torch):
+    @classmethod
+    @contextmanager
+    def timing(cls, **kwargs):
+        class Foo:
+            pass
+        res = Foo()
+        start = torch.cuda.Event(enable_timing=True)
+        end = torch.cuda.Event(enable_timing=True)
+        start.record()
+        yield res
+        end.record()
+        torch.cuda.synchronize()
+        res.result = start.elapsed_time(end)/1000
+
+
+class Cupy(Backend):
+    @classmethod
+    @contextmanager
+    def timing(cls, **kwargs):
+        class Foo:
+            pass
+        res = Foo()
+        start = cupy.cuda.Event(disable_timing=False)
+        end = cupy.cuda.Event(disable_timing=False)
+        start.record()
+        yield res
+        end.record()
+        end.synchronize()
+        res.result = cupy.cuda.get_elapsed_time(start, end)/1000
+
+    @staticmethod
+    def get_dtype(dtype):
+        return {
+            'float':cupy.float32
+            ,'double': cupy.float64
+            ,'complex64': cupy.complex64
+            ,'complex128': cupy.complex128
+        }[dtype]
+
+    @classmethod
+    def gen_tensor(cls, *sizes, dtype='float'):
+        dtype_t = cls.get_dtype(dtype)
+        return cupy.random.rand(*sizes).astype(dtype_t)
+
+    @staticmethod
+    def get_matmul():
+        with pyrofiler.timing('cblas handler'):
+            cupy.cuda.device.get_cublas_handle()
+        return cupy.matmul
+
+    @staticmethod
+    def get_tncontract():
+        with pyrofiler.timing('cblas handler'):
+            cupy.cuda.device.get_cublas_handle()
+        return cupy.einsum
+
+
+class CuTensor(Cupy):
+    @classmethod
+    def get_ready(self, num_tensors, *sizes):
+        raise NotImplementedError
+
+    @classmethod
+    def gen_tensor(cls, *sizes, dtype='float'):
+        dtype_t = cls.get_dtype(dtype)
+        return cupy.random.rand(*sizes).astype(dtype_t)
+
+    @classmethod
+    def cutensor_matmul(cls, x, y, z):
+        [x, desc_x] = x
+        [y, desc_y] = y
+        [z, desc_z] = z
+        from cupy import cutensor
+        return cutensor.contraction(1, x, desc_x,  ('m', 'k'), 
+                                y, desc_y, ('k', 'n'), 0, 
+                                z, desc_z, ('m', 'n'))
+    
+    @classmethod
+    def get_matmul(cls):
+        with pyrofiler.timing('cblas handler'):
+            cupy.cuda.device.get_cublas_handle()
+        return cls.cutensor_matmul
+    
+    @classmethod
+    def prepare(cls, x):
+        desc_x = cupy_cutensor.create_tensor_descriptor(x)
+        return [x, desc_x]
+    
+    @classmethod
+    def tncontract(cls, contraction, *tensors):
+        [x, desc_x] = tensors[0]
+        [y, desc_y] = tensors[1]
+        [z, desc_z] = tensors[2]
+        return cupy_cutensor.contraction(1.0, x, desc_x, ('A', 'B', 'C', 'D'), 
+                        y, desc_y, ('B', 'C', 'D', 'F'), 0, 
+                        z, desc_z, ('A', 'C', 'F'))
+
+    @classmethod
+    def get_tncontract(cls):
+        with pyrofiler.timing('cblas handler'):
+            cupy.cuda.device.get_cublas_handle()
+        return cls.tncontract
+
+
 
 def obj2dict(obj):
         keys = [x for x in dir(obj) if x[0]!='_']

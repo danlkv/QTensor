@@ -8,7 +8,7 @@ import itertools
 import platform
 import importlib
 
-from base import LasyModule, BenchResult, Backend, get_gpu_props_json
+from base import LasyModule, BenchResult, Backend, get_gpu_props_json, Benchmark, Numpy, TorchCuda, Cupy, CuTensor
 
 np = LasyModule('numpy')
 torch = LasyModule('torch')
@@ -20,159 +20,34 @@ sys.path.append(os.environ['HOME']+"/.local")
 exatn = LasyModule('exatn')
 
 
-class Matmul(Backend):    
+class MatmulBench(Benchmark):
+    @classmethod
+    def __init__(self, backend:Backend):
+        self.backend = backend
+    
     @staticmethod
     def get_task_type():
         return "matmul"
 
-    def get_params(*sizes):
+    @classmethod
+    def get_operation(cls):
+        return cls.backend.get_matmul()
+    
+    @classmethod
+    def get_params(cls, *sizes):
         ops = np.prod(sizes[0]) * sizes[1][1]
         param_in = np.prod(sizes[0]) + np.prod(sizes[1])
         param_out = sizes[0][0]*sizes[1][1]
         return ops.item(), param_in.item(), param_out
 
 
-
-class Numpy(Matmul):
-    @staticmethod
-    def get_dtype(dtype):
-        return {
-            'float':np.float32
-            ,'double': np.float64
-            ,'complex64': np.complex64
-            ,'complex128': np.complex128
-        }[dtype]
-
-    @classmethod
-    def gen_tensor(cls, *sizes, dtype='float'):
-        dtype_t = cls.get_dtype(dtype)
-        return np.random.rand(*sizes).astype(dtype_t)
-
-    @staticmethod
-    def get_operation():
-        return np.matmul
-
-
-class Torch(Matmul):
-    torch.backends.cuda.matmul.allow_tf32 = False
-    gpu_tensor = ['float', 'double']
-
-    @staticmethod
-    def get_dtype(dtype):
-        return {
-            'float':torch.cuda.FloatTensor
-            ,'double': torch.cuda.DoubleTensor
-            ,'complex64': torch.complex64
-            ,'complex128': torch.complex128
-        }[dtype]
-
-    @classmethod
-    def gen_tensor(cls, *sizes, dtype='float'):
-        if dtype in cls.gpu_tensor:
-            dtype = cls.get_dtype(dtype)
-            return dtype(*sizes).normal_()
-        else:
-            dtype = cls.get_dtype(dtype)
-            return torch.rand(*sizes, dtype=dtype, device='cuda')
-
-    @staticmethod
-    def get_operation():
-        return torch.matmul
-
-
-class TorchCuda(Torch):
-    @classmethod
-    @contextmanager
-    def timing(cls, **kwargs):
-        class Foo:
-            pass
-        res = Foo()
-        start = torch.cuda.Event(enable_timing=True)
-        end = torch.cuda.Event(enable_timing=True)
-        start.record()
-        yield res
-        end.record()
-        torch.cuda.synchronize()
-        res.result = start.elapsed_time(end)/1000
-
-
-class Cupy(Matmul):
-    @classmethod
-    @contextmanager
-    def timing(cls, **kwargs):
-        class Foo:
-            pass
-        res = Foo()
-        start = cupy.cuda.Event(disable_timing=False)
-        end = cupy.cuda.Event(disable_timing=False)
-        start.record()
-        yield res
-        end.record()
-        end.synchronize()
-        res.result = cupy.cuda.get_elapsed_time(start, end)/1000
-
-    @staticmethod
-    def get_dtype(dtype):
-        return {
-            'float':cupy.float32
-            ,'double': cupy.float64
-            ,'complex64': cupy.complex64
-            ,'complex128': cupy.complex128
-        }[dtype]
-
-    @classmethod
-    def gen_tensor(cls, *sizes, dtype='float'):
-        dtype_t = cls.get_dtype(dtype)
-        return cupy.random.rand(*sizes).astype(dtype_t)
-
-    @staticmethod
-    def get_operation():
-        with pyrofiler.timing('cblas handler'):
-            cupy.cuda.device.get_cublas_handle()
-        return cupy.matmul
-
-
-class CuTensor(Cupy):
+class CuTensorMatmul(CuTensor):
     @classmethod
     def get_ready(self, num_tensors, *sizes):
         sizes = list(sizes)
         num_tensors += 1
         sizes.append([sizes[0][0], sizes[1][1]])
         return num_tensors, *sizes
-
-    @classmethod
-    def gen_tensor(cls, *sizes, dtype='float'):
-        dtype_t = cls.get_dtype(dtype)
-        return cupy.random.rand(*sizes).astype(dtype_t)
-
-    @classmethod
-    def cutensor_matmul(cls, x, y, z):
-        [x, desc_x] = x
-        [y, desc_y] = y
-        [z, desc_z] = z
-        from cupy import cutensor
-        return cutensor.contraction(1, x, desc_x, cls.mode_x, 
-                                y, desc_y, cls.mode_y, 0, 
-                                z, desc_z, cls.mode_z)
-    
-    @classmethod
-    def get_operation(cls):
-        with pyrofiler.timing('cblas handler'):
-            cupy.cuda.device.get_cublas_handle()
-        return cls.cutensor_matmul
-    
-    @classmethod
-    def prepare(cls, x):
-        from cupy import cutensor
-        if not hasattr(cls, 'mode_x'):
-            cls.mode_x = ('m', 'k')
-            cls.mode_y = ('k', 'n')
-            cls.mode_z = ('m', 'n')
-            cls.mode_x = cutensor.create_mode(*cls.mode_x)
-            cls.mode_y = cutensor.create_mode(*cls.mode_y)
-            cls.mode_z = cutensor.create_mode(*cls.mode_z)
-        desc_x = cutensor.create_tensor_descriptor(x)
-        return [x, desc_x]
     
 
 # @dataclass
@@ -267,7 +142,7 @@ def main():
         backends.update({
             'torch':TorchCuda
             , 'cupy':Cupy
-            , 'cutensor': CuTensor
+            , 'cutensor': CuTensorMatmul
         })
 
     use_strip = True
@@ -276,6 +151,15 @@ def main():
         repeats += 2
     dtypes = ['float', 'double', 'complex64', 'complex128']
 
+    # for backend in backends:
+    #     size_m, size_l, size_n = 2, 2, 2
+    #     sizes = [size_m,size_n], [size_n, size_l]
+    #     dtype = 'float'
+    #     b = backends[backend]
+    #     matmulbench = MatmulBench(b)
+    #     _, bench_result = matmulbench.benchmark(b, num_tensors, *sizes, dtype=dtype)
+    #     json_result = matmulbench.print_results_json(use_strip, backend, *sizes, dtype=dtype, results=bench_result, experiment_group=experiment_group)
+
     for backend in backends:
         for size_m, size_n, size_l in zip(sizes_m, sizes_n, sizes_l):
             sizes = [size_m,size_n], [size_n, size_l]
@@ -283,9 +167,10 @@ def main():
             for dtype in dtypes:
                 for _ in range(repeats):
                     b = backends[backend]
-                    _, bench_result = b.benchmark(num_tensors, *sizes, dtype=dtype)
+                    matmulbench = MatmulBench(b)
+                    _, bench_result = matmulbench.benchmark(b, num_tensors, *sizes, dtype=dtype)
                     results.append(bench_result)
-                json_result = b.print_results_json(use_strip, backend, *sizes, dtype=dtype, results=results, experiment_group=experiment_group)
+                json_result = matmulbench.print_results_json(use_strip, backend, *sizes, dtype=dtype, results=results, experiment_group=experiment_group)
 
 if __name__ == "__main__":
     main()
