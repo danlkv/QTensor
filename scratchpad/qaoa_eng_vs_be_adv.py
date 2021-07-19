@@ -202,7 +202,7 @@ if __name__ == '__main__':
     total_report = []
     backends= ["cupy", "einsum", "torch","torch_gpu", 'tr_einsum','opt_einsum']
     problems = param_gen(5,10,"random")
-    for be in [backends[1]]:
+    for be in backends:
         for pt in problems:
             raw_report = collect_process_be_pt_report(7, be, pt)
             cooked = cook_raw_report(be, pt, raw_report)
