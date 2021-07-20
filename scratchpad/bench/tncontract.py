@@ -38,6 +38,12 @@ class TncontractBench(Benchmark):
         param_in = np.prod(sizes[0]) + np.prod(sizes[1])
         param_out = sizes[0][0] * sizes[0][2] * sizes[1][3]
         return ops.item(), param_in.item(), param_out
+    
+
+def gen_sizes(max_size):
+    sizes = np.random.randint(1, max_size+1, size=6).tolist()
+    size = [sizes[0:4], sizes[1:5]]
+    return size
 
 
 class CuTensorTncontract(CuTensor):
@@ -45,14 +51,16 @@ class CuTensorTncontract(CuTensor):
     def get_ready(self, num_tensors, *sizes):
         sizes = list(sizes)
         num_tensors += 1
-        unit_size = sizes[0][0]
-        sizes.append([unit_size for i in range(3)])
+        size_a = sizes[0][0]
+        size_c = sizes[0][2]
+        size_f = sizes[1][3]
+        sizes.append([size_a, size_c, size_f])
         return num_tensors, *sizes
 
 
 def main():
 
-    experiment_group = "Angela_nslb_tncontract_test"
+    experiment_group = "Angela_nslb_tncontract_random"
 
     contraction = 'abcd,bcdf->acf' # tensor
 
@@ -72,7 +80,7 @@ def main():
     num_tensors = 2
     dim = 4 # tensor
     # sizes = [2, 4, 8, 10, 16, 20, 30, 32, 40, 50, 60, 64, 70, 80, 100, 120, 128, 130, 150]  # tensor
-    sizes = [2, 4, 8, 10, 16, 20, 30, 32, 40, 50, 60, 64, 70, 80, 100, 120]  # tensor
+    sizes = [4, 8, 10, 16, 20, 30, 32, 40, 50, 60, 64, 70, 80, 100, 120]  # tensor
     dtypes = ['float', 'double', 'complex64', 'complex128']
 
     # Test properties
@@ -81,20 +89,26 @@ def main():
     if use_strip:
         repeats += 2
     
+    is_square = True
+    
     # Bechmark
-    for backend in backends:
-        for size in sizes:
-            input_sizes = [size for i in range(dim)] # square tensors
+    for max_size in sizes:
+        results = []
+        if is_square:
+            input_sizes = [max_size for i in range(dim)] # square tensors
             size = [input_sizes, input_sizes]
-            results = []
+        else:
+            size = gen_sizes(max_size)
+
+        for backend in backends:
+            b = backends[backend]
+            tncontractbench = TncontractBench(b)
+        
             for dtype in dtypes:
                 for _ in range(repeats):
-                    b = backends[backend]
-                    tncontractbench = TncontractBench(b)
                     _, bench_result = tncontractbench.benchmark(b,num_tensors, *size, dtype=dtype, contraction=contraction)
                     results.append(bench_result)
-                json_result = tncontractbench.print_results_json(use_strip, backend, *size, dtype=dtype, results=results, experiment_group=experiment_group)
-                          
+                json_result = tncontractbench.print_results_json(use_strip, backend, *size, dtype=dtype, results=results, experiment_group=experiment_group)      
 
 
 if __name__ == "__main__":

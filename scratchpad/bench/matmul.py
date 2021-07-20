@@ -151,15 +151,6 @@ def main():
         repeats += 2
     dtypes = ['float', 'double', 'complex64', 'complex128']
 
-    # for backend in backends:
-    #     size_m, size_l, size_n = 2, 2, 2
-    #     sizes = [size_m,size_n], [size_n, size_l]
-    #     dtype = 'float'
-    #     b = backends[backend]
-    #     matmulbench = MatmulBench(b)
-    #     _, bench_result = matmulbench.benchmark(b, num_tensors, *sizes, dtype=dtype)
-    #     json_result = matmulbench.print_results_json(use_strip, backend, *sizes, dtype=dtype, results=bench_result, experiment_group=experiment_group)
-
     for backend in backends:
         for size_m, size_n, size_l in zip(sizes_m, sizes_n, sizes_l):
             sizes = [size_m,size_n], [size_n, size_l]
