@@ -68,6 +68,8 @@ Tamaki solver repository: https://github.com/TCS-Meiji/PACE2017-TrackA
 
 If you have memory errors, modify the `JFLAGS` variable in the bash script `./tw-heuristic`. I use `JFLAGS="-Xmx4g -Xms4g -Xss500m"`.
 
+Before running qtensor with tamaki, make sure `tw-heuristic` resolves as executable. For that, add the `tamaki_treewidth` dir to your `PATH`. Test with `which tw-heuristic`.
+
 #### Usage
 
 ```python
