@@ -68,15 +68,10 @@ class Benchmark:
     @staticmethod
     def get_task_type():
         raise NotImplementedError
-
-    @staticmethod
-    def get_operation():
-        raise NotImplementedError
         
     @classmethod
     def benchmark(cls, **args):
         raise NotImplementedError
-
 
     def format_flops(flops):
         ord = 3*int(np.log10(flops)/3)
