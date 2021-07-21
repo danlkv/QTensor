@@ -21,17 +21,9 @@ exatn = LasyModule('exatn')
 
 
 class MatmulBench(Benchmark):
-    @classmethod
-    def __init__(self, backend:Backend):
-        self.backend = backend
-    
     @staticmethod
     def get_task_type():
         return "matmul"
-
-    @classmethod
-    def get_operation(cls):
-        return cls.backend.get_matmul()
     
     @classmethod
     def get_params(cls, *sizes):
@@ -39,6 +31,24 @@ class MatmulBench(Benchmark):
         param_in = np.prod(sizes[0]) + np.prod(sizes[1])
         param_out = sizes[0][0]*sizes[1][1]
         return ops.item(), param_in.item(), param_out
+
+    @classmethod
+    def benchmark(cls, backend:Backend, num_tensors, *sizes, dtype='float', **args):
+        num_tensors, *sizes = backend.get_ready(num_tensors, *sizes)
+        operation = backend.get_matmul()
+        with cls.timing(callback=lambda x: None) as gen:
+            tensors = backend.gen_tensors(num_tensors, *sizes, dtype=dtype)
+        with cls.timing(callback=lambda x: None) as prep:
+            for i in range(len(tensors)):
+                tensors[i] = backend.prepare(tensors[i])
+        with cls.timing(callback=lambda x: None) as op:
+            if 'contraction' in args:
+                out_tensor = operation(args['contraction'], *tensors)
+            else:
+                out_tensor = operation(*tensors)
+        with cls.timing(callback=lambda x: None) as get:
+            zr = backend.get_result(out_tensor)
+        return zr, BenchResult(gen_time=gen.result, transfer_time=prep.result+get.result, operation_time=op.result)
 
 
 class CuTensorMatmul(CuTensor):
@@ -158,7 +168,7 @@ def main():
             for dtype in dtypes:
                 for _ in range(repeats):
                     b = backends[backend]
-                    matmulbench = MatmulBench(b)
+                    matmulbench = MatmulBench()
                     _, bench_result = matmulbench.benchmark(b, num_tensors, *sizes, dtype=dtype)
                     results.append(bench_result)
                 json_result = matmulbench.print_results_json(use_strip, backend, *sizes, dtype=dtype, results=results, experiment_group=experiment_group)

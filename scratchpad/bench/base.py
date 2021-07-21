@@ -69,28 +69,13 @@ class Benchmark:
     def get_task_type():
         raise NotImplementedError
 
-    @classmethod
-    def get_operation(cls):
+    @staticmethod
+    def get_operation():
         raise NotImplementedError
         
     @classmethod
-    def benchmark(cls, backend:Backend, num_tensors, *sizes, dtype='float', **args):
-        num_tensors, *sizes = backend.get_ready(num_tensors, *sizes)
-        operation = cls.get_operation()
-        with cls.timing(callback=lambda x: None) as gen:
-            tensors = backend.gen_tensors(num_tensors, *sizes, dtype=dtype)
-        with cls.timing(callback=lambda x: None) as prep:
-            for i in range(len(tensors)):
-                tensors[i] = backend.prepare(tensors[i])
-        with cls.timing(callback=lambda x: None) as op:
-            if 'contraction' in args:
-                out_tensor = operation(args['contraction'], *tensors)
-            else:
-                out_tensor = operation(*tensors)
-        with cls.timing(callback=lambda x: None) as get:
-            zr = backend.get_result(out_tensor)
-        return zr, BenchResult(gen_time=gen.result, transfer_time=prep.result+get.result, operation_time=op.result)
-
+    def benchmark(cls, **args):
+        raise NotImplementedError
 
 
     def format_flops(flops):
@@ -144,10 +129,11 @@ class Benchmark:
         ops, param_in, param_out = cls.get_params(*sizes)
         flops = ops/m2
         task_type = cls.get_task_type()
+        avg_size = int(np.mean(sizes))
         res = dict(
             task_type=task_type
             , backend=backend
-            , size=sizes[0][0]
+            , size=avg_size
             , sizes=sizes
             , itemsize=cls.get_dtype_size(dtype)
             , input_bytes=cls.get_dtype_size(dtype)*param_in

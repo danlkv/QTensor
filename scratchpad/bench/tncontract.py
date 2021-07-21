@@ -19,18 +19,10 @@ import os
 sys.path.append(os.environ['HOME']+"/.local")
 exatn = LasyModule('exatn')
 
-class TncontractBench(Benchmark):
-    @classmethod
-    def __init__(self, backend:Backend):
-        self.backend = backend
-    
+class TncontractBench(Benchmark):    
     @staticmethod
     def get_task_type():
         return "tncontract"
-
-    @classmethod
-    def get_operation(cls):
-        return cls.backend.get_tncontract()
     
     @classmethod
     def get_params(cls, *sizes):
@@ -38,7 +30,25 @@ class TncontractBench(Benchmark):
         param_in = np.prod(sizes[0]) + np.prod(sizes[1])
         param_out = sizes[0][0] * sizes[0][2] * sizes[1][3]
         return ops.item(), param_in.item(), param_out
-    
+
+    @classmethod
+    def benchmark(cls, backend:Backend, num_tensors, *sizes, dtype='float', **args):
+        num_tensors, *sizes = backend.get_ready(num_tensors, *sizes)
+        operation = backend.get_tncontract()
+        with cls.timing(callback=lambda x: None) as gen:
+            tensors = backend.gen_tensors(num_tensors, *sizes, dtype=dtype)
+        with cls.timing(callback=lambda x: None) as prep:
+            for i in range(len(tensors)):
+                tensors[i] = backend.prepare(tensors[i])
+        with cls.timing(callback=lambda x: None) as op:
+            if 'contraction' in args:
+                out_tensor = operation(args['contraction'], *tensors)
+            else:
+                out_tensor = operation(*tensors)
+        with cls.timing(callback=lambda x: None) as get:
+            zr = backend.get_result(out_tensor)
+        return zr, BenchResult(gen_time=gen.result, transfer_time=prep.result+get.result, operation_time=op.result)
+
 
 def gen_sizes(max_size):
     sizes = np.random.randint(1, max_size+1, size=6).tolist()
@@ -80,7 +90,7 @@ def main():
     num_tensors = 2
     dim = 4 # tensor
     # sizes = [2, 4, 8, 10, 16, 20, 30, 32, 40, 50, 60, 64, 70, 80, 100, 120, 128, 130, 150]  # tensor
-    sizes = [4, 8, 10, 16, 20, 30, 32, 40, 50, 60, 64, 70, 80, 100, 120]  # tensor
+    sizes = [10, 16, 20, 30, 32, 40, 50, 60, 64, 70, 80, 100, 120]  # tensor
     dtypes = ['float', 'double', 'complex64', 'complex128']
 
     # Test properties
@@ -89,10 +99,11 @@ def main():
     if use_strip:
         repeats += 2
     
-    is_square = True
+    is_square = False
     
     # Bechmark
     for max_size in sizes:
+        # max_size = 150  # hardcode
         results = []
         if is_square:
             input_sizes = [max_size for i in range(dim)] # square tensors
@@ -102,7 +113,7 @@ def main():
 
         for backend in backends:
             b = backends[backend]
-            tncontractbench = TncontractBench(b)
+            tncontractbench = TncontractBench()
         
             for dtype in dtypes:
                 for _ in range(repeats):
