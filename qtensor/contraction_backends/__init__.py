@@ -1,4 +1,4 @@
-from torch._C import device
+#from torch._C import device
 from .base_class import ContractionBackend
 from .numpy import NumpyBackend
 from .torch import TorchBackend

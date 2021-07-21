@@ -6,13 +6,15 @@ import platform
 import pyrofiler
 from qtensor import QtreeQAOAComposer
 from qtensor import QAOAQtreeSimulator
+from qtensor import toolbox
 from qtensor.contraction_backends import get_backend, get_perf_backend
 
 @lru_cache
 def get_test_problem(n=10, p=2, d=3, type='random'):
     print('Test problem: n, p, d', n, p, d)
     if type == 'random':
-        G = nx.random_regular_graph(d, n)
+        seed = 250
+        G = nx.random_regular_graph(d, n, seed = 250)
     elif type == 'grid2d':
         G = nx.grid_2d_graph(n,n)
     elif type == 'line':
@@ -40,9 +42,8 @@ paramtest_p = [
 
 def param_gen(p_max, n_max, type:str):
     result = []
-    for i in range(1,p_max+1):
-        for n in range(10, n_max+10, 10):
-            result.append([n,i, 3, type])
+    for n in range(24, n_max+10, 10):
+        result.append([n,p_max, 3, type])
     return result   
 
 
@@ -97,7 +98,8 @@ def gen_be_pt_report(backend_name:str , pt: list):
     with timing(callback=lambda x: None) as gen:
         G, gamma, beta = get_test_problem(n=n,p=p,d=d, type = type)
         curr_backend = get_perf_backend(backend_name)
-        sim = QAOAQtreeSimulator(QtreeQAOAComposer, backend = curr_backend)
+        opt = toolbox.get_ordering_algo('rgreedy_0.05_30')
+        sim = QAOAQtreeSimulator(QtreeQAOAComposer, backend = curr_backend, optimizer = opt)
     sim.energy_expectation(G, gamma=gamma, beta=beta)
     curr_backend.gen_report(show = False)
 
@@ -200,14 +202,18 @@ if __name__ == '__main__':
 
 
     total_report = []
-    backends= ["cupy", "einsum", "torch","torch_gpu", 'tr_einsum','opt_einsum']
-    problems = param_gen(5,10,"random")
-    for be in backends:
-        for pt in problems:
+    backends= ["cupy","einsum", "torch","torch_gpu", 'tr_einsum','opt_einsum']
+    problems = param_gen(4,100,"random")
+    for be in ["torch"]:
+        for pt in [problems[0]]:
             raw_report = collect_process_be_pt_report(7, be, pt)
             cooked = cook_raw_report(be, pt, raw_report)
             total_report.append(cooked)
             print(json.dumps(cooked))
+    with open("a100.json","w") as outfile:
+        json.dump(total_report, outfile, indent=4)
+    print(total_report)
+    
 
     # G, gamma, beta = get_test_problem(4,4,3, type = "random")
     # curr_backend = get_perf_backend("torch")
