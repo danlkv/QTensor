@@ -152,13 +152,15 @@ def gen_sizes(is_random, contraction='', fill_number=2):
             if num_result_in_first_tensor != 0 and num_indices_result - num_result_in_first_tensor != 0:
                 break
         array = [result_indices[:num_result_in_first_tensor],result_indices[num_result_in_first_tensor:]]
+
+        # choices select the common indices in the results
         choices = []
         for i in range(len(array)):
             choice = np.random.randint(len(array[i])+1)
             choices.append(np.random.permutation(array[(i+1)%2])[:choice].tolist())
 
         dom_ix = [
-            contracted_indices + array[i] for i in range(len(array))
+            contracted_indices + array[i] + choices[i] for i in range(len(array))
         ]
 
         # filling the array sizes
