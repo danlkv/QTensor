@@ -19,60 +19,166 @@ import os
 sys.path.append(os.environ['HOME']+"/.local")
 exatn = LasyModule('exatn')
 
+
+@dataclass
+class RandomContract:
+    is_random: bool
+    contraction: str
+    num_indices_result: int = 0
+    num_contracted_indices: int = 0
+    fill_number: int = 2
+
+
 class TncontractBench(Benchmark):    
     @staticmethod
     def get_task_type():
         return "tncontract"
     
     @classmethod
-    def get_params(cls, *sizes):
-        ops = np.prod(sizes[0]) * sizes[1][3] 
-        param_in = np.prod(sizes[0]) + np.prod(sizes[1])
-        param_out = sizes[0][0] * sizes[0][2] * sizes[1][3]
-        return ops.item(), param_in.item(), param_out
+    def get_params(cls, *sizes, contraction:RandomContract):
+        *in_size, out_size = sizes
+        unit_size = in_size[0][0]
+        ops = unit_size**(contraction.num_indices_result+contraction.num_contracted_indices)
+        param_in = np.prod(in_size[0]) + np.prod(in_size[1])
+        param_out = np.prod(out_size)
+        return ops, param_in.item(), param_out.item(), unit_size
 
-    @classmethod
-    def benchmark(cls, backend:Backend, num_tensors, *sizes, dtype='float', **args):
-        num_tensors, *sizes = backend.get_ready(num_tensors, *sizes)
+    @staticmethod
+    def benchmark(backend:Backend, num_tensors, contraction:RandomContract, *sizes, dtype='float'):
+        num_tensors, *size = backend.get_ready(num_tensors, *sizes, contraction=contraction)
         operation = backend.get_tncontract()
-        with cls.timing(callback=lambda x: None) as gen:
-            tensors = backend.gen_tensors(num_tensors, *sizes, dtype=dtype)
-        with cls.timing(callback=lambda x: None) as prep:
-            for i in range(len(tensors)):
+        with backend.timing(callback=lambda x: None) as gen:
+            tensors = backend.gen_tensors(num_tensors, *size[0], dtype=dtype)
+        with backend.timing(callback=lambda x: None) as prep:
+            for i in range(num_tensors):
                 tensors[i] = backend.prepare(tensors[i])
-        with cls.timing(callback=lambda x: None) as op:
-            if 'contraction' in args:
-                out_tensor = operation(args['contraction'], *tensors)
+        with backend.timing(callback=lambda x: None) as op:
+            if contraction.contraction != '':
+                out_tensor = operation(contraction.contraction, *tensors)
             else:
                 out_tensor = operation(*tensors)
-        with cls.timing(callback=lambda x: None) as get:
+        with backend.timing(callback=lambda x: None) as get:
             zr = backend.get_result(out_tensor)
         return zr, BenchResult(gen_time=gen.result, transfer_time=prep.result+get.result, operation_time=op.result)
 
-
-def gen_sizes(max_size):
-    sizes = np.random.randint(1, max_size+1, size=6).tolist()
-    size = [sizes[0:4], sizes[1:5]]
-    return size
-
-
-class CuTensorTncontract(CuTensor):
     @classmethod
-    def get_ready(self, num_tensors, *sizes):
-        sizes = list(sizes)
-        num_tensors += 1
-        size_a = sizes[0][0]
-        size_c = sizes[0][2]
-        size_f = sizes[1][3]
-        sizes.append([size_a, size_c, size_f])
-        return num_tensors, *sizes
+    def print_results_json(cls, use_strip, backend, *sizes, dtype, results: List[BenchResult], experiment_group="default group", contraction:RandomContract=None):
+        prefix = {
+            'float': 2
+            ,'double': 2
+            ,'complex64': 8
+            ,'complex128': 8
+        }[dtype]
+        import json
+        GPU_PROPS = get_gpu_props_json()
+        tt1 = [r.gen_time for r in results]
+        tt2 = [r.operation_time for r in results]
+        tt3 = [r.transfer_time for r in results]
+        m1, m3 = np.mean(tt1), np.mean(tt3)
+        if use_strip:
+            m1 = cls.mean_mmax(tt1)
+            m2 = cls.mean_mmax(tt2)
+            m3 = cls.mean_mmax(tt3)
+        else:
+            m1, m2, m3 = np.mean(tt1), np.mean(tt2), np.mean(tt3)
+        s1, s2, s3 = np.std(tt1), np.std(tt2), np.std(tt3)
+        sizes = sizes[0]
+        ops, param_in, param_out, unit_size = cls.get_params(*sizes, contraction=contraction)
+        flops = prefix*ops/m2
+        task_type = cls.get_task_type()
+        res = dict(
+            task_type=task_type
+            , backend=backend
+            , size=unit_size
+            , sizes=sizes
+            , size_idx=[len(x) for x in sizes]
+            , contraction=contraction.contraction
+            , itemsize=cls.get_dtype_size(dtype)
+            , input_bytes=cls.get_dtype_size(dtype)*param_in
+            , output_bytes=cls.get_dtype_size(dtype)*param_out
+            , dtype=dtype
+            , device_props=dict(name=platform.node(), gpu=GPU_PROPS)
+            , transfer_time=m3
+            , transfer_relstd=s3
+            , gen_time=m1
+            , gen_relstd=s1
+            , operation_time=m2
+            , operation_relstd=s2
+            , ops=ops
+            , flops=flops
+            , flops_str=cls.format_flops(flops)
+            , fbratio=ops/(cls.get_dtype_size(dtype)*param_in)
+            , experiment_group=experiment_group
+        )
+        print(json.dumps(res), flush=True)
+        return res
+
+
+def gen_sizes(is_random, contraction='', fill_number=2):
+    max = 10
+    CHARS = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ'
+
+    import random
+    from itertools import accumulate
+
+    # seed = 10
+    # np.random.seed(seed)
+    # random.seed(seed)
+    
+    if not is_random and contraction != '':
+        # square tensors of form [n,n,n,n],[n,n,n,n]->[n,n,n]
+        inp, out = contraction.split('->')
+        size = inp.split(',')
+        sizes = [np.full(len(x), fill_number).tolist() for x in size]
+        out_size = np.full(len(out), fill_number).tolist()
+        randomcontract = RandomContract(is_random, contraction, 3, 2, fill_number)
+    else:
+        # random generate results indices and contracted indices
+        num_indices_result = np.random.randint(max)
+        num_contracted_indices = np.random.randint(np.floor(num_indices_result/2)+1)
+        
+        while num_indices_result == 0 or num_contracted_indices == 0 or num_indices_result+num_contracted_indices>len(CHARS) or num_contracted_indices + np.ceil(num_indices_result/2) > num_indices_result:
+            num_indices_result = np.random.randint(max)
+            num_contracted_indices = np.random.randint(np.floor(num_indices_result/2)+1)
+
+        all_indices = list(CHARS[:num_indices_result+num_contracted_indices])
+        contracted_indices = list(np.random.permutation(list(all_indices)[:num_contracted_indices]))
+        result_indices = list(set(all_indices) - set(contracted_indices))
+
+        # split the result indices into two array, append the array to contracted indices
+        # since each index has to be present in at least one tensor
+        while True:
+            num_result_in_first_tensor = np.random.randint(num_indices_result)
+            if num_result_in_first_tensor != 0 and num_indices_result - num_result_in_first_tensor != 0:
+                break
+        array = [result_indices[:num_result_in_first_tensor],result_indices[num_result_in_first_tensor:]]
+        choices = []
+        for i in range(len(array)):
+            choice = np.random.randint(len(array[i])+1)
+            choices.append(np.random.permutation(array[(i+1)%2])[:choice].tolist())
+
+        dom_ix = [
+            contracted_indices + array[i] for i in range(len(array))
+        ]
+
+        # filling the array sizes
+        size = [len(x) for x in dom_ix]
+        sizes = [np.full(size[0], fill_number).tolist(), np.full(size[1], fill_number).tolist()]
+        out_size = np.full(num_indices_result,2).tolist()
+
+        contraction = ','.join(
+            ''.join(ix) for ix in dom_ix
+        ) + '->' + ''.join(result_indices)
+
+        randomcontract = RandomContract(is_random, contraction, num_indices_result, num_indices_result, fill_number)
+
+    sizes.append(out_size)
+    return sizes, randomcontract
 
 
 def main():
 
     experiment_group = "Angela_nslb_tncontract_random"
-
-    contraction = 'abcd,bcdf->acf' # tensor
 
     # Backend
     backends = {
@@ -83,14 +189,11 @@ def main():
         backends.update({
             'torch':TorchCuda
             , 'cupy':Cupy
-            , 'cutensor': CuTensorTncontract
+            , 'cutensor': CuTensor
         })
     
     # Tensor properties
     num_tensors = 2
-    dim = 4 # tensor
-    # sizes = [2, 4, 8, 10, 16, 20, 30, 32, 40, 50, 60, 64, 70, 80, 100, 120, 128, 130, 150]  # tensor
-    sizes = [10, 16, 20, 30, 32, 40, 50, 60, 64, 70, 80, 100, 120]  # tensor
     dtypes = ['float', 'double', 'complex64', 'complex128']
 
     # Test properties
@@ -99,27 +202,29 @@ def main():
     if use_strip:
         repeats += 2
     
-    is_square = False
+    is_random = True
+    contraction = 'abcd,bcdf->acf' # tensor
+    num_trials = 100
+    if is_random:
+        sizes = np.empty(num_trials)
+    else:
+        sizes = [10, 16, 20, 30, 32, 40, 50, 60, 64, 70, 80, 100, 120]  # tensor
     
     # Bechmark
     for max_size in sizes:
-        # max_size = 150  # hardcode
-        results = []
-        if is_square:
-            input_sizes = [max_size for i in range(dim)] # square tensors
-            size = [input_sizes, input_sizes]
+        if not is_random:
+            *size, out_contraction = gen_sizes(is_random, contraction, max_size)
         else:
-            size = gen_sizes(max_size)
-
+            *size, out_contraction = gen_sizes(is_random)
         for backend in backends:
             b = backends[backend]
             tncontractbench = TncontractBench()
-        
+            results = []
             for dtype in dtypes:
                 for _ in range(repeats):
-                    _, bench_result = tncontractbench.benchmark(b,num_tensors, *size, dtype=dtype, contraction=contraction)
+                    _, bench_result = tncontractbench.benchmark(b,num_tensors, out_contraction, *size, dtype=dtype)
                     results.append(bench_result)
-                json_result = tncontractbench.print_results_json(use_strip, backend, *size, dtype=dtype, results=results, experiment_group=experiment_group)      
+                json_result = tncontractbench.print_results_json(use_strip, backend, *size, dtype=dtype, results=results, experiment_group=experiment_group, contraction=out_contraction)      
 
 
 if __name__ == "__main__":

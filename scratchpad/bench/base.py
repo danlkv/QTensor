@@ -35,12 +35,14 @@ class BenchResult:
 
 
 class Backend:
+    timing=pyrofiler.timing
+
     @classmethod
     def gen_tensor(cls, *sizes, dtype='float'):
         raise NotImplementedError
     
     @classmethod
-    def get_ready(cls, num_tensors, *sizes):
+    def get_ready(cls, num_tensors, *sizes, **args):
         return num_tensors, *sizes
 
     @staticmethod
@@ -54,7 +56,6 @@ class Backend:
     @classmethod
     def gen_tensors(cls, num_tensors, *sizes, dtype='float'):
         tensors = []
-        assert num_tensors == len(sizes), "number of tensors does not match input size array"
         for i in range(num_tensors):
             tensor = cls.gen_tensor(*sizes[i], dtype=dtype)
             tensors.append(tensor)
@@ -63,13 +64,11 @@ class Backend:
 
 
 class Benchmark:
-    timing=pyrofiler.timing
-
     @staticmethod
     def get_task_type():
         raise NotImplementedError
         
-    @classmethod
+    @staticmethod
     def benchmark(cls, **args):
         raise NotImplementedError
 
@@ -107,48 +106,8 @@ class Benchmark:
 
 
     @classmethod
-    def print_results_json(cls, use_strip, backend, *sizes, dtype, results: List[BenchResult], experiment_group="default group"):
-        import json
-        GPU_PROPS = get_gpu_props_json()
-        tt1 = [r.gen_time for r in results]
-        tt2 = [r.operation_time for r in results]
-        tt3 = [r.transfer_time for r in results]
-        m1, m3 = np.mean(tt1), np.mean(tt3)
-        if use_strip:
-            m1 = cls.mean_mmax(tt1)
-            m2 = cls.mean_mmax(tt2)
-            m3 = cls.mean_mmax(tt3)
-        else:
-            m1, m2, m3 = np.mean(tt1), np.mean(tt2), np.mean(tt3)
-        s1, s2, s3 = np.std(tt1), np.std(tt2), np.std(tt3)
-        ops, param_in, param_out = cls.get_params(*sizes)
-        flops = ops/m2
-        task_type = cls.get_task_type()
-        avg_size = int(np.mean(sizes))
-        res = dict(
-            task_type=task_type
-            , backend=backend
-            , size=avg_size
-            , sizes=sizes
-            , itemsize=cls.get_dtype_size(dtype)
-            , input_bytes=cls.get_dtype_size(dtype)*param_in
-            , output_bytes=cls.get_dtype_size(dtype)*param_out
-            , dtype=dtype
-            , device_props=dict(name=platform.node(), gpu=GPU_PROPS)
-            , transfer_time=m3
-            , transfer_relstd=s3
-            , gen_time=m1
-            , gen_relstd=s1
-            , operation_time=m2
-            , operation_relstd=s2
-            , ops=ops
-            , flops=flops
-            , flops_str=cls.format_flops(flops)
-            , fbratio=ops/(cls.get_dtype_size(dtype)*param_in)
-            , experiment_group=experiment_group
-        )
-        print(json.dumps(res), flush=True)
-        return res
+    def print_results_json(cls, **args):
+        raise NotImplementedError
 
 
 class Numpy(Backend):
@@ -266,8 +225,22 @@ class Cupy(Backend):
 
 class CuTensor(Cupy):
     @classmethod
-    def get_ready(self, num_tensors, *sizes):
-        raise NotImplementedError
+    def get_ready(self, num_tensors, *sizes, contraction=None):
+        if contraction is None:
+            # matrix mk,kn->mn
+            self.mode_A = ('m', 'k')
+            self.mode_B = ('k', 'n')
+            self.mode_C = ('m', 'n')
+        else:
+            # tncontract
+            contraction_str = contraction.contraction
+            inp, out = contraction_str.split('->')
+            size = inp.split(',')
+            self.mode_A = tuple(size[0])
+            self.mode_B = tuple(size[1])
+            self.mode_C = tuple(out)
+        num_tensors += 1
+        return num_tensors, *sizes
 
     @classmethod
     def gen_tensor(cls, *sizes, dtype='float'):
@@ -280,9 +253,9 @@ class CuTensor(Cupy):
         [y, desc_y] = y
         [z, desc_z] = z
         from cupy import cutensor
-        return cutensor.contraction(1, x, desc_x,  ('m', 'k'), 
-                                y, desc_y, ('k', 'n'), 0, 
-                                z, desc_z, ('m', 'n'))
+        return cutensor.contraction(1, x, desc_x,  cls.mode_A, 
+                                y, desc_y, cls.mode_B, 0, 
+                                z, desc_z, cls.mode_C)
     
     @classmethod
     def get_matmul(cls):
@@ -300,9 +273,9 @@ class CuTensor(Cupy):
         [x, desc_x] = tensors[0]
         [y, desc_y] = tensors[1]
         [z, desc_z] = tensors[2]
-        return cupy_cutensor.contraction(1.0, x, desc_x, ('A', 'B', 'C', 'D'), 
-                        y, desc_y, ('B', 'C', 'D', 'F'), 0, 
-                        z, desc_z, ('A', 'C', 'F'))
+        return cupy_cutensor.contraction(1.0, x, desc_x, cls.mode_A, 
+                        y, desc_y, cls.mode_B, 0, 
+                        z, desc_z, cls.mode_C)
 
     @classmethod
     def get_tncontract(cls):

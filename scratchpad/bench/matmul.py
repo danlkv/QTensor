@@ -32,25 +32,72 @@ class MatmulBench(Benchmark):
         param_out = sizes[0][0]*sizes[1][1]
         return ops.item(), param_in.item(), param_out
 
-    @classmethod
-    def benchmark(cls, backend:Backend, num_tensors, *sizes, dtype='float', **args):
+    @staticmethod
+    def benchmark(backend:Backend, num_tensors, *sizes, dtype='float', **args):
         num_tensors, *sizes = backend.get_ready(num_tensors, *sizes)
         operation = backend.get_matmul()
-        with cls.timing(callback=lambda x: None) as gen:
+        with backend.timing(callback=lambda x: None) as gen:
             tensors = backend.gen_tensors(num_tensors, *sizes, dtype=dtype)
-        with cls.timing(callback=lambda x: None) as prep:
+        with backend.timing(callback=lambda x: None) as prep:
             for i in range(len(tensors)):
                 tensors[i] = backend.prepare(tensors[i])
-        with cls.timing(callback=lambda x: None) as op:
-            if 'contraction' in args:
-                out_tensor = operation(args['contraction'], *tensors)
-            else:
-                out_tensor = operation(*tensors)
-        with cls.timing(callback=lambda x: None) as get:
+        with backend.timing(callback=lambda x: None) as op:
+            out_tensor = operation(*tensors)
+        with backend.timing(callback=lambda x: None) as get:
             zr = backend.get_result(out_tensor)
         return zr, BenchResult(gen_time=gen.result, transfer_time=prep.result+get.result, operation_time=op.result)
 
+    @classmethod
+    def print_results_json(cls, use_strip, backend, *sizes, dtype, results: List[BenchResult], experiment_group="default group"):
+        prefix = {
+            'float': 2
+            ,'double': 2
+            ,'complex64': 8
+            ,'complex128': 8
+        }[dtype]
+        import json
+        GPU_PROPS = get_gpu_props_json()
+        tt1 = [r.gen_time for r in results]
+        tt2 = [r.operation_time for r in results]
+        tt3 = [r.transfer_time for r in results]
+        m1, m3 = np.mean(tt1), np.mean(tt3)
+        if use_strip:
+            m1 = cls.mean_mmax(tt1)
+            m2 = cls.mean_mmax(tt2)
+            m3 = cls.mean_mmax(tt3)
+        else:
+            m1, m2, m3 = np.mean(tt1), np.mean(tt2), np.mean(tt3)
+        s1, s2, s3 = np.std(tt1), np.std(tt2), np.std(tt3)
+        ops, param_in, param_out = cls.get_params(*sizes)
+        flops = prefix*ops/m2
+        task_type = cls.get_task_type()
+        avg_size = int(np.mean(sizes))
+        res = dict(
+            task_type=task_type
+            , backend=backend
+            , size=avg_size
+            , sizes=sizes
+            , itemsize=cls.get_dtype_size(dtype)
+            , input_bytes=cls.get_dtype_size(dtype)*param_in
+            , output_bytes=cls.get_dtype_size(dtype)*param_out
+            , dtype=dtype
+            , device_props=dict(name=platform.node(), gpu=GPU_PROPS)
+            , transfer_time=m3
+            , transfer_relstd=s3
+            , gen_time=m1
+            , gen_relstd=s1
+            , operation_time=m2
+            , operation_relstd=s2
+            , ops=ops
+            , flops=flops
+            , flops_str=cls.format_flops(flops)
+            , fbratio=ops/(cls.get_dtype_size(dtype)*param_in)
+            , experiment_group=experiment_group
+        )
+        print(json.dumps(res), flush=True)
+        return res
 
+# TO DO: add docstring
 class CuTensorMatmul(CuTensor):
     @classmethod
     def get_ready(self, num_tensors, *sizes):
@@ -133,16 +180,13 @@ class CuTensorMatmul(CuTensor):
 
 def main():
 
-    experiment_group = "Angela_nslb_matmul_test"
+    experiment_group = "Angela_nslb_matmul"
 
 
     num_tensors = 2
     sizes_m = [10, 100, 1000, 1024, 1025, 2000, 4090, 4096, 8192]
     sizes_n = [10, 100, 1000, 1024, 1025, 2000, 4090, 4096, 8192]
-    sizes_l = [10, 100, 1000, 1024, 1025, 2000, 4090, 4096, 8192]
-    # sizes_m = [2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2]
-
-    
+    sizes_l = [10, 100, 1000, 1024, 1025, 2000, 4090, 4096, 8192]   
 
     backends = {
         'numpy':Numpy
