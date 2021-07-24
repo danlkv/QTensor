@@ -1,9 +1,5 @@
 import json
 from functools import lru_cache
-
-from networkx.algorithms.shortest_paths.weighted import all_pairs_dijkstra
-from scratchpad.qaoa_eng_vs_be_adv import gen_be_pt_report
-from networkx.algorithms.cycles import simple_cycles
 import numpy as np
 import networkx as nx
 import platform
@@ -47,7 +43,7 @@ def get_gpu_props_json():
 
 
 paramtest = [
-    [4,2,3,"random"]
+    [10,4,3,"random"]
     ,[4, 4, 3, 'random']
     ,[10, 5, 2, 'random']
     ,[14, 1, 3, 'random']
