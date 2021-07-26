@@ -8,6 +8,7 @@ import qtensor
 from qtensor import QtreeQAOAComposer
 from qtensor import QAOAQtreeSimulator
 from qtensor.contraction_backends import get_backend, get_perf_backend
+from qtree.optimizer import Var
 
 
 timing = pyrofiler.timing
@@ -43,7 +44,7 @@ def get_gpu_props_json():
 
 
 paramtest = [
-    [10,4,3,"random"]
+    [4,4,3,"random"]
     ,[4, 4, 3, 'random']
     ,[10, 5, 2, 'random']
     ,[14, 1, 3, 'random']
@@ -191,6 +192,7 @@ def merge_all_lightcones_report(list_of_dicts:list):
 
 '''
 Function: Reduce the merged report according to the keyword
+NOTE: MAY NOT BE NEEDED
 '''
 def reduce_merged_report(merged:dict):
     #print(merged)
@@ -211,18 +213,19 @@ def reduce_merged_report(merged:dict):
 '''
 Function: Generate json report for current backend and problem
 '''
-def gen_json_for_be_pt(backend_name: str, problem:list, redux_report: dict, task_type = "QAOAEnergyExpectation"):
+def gen_json_for_be_pt(backend_name: str, problem:list, redux_report: dict, opt_algo:str, task_type = "QAOAEnergyExpectation"):
     GPU_PROPS = get_gpu_props_json()
     res = dict(
         backend = backend_name,
         device_props = dict(name=platform.node(), gpu=GPU_PROPS),
         task_type = task_type,
+        opt_algo = opt_algo,
         flops = redux_report["mean_FLOPS"],
-        flops_str = format_flops(redux_report["mean_FLOPS"]),
+        flops_str = [format_flops(flops) for flops in redux_report["mean_FLOPS"]],
         ops = redux_report["sum_flop"],
         width = redux_report["max_max_size"],
         mult_time = redux_report["sum_time"],
-        mult_relstd = redux_report["sum_time_std"],
+        mult_relstd = np.std(redux_report["sum_time"]),
         bytes = redux_report["bytes"],
         gen_time = redux_report["gen_time"],
         num_buckets = redux_report["bucket_num"],
@@ -231,10 +234,10 @@ def gen_json_for_be_pt(backend_name: str, problem:list, redux_report: dict, task
                     "p" :problem[1] ,
                     "d" :problem[2] ,
                     'type': problem[3]
-                    }
+                    },
+        experiment_group = "Chen_A100_Test"
     )
     return res
-
 
 
 
@@ -242,7 +245,7 @@ def gen_json_for_be_pt(backend_name: str, problem:list, redux_report: dict, task
 if __name__ == '__main__':
     gen_sim = QAOAQtreeSimulator(QtreeQAOAComposer)
     backends = ["cupy","torch_gpu","einsum","torch","tr_einsum","opt_einsum"]
-    my_algo = 'greedy'
+    my_algo = 'rgreedy_0.05_30'
 
     for pb in [paramtest[0]]:
 
@@ -250,14 +253,12 @@ if __name__ == '__main__':
         Generate fixed peos for a given problem, thus be used for various backends
         '''
         with timing(callback=lambda x: None) as gen_pb:
-            n, p, d, type = pb
-            G, gamma, beta = get_test_problem(n=n,p=p,d=d, type = type)
+            n, p, d, ttype = pb
+            G, gamma, beta = get_test_problem(n=n,p=p,d=d, type = ttype)
             peos, widths = get_fixed_peos_for_a_pb(G, gamma, beta, algo = my_algo, sim = gen_sim)
 
         gen_base = gen_pb.result
-
         for be in backends:
-
             '''
             Collecting all lightcones' report
             '''
@@ -279,12 +280,12 @@ if __name__ == '__main__':
             '''
             Reduced Merged Report, good for writing the final json
             '''
-            merged_report_reduced = reduce_merged_report(merged_report)
+            #merged_report_reduced = reduce_merged_report(merged_report)
 
 
             '''
             generate report for current backend and problem
             '''
-            final = json.dumps(gen_json_for_be_pt(be, pb, merged_report_reduced), indent = 4)
+            final = json.dumps(gen_json_for_be_pt(be, pb, merged_report, opt_algo= my_algo), indent = 4)
             print(final)
             
