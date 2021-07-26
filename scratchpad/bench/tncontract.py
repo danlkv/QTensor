@@ -27,6 +27,7 @@ class RandomContract:
     num_indices_result: int = 0
     num_contracted_indices: int = 0
     fill_number: int = 2
+    is_transpose: bool = False
 
 
 class TncontractBench(Benchmark):    
@@ -93,6 +94,9 @@ class TncontractBench(Benchmark):
             , sizes=sizes
             , size_idx=[len(x) for x in sizes]
             , contraction=contraction.contraction
+            , num_indices_result=contraction.num_indices_result
+            , num_contracted_indices=contraction.num_contracted_indices
+            , is_transpose=contraction.is_transpose
             , itemsize=cls.get_dtype_size(dtype)
             , input_bytes=cls.get_dtype_size(dtype)*param_in
             , output_bytes=cls.get_dtype_size(dtype)*param_out
@@ -172,10 +176,35 @@ def gen_sizes(is_random, contraction='', fill_number=2):
             ''.join(ix) for ix in dom_ix
         ) + '->' + ''.join(result_indices)
 
-        randomcontract = RandomContract(is_random, contraction, num_indices_result, num_indices_result, fill_number)
+        randomcontract = RandomContract(is_random, contraction, num_indices_result, num_contracted_indices, fill_number)
 
     sizes.append(out_size)
     return sizes, randomcontract
+
+
+def permute_sizes(contraction:RandomContract, fill_number=2, num_perm=5):
+    num_indices_result = contraction.num_indices_result
+    num_contracted_indices = contraction.num_contracted_indices
+    contraction = contraction.contraction
+    inp, out = contraction.split('->')
+    size = inp.split(',')
+    sizes = [np.full(len(x), fill_number).tolist() for x in size]
+    out_size = np.full(len(out), fill_number).tolist()
+    sizes.append(out_size)
+    perm_indices = []
+    import random
+    for i in range(len(size)):
+        new_sizes = []
+        for j in range(num_perm):
+            new_str = ''.join(random.sample(size[i],len(size[i])))
+            new_sizes.append(new_str)
+        perm_indices.append(new_sizes)
+    contractions = []
+    for idx_a, idx_b in zip(perm_indices[0], perm_indices[1]):
+        contract = idx_a + ',' + idx_b + '->' + out
+        randomcontract = RandomContract(is_random=True, contraction=contract, num_indices_result=num_indices_result, num_contracted_indices=num_contracted_indices, fill_number=fill_number, is_transpose=True)
+        contractions.append(randomcontract)
+    return sizes, contractions
 
 
 def main():
@@ -207,6 +236,7 @@ def main():
     is_random = True
     contraction = 'abcd,bcdf->acf' # tensor
     num_trials = 100
+    num_perm=5
     if is_random:
         sizes = np.empty(num_trials)
     else:
@@ -218,15 +248,20 @@ def main():
             *size, out_contraction = gen_sizes(is_random, contraction, max_size)
         else:
             *size, out_contraction = gen_sizes(is_random)
-        for backend in backends:
-            b = backends[backend]
-            tncontractbench = TncontractBench()
-            results = []
-            for dtype in dtypes:
-                for _ in range(repeats):
-                    _, bench_result = tncontractbench.benchmark(b,num_tensors, out_contraction, *size, dtype=dtype)
-                    results.append(bench_result)
-                json_result = tncontractbench.print_results_json(use_strip, backend, *size, dtype=dtype, results=results, experiment_group=experiment_group, contraction=out_contraction)      
+
+        *sizes, contractions = permute_sizes(out_contraction, num_perm=num_perm)
+        contractions.append(out_contraction)
+
+        for contraction in contractions:
+            for backend in backends:
+                b = backends[backend]
+                tncontractbench = TncontractBench()
+                results = []
+                for dtype in dtypes:
+                    for _ in range(repeats):
+                        _, bench_result = tncontractbench.benchmark(b,num_tensors, contraction, *sizes, dtype=dtype)
+                        results.append(bench_result)
+                    json_result = tncontractbench.print_results_json(use_strip, backend, *sizes, dtype=dtype, results=results, experiment_group=experiment_group, contraction=contraction)      
 
 
 if __name__ == "__main__":
