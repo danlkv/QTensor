@@ -26,6 +26,6 @@ def test_lightcone_energy_value_large():
 
     sym = QAOAQtreeSimulatorSymmetryAccelerated(QtreeQAOAComposer)
 
-    E2 = sym.energy_expectation(G, gamma, beta)
+    E2 = sym.energy_expectation(G, gamma, beta, nprocs=8)
 
     assert(np.isclose(E,E2))

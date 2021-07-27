@@ -3,6 +3,7 @@ from qtensor.tools.lazy_import import pynauty
 import networkx as nx
 from multiprocessing import Pool
 from functools import partial
+import warnings
 import psutil
 
 from qtensor.utils import get_edge_subgraph
@@ -56,18 +57,25 @@ def get_cert_e_tuples(e,G=None,p=None):
     return e,cert
 
 
-def get_edge_orbits_lightcones(G,p):
+def get_edge_orbits_lightcones(G, p, nprocs=None):
     """Takes graph G and number of QAOA steps p
+    and number of processes nprocs to use
     returns unique subgraphs that QAOA sees
     dict: {orbit_id : [list of edges in orbit]} 
     and maximum number of nodes in a lightcone subgraph
     """
 
     eorbits = defaultdict(list)
+
+    # default is to use all CPUs
+    if nprocs is None:
+        nprocs = psutil.cpu_count()
     # for each edge construct the light cone subgraph and compute certificate  
-    if G.number_of_edges() > 1000:
+    if nprocs > 1:
+        if G.number_of_edges() <= 1000:
+            warnings.warn(f"The speedup from using multiple processes for problem with less than 1000 edges is typically small, set nprocs=1\n Number of edges: {G.number_of_edges()}, number of processes requested: {nprocs}.")
         # accelerate with multiprocessing if computing for a large graph
-        with Pool(psutil.cpu_count()) as pool:
+        with Pool(nprocs) as pool:
             certs_e_tuples = pool.map(partial(get_cert_e_tuples, G=G,p=p), G.edges())
     else:
         certs_e_tuples = [get_cert_e_tuples(e,G=G,p=p) for e in G.edges()]
@@ -80,4 +88,4 @@ def get_edge_orbits_lightcones(G,p):
         eorbits_integer_keys[i] = edges
 
     assert(len(eorbits_integer_keys) == len(eorbits))
-    return eorbits_integer_keys, None 
+    return eorbits_integer_keys 
