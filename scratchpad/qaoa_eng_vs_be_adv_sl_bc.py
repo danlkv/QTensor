@@ -41,9 +41,8 @@ def get_gpu_props_json():
     except:
         return None
 
-
 paramtest = [
-    [24,4,3,"random"]
+    [4,4,3,"random"]
     ,[4, 4, 3, 'random']
     ,[10, 5, 2, 'random']
     ,[14, 1, 3, 'random']
@@ -216,7 +215,8 @@ if __name__ == '__main__':
             all_lightcones_report = []
             for i, pack in enumerate(zip(G.edges, peos)):
                 edge, peo = pack
-                all_lightcones_report.append(process_reduced_data(G, gamma, beta, edge, peo, be, pb, 3, 114514, i, my_algo))
+                curr_report = process_reduced_data(G, gamma, beta, edge, peo, be, pb, 3, 114514, i, my_algo)
+                for c in curr_report:
+                    print(json.dumps(c))
+                #all_lightcones_report.append(curr_report)
             agg_reports.append(all_lightcones_report)
-        
-        print(json.dumps(agg_reports, indent = 4))
