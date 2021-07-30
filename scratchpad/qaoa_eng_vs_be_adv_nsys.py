@@ -7,7 +7,7 @@ import pyrofiler
 import qtensor
 from qtensor import QtreeQAOAComposer
 from qtensor import QAOAQtreeSimulator
-from qtensor.contraction_backends import get_backend, get_perf_backend
+from qtensor.contraction_backends import get_backend
 
 
 timing = pyrofiler.timing
@@ -90,7 +90,7 @@ CHANGE: Rid aggregation methods
 '''
 def gen_be_lc_report(G, gamma, beta, edge, peo, backend_name, gen_base = 0):
 
-    curr_backend = get_perf_backend(backend_name)
+    curr_backend = get_backend(backend_name)
     curr_sim = QAOAQtreeSimulator(QtreeQAOAComposer,backend=curr_backend)
     circuit = curr_sim._edge_energy_circuit(G, gamma, beta, edge)
     curr_sim.simulate_batch(circuit, peo = peo)
@@ -114,7 +114,7 @@ if __name__ == '__main__':
 
         gen_base = gen_pb.result
         agg_reports = []
-        for be in backends:
+        for be in [backends[5]]:
             all_lightcones_report = []
             for i, pack in enumerate(zip(G.edges, peos)):
                 edge, peo = pack
