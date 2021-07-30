@@ -90,11 +90,11 @@ CHANGE: Rid aggregation methods
 '''
 def gen_be_lc_report(G, gamma, beta, edge, peo, backend_name, gen_base = 0):
 
-    curr_backend = get_perf_backend(backend_name)
+    curr_backend = get_backend(backend_name)
     curr_sim = QAOAQtreeSimulator(QtreeQAOAComposer,backend=curr_backend)
     circuit = curr_sim._edge_energy_circuit(G, gamma, beta, edge)
     curr_sim.simulate_batch(circuit, peo = peo)
-    curr_sim.backend.gen_report(show = True)
+    #curr_sim.backend.gen_report(show = False)
 
 
 
@@ -114,7 +114,7 @@ if __name__ == '__main__':
 
         gen_base = gen_pb.result
         agg_reports = []
-        for be in [backends[0]]:
+        for be in [backends[5]]:
             all_lightcones_report = []
             for i, pack in enumerate(zip(G.edges, peos)):
                 edge, peo = pack
