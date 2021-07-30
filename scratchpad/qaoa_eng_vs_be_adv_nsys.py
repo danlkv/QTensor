@@ -94,35 +94,7 @@ def gen_be_lc_report(G, gamma, beta, edge, peo, backend_name, gen_base = 0):
     curr_sim = QAOAQtreeSimulator(QtreeQAOAComposer,backend=curr_backend)
     circuit = curr_sim._edge_energy_circuit(G, gamma, beta, edge)
     curr_sim.simulate_batch(circuit, peo = peo)
-    curr_sim.backend.gen_report(show = False)
-
-    '''
-    Generate report table data
-    '''
-    tensor_dims = []
-    for i, x in enumerate(curr_sim.backend._profile_results):
-        bucket_signature, _ = curr_sim.backend._profile_results[x]
-        bucket_size = []
-        for tensor in bucket_signature:
-            tensor_2_size = [qtreeVar.size for qtreeVar in tensor]
-            tensor_dim = np.prod(tensor_2_size)
-            bucket_size.append(tensor_dim)
-        tensor_dims.append(sum(bucket_size))
-    
-    report_record = curr_sim.backend.report_table.records
-    gen_time = gen_base
-    title_record = curr_sim.backend.report_table._title_row()[1:]
-
-    '''
-    Modify and concatenate new report table
-    '''
-    title_record.append("byte")
-    title_record.append("gen_time")
-    for i, row in enumerate(report_record):
-        row.append(tensor_dims[i])
-        row.append(gen_time)
-
-    return title_record, report_record
+    #curr_sim.backend.gen_report(show = False)
 
 
 
