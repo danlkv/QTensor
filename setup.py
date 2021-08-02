@@ -15,6 +15,7 @@ REQUIRED_PACKAGES = [
     ,'qtensor-qtree'
     ,'lazy-import'
     ,'pynauty'
+    ,'sarge'
 
 ]
 
