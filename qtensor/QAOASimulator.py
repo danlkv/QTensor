@@ -111,11 +111,12 @@ class QAOASimulator(Simulator):
            return C
 
 class QAOASimulatorSymmetryAccelerated(QAOASimulator):
-    def energy_expectation(self, G, gamma, beta):
+    def energy_expectation(self, G, gamma, beta, nprocs=None):
         """
         Arguments:
             G: MaxCut graph, Networkx
             gamma, beta: list[float]
+            nprocs: int (number of processes to use for lightcone orbit computation)
 
         Returns: MaxCut energy expectation
         """
@@ -123,7 +124,7 @@ class QAOASimulatorSymmetryAccelerated(QAOASimulator):
         p = len(gamma)
         assert(len(beta) == p)
 
-        eorbits, maxnnodes_lightcone = get_edge_orbits_lightcones(G,p)
+        eorbits = get_edge_orbits_lightcones(G,p, nprocs)
         if len(eorbits) == G.number_of_edges():
             warnings.warn(f"There is no speedup from leveraging the symmetries in lightcone structure, size of the largest lightcone: {maxnnodes_lightcone}\n Use QAOASimulator instead", RuntimeWarning)
 
