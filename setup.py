@@ -2,9 +2,9 @@ import setuptools
 
 # Configure the required packages and scripts to install.
 REQUIRED_PACKAGES = [
-    'numpy',
+    'numpy>=1.18.1',
     'networkx>=2.3',
-    'matplotlib'
+    'matplotlib>=3.1.3'
     ,'google-api-core[grpc]<=1.14.0'
     ,'cirq'
     ,'qiskit'
@@ -14,6 +14,8 @@ REQUIRED_PACKAGES = [
     ,'click'
     ,'qtensor-qtree'
     ,'lazy-import'
+    ,'pynauty'
+    ,'sarge'
 
 ]
 
