@@ -1,0 +1,24 @@
+FROM danlkv/qtensor:dev
+
+RUN    yes | apt update
+RUN    yes | apt install git htop curl
+RUN    cd /tmp && curl https://apt.repos.intel.com/intel-gpg-keys/GPG-PUB-KEY-INTEL-SW-PRODUCTS-2019.PUB -o intel-key.pub
+RUN    cd /tmp && apt-key add intel-key.pub
+RUN    cd /tmp && rm intel-key.pub
+RUN    curl https://apt.repos.intel.com/setup/intelproducts.list -o /etc/apt/sources.list.d/intelproducts.list
+RUN    yes | apt update
+RUN    yes | apt install intel-mkl-2020.0-088
+RUN    yes | apt install python3 python3-pip
+
+WORKDIR /root
+
+RUN pip3 install setuptools numpy pyrofiler
+RUN cd QTensor/ && git checkout cpp_binds
+RUN cd QTensor/scratchpad/cpp_connections/vanilia/nparray && python3 setup.py install
+
+
+ENV MKLROOT=/opt/intel/mkl
+ENV LD_PRELOAD=$MKLROOT/lib/intel64/libmkl_core.so:$MKLROOT/lib/intel64/libmkl_intel_lp64.so:$MKLROOT/lib/intel64/libmkl_gnu_thread.so
+ENV LD_PRELOAD=/lib/x86_64-linux-gnu/libgomp.so.1:$LD_PRELOAD
+RUN echo "source /opt/intel/bin/compilervars.sh intel64" >> /etc/bash.bashrc
+ENTRYPOINT ["bash"]
