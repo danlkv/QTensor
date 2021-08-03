@@ -1,5 +1,6 @@
 from qtensor.Simulate import Simulator, QtreeSimulator, CirqSimulator
 from qtensor.utils import get_edge_subgraph
+from qtensor.optimisation import QtreeTensorNet
 import numpy as np
 import networkx as nx
 from tqdm.auto import tqdm
@@ -10,21 +11,48 @@ from qtensor import tools
 from qtensor.tools.lazy_import import pynauty
 from qtensor.tools.lightcone_orbits import get_edge_orbits_lightcones
 
+#debt: this is effectively only qtree simulator
 class QAOASimulator(Simulator):
     def __init__(self, composer, profile=False, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.composer = composer
         self.profile = profile
+        self._edge_cache = {}
 
     def _get_edge_energy(self, G, gamma, beta, edge):
         circuit = self._edge_energy_circuit(G, gamma, beta, edge)
-        return self.simulate(circuit)
+        cdata = self._edge_cache.get(edge)
+        if cdata is not None:
+            peo, width = cdata
+            return self.simulate_batch(circuit, batch_vars=0, peo=peo)
+        else:
+            return self.simulate(circuit)
 
     def _edge_energy_circuit(self, G, gamma, beta, edge):
         composer = self.composer(G, gamma=gamma, beta=beta)
         composer.energy_expectation_lightcone(edge)
-
         return composer.circuit
+
+    def _iterate_edges(self, G):
+        return G.edges()
+
+    def optimize_lightcone(self, G, p, edge):
+        """
+        Builds a circuit for corresponding edge, optimizes it and caches the result
+        """
+        gamma, beta = [.1]*p, [.2]*p
+        circuit = self._edge_energy_circuit(G, gamma, beta, edge=edge)
+
+        tn = QtreeTensorNet.from_qtree_gates(circuit, backend=self.backend)
+        peo, tn = self.optimizer.optimize(tn)
+        width = self.optimizer.treewidth
+        self._edge_cache[edge] = (peo, width)
+        # debt: proper opt data needed
+        return peo, width
+
+    def optimize_lightcones(self, G, p):
+        for e in self._iterate_edges(G):
+            self.optimize_lightcone(G, p, e)
 
 
     def _post_process_energy(self, G, E):
@@ -44,6 +72,7 @@ class QAOASimulator(Simulator):
         return (Ed - E)/2
 
 
+
     def energy_expectation(self, G, gamma, beta):
         """
         Arguments:
@@ -58,11 +87,13 @@ class QAOASimulator(Simulator):
         with tqdm(total=G.number_of_edges(), desc='Edge iteration', ) as pbar:
             for i, edge in enumerate(G.edges()):
                 E = self._get_edge_energy(G, gamma, beta, edge)
+                # debt
                 pbar.set_postfix(Treewidth=self.optimizer.treewidth)
                 pbar.update(1)
                 total_E += E
 
             if self.profile:
+                # debt
                 print(self.backend.gen_report())
 
         C = self._post_process_energy(G, total_E)
@@ -80,7 +111,26 @@ class QAOASimulator(Simulator):
 
         Returns: MaxCut energy expectation
         """
-        args = [(G, gamma, beta, edge) for edge in G.edges()]
+        widths = []
+        edges = list(self._iterate_edges(G))
+        optcache = list(self._edge_cache.keys())
+
+        for e in edges:
+            cdata = self._edge_cache.get(e)
+            if cdata is not None:
+                peo, width = cdata
+            else:
+                peo, width = self.optimize_lightcone(G, len(gamma), e)
+            widths.append(width)
+
+
+        sort_ixs = sorted(range(len(edges)), key=lambda x: widths[x])
+        sorted_edges = [edges[x] for x in sort_ixs]
+        print('widths', widths)
+        print('indices', sort_ixs)
+        print('edges', sorted_edges)
+
+        args = [(G, gamma, beta, edge) for edge in sorted_edges]
 
         with Pool(n_processes) as p:
 
@@ -111,6 +161,14 @@ class QAOASimulator(Simulator):
            return C
 
 class QAOASimulatorSymmetryAccelerated(QAOASimulator):
+    def _iterate_edges(self, G, p, nprocs):
+        # debt: code duplication with energy calc
+        eorbits = get_edge_orbits_lightcones(G, p, nprocs)
+        if len(eorbits) == G.number_of_edges():
+            warnings.warn(f"There is no speedup from leveraging the symmetries in lightcone structure, size of the largest lightcone: {maxnnodes_lightcone}\n Use QAOASimulator instead", RuntimeWarning)
+        edges = [orb_edges[0] for orb_edges in eorbits.values()]
+        return edges
+
     def energy_expectation(self, G, gamma, beta, nprocs=None):
         """
         Arguments:
@@ -124,7 +182,7 @@ class QAOASimulatorSymmetryAccelerated(QAOASimulator):
         p = len(gamma)
         assert(len(beta) == p)
 
-        eorbits = get_edge_orbits_lightcones(G,p, nprocs)
+        eorbits = get_edge_orbits_lightcones(G, p, nprocs)
         if len(eorbits) == G.number_of_edges():
             warnings.warn(f"There is no speedup from leveraging the symmetries in lightcone structure, size of the largest lightcone: {maxnnodes_lightcone}\n Use QAOASimulator instead", RuntimeWarning)
 

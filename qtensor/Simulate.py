@@ -1,9 +1,9 @@
 import qtree
 import cirq
-from qtensor.contraction_backends import NumpyBackend
+from qtensor.contraction_backends import NumpyBackend, ContractionBackend
 
 from qtensor.optimisation.TensorNet import QtreeTensorNet
-from qtensor.optimisation.Optimizer import DefaultOptimizer
+from qtensor.optimisation.Optimizer import DefaultOptimizer, Optimizer
 from tqdm.auto import tqdm
 
 from loguru import logger as log
@@ -21,6 +21,9 @@ class Simulator:
 
 class QtreeSimulator(Simulator):
     FallbackOptimizer = DefaultOptimizer
+    optimizer: Optimizer
+    backend: ContractionBackend
+
     def __init__(self, backend=NumpyBackend(), optimizer=None, max_tw=None):
         self.backend = backend
         if optimizer:
