@@ -1,7 +1,16 @@
 import networkx as nx
+from numpy.lib.financial import ppmt
 import pytest
 import numpy as np
 from qtensor import QAOA_energy, QAOAQtreeSimulatorSymmetryAccelerated, QtreeQAOAComposer
+
+@pytest.mark.skip(reason='pynauty throws "Illegal instruction" on gh actions')
+def test_parallel_lightcone():
+    from cartesian_explorer import parallels
+    from qtensor.tools import lightcone_orbits
+    par = parallels.Multiprocess(processes=2)
+    G = nx.random_regular_graph(3, 1000, seed=42)
+    eorbits_dict = lightcone_orbits.get_edge_orbits_lightcones(G, p=3, nprocs=par)
 
 @pytest.mark.skip(reason='pynauty throws "Illegal instruction" on gh actions')
 def test_lightcone_energy_value():

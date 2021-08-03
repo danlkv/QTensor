@@ -7,6 +7,9 @@ import warnings
 import psutil
 
 from qtensor.utils import get_edge_subgraph
+# caex has more than parallels, but I use just this
+# Maybe just make a separate parallels package
+from cartesian_explorer import parallels
 
 def get_adjacency_dict(G):
     """Returns adjacency dictionary for G
@@ -63,6 +66,11 @@ def get_edge_orbits_lightcones(G, p, nprocs=None):
     returns unique subgraphs that QAOA sees
     dict: {orbit_id : [list of edges in orbit]} 
     and maximum number of nodes in a lightcone subgraph
+
+    Args:
+        nprocs (int | ParallelIFC): number of processes or parallel ifc to use. 
+            see cartesian_explorer.parallels.ParallelIFC
+            if None, will determine from machine cpu count
     """
 
     eorbits = defaultdict(list)
@@ -71,16 +79,28 @@ def get_edge_orbits_lightcones(G, p, nprocs=None):
     if nprocs is None:
         nprocs = psutil.cpu_count()
     # for each edge construct the light cone subgraph and compute certificate  
-    if nprocs > 1:
+    if isinstance(nprocs, parallels.ParallelIFC):
         if G.number_of_edges() <= 1000:
             warnings.warn(f"The speedup from using multiple processes for problem with less than 1000 edges is typically small, set nprocs=1\n Number of edges: {G.number_of_edges()}, number of processes requested: {nprocs}.")
         # accelerate with multiprocessing if computing for a large graph
-        with Pool(nprocs) as pool:
-            certs_e_tuples = pool.map(partial(get_cert_e_tuples, G=G,p=p), G.edges())
-    else:
-        certs_e_tuples = [get_cert_e_tuples(e,G=G,p=p) for e in G.edges()]
+        # debt: it's confusing to use nprocs name for a parallelIFC object
+        certs_e_tuples = nprocs.map(partial(get_cert_e_tuples, G=G, p=p), G.edges())
 
-    for e,cert in certs_e_tuples:
+    elif isinstance(nprocs, int):
+        if nprocs > 1:
+            if G.number_of_edges() <= 1000:
+                warnings.warn(f"The speedup from using multiple processes for problem with less than 1000 edges is typically small, set nprocs=1\n Number of edges: {G.number_of_edges()}, number of processes requested: {nprocs}.")
+            # accelerate with multiprocessing if computing for a large graph
+            with Pool(nprocs) as pool:
+                certs_e_tuples = pool.map(partial(get_cert_e_tuples, G=G, p=p), G.edges())
+        else:
+            certs_e_tuples = [get_cert_e_tuples(e, G=G, p=p) for e in G.edges()]
+    else:
+        warnings.warn(f"Invalid type for `nprocs` parameter: {type(nprocs)}. Assuming nprocs = 1."
+        certs_e_tuples = [get_cert_e_tuples(e, G=G, p=p) for e in G.edges()]
+
+
+    for e, cert in certs_e_tuples:
         eorbits[cert].append(e)
 
     eorbits_integer_keys = {}
