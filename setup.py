@@ -16,6 +16,7 @@ REQUIRED_PACKAGES = [
     ,'lazy-import'
     ,'pynauty'
     ,'sarge'
+    ,'cartesian-explorer'
 
 ]
 

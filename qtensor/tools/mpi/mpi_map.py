@@ -6,6 +6,22 @@ from qtensor.tools.mpi import pbar_wrapper
 
 RECENT_TASK = None
 
+from cartesian_explorer import parallels
+
+class MPIParallel(parallels.ParallelIFC):
+    def __init__(self, processes=None, pbar=False):
+        """
+        Args:
+            processes (int): Number of MPI ranks to use, set to None for auto
+            pbar (bool): Whether to use progressbar, affects performance for large size
+
+        """
+        super().__init__(processes=processes)
+        self.pbar = pbar
+
+    def map(self, func, args):
+        return mpi_map(func, list(args), override_size=self.processes, pbar=self.pbar)
+
 def mpi_map(f, arr, override_size=None, pbar=False, total=None):
     if pbar:
         f = pbar_wrapper(total=total)(f)
@@ -26,9 +42,9 @@ def _mpi_map(f, arr, override_size=None):
         """
         input_indices = [list(indices[x::size]) for x in range(size)]
         lens = [len(x) for x in input_indices]
-        print(f'I:: There are {size} workers, each will get {np.mean(lens)} tasks on average.', flush=True)
+        print(f'MPI::I:: There are {size} workers, each will get {np.mean(lens)} tasks on average.', flush=True)
         if size>len(arr):
-            print(f'W:: there are more workers than jobs, {size}>{len(arr)}')
+            print(f'MPI::W:: there are more workers than jobs, {size}>{len(arr)}')
     else:
         input_indices = None
     p0 = time.time()
@@ -104,6 +120,8 @@ def test():
         print('Result:', sum(res))
         assert(len(res)==len(x)), "Lengths do not match"
         print_stats()
+    par = MPIParallel(pbar=True)
+    par.starmap(print, [ ('hello', 'world', i) for i in range(20)])
 
 if __name__=='__main__':
     test()

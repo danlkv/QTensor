@@ -24,6 +24,7 @@ class QAOASimulator(Simulator):
         cdata = self._edge_cache.get(edge)
         if cdata is not None:
             peo, width = cdata
+            # debt: incompatible with feynman simulator
             return self.simulate_batch(circuit, batch_vars=0, peo=peo)
         else:
             return self.simulate(circuit)
