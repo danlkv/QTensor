@@ -17,4 +17,4 @@ def test_peo_cache():
     with prof.timing('Qiskit energy time') as t2:
         E2 = sim.energy_expectation(G, gamma=gamma, beta=beta)
     assert np.isclose(E1, E2)
-    assert t2.result < t1.result - topt.result*.5
+    assert t2.result < t1.result - topt.result*.2
