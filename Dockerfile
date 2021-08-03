@@ -12,6 +12,4 @@ RUN    pip install quimb pyrofiler cartesian-explorer pynauty opt_einsum
 RUN    pip install torch
 RUN    pip install cupy-cuda110
 
-COPY QTensor /qtensor
-
 ENTRYPOINT ["python3"]
