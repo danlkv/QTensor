@@ -97,15 +97,6 @@ class MatmulBench(Benchmark):
         print(json.dumps(res), flush=True)
         return res
 
-# TO DO: add docstring
-class CuTensorMatmul(CuTensor):
-    @classmethod
-    def get_ready(self, num_tensors, *sizes):
-        sizes = list(sizes)
-        num_tensors += 1
-        sizes.append([sizes[0][0], sizes[1][1]])
-        return num_tensors, *sizes
-    
 
 # @dataclass
 # class ExatnTensor:
@@ -180,7 +171,7 @@ class CuTensorMatmul(CuTensor):
 
 def main():
 
-    experiment_group = "Angela_nslb_matmul"
+    experiment_group = "Angela_nslb_matmul_v100"
 
 
     num_tensors = 2
@@ -196,7 +187,7 @@ def main():
         backends.update({
             'torch':TorchCuda
             , 'cupy':Cupy
-            , 'cutensor': CuTensorMatmul
+            , 'cutensor': CuTensor
         })
 
     use_strip = True

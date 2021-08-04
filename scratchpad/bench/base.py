@@ -75,11 +75,11 @@ class Benchmark:
     def format_flops(flops):
         ord = 3*int(np.log10(flops)/3)
         suffix = {
-            3: 'k'
+            0: ''
+            ,3: 'k'
             ,6: 'M'
             ,9: 'G'
             , 12: 'T'
-            , 15: 'P'
         }[ord]
         return f'{(flops/10**ord).round(2)}{suffix}'
 
@@ -231,6 +231,8 @@ class CuTensor(Cupy):
             self.mode_A = ('m', 'k')
             self.mode_B = ('k', 'n')
             self.mode_C = ('m', 'n')
+            sizes = list(sizes)
+            sizes.append([sizes[0][0], sizes[1][1]])
         else:
             # tncontract
             contraction_str = contraction.contraction

@@ -9,7 +9,6 @@ import itertools
 import platform
 import importlib
 import os, psutil
-import fire
 
 from base import LasyModule, BenchResult, Backend, get_gpu_props_json, Benchmark, Numpy, TorchCuda, Cupy, CuTensor
 
@@ -116,11 +115,12 @@ class TncontractBench(Benchmark):
             , fbratio=ops/(cls.get_dtype_size(dtype)*param_in)
             , experiment_group=experiment_group
         )
-        print(json.dumps(res), flush=True)
+        print(res)
+        # print(json.dumps(res), flush=True)
         return res
 
 
-def gen_sizes(is_random, contraction='', fill_number=2, num_total_indices=0):
+def gen_sizes(is_random, contraction='', fill_number=2, num_total_indices=0, num_indices_result=0, num_contracted_indices=0):
     CHARS = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ'
 
     import random
@@ -207,67 +207,54 @@ def permute_sizes(contraction:RandomContract, fill_number=2, num_perm=5):
 
 
 def main():
+    ### change contraction [line 218] and select backends [line 223 - 224]
 
-    experiment_group = "Angela_nslb_tncontract"
+    test_contractions = {
+        'random26': RandomContract(is_random,'mfgjcehdiolqnbpkatwv,mfgjcehdiolqnbpkauzysrxv->twuzysrxv', 9, 17, 2),
+        'random28': RandomContract(is_random,'hjlageikdcbfztounxBrqms,hjlageikdcbfvqBrspAymwz->ztounxvqBrspAymw', 16, 12, 2),
+        'fixed40': RandomContract(is_random, 'abcd,bcdf->acf', 3, 2, 40)
+    }
+
+    contraction = test_contractions['random28']
 
     # Backend
-    backends = {
-        'numpy':Numpy
-        # , 'exatn': Exatn
-    }
     if get_gpu_props_json():
         backends.update({
             'torch':TorchCuda
-            , 'cupy':Cupy
-            , 'cutensor': CuTensor
+            # 'cupy':Cupy
         })
     
+    
+    experiment_group = "Angela_nslb_tncontract_nsight"
+
     # Tensor properties
     num_tensors = 2
     dtypes = ['float', 'double', 'complex64', 'complex128']
 
     # Test properties
     repeats = 5
+    is_random = False
+
     use_strip = True
     if use_strip:
         repeats += 2
-    
-    is_random = True
-    in_contraction = 'abcd,bcdf->acf' # tensor
-    max_num_indices = 26
-    num_perm=1
-    if is_random:
-        in_sizes = np.arange(4,max_num_indices)
-    else:
-        in_sizes = [10, 16, 20, 30, 32, 40, 50, 60, 64, 70, 80, 100]  # tensor
-    
-    # Bechmark
-    for max_size in in_sizes:
-        if not is_random:
-            fill_number = max_size
-            *sizes, out_contraction = gen_sizes(is_random, contraction=in_contraction, fill_number=fill_number)
-            contractions = [out_contraction]
-        else:
-            fill_number = 2
-            *size, out_contraction = gen_sizes(is_random, num_total_indices=max_size)
-            *sizes, contractions = permute_sizes(out_contraction, num_perm=num_perm, fill_number=fill_number)
-            contractions.append(out_contraction)
 
-        for contraction in contractions:
-            for backend in backends:
-                try:
-                    b = backends[backend]
-                    tncontractbench = TncontractBench()
-                    results = []
-                    for dtype in dtypes:
-                        for _ in range(repeats):
-                            _, bench_result = tncontractbench.benchmark(b,num_tensors, contraction, *sizes, dtype=dtype)
-                            results.append(bench_result)
-                        json_result = tncontractbench.print_results_json(use_strip, backend, *sizes, dtype=dtype, results=results, experiment_group=experiment_group, contraction=contraction)      
-                except Exception as e:
-                    print(e, file=sys.stderr)
-                    pass
+    # Bechmark    
+    *sizes, out_contraction = gen_sizes(contraction.is_random, contraction=contraction.contraction, fill_number=contraction.fill_number, num_indices_result=contraction.num_indices_result, num_contracted_indices=contraction.num_contracted_indices)
+    for backend in backends:
+        try:
+            b = backends[backend]
+            tncontractbench = TncontractBench()
+            results = []
+            for dtype in dtypes:
+                for _ in range(repeats):
+                    _, bench_result = tncontractbench.benchmark(b,num_tensors, contraction, *sizes, dtype=dtype)
+                    results.append(bench_result)
+                json_result = tncontractbench.print_results_json(use_strip, backend, *sizes, dtype=dtype, results=results, experiment_group=experiment_group, contraction=contraction)      
+        except Exception as e:
+            print(e, file=sys.stderr)
+            pass
 
 if __name__ == "__main__":
-    fire.Fire(main)
+    main()
 
