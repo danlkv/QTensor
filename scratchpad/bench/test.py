@@ -207,8 +207,9 @@ def permute_sizes(contraction:RandomContract, fill_number=2, num_perm=5):
 
 
 def main():
-    ### change contraction [line 218] and select backends [line 223 - 224]
+    ### change contraction [line 219] and select backends [line 228 - 229]
 
+    is_random = False
     test_contractions = {
         'random26': RandomContract(is_random,'mfgjcehdiolqnbpkatwv,mfgjcehdiolqnbpkauzysrxv->twuzysrxv', 9, 17, 2),
         'random28': RandomContract(is_random,'hjlageikdcbfztounxBrqms,hjlageikdcbfvqBrspAymwz->ztounxvqBrspAymw', 16, 12, 2),
@@ -218,13 +219,18 @@ def main():
     contraction = test_contractions['random28']
 
     # Backend
+    backends = {
+        # 'numpy':Numpy
+        # , 'exatn': Exatn
+    }
     if get_gpu_props_json():
         backends.update({
             'torch':TorchCuda
             # 'cupy':Cupy
+            # 'cutensor': CuTensor
         })
     
-    
+
     experiment_group = "Angela_nslb_tncontract_nsight"
 
     # Tensor properties
@@ -233,8 +239,6 @@ def main():
 
     # Test properties
     repeats = 5
-    is_random = False
-
     use_strip = True
     if use_strip:
         repeats += 2
