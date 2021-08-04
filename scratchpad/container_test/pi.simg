@@ -1,0 +1,23 @@
+Bootstrap: docker
+From: centos
+
+%setup
+    mkdir ${SINGULARITY_ROOTFS}/myapp
+
+
+%files
+    ./app/pi.c /myapp/
+    ./app/Makefile /myapp/
+
+
+%post
+    yum update -y
+    yum groupinstall -y "Development Tools"
+    yum install -y gcc
+    yum install -y gcc-c++
+    yum install -y wget
+    cd /myapp
+    make
+
+%runscript
+    /myapp/pi
