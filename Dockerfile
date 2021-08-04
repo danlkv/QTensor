@@ -10,7 +10,8 @@ RUN    git clone --recursive -b dev https://github.com/danlkv/QTensor.git
 RUN    cd QTensor/qtree && pip install .
 RUN    cd QTensor && pip install .
 
-RUN    pip install quimb pyrofiler cartesian-explorer pynauty opt_einsum
+RUN    pip install quimb pyrofiler cartesian-explorer opt_einsum
+RUN    pip install --no-binary pynauty pynauty
 RUN    pip install torch
 RUN    pip install cupy-cuda110
 
