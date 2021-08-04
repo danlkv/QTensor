@@ -96,7 +96,7 @@ def get_edge_orbits_lightcones(G, p, nprocs=None):
         else:
             certs_e_tuples = [get_cert_e_tuples(e, G=G, p=p) for e in G.edges()]
     else:
-        warnings.warn(f"Invalid type for `nprocs` parameter: {type(nprocs)}. Assuming nprocs = 1."
+        warnings.warn(f"Invalid type for `nprocs` parameter: {type(nprocs)}. Assuming nprocs = 1.")
         certs_e_tuples = [get_cert_e_tuples(e, G=G, p=p) for e in G.edges()]
 
 
