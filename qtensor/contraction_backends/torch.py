@@ -2,7 +2,6 @@ from qtensor.tools.lazy_import import torch
 import qtree
 import numpy as np
 from qtree import np_framework
-
 from qtensor.contraction_backends import ContractionBackend
 def qtree2torch_tensor(tensor, data_dict):
     """ Converts qtree tensor to pytorch tensor using data dict"""
@@ -18,6 +17,13 @@ def qtree2torch_tensor(tensor, data_dict):
 
 
 class TorchBackend(ContractionBackend):
+    def __init__(self, is_gpu=True):
+        if is_gpu and torch.cuda.is_available():
+            print("cuda gpu")
+            self.is_gpu = True
+        else:
+            self.is_gpu = False
+
     def process_bucket(self, bucket, no_sum=False):
         result_indices = bucket[0].indices
         result_data = bucket[0].data
@@ -64,7 +70,11 @@ class TorchBackend(ContractionBackend):
                 transpose_order = np.argsort(list(map(int, tensor.indices)))
                 data = data_dict[tensor.data_key]
                 if not isinstance(data, torch.Tensor):
-                    data = torch.from_numpy(data)
+                    if self.is_gpu:
+                        cuda = torch.device('cuda')
+                        data = torch.from_numpy(data).to(cuda)
+                    else:
+                        data = torch.from_numpy(data)
                 data = data.permute(tuple(transpose_order))
                 # transpose indices
                 indices_sorted = [tensor.indices[pp]

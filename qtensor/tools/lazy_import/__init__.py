@@ -43,6 +43,7 @@ class FallbackLasyModule:
 
 tcontract = LasyModule('tcontract')
 torch = LasyModule('torch')
+cupy = LasyModule('cupy')
 qiskit = LasyModule('qiskit')
 qiskit_lib = FallbackLasyModule(['qiskit.circuit.library','qiskit.extensions.standard'])
 mpi4py = LasyModule('mpi4py')

@@ -216,7 +216,7 @@ def main():
         'fixed40': RandomContract(is_random, 'abcd,bcdf->acf', 3, 2, 40)
     }
 
-    contraction = test_contractions['random28']
+    contraction = test_contractions['random26']
 
     # Backend
     backends = {
@@ -225,9 +225,9 @@ def main():
     }
     if get_gpu_props_json():
         backends.update({
-            'torch':TorchCuda
+            # 'torch':TorchCuda
             # 'cupy':Cupy
-            # 'cutensor': CuTensor
+            'cutensor': CuTensor
         })
     
 
