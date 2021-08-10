@@ -121,8 +121,8 @@ class TransposedBackend(ContractionBackend):
         a = a.reshape(k, f, m)
         b = b.reshape(k, f, n)
         G = np.einsum('ijk,ijl->jkl', a, b)
-        if len(out)>17:
-            print('lg', G.nbytes)
+        # if len(out)>17:
+        #     print('lg', G.nbytes)
             #print('ax/bx', ixa, ixb, 'out ix', out, 'kfmnix', kix, fix, mix, nix, 'summed', sum_ix)
         if len(out):
             #print('out ix', out, 'kfmnix', kix, fix, mix, nix)

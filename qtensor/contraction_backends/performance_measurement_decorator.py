@@ -15,7 +15,8 @@ class PerfBackend(ContractionBackend):
     def _profile_callback(self, time, label, indices):
         if self._print:
             print(f"PROF:: perf data {label}: {time}")
-        self._profile_results[str(indices)] = indices, time
+        self._profile_results[str(id(indices))] = indices, time
+        
 
     @classmethod
     def from_backend(cls, backend, *args, **kwargs):
@@ -36,7 +37,7 @@ class PerfBackend(ContractionBackend):
     def get_result_data(self, result):
         return self.backend.get_result_data(result)
 
-    def _perfect_bucket_flop(self, bucket_indices):
+    def _perfect_bucket_flop(self, bucket_indices, show = False):
         # L46 taking all indices that are invilved in current bucket contraction
 
 
@@ -44,12 +45,25 @@ class PerfBackend(ContractionBackend):
         # each index object has a size
         # SO, I want a list of the sizes; si
 
+        # Store the first tensor
+        # remove it from the resulting indices
+
+        first_index = bucket_indices[0][0]
+        #print("first tensor",first_tensor)
+
 
         resulting_indices = list(set.union(*[set(ixs) for ixs in bucket_indices]))
         # The first index is contracted
-        resulting_indices = resulting_indices[1:]
+        #resulting_indices = resulting_indices[1:]
+        #print("resultting indices:",resulting_indices)
+        if first_index in resulting_indices:
+            resulting_indices.remove(first_index)
         # don't take index size into account
         sizes = [x.size for x in resulting_indices]
+
+        if show:
+            print("sizes:", sizes)
+            print("resulting indices:", resulting_indices)
         # n_multiplications = len(bucket_indices)
         # size_of_result = 2**len(resulting_indices)
         # summation_index_size = 2
@@ -67,7 +81,8 @@ class PerfBackend(ContractionBackend):
     def gen_report(self, show = True):
         data = self._profile_results.values()
         # -- sotrt data with respect to time
-        data = sorted(data, key= lambda pair: pair[1], reverse=True)
+        #data = sorted(data, key= lambda pair: pair[1], reverse=True)
+        data = list(data)
         # -- report on largest contractions
         max_lines = self.max_lines
 
