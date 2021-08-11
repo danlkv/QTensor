@@ -17,12 +17,8 @@ def qtree2torch_tensor(tensor, data_dict):
 
 
 class TorchBackend(ContractionBackend):
-    def __init__(self, is_gpu=True):
-        if is_gpu and torch.cuda.is_available():
-            print("cuda gpu")
-            self.is_gpu = True
-        else:
-            self.is_gpu = False
+    def __init__(self, device='gpu'):
+        self.device = device
 
     def process_bucket(self, bucket, no_sum=False):
         result_indices = bucket[0].indices
@@ -69,12 +65,13 @@ class TorchBackend(ContractionBackend):
                 # sort tensor dimensions
                 transpose_order = np.argsort(list(map(int, tensor.indices)))
                 data = data_dict[tensor.data_key]
-                if not isinstance(data, torch.Tensor):
-                    if self.is_gpu:
+                if not isinstance(data, torch.Tensor):             
+                    if self.device == 'gpu' and torch.cuda.is_available():
                         cuda = torch.device('cuda')
                         data = torch.from_numpy(data).to(cuda)
                     else:
                         data = torch.from_numpy(data)
+
                 data = data.permute(tuple(transpose_order))
                 # transpose indices
                 indices_sorted = [tensor.indices[pp]

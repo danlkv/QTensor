@@ -1,4 +1,3 @@
-#https://github.com/danlkv/QTensor/blob/d7586677ead0d789a4466b559107cb0c648a69f6/qtensor/contraction_backends/cupy.py
 import qtree
 from qtensor.tools.lazy_import import cupy as cp
 from qtensor.contraction_backends import ContractionBackend

@@ -5,8 +5,11 @@ __pycache__/
 
 .vscode
 
+data/caex_cache
+
 analysis/data
 analysis/caex_cache
+**/circuits/rect/4x4/*.txt
 # C extensions
 *.so
 

@@ -30,8 +30,9 @@ def get_einsum_expr(bucket, all_indices_list, result_indices):
     return expr
 
 class TransposedBackend(ContractionBackend):
-    def __init__(self):
+    def __init__(self, device='gpu'):
         super().__init__()
+        self.device = device
         #self.pbar = tqdm(desc='Buckets', position=2)
         #self.status_bar = tqdm(desc='Current status', position=3, bar_format='{desc}')
 
@@ -40,9 +41,13 @@ class TransposedBackend(ContractionBackend):
         all_indices = sorted(all_indices, key=int)
         result_indices = all_indices[1:]
         contract_index = all_indices[0]
-        #print('contract_index', contract_index, no_sum)
+        # print('contract_index', contract_index, no_sum)
         res = self.process_bucket_merged([contract_index], bucket, no_sum=no_sum)
         # Convert indices to growing, bucket elimination expects this
+        # print("all_indices:", all_indices)
+        # print("bucket:", bucket)
+        # print("res.indices:", res.indices)
+        # print("result_indices", result_indices)
         tdata = self.get_transpose(res.data,*[res.indices.index(x) for x in result_indices])
         res = qtree.optimizer.Tensor(name=res.name, indices=tuple(result_indices), data=tdata)
         return res
@@ -134,7 +139,6 @@ class TransposedBackend(ContractionBackend):
             G = tncontract(1.0, a, desc_a, mode_a, 
                         b, desc_b, mode_b, 0, 
                         c, desc_c, mode_c)
-            pass
         else:
             G = tncontract(contraction, a, b)
 

@@ -1,9 +1,9 @@
 import qtree
 import cirq
-from qtensor.contraction_backends import NumpyBackend
+from qtensor.contraction_backends import NumpyBackend, ContractionBackend
 
 from qtensor.optimisation.TensorNet import QtreeTensorNet
-from qtensor.optimisation.Optimizer import DefaultOptimizer
+from qtensor.optimisation.Optimizer import DefaultOptimizer, Optimizer
 from tqdm.auto import tqdm
 
 from loguru import logger as log
@@ -21,6 +21,9 @@ class Simulator:
 
 class QtreeSimulator(Simulator):
     FallbackOptimizer = DefaultOptimizer
+    optimizer: Optimizer
+    backend: ContractionBackend
+
     def __init__(self, backend=NumpyBackend(), optimizer=None, max_tw=None):
         self.backend = backend
         if optimizer:
@@ -94,7 +97,8 @@ class QtreeSimulator(Simulator):
 
     def optimize_buckets(self):
         peo, self.tn = self.optimizer.optimize(self.tn)
-        #print('Treewidth', self.optimizer.treewidth)
+        # print('Treewidth', self.optimizer.treewidth)
+        # print(peo)
         return peo
 
     def prepare_buckets(self, qc, batch_vars=0, peo=None):
@@ -126,6 +130,8 @@ class QtreeSimulator(Simulator):
         sliced_buckets = self.tn.slice(slice_dict)
         #self.backend.pbar.set_total ( len(sliced_buckets))
         self.buckets = sliced_buckets
+        # print("Buckets:")
+        # print(sliced_buckets)
 
     def simulate_batch(self, qc, batch_vars=0, peo=None):
         self.prepare_buckets(qc, batch_vars, peo)

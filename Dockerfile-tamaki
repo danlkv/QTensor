@@ -1,0 +1,12 @@
+FROM danlkv/qtensor:dev
+
+ENV DEBIAN_FRONTEND=noninteractive 
+RUN    yes | apt update
+RUN    yes | apt install git htop curl
+RUN    yes | apt install default-jdk
+RUN    cd QTensor/qtree/thirdparty/tamaki_treewidth && make
+
+ENV PATH=/root/QTensor/qtree/thirdparty/tamaki_treewidth:$PATH
+
+
+ENTRYPOINT ["bash"]

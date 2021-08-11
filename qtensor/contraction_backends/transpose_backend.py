@@ -9,6 +9,7 @@ class NumpyTranspoedBackend(TransposedBackend):
     def __init__(self):
         super().__init__()
         self.backend = 'numpy'
+        self.device = 'cpu'
     
     def get_sliced_buckets(self, buckets, data_dict, slice_dict):
         return np_framework.get_sliced_np_buckets(buckets, data_dict, slice_dict)
@@ -31,13 +32,8 @@ class NumpyTranspoedBackend(TransposedBackend):
 
 
 class TorchTransposedBackend(TransposedBackend):
-    def __init__(self, is_gpu=True):
+    def __init__(self, device='gpu'):
         super().__init__()
-        if is_gpu and torch.cuda.is_available():
-            print("cuda gpu")
-            self.is_gpu = True
-        else:
-            self.is_gpu = False
         self.backend_module = torch
         self.backend = 'pytorch'
     
@@ -51,7 +47,7 @@ class TorchTransposedBackend(TransposedBackend):
     
     @staticmethod
     def get_transpose(data, *axis):
-        if len(axis) is 0:
+        if len(axis) == 0:
             axis = (0,) # Hardcode
         return data.permute(*axis)
     
@@ -61,7 +57,7 @@ class TorchTransposedBackend(TransposedBackend):
 
     def prepare(self, data):
         if not isinstance(data, torch.Tensor):
-            if self.is_gpu:
+            if self.device == 'gpu' and torch.cuda.is_available():
                 cuda = torch.device('cuda')
                 data = torch.from_numpy(data).to(cuda)
             else:
@@ -71,13 +67,8 @@ class TorchTransposedBackend(TransposedBackend):
 
 
 class CupyTransposedBackend(TransposedBackend):
-    def __init__(self, is_gpu=True):
+    def __init__(self, device='gpu'):
         super().__init__()
-        if is_gpu and torch.cuda.is_available():
-            print("cuda gpu")
-            self.is_gpu = True
-        else:
-            self.is_gpu = False
         self.mempool = cp.get_default_memory_pool()
         self.backend_module = cp
         self.backend = 'cupy'
@@ -100,13 +91,13 @@ class CupyTransposedBackend(TransposedBackend):
         return cp.argsort(cp.asarray(*args)).tolist()
     
     def prepare(self, data):
-        if self.is_gpu:
+        if self.device == 'gpu':
             data = cp.asarray(data)
         return data
 
 
 class CutensorTransposedBackend(CupyTransposedBackend):
-    def __init__(self, is_gpu=True):
+    def __init__(self, device='gpu'):
         super().__init__()
         self.backend = 'cutensor'
     
