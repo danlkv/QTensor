@@ -2,7 +2,6 @@ import qtree
 from qtensor.tools.lazy_import import cupy as cp
 from qtensor.contraction_backends import ContractionBackend
 
-mempool = mempool = cp.get_default_memory_pool()
 
 class CuPyBackend(ContractionBackend):
     
@@ -48,6 +47,7 @@ class CuPyBackend(ContractionBackend):
         return result
 
     def get_sliced_buckets(self, buckets, data_dict, slice_dict):
+        mempool = cp.get_default_memory_pool()
         mempool.free_all_blocks()
         sliced_buckets = []
         for bucket in buckets:
