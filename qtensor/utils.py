@@ -159,7 +159,7 @@ def eliminate_low_degrees(graph, min_degree=3):
     return len(to_eliminate)
 
 
-def get_neighbours_peo_vars(old_graph, inplace=False):
+def get_neighbors_peo_vars(old_graph, inplace=False):
     if inplace:
         graph = old_graph
     else:
@@ -193,7 +193,7 @@ def get_neighbours_peo_vars(old_graph, inplace=False):
         #pbar.set_postfix(costiter=1/costtime, nodeiter=1/nodeiter_time, eliter=1/eltime ,costtime=costtime, nodeiter_time=nodeiter_time, eltime=eltime)
     return peo, nghs
 
-def get_neighbours_peo(old_graph):
+def get_neighbors_peo(old_graph):
     graph = copy.deepcopy(old_graph)
     graph.remove_edges_from(nx.selfloop_edges(old_graph))
     peo = []
@@ -310,7 +310,7 @@ def _neighbors(graph, node):
     return list(graph.neighbors(node))
 
 
-def get_neighbours_path(old_graph, peo=None):
+def get_neighbors_path(old_graph, peo=None):
     if peo is not None:
         graph, _ = reorder_graph(old_graph, peo)
     else:

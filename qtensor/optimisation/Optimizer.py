@@ -27,7 +27,7 @@ class WithoutOptimizer(Optimizer):
         peo = sorted([int(v) for v in graph.nodes()])
         # magic line
         peo = list(reversed(peo))
-        _, path = utils.get_neighbours_path(graph, peo)
+        _, path = utils.get_neighbors_path(graph, peo)
         self.treewidth = max(path)
         self.peo_ints = peo
 
@@ -49,7 +49,7 @@ class GreedyOptimizer(Optimizer):
     def _get_ordering_ints(self, graph, free_vars=[]):
         #mapping = {a:b for a,b in zip(graph.nodes(), reversed(list(graph.nodes())))}
         #graph = nx.relabel_nodes(graph, mapping)
-        peo_ints, path = utils.get_neighbours_peo(graph)
+        peo_ints, path = utils.get_neighbors_peo(graph)
 
         return peo_ints, path
 
@@ -57,7 +57,7 @@ class GreedyOptimizer(Optimizer):
         node_names = nx.get_node_attributes(graph, 'name')
         node_sizes = nx.get_node_attributes(graph, 'size')
         # performing ordering inplace reduces time for ordering by 60%
-        #peo, path = utils.get_neighbours_peo_vars(graph, inplace=inplace)
+        #peo, path = utils.get_neighbors_peo_vars(graph, inplace=inplace)
 
         # this may be ugly, but it is actually pythonic:)
         # solves two problems: possible inconsistencies in api, and missing networkit.
@@ -66,7 +66,7 @@ class GreedyOptimizer(Optimizer):
         try:
             peo, path = greedy_ordering_networkit(graph)
         except:
-            peo, path = utils.get_neighbours_peo_vars(graph, inplace=inplace)
+            peo, path = utils.get_neighbors_peo_vars(graph, inplace=inplace)
 
         peo = [qtree.optimizer.Var(var, size=node_sizes[var],
                         name=node_names[var])
@@ -122,7 +122,7 @@ class SlicesOptimizer(GreedyOptimizer):
         searcher = GreedyParvars(p_graph)
         peo_ints, path = self._get_ordering_ints(p_graph)
         while True:
-            #nodes, path = utils.get_neighbours_path(graph, peo=peo_ints)
+            #nodes, path = utils.get_neighbors_path(graph, peo=peo_ints)
             tw = self.treewidth
             log.info('Treewidth: {}', tw)
             if tw < max_tw:
