@@ -41,6 +41,7 @@ def test_tn():
     print('tensors', tn_.tensors)
 
     tn = generate_TN.circ2tn(circ)
+    dual = generate_TN.dual_hg(tn)
     print(tn)
     dangling = [item for item in tn.values() if len(item)==1]
 
@@ -50,3 +51,6 @@ def test_tn():
     assert len(verts) == vert_cnt
 
     assert len(tn) == edge_cnt
+
+#test_dual_hg()
+test_tn()
