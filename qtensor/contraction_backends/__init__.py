@@ -5,6 +5,7 @@ from .torch import TorchBackend
 from .cupy import CuPyBackend
 from .mkl import CMKLExtendedBackend
 from .cupy import CuPyBackend
+from .cutensor import CuTensorBackend
 from .transposed import TransposedBackend
 from .opt_einsum import OptEinusmBackend
 from .transpose_backend import NumpyTranspoedBackend, TorchTransposedBackend, CupyTransposedBackend, CutensorTransposedBackend
@@ -12,14 +13,15 @@ from .performance_measurement_decorator import PerfNumpyBackend, PerfBackend, GP
 
 def get_backend(name):
     backend_dict = {
+        'mkl': CMKLExtendedBackend,
         'einsum':NumpyBackend,
+        'opt_einsum': OptEinusmBackend,
         'torch_cpu': TorchBackend,
         'torch_gpu': TorchBackend,
-        'mkl': CMKLExtendedBackend,
-        'tr_einsum': NumpyTranspoedBackend,
-        'opt_einsum': OptEinusmBackend,
-        'tr_torch': TorchTransposedBackend,
         'cupy': CuPyBackend,
+        'cutensor': CuTensorBackend,
+        'tr_einsum': NumpyTranspoedBackend,
+        'tr_torch': TorchTransposedBackend,
         'tr_cupy': CupyTransposedBackend,
         'tr_cutensor': CutensorTransposedBackend
     }[name]()
@@ -31,12 +33,11 @@ def get_backend(name):
 def get_cpu_perf_backend(name):
     class MyPerfBackend(PerfBackend):
         Backend = {
+            'mkl': CMKLExtendedBackend,
             'einsum':NumpyBackend,
-            'torch_cpu': TorchBackend,
-            'mkl':CMKLExtendedBackend,
             'opt_einsum': OptEinusmBackend,
+            'torch_cpu': TorchBackend,     
             'tr_einsum': NumpyTranspoedBackend,
-            'opt_einsum': OptEinusmBackend,
         }[name]
 
     return MyPerfBackend()
@@ -46,6 +47,7 @@ def get_gpu_perf_backend(name):
         Backend = {
             'torch_gpu': TorchBackend,
             'cupy': CuPyBackend,
+            'cutensor': CuTensorBackend,
             'tr_torch': TorchTransposedBackend,
             'tr_cupy': CupyTransposedBackend,
             'tr_cutensor': CutensorTransposedBackend

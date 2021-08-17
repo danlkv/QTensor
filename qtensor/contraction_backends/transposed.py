@@ -30,9 +30,12 @@ def get_einsum_expr(bucket, all_indices_list, result_indices):
     return expr
 
 class TransposedBackend(ContractionBackend):
+    
+
     def __init__(self, device='gpu'):
         super().__init__()
         self.device = device
+        self.dtype = ['float', 'double', 'complex64', 'complex128']
         #self.pbar = tqdm(desc='Buckets', position=2)
         #self.status_bar = tqdm(desc='Current status', position=3, bar_format='{desc}')
 
@@ -130,7 +133,10 @@ class TransposedBackend(ContractionBackend):
         a = a.reshape(k, f, m)
         b = b.reshape(k, f, n)
 
+        # manual cast
+        a, b = self.convert_type(a, b)
 
+        
         tncontract = self.get_tncontract()
 
         contraction = 'ijk,ijl->jkl'
@@ -139,11 +145,11 @@ class TransposedBackend(ContractionBackend):
             G = tncontract(1.0, a, desc_a, mode_a, 
                         b, desc_b, mode_b, 0, 
                         c, desc_c, mode_c)
-        else:
+        else:    
             G = tncontract(contraction, a, b)
 
-        if len(out)>17:
-            print('lg', G.nbytes)
+        # if len(out)>17:
+            # print('lg', G.nbytes)
             #print('ax/bx', ixa, ixb, 'out ix', out, 'kfmnix', kix, fix, mix, nix, 'summed', sum_ix)
         if len(out):
             #print('out ix', out, 'kfmnix', kix, fix, mix, nix)
@@ -330,6 +336,18 @@ class TransposedBackend(ContractionBackend):
 
     def get_argsort(*args):
         raise NotImplementedError
+    
+    def convert_type(self, a, b):
+        a_type = self.get_dtype(str(a.dtype))
+        b_type = self.get_dtype(str(b.dtype))
+        # print("a/b before:", a_type, b_type)
+        if a_type != b_type:
+            if self.dtype.index(a_type) > self.dtype.index(b_type):
+                b = b.astype(a.dtype)
+            else:
+                a = a.astype(b.dtype)
+        # print("a/b after:", str(a.dtype), str(b.dtype))
+        return a, b
     
     def get_result_data(self, result):
         return result.data

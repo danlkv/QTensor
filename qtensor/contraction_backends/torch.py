@@ -17,7 +17,7 @@ def qtree2torch_tensor(tensor, data_dict):
 
 
 class TorchBackend(ContractionBackend):
-    def __init__(self, device='gpu'):
+    def __init__(self, device='cpu'):
         self.device = device
 
     def process_bucket(self, bucket, no_sum=False):
