@@ -92,8 +92,8 @@ def gen_mixed_lc_report(G, gamma, beta, edge, peo, backend_name, gen_base = 0):
     circuit = curr_sim._edge_energy_circuit(G, gamma, beta, edge)
     curr_sim.simulate_batch(circuit, peo = peo)
     
-    curr_backend.cpu_be.gen_report(show = True)
-    curr_backend.gpu_be.gen_report(show = True)
+    curr_backend.cpu_be.gen_report(show = False)
+    curr_backend.gpu_be.gen_report(show = False)
 
     '''
     Merging two report table together
@@ -233,12 +233,16 @@ def reduce_bucket_reports(G, gamma, beta, edge, peo, backend_name, repeat, gen_b
     return titles, bi_2_reduced
 
 def process_reduced_data(G, gamma, beta, edge, peo, backend_name, problem, repeat, gen_base, lc_index, opt_algo):
+    if type(backend_name) == list:
+        final_backend_name = backend_name[0]+"-"+backend_name[1]
+    else:
+        final_backend_name = backend_name
     titles, bi_2_reduced = reduce_bucket_reports(G, gamma, beta, edge, peo, backend_name, repeat, gen_base)
     GPU_PROPS = get_gpu_props_json()
     lc_collection = []
     for bi, report in bi_2_reduced.items():
         bi_json_usable = {}
-        bi_json_usable["backend"] = backend_name
+        bi_json_usable["backend"] = final_backend_name
         bi_json_usable["device_props"] = dict(name=platform.node(), gpu=GPU_PROPS)
         bi_json_usable["lightcone_index"] = lc_index
         bi_json_usable["bucket_index"] = bi
@@ -296,7 +300,7 @@ if __name__ == "__main__":
             peos, widths = get_fixed_peos_for_a_pb(G, gamma, beta, algo = my_algo, sim = gen_sim)
         gen_base = gen_pb.result
 
-        for be in [backends[0]]:
+        for be in [backends[2]]:
             
             for i, pack in enumerate(zip(G.edges, peos)):
                 edge, peo = pack
