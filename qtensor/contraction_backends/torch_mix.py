@@ -1,14 +1,35 @@
+from qtensor.tools.lazy_import import torch
 import qtree
-from qtensor.tools.lazy_import import cupy as cp
 import numpy as np
 from qtensor.contraction_backends import ContractionBackend
+def qtree2torch_tensor(tensor, data_dict):
+    """ Converts qtree tensor to pytorch tensor using data dict"""
+    if isinstance(tensor.data, torch.Tensor):
+        return tensor
+    if tensor.data is not None:
+        data = tensor.data
+    else:
+        data = data_dict[tensor.data_key]
+    torch_t = torch.from_numpy(data)
+    data_dict[tensor.data_key] = torch_t
+    return tensor.copy(data=torch_t)
 
-mempool = mempool = cp.get_default_memory_pool()
 
-class CuPyBackend(ContractionBackend):
-    
-    # Replace all torch methods with cupy's analog
-    
+
+'bucket = [t.indices for t in bucket] for converting a tensor' 
+
+def bucketWidth(bucket):
+    """ Returns the width of a bucket"""
+    return len(max(bucket, key = len))
+
+
+
+class TorchMixBackend(ContractionBackend):
+
+    def __init__(self):
+        self.cuda_available = torch.cuda.is_available()
+
+
     def process_bucket(self, bucket, no_sum=False):
         result_indices = bucket[0].indices
         result_data = bucket[0].data
@@ -17,12 +38,9 @@ class CuPyBackend(ContractionBackend):
             expr = qtree.utils.get_einsum_expr(
                 list(map(int, result_indices)), list(map(int, tensor.indices))
             )
-            
-            '''
-            Change 1: Using cp.einsum not torch.einsum
-            ''' 
-            result_data = cp.einsum(expr, cp.asarray(result_data), cp.asarray(tensor.data))
-            #print("result data: ",type(result_data))
+
+            result_data = torch.einsum(expr, result_data, tensor.data)
+
             # Merge and sort indices and shapes
             result_indices = tuple(sorted(
                 set(result_indices + tensor.indices),
@@ -45,40 +63,27 @@ class CuPyBackend(ContractionBackend):
                                 data=result_data)
         else:
             result = qtree.optimizer.Tensor(f'E{tag}', result_indices,
-                                data=cp.sum(result_data, axis=0))
+                                data=torch.sum(result_data, axis=0))
         return result
 
     def get_sliced_buckets(self, buckets, data_dict, slice_dict):
-        mempool.free_all_blocks()
         sliced_buckets = []
         for bucket in buckets:
             sliced_bucket = []
+            bucket_width = bucketWidth(bucket)
             for tensor in bucket:
-                # get data
-                # sort tensor dimensions
-                
-                '''
-                Change 2:
-                Original: Using np to sort
-                New:      Use cp.argsort() to sort it needs to be casted into an python list
-                '''
-                # transpose_order = np.argsort(list(map(int, tensor.indices)))
-                # cp.argsort requires input to be cp array
-                #print(tensor.indices)
-                transpose_order = cp.argsort(cp.asarray(list(map(int, tensor.indices)))).tolist()
-                
-                '''
-                Change 2:
-                Original: Data is all converted into torch.tensor and use torch api, the results are in torch
-                New:      Convert all data to CuPy.ndarray, will raise exceptional signal
-                '''
+                transpose_order = np.argsort(list(map(int, tensor.indices)))
                 data = data_dict[tensor.data_key]
-                try:
-                    data = cp.asarray(data)
-                    data = data.transpose(tuple(transpose_order))
-                except:
-                    print("CuPy Backend doesn't support gradient.")
-                
+                if not isinstance(data, torch.Tensor):
+                    if self.cuda_available:
+                        if bucket_width > 8:
+                            cuda = torch.device('cuda')
+                            data = torch.from_numpy(data).to(cuda)
+                        else:
+                            data = torch.from_numpy(data)
+                    else:
+                        raise Exception("cuda is not available on this machine")
+                data = data.permute(tuple(transpose_order))
                 # transpose indices
                 indices_sorted = [tensor.indices[pp]
                                   for pp in transpose_order]
@@ -106,8 +111,4 @@ class CuPyBackend(ContractionBackend):
         return sliced_buckets
 
     def get_result_data(self, result):
-        #print(type(result.data))
-        try:
-            return result.data.get()
-        except :
-            return result.data
+        return result.data

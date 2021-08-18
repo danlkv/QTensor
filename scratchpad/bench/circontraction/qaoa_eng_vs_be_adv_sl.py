@@ -267,42 +267,19 @@ if __name__ == '__main__':
             peos, widths = get_fixed_peos_for_a_pb(G, gamma, beta, algo = my_algo, sim = gen_sim)
 
         gen_base = gen_pb.result
-        for be in backends:
+        for be in [backends[5]]:
             '''
             Collecting all lightcones' reduced report
             '''
             all_lightcones_report = []
             for i, pack in enumerate(zip(G.edges, peos)):
                 edge, peo = pack
+                
                 curr_lightcone_report = collect_reports_for_a_lc(G, gamma, beta, edge, peo, be, 3,i, gen_base)
                 reduced_lightcone_report = reduce_reports_for_a_lc(curr_lightcone_report)
-                ''''
-                DESIGN CHOICE:
-                convert reduced_lightcone_report into a json-usable formart here
-                then append to all_lightcone_report
-                '''
                 js_usable = gen_json_for_be_pt(be, pb, reduced_lightcone_report, my_algo)
-                #print(js_usable)
                 all_lightcones_report.append(js_usable)
-                #print("{}th lc finished REEEEEEEEEEEEEE".format(i))
 
             
             print(json.dumps(all_lightcones_report, indent=4))
-
-            ''''
-            UNCOMMENT THE BELOW FOR FINAL USEAGE
-            '''
-            #merged_report = merge_all_lightcones_report(all_lightcones_report)
-
-            '''
-            Reduced Merged Report, good for writing the final json
-            '''
-            #merged_report_reduced = reduce_merged_report(merged_report)
-
-
-            '''
-            generate report for current backend and problem
-            '''
-            #final = json.dumps(gen_json_for_be_pt(be, pb, merged_report, opt_algo= my_algo), indent = 4)
-            #print(final)
             

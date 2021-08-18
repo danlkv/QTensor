@@ -107,6 +107,7 @@ def gen_be_lc_report(G, gamma, beta, edge, peo, backend_name, gen_base = 0):
     for i, x in enumerate(curr_sim.backend._profile_results):
         bucket_signature, _ = curr_sim.backend._profile_results[x]
         bucket_size = []
+        #print(len(max(bucket_signature, key=len)))
         for tensor in bucket_signature:
             tensor_2_size = [qtreeVar.size for qtreeVar in tensor]
             tensor_dim = np.prod(tensor_2_size)
@@ -204,7 +205,7 @@ if __name__ == '__main__':
 
     my_algo = 'rgreedy_0.05_30'
 
-    for pb in paramtest:
+    for pb in [paramtest[0]]:
 
         '''
         Generate fixed peos for a given problem, thus be used for various backends
@@ -216,12 +217,14 @@ if __name__ == '__main__':
 
         gen_base = gen_pb.result
         agg_reports = []
-        for be in backends:
+        for be in [backends[0]]:
             all_lightcones_report = []
             for i, pack in enumerate(zip(G.edges, peos)):
                 edge, peo = pack
-                curr_report = process_reduced_data(G, gamma, beta, edge, peo, be, pb, 3, 114514, i, my_algo)
-                for c in curr_report:
-                    print(json.dumps(c))
-                #all_lightcones_report.append(curr_report)
-            agg_reports.append(all_lightcones_report)
+                #curr_report = process_reduced_data(G, gamma, beta, edge, peo, be, pb, 3, 114514, i, my_algo)
+                curr_report = gen_be_lc_report(G, gamma, beta, edge, peo, be, 114514)
+                print("{}th LC complete!".format(i+1))
+                # for c in curr_report:
+                #     print(json.dumps(c))
+            #     #all_lightcones_report.append(curr_report)
+            # agg_reports.append(all_lightcones_report)

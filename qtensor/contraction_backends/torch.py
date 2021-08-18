@@ -17,7 +17,7 @@ def qtree2torch_tensor(tensor, data_dict):
 
 
 class TorchBackend(ContractionBackend):
-    def __init__(self, device='gpu'):
+    def __init__(self, device = "gpu"):
         self.device = device
 
     def process_bucket(self, bucket, no_sum=False):
@@ -28,6 +28,21 @@ class TorchBackend(ContractionBackend):
             expr = qtree.utils.get_einsum_expr(
                 list(map(int, result_indices)), list(map(int, tensor.indices))
             )
+
+
+            '''
+            Change: input data type may not be the same as the device type, hence we must make device type consistent with the backend device type
+            '''
+            if self.device == 'gpu':
+                if result_data.device != "gpu":
+                    result_data = result_data.to(torch.device('cuda'))
+                if tensor.data.device != "gpu":
+                    tensor._data = tensor._data.to(torch.device("cuda"))
+            else:
+                if result_data.device != "cpu":
+                    result_data = result_data.cpu()
+                if tensor.data.device != "cpu":
+                    tensor._data = tensor._data.cpu()
 
             result_data = torch.einsum(expr, result_data, tensor.data)
 
@@ -100,4 +115,4 @@ class TorchBackend(ContractionBackend):
         return sliced_buckets
 
     def get_result_data(self, result):
-        return result.data
+        return result.data.cpu()
