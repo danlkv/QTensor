@@ -54,7 +54,7 @@ class MixBackend(ContractionBackend):
     
     def process_bucket(self, bucket, no_sum = False):
         bucket_width = bucketWidth(bucket)
-        if bucket_width >= 8:
+        if bucket_width >= 11:
             #print("In GPU")
             return self.gpu_be.process_bucket(bucket, no_sum)
         else:
