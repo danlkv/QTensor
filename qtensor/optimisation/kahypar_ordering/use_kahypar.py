@@ -6,6 +6,19 @@ from qtensor.optimisation.kahypar_ordering import generate_TN
 import kahypar as kahypar
 from os.path import join, abspath, dirname
 
+# -- Timing
+from contextlib import contextmanager
+import time
+@contextmanager
+def timing():
+    class Ret:
+        result=None
+    r = Ret()
+    start = time.time()
+    yield r
+    end = time.time()
+    r.result = end-start
+# --
 
 def set_context(**kwargs):
         mode = modes[int(kwargs.get('mode'))]
@@ -213,9 +226,11 @@ if test_mode == 1:
          'v_4':['C','E'], 'v_5':['D','F'], 'v_6':['E','F']}
 else:
     import networkx as nx
-    N = 20
-    g = nx.path_graph(N)
-    comp = qtensor.DefaultQAOAComposer(g, gamma=[1], beta=[2])
+    N = 40 # the larger the harder
+    p = 2 # the larger the harder
+    #g = nx.path_graph(N) # simple graph structure
+    g = nx.random_regular_graph(3, N) # more complicated structure
+    comp = qtensor.DefaultQAOAComposer(g, gamma=[1]*p, beta=[2]*p)
     comp.ansatz_state()
     circ = comp.circuit
     tn = generate_TN.circ2tn(circ)
@@ -225,10 +240,12 @@ else:
     rem_list = [edge[i] for i in rem_num_list]
     [tn.pop(key) for key in rem_list]
     
+
 all_edge = list(tn.keys())
 kwargs = {'K': 2, 'eps': 0.05, 'seed': 2021, 'mode':0, 'objective':0} 
 tn_partite_list = recur_partition(tn,**kwargs)        
-order = tree2order(tn_partite_list)
+with timing() as t_kahypar:
+    order = tree2order(tn_partite_list)
 #full_order=rem_list; full_order.extend(order)
 print(order)  
 
@@ -249,16 +266,18 @@ if test_mode != 1:
     contraction_width_list = []; 
     import numpy as np
     np.random.seed(1)
-    for _ in range(100):
-        random_peo=np.random.permutation(peo)
-        nodes, ngh = utils.get_neighbors_path(line_graph, list(random_peo))
-        contraction_width_list.append(max(ngh))
+    with timing() as t_random:
+        for _ in range(100):
+            random_peo=np.random.permutation(peo)
+            nodes, ngh = utils.get_neighbors_path(line_graph, list(random_peo))
+            contraction_width_list.append(max(ngh))
     
     # compare with tamaki
-    from qtensor.optimisation.Optimizer import TamakiTrimSlicing, GreedyOptimizer
-    opt = TamakiTrimSlicing() 
-    opt.max_tw = 10
-    tamaki_peo, _, _ = opt.optimize(old_tn)
+    from qtensor.optimisation.Optimizer import TamakiOptimizer, GreedyOptimizer
+    opt = TamakiOptimizer(wait_time=1) # time to run tamaki, in seconds
+    with timing() as t_tamaki:
+        tamaki_peo, _ = opt.optimize(old_tn)
+
     tamaki_peo = tamaki_peo[2*N:len(tamaki_peo)]
     nodes, ngh = utils.get_neighbors_path(line_graph, tamaki_peo)
     tamaki_contraction_width = max(ngh)
@@ -266,12 +285,22 @@ if test_mode != 1:
     greed_opt = GreedyOptimizer()
     greedy_peo, _ = greed_opt.optimize(old_tn)
     greedy_peo = greedy_peo[2*N:len(greedy_peo)]
-    nodes, ngh = utils.get_neighbors_path(line_graph, greedy_peo)
+    with timing() as t_greedy:
+        nodes, ngh = utils.get_neighbors_path(line_graph, greedy_peo)
     greedy_contraction_width = max(ngh)
+    print('--Width--')
     print(f'Partition contraction width: {contraction_width}') 
     print(f'Min random contraction width: {min(contraction_width_list)}') 
     print(f'Tamaki contraction width: {tamaki_contraction_width}')
     print(f'Greedy contraction width: {greedy_contraction_width}')
+    print()
+
+    print('--Time--')
+    print(f'Kahypa: {t_kahypar.result}') 
+    print(f'Random: {t_random.result}') 
+    print(f'Tamaki: {t_tamaki.result}')
+    print(f'Greedy: {t_greedy.result}')
+    print()
 
 plot_mode = 1
 if (test_mode != 1 and plot_mode ==1):   
@@ -298,7 +327,10 @@ if (test_mode != 1 and plot_mode ==1):
         print(f'Max peo: {max(path)}')
     
     # real mems & flops    
-    mems, flops = qtree.graph_model.get_contraction_costs(line_graph)
-    qtensor.utils.plot_cost(mems,flops)
+    #mems, flops = qtree.graph_model.get_contraction_costs(line_graph)
+    #qtensor.utils.plot_cost(mems,flops)
+    plot_conraction_costs(line_graph, greedy_peo)
+    plt.title('Greedy cost')
     plot_conraction_costs(line_graph, peo)
     plt.title('Cost for partition peo')
+    plt.show() # shows a plot if run from terminal on machine with GUI on
