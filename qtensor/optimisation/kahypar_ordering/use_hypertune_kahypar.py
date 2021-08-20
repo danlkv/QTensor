@@ -1,10 +1,14 @@
 """
 This module implements interface to KaHypar program.
+CMA-ES to do hyperparameter optimization
 """
 import qtensor
 from qtensor.optimisation.kahypar_ordering import generate_TN
 import kahypar as kahypar
 from os.path import join, abspath, dirname
+import cma
+import os
+import tempfile
 
 def set_context(**kwargs):
         mode = modes[int(kwargs.get('mode'))]
@@ -200,7 +204,8 @@ def tree2order(tn_partite_list):
     assert len(order) == len(all_edge)
     return order
 
-
+CMA_TEMP_DIR = tempfile.TemporaryDirectory()
+CMA_FILE_PREFIX = CMA_TEMP_DIR.name + os.sep
 modes = ['direct', 'recursive']
 objectives = ['cut', 'km1']  
 KAHYPAR_PROFILE_DIR = join(abspath(dirname(__file__)), 'config')
@@ -232,6 +237,16 @@ order = tree2order(tn_partite_list)
 #full_order=rem_list; full_order.extend(order)
 print(order)  
 
+
+
+
+
+
+
+
+
+
+'''
 ### test treewidth
 if test_mode != 1:
     from qtensor import utils
@@ -301,3 +316,4 @@ if (test_mode != 1 and plot_mode ==1):
     qtensor.utils.plot_cost(mems,flops)
     plot_conraction_costs(line_graph, peo)
     plt.title('Cost for partition peo')
+'''
