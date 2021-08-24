@@ -69,7 +69,7 @@ def test_qtree_energy():
         G=G, gamma=gamma, beta=beta)
 
     print('Energy', E)
-    assert np.imag(E)<1e-6
+    assert np.abs(np.imag(E))<1e-6
 
     E = np.real(E)
 
