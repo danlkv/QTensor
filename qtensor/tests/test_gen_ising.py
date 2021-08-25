@@ -148,7 +148,7 @@ def test_gen_ising_energy():
         
         print(f"{qtensor_energy = }, {scipy_energy = }")
         assert np.abs(np.imag(qtensor_energy)) < 1e-6
-        assert np.abs(np.imag(qtensor_energy)) < 1e-6
+        assert np.abs(np.imag(scipy_energy)) < 1e-6
         assert np.isclose(
             np.real(qtensor_energy), np.real(scipy_energy),
             rtol=1e-4, atol=1e-7

@@ -161,13 +161,6 @@ class WeightedQAOASimulator(QAOASimulator, QtreeSimulator):
         if np.any(np.abs(np.imag(E)) > 1e-6):
             print(f"Warning: Energy result imaginary part was: {np.imag(E)}")
 
-        """
-        C = sum(CC)
-        2*CC = 1 - ZZ
-        2*C = sum(1-CC)
-        2*C = Ed - sum(CC)
-        C = (Ed - E)/2
-        """
         E = np.real(E)
 
         weights_sum = 0
