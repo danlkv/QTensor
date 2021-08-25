@@ -34,6 +34,32 @@ def test_qaoa_ordering():
     order = get_qaoa_exp_ordering(comp.circuit, algo='greedy')
     tn = qtensor.optimisation.QtreeTensorNet.from_qtree_gates(comp.circuit)
     lg = tn.get_line_graph()
-    width = qtree.graph_model.get_treewidth_from_peo(lg, peo=order)
+    nodes, path = qtensor.utils.get_neighbors_path(lg, peo=order)
+    width = max(path)
     
-    assert width == 2*p
+    assert width == 2*p + 1
+
+def test_qaoa_ordering_tree():
+    import time
+    from qtensor.tools.qaoa_ordering import get_qaoa_exp_ordering
+    p = 8
+    degree = 5
+    start = time.time()
+    g = qtensor.toolbox.bethe_graph(p, degree=degree)
+    print('P = ', p)
+    print('D = ', degree)
+    print('Bethe num of nodes', g.number_of_nodes())
+    comp = qtensor.DefaultQAOAComposer(g, gamma=[1]*p, beta=[2]*p)
+    comp.energy_expectation_lightcone((0, 1))
+    order = get_qaoa_exp_ordering(comp.circuit, algo='greedy')
+    print('Got ordering')
+    tn = qtensor.optimisation.QtreeTensorNet.from_qtree_gates(comp.circuit)
+    lg = tn.get_line_graph()
+    assert lg.number_of_nodes() == len(order)
+    print('Bethe LineGraph # of nodes', len(order))
+    nodes, path = qtensor.utils.get_neighbors_path(lg, peo=order)
+    width = max(path)
+    print('Synthetic width', width)
+    print('Total time', time.time() - start)
+    
+    assert width == 2*p + 1

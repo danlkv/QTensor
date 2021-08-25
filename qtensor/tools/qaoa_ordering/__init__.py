@@ -4,7 +4,7 @@ import qtensor
 
 def get_graph_order(graph: nx.Graph, opt_key:str):
     opt = qtensor.toolbox.get_ordering_algo(opt_key)
-    peo, path = opt._get_ordering(graph) #
+    peo, path = opt._get_ordering_ints(graph) #
     return peo
 
 
