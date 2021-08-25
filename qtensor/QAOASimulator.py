@@ -28,7 +28,7 @@ class QAOASimulator(Simulator):
 
 
     def _post_process_energy(self, G, E):
-        if np.imag(E).any()>1e-6:
+        if np.any(np.abs(np.imag(E)) > 1e-6):
             print(f"Warning: Energy result imaginary part was: {np.imag(E)}")
 
         """
@@ -156,6 +156,17 @@ class WeightedQAOASimulator(QAOASimulator, QtreeSimulator):
         circuit = self._edge_energy_circuit(G, gamma, beta, edge)
         weight = G.get_edge_data(*edge)['weight']
         return weight*self.simulate(circuit)
+    
+    def _post_process_energy(self, G, E):
+        if np.any(np.abs(np.imag(E)) > 1e-6):
+            print(f"Warning: Energy result imaginary part was: {np.imag(E)}")
+
+        E = np.real(E)
+
+        weights_sum = 0
+        for i, j, w in G.edges.data('weight'):
+            weights_sum += w
+        return (weights_sum - E)/2
 
 
 class QAOACirqSimulator(QAOASimulator, CirqSimulator):

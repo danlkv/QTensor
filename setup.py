@@ -7,7 +7,7 @@ REQUIRED_PACKAGES = [
     'matplotlib'
     ,'google-api-core[grpc]<=1.14.0'
     ,'cirq'
-    ,'qiskit'
+    ,'qiskit[optimization]'
     ,'pyrofiler>=0.1.5'
     ,'loguru'
     ,'tqdm'
@@ -15,6 +15,8 @@ REQUIRED_PACKAGES = [
     ,'qtensor-qtree'
     ,'lazy-import'
     ,'pynauty'
+    ,'docplex'
+    ,'scipy'
 
 ]
 
