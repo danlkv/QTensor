@@ -170,8 +170,8 @@ def timing():
 #tn ={'v_1': ['A','C'], 'v_2':['A','B'], 'v_3':['B','C','D'], 
 #         'v_4':['C','E'], 'v_5':['D','F'], 'v_6':['E','F']}
 import networkx as nx
-N = 76 # the larger the harder
-p = 4 # the larger the harder
+N = 50 # the larger the harder
+p = 3 # the larger the harder
 #g = nx.path_graph(N) # simple graph structure
 g = nx.random_regular_graph(3, N) # more complicated structure
 comp = qtensor.DefaultQAOAComposer(g, gamma=[1]*p, beta=[2]*p)

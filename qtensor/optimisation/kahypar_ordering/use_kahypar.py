@@ -121,14 +121,17 @@ def recur_partition(tn,**kwargs):
     tn_partite_list[layer] = subgraph_partition(tn,**kwargs)
         
     # grow the tree
-    # if the size > 1, call the partition solver 
-    while max([len(x) for x in tn_partite_list[layer]])>1:
+    # if the size > K-1, call the partition solver 
+    K = int(kwargs.get('K'))
+    while max([len(x) for x in tn_partite_list[layer]]) > K-1:
         layer += 1
         tn_partite_list.append([])
         for (count,subgraph) in enumerate(tn_partite_list[layer-1]):
             if subgraph != {}: # important
                 tn_partite_list[layer][2*count:2*count] = subgraph_partition(subgraph,**kwargs)
        
+        # TODO: Adjust the hyperparameters during the partition
+        
     return tn_partite_list
 
 
@@ -209,7 +212,7 @@ def tree2order(tn,tn_partite_list):
                     parent_set = list(order_tree[layer-1][partent_ind])
                     exist_order = [order.index(x) for x in list(parent_set) if x in order]
                     ind = min(exist_order)
-                    order[ind:ind]=result
+                    order[ind:ind] = result
                     order_tree[layer][count] = result                        
                       
     order = [x for x in order if type(x) != str]

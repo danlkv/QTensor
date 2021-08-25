@@ -102,13 +102,15 @@ class GreedyOptimizer(Optimizer):
 class KahyparOptimizer(Optimizer):
    
     def _get_kahyper_kwarge(self):
+        # initial hyperparameters: to tune 
+        # different from tuning during the recur_partition
         kwargs = {'K': 2, 'eps': 0.1, 'seed': 2021, 'mode':0, 'objective':0} 
         return kwargs
         
     def optimize(self, circ):
         
         tensor_net=qtensor.optimisation.QtreeTensorNet.from_qtree_gates(circ)
-        free_vars = tensor_net.free_vars
+        #free_vars = tensor_net.free_vars
         ignored_vars = tensor_net.ket_vars + tensor_net.bra_vars
             
         kwargs = self._get_kahyper_kwarge()
