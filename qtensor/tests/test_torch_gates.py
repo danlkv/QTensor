@@ -1,9 +1,10 @@
 import qtensor
 import numpy as np
+import pytest
+torch = pytest.importorskip('torch')
 
 
 def test_torch_sim():
-    import torch
     p = 3
     gamma, beta = torch.tensor([0.1]*p), torch.tensor([0.2]*p)
     G = qtensor.toolbox.random_graph(nodes=10, degree=3)
@@ -24,7 +25,6 @@ def test_torch_sim():
     assert np.allclose(resnp, restr)
 
 def test_torch_composer__smoke():
-    import torch
     p = 3
     gamma, beta = torch.tensor([0.1]*p), torch.tensor([0.2]*p)
     G = qtensor.toolbox.random_graph(nodes=10, degree=3)
@@ -38,7 +38,6 @@ def test_torch_composer__smoke():
     assert len(composer.circuit)
 
 def test_torch_gates():
-    import torch
     def compare_gates(a, b):
         assert np.allclose(a.gen_tensor(), b.gen_tensor())
     alphatr = torch.tensor(0.19)

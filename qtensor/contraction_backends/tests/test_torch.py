@@ -1,8 +1,9 @@
 import qtensor
-import torch
+import pytest
 import numpy as np
 from qtensor.contraction_backends import TorchBackend, NumpyBackend
 from qtensor import QtreeSimulator
+torch = pytest.importorskip('torch')
 
 def get_test_qaoa_circ(n=10, p=2, d=3, type='random'):
     G = qtensor.toolbox.random_graph(seed=10, degree=d, nodes=n, type=type)

@@ -26,7 +26,7 @@ def test_builder():
     print(qc)
     assert isinstance(qc[0], builder.operators.YPhase)
 
-    import torch
+    torch = pytest.importorskip('torch')
     builder = qtensor.TorchBuilder(N)
     circ = TwoLocal(N, 'ry', 'cz', 'full', skip_final_rotation_layer=True, reps=3)
     for p in circ.parameters:

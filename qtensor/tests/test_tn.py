@@ -128,7 +128,7 @@ class QtreeCaomposer(qtensor.CircuitComposer):
         return qtensor.QtreeBuilder(n_qubits=self.params['n_qubits'])
 
 def test_substitute_parameters():
-    import torch
+    torch = pytest.importorskip('torch')
     import qtensor.optimisation.TensorNet as TN
     N = 2
     composer = QtreeCaomposer(n_qubits=N)
