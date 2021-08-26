@@ -1,5 +1,4 @@
 import networkx as nx
-from numpy.lib.financial import ppmt
 import pytest
 import numpy as np
 from qtensor import QAOA_energy, QAOAQtreeSimulatorSymmetryAccelerated, QtreeQAOAComposer
