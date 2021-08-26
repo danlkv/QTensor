@@ -166,7 +166,7 @@ class QAOASimulatorSymmetryAccelerated(QAOASimulator):
         # debt: code duplication with energy calc
         eorbits = get_edge_orbits_lightcones(G, p, nprocs)
         if len(eorbits) == G.number_of_edges():
-            warnings.warn(f"There is no speedup from leveraging the symmetries in lightcone structure, size of the largest lightcone: {maxnnodes_lightcone}\n Use QAOASimulator instead", RuntimeWarning)
+            warnings.warn(f"There is no speedup from leveraging the symmetries in lightcone structure\n Use QAOASimulator instead", RuntimeWarning)
         edges = [orb_edges[0] for orb_edges in eorbits.values()]
         return edges
 
@@ -185,7 +185,7 @@ class QAOASimulatorSymmetryAccelerated(QAOASimulator):
 
         eorbits = get_edge_orbits_lightcones(G, p, nprocs)
         if len(eorbits) == G.number_of_edges():
-            warnings.warn(f"There is no speedup from leveraging the symmetries in lightcone structure, size of the largest lightcone: {maxnnodes_lightcone}\n Use QAOASimulator instead", RuntimeWarning)
+            warnings.warn(f"There is no speedup from leveraging the symmetries in lightcone structure\n Use QAOASimulator instead", RuntimeWarning)
 
         total_E = 0
 
