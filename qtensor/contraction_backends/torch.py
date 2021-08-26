@@ -23,6 +23,15 @@ class TorchBackend(ContractionBackend):
     def process_bucket(self, bucket, no_sum=False):
         result_indices = bucket[0].indices
         result_data = bucket[0].data
+        
+        if not isinstance(result_data, torch.Tensor):
+            #print("Encountering: ",type(result_data))           
+            if self.device == 'gpu' and torch.cuda.is_available():
+                cuda = torch.device('cuda')
+                result_data = torch.from_numpy(result_data).to(cuda)
+            else:
+                result_data = torch.from_numpy(result_data)
+
         for tensor in bucket[1:]:
 
             expr = qtree.utils.get_einsum_expr(
@@ -31,8 +40,20 @@ class TorchBackend(ContractionBackend):
 
 
             '''
+            Objective: Change Numpy Array into Tensor on GPU
+            '''            
+            if not isinstance(tensor._data, torch.Tensor):             
+                if self.device == 'gpu' and torch.cuda.is_available():
+                    cuda = torch.device('cuda')
+                    tensor._data = torch.from_numpy(tensor._data).to(cuda)
+                else:
+                    tensor._data = torch.from_numpy(tensor._data)
+
+            '''
             Change: input data type may not be the same as the device type, hence we must make device type consistent with the backend device type
             '''
+
+
             if self.device == 'gpu':
                 if result_data.device != "gpu":
                     result_data = result_data.to(torch.device('cuda'))
@@ -115,4 +136,7 @@ class TorchBackend(ContractionBackend):
         return sliced_buckets
 
     def get_result_data(self, result):
-        return result.data.cpu()
+        try:
+            return result.data.cpu()
+        except:
+            return result.data

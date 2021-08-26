@@ -33,6 +33,16 @@ class NumpyBackend(ContractionBackend):
         #self.status_bar = tqdm(desc='Current status', position=3, bar_format='{desc}')
 
     def process_bucket(self, bucket, no_sum=False):
+        '''
+        TODO: Preprocess the bucket to make sure the all data are in numpy format
+        '''
+        for tensor in bucket:
+            if not isinstance(tensor._data, np.ndarray):
+                try:
+                    tensor._data = tensor._data.cpu().numpy()
+                except:
+                    pass
+
         res = np_framework.process_bucket_np(bucket, no_sum=no_sum)
         return res
 
