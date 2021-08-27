@@ -150,7 +150,6 @@ def test_Kahypar(circ, compare = True, plot = False):
 #test_tn()
 
 ################--------------------------################
-from os.path import join, abspath, dirname
 # -- Timing
 from contextlib import contextmanager
 import time
