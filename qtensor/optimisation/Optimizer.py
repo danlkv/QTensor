@@ -65,6 +65,7 @@ class GreedyOptimizer(Optimizer):
         # this may be ugly, but it is actually pythonic:)
         # solves two problems: possible inconsistencies in api, and missing networkit.
         # does not introduce overhead
+
         try:
             peo, path = greedy_ordering_networkit(graph)
         except:
