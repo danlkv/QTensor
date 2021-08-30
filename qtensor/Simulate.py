@@ -96,11 +96,7 @@ class QtreeSimulator(Simulator):
     #-- 
 
     def optimize_buckets(self):
-        ## Fro Kahypar
-        if hasattr(self, 'hypar_tn'):
-            peo, self.tn = self.optimizer.optimize(self.tn, self.hypar_tn)
-        else:
-            peo, self.tn = self.optimizer.optimize(self.tn)
+        peo, self.tn = self.optimizer.optimize(self.tn)
         
         # print('Treewidth', self.optimizer.treewidth)
         # print(peo)

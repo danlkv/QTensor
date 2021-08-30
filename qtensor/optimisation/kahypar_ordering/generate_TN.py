@@ -24,3 +24,9 @@ def circ2tn(circuit: List[qtree.operators.Gate]):
     TN = dual_hg(dual_tn)
     return TN
 
+def tn2tn(tn): #tn: qtensor.optimization.QtreeTensorNet
+    #tn = qtensor.optimisation.QtreeTensorNet.from_qtree_gates(circuit)
+    dual_tn = { str(hex(id(t))):t.indices for t in tn.tensors }
+    TN = dual_hg(dual_tn)
+    return TN
+

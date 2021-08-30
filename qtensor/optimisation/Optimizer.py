@@ -100,6 +100,7 @@ class GreedyOptimizer(Optimizer):
         return peo, tensor_net
 
 ###################################################################
+from qtensor.optimisation.kahypar_ordering import generate_TN
 class KahyparOptimizer(Optimizer):
    
     def _get_kahyper_kwarge(self):
@@ -108,15 +109,15 @@ class KahyparOptimizer(Optimizer):
         kwargs = {'K': 2, 'eps': 0.1, 'seed': 2021, 'mode':0, 'objective':0} 
         return kwargs
         
-    def optimize(self, tensor_net, tn):
+    def optimize(self, tensor_net):
         
         #tensor_net=qtensor.optimisation.QtreeTensorNet.from_qtree_gates(circ)
         #free_vars = tensor_net.free_vars
         ignored_vars = tensor_net.ket_vars + tensor_net.bra_vars
             
         kwargs = self._get_kahyper_kwarge()
-        #from qtensor.optimisation.kahypar_ordering import generate_TN
         #tn = generate_TN.circ2tn(circ)
+        tn = generate_TN.tn2tn(tensor_net)
         
         # preprocessing to remove edges i_ and o_ (which have only one vertex)
         #edge =list(tn.keys()); edge.sort()

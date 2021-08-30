@@ -1,3 +1,7 @@
+#####
+# For simple test of kahypar itself
+#####
+
 import os
 import kahypar as kahypar
 
