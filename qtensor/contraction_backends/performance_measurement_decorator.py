@@ -1,11 +1,25 @@
+from numpy.core.numeric import indices
 from qtensor.contraction_backends import ContractionBackend, NumpyBackend
 from qtensor.utils import ReportTable
 from pyrofiler import timing
 import torch
 
+def _accurateBucketWidth(bucket):
+    indices_set = set()
+    for tensor in bucket:
+        if type(tensor) is tuple:
+            for index in tensor:
+                indices_set.add(index)
+        else:
+            for index in tensor.indices:
+                indices_set.add(index)
+
+    return len(indices_set)
+
+
 class PerfBackend(ContractionBackend):
     Backend = ContractionBackend
-
+        
     def __init__(self, *args, print=False, num_lines=20, **kwargs):
         self.backend = self.Backend(*args, **kwargs)
         self._print = print
@@ -102,6 +116,7 @@ class PerfBackend(ContractionBackend):
                 , FLOPS = self._perfect_bucket_flop(indices)/time
                 , max_size = max([len(ixs) for ixs in indices])
                 , min_size = min([len(ixs) for ixs in indices])
+                , width = _accurateBucketWidth(indices)
                 , result_size = len(set.union(*[set(i) for i in indices])) - 1
             )
         

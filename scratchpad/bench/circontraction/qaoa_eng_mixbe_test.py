@@ -271,7 +271,7 @@ def process_reduced_data(G, gamma, beta, edge, peo, backend_name, problem, repea
                     "d" :problem[2] ,
                     'type': problem[3]
                     }
-        bi_json_usable["experiment_group"] = "Chen_Test_Seed_Fix"
+        bi_json_usable["experiment_group"] = "Chen_Updated_Width_Mix"
         lc_collection.append(bi_json_usable)
     #print(json.dumps(lc_collection, indent = 4))
 
@@ -304,7 +304,7 @@ if __name__ == "__main__":
     # mixed_be.gpu_be.gen_report(show = True)
     gen_sim = QAOAQtreeSimulator(QtreeQAOAComposer)
     my_algo = "greedy"
-    backends = [["einsum", "torch_gpu",9]]
+    backends = ["einsum","torch_gpu",["einsum", "torch_gpu",9]]
     
     for pb in [paramtest[0]]:
         with timing(callback=lambda x: None) as gen_pb:
@@ -313,13 +313,13 @@ if __name__ == "__main__":
             peos, widths = get_fixed_peos_for_a_pb(G, gamma, beta, algo = my_algo, sim = gen_sim)
         gen_base = gen_pb.result
 
-        for be in [backends[0]]:
+        for be in backends:
             
             for i, pack in enumerate(zip(G.edges, peos)):
                 edge, peo = pack
 
-                curr_report =process_reduced_data(G, gamma, beta, edge, peo, be, pb, 3, 114514, i, my_algo)
+                curr_report =process_reduced_data(G, gamma, beta, edge, peo, be, pb, 3, gen_base, i, my_algo)
                 for c in curr_report:
-                    print(json.dumps(c))
+                     print(json.dumps(c))
 
         

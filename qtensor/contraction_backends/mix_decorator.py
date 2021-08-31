@@ -29,7 +29,7 @@ def bucketWidth(bucket):
     bucket_width = 0
     for tensor in bucket:
         tensor_len = 0
-        if tensor is tuple:
+        if type(tensor) is tuple:
             tensor_len = len(tensor)
             if tensor_len > bucket_width:
                 bucket_width = tensor_len
@@ -39,6 +39,19 @@ def bucketWidth(bucket):
                 bucket_width = tensor_len
     return bucket_width
 
+
+def AccurateBucketWidth(bucket):
+    indices_set = set()
+    for tensor in bucket:
+        if type(tensor) is tuple:
+            for index in tensor:
+                indices_set.add(index)
+        else:
+            for index in tensor.indices:
+                indices_set.add(index)
+
+    return len(indices_set)
+    
 
 
 
@@ -54,8 +67,11 @@ class MixBackend(ContractionBackend):
         self.watershed = watershed
     
     def process_bucket(self, bucket, no_sum = False):
-        bucket_width = bucketWidth(bucket)
-        if bucket_width >= self.watershed:
+        # bucket_width = bucketWidth(bucket)
+        accc_width = AccurateBucketWidth(bucket)
+        # if accc_width != bucket_width:
+        #      print(accc_width, bucket_width)
+        if accc_width >= self.watershed:
             #print("In GPU")
             return self.gpu_be.process_bucket(bucket, no_sum)
         else:
