@@ -87,18 +87,18 @@ def get_gpu_perf_backend(name):
 #     else:
 #         return MyMixedBackend()
 
-def get_mixed_backend(cpu_name, gpu_name):
+def get_mixed_backend(cpu_name, gpu_name, threshold = 11):
 
     cpu_be = get_backend(cpu_name)
     gpu_be = get_backend(gpu_name)
     
-    return MixBackend(cpu_be, gpu_be)
+    return MixBackend(cpu_be, gpu_be,threshold)
 
 
-def get_mixed_perf_backend(cpu_name, gpu_name):
+def get_mixed_perf_backend(cpu_name, gpu_name,threshold = 11):
     
     cpu_be = get_cpu_perf_backend(cpu_name)
     gpu_be = get_gpu_perf_backend(gpu_name)
 
-    return MixBackend(cpu_be, gpu_be)
+    return MixBackend(cpu_be, gpu_be, threshold)
 

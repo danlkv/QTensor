@@ -48,13 +48,14 @@ I/O: Actual BE Objects -> Wrapped Class
 
 class MixBackend(ContractionBackend):
 
-    def __init__(self, cpu_be, gpu_be):
+    def __init__(self, cpu_be, gpu_be, watershed):
         self.cpu_be = cpu_be
         self.gpu_be = gpu_be
+        self.watershed = watershed
     
     def process_bucket(self, bucket, no_sum = False):
         bucket_width = bucketWidth(bucket)
-        if bucket_width >= 11:
+        if bucket_width >= self.watershed:
             #print("In GPU")
             return self.gpu_be.process_bucket(bucket, no_sum)
         else:

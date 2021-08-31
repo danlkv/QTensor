@@ -1,10 +1,14 @@
 import json
 from functools import lru_cache
 import numpy as np
+import cupy as cp
+import torch
+import random
 import networkx as nx
 import platform
 import pyrofiler
 import qtensor
+import time
 from qtensor import QtreeQAOAComposer
 from qtensor import QAOAQtreeSimulator
 from qtensor.contraction_backends import get_mixed_backend, get_mixed_perf_backend, get_gpu_perf_backend, get_cpu_perf_backend
@@ -12,7 +16,13 @@ from qtensor.contraction_backends import get_mixed_backend, get_mixed_perf_backe
 gpu_backends = ['torch_gpu', 'cupy', 'tr_torch', 'tr_cupy', 'tr_cutensor']
 cpu_backends = ['einsum', 'torch_cpu', 'mkl', 'opt_einsum', 'tr_einsum', 'opt_einsum']
 
+mempool = cp.get_default_memory_pool()
+pinned_mempool = cp.get_default_pinned_memory_pool()
+
 timing = pyrofiler.timing
+
+random.seed(42)
+np.random.seed(42)
 
 @lru_cache
 def get_test_problem(n=10, p=2, d=3, type='random'):
@@ -30,7 +40,7 @@ def get_test_problem(n=10, p=2, d=3, type='random'):
 
 paramtest = [
     # n, p, degree, type
-     [8, 4, 3, 'random']
+     [12, 4, 3, 'random']
     ,[10, 5, 2, 'random']
     ,[14, 1, 3, 'random']
     ,[3, 3, 0, 'grid2d']
@@ -87,7 +97,7 @@ I/O: -> list, np.ndarray
 '''
 def gen_mixed_lc_report(G, gamma, beta, edge, peo, backend_name, gen_base = 0):
 
-    curr_backend = get_mixed_perf_backend(backend_name[0], backend_name[1])   
+    curr_backend = get_mixed_perf_backend(backend_name[0], backend_name[1], backend_name[2])   
     curr_sim = QAOAQtreeSimulator(QtreeQAOAComposer,backend=curr_backend)
     circuit = curr_sim._edge_energy_circuit(G, gamma, beta, edge)
     curr_sim.simulate_batch(circuit, peo = peo)
@@ -235,14 +245,17 @@ def reduce_bucket_reports(G, gamma, beta, edge, peo, backend_name, repeat, gen_b
 def process_reduced_data(G, gamma, beta, edge, peo, backend_name, problem, repeat, gen_base, lc_index, opt_algo):
     if type(backend_name) == list:
         final_backend_name = backend_name[0]+"-"+backend_name[1]
+        threshold = backend_name[2]
     else:
         final_backend_name = backend_name
+        threshold = 0
     titles, bi_2_reduced = reduce_bucket_reports(G, gamma, beta, edge, peo, backend_name, repeat, gen_base)
     GPU_PROPS = get_gpu_props_json()
     lc_collection = []
     for bi, report in bi_2_reduced.items():
         bi_json_usable = {}
         bi_json_usable["backend"] = final_backend_name
+        bi_json_usable["threshold"] = threshold
         bi_json_usable["device_props"] = dict(name=platform.node(), gpu=GPU_PROPS)
         bi_json_usable["lightcone_index"] = lc_index
         bi_json_usable["bucket_index"] = bi
@@ -258,7 +271,7 @@ def process_reduced_data(G, gamma, beta, edge, peo, backend_name, problem, repea
                     "d" :problem[2] ,
                     'type': problem[3]
                     }
-        bi_json_usable["experiment_group"] = "Chen_mixed_be_10"
+        bi_json_usable["experiment_group"] = "Chen_Test_Seed_Fix"
         lc_collection.append(bi_json_usable)
     #print(json.dumps(lc_collection, indent = 4))
 
@@ -291,7 +304,7 @@ if __name__ == "__main__":
     # mixed_be.gpu_be.gen_report(show = True)
     gen_sim = QAOAQtreeSimulator(QtreeQAOAComposer)
     my_algo = "greedy"
-    backends = ["einsum", "cupy", ["einsum", "cupy"],"torch_cpu", "torch_gpu",["torch_cpu", "torch_gpu"]]
+    backends = [["einsum", "torch_gpu",9]]
     
     for pb in [paramtest[0]]:
         with timing(callback=lambda x: None) as gen_pb:
@@ -300,7 +313,7 @@ if __name__ == "__main__":
             peos, widths = get_fixed_peos_for_a_pb(G, gamma, beta, algo = my_algo, sim = gen_sim)
         gen_base = gen_pb.result
 
-        for be in backends:
+        for be in [backends[0]]:
             
             for i, pack in enumerate(zip(G.edges, peos)):
                 edge, peo = pack
@@ -308,4 +321,5 @@ if __name__ == "__main__":
                 curr_report =process_reduced_data(G, gamma, beta, edge, peo, be, pb, 3, 114514, i, my_algo)
                 for c in curr_report:
                     print(json.dumps(c))
+
         
