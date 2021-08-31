@@ -97,7 +97,6 @@ class QtreeSimulator(Simulator):
 
     def optimize_buckets(self):
         peo, self.tn = self.optimizer.optimize(self.tn)
-        
         # print('Treewidth', self.optimizer.treewidth)
         # print(peo)
         return peo

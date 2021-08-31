@@ -65,6 +65,7 @@ class GreedyOptimizer(Optimizer):
         # this may be ugly, but it is actually pythonic:)
         # solves two problems: possible inconsistencies in api, and missing networkit.
         # does not introduce overhead
+
         try:
             peo, path = greedy_ordering_networkit(graph)
         except:
@@ -102,20 +103,41 @@ class GreedyOptimizer(Optimizer):
 ###################################################################
 from qtensor.optimisation.kahypar_ordering import generate_TN
 class KahyparOptimizer(Optimizer):
-   
-    def _get_kahyper_kwarge(self):
-        # initial hyperparameters: to tune 
-        # different from tuning during the recur_partition
-        kwargs = {'K': 2, 'eps': 0.1, 'seed': 2021, 'mode':0, 'objective':0} 
-        return kwargs
-        
+    """
+    Properties:
+        kahypar_args: dict
+    """
+
+    def set_kahypar_kwarge(self, **kwargs):
+        """
+        Set kahypar parameters
+
+        Example:
+
+        ```
+           opt.set_kahypar_kwarge(**{'K': 2, 'eps': 0.1, 'seed': 2021, 'mode':0, 'objective':0}))
+        ```
+        """
+        self.kahypar_args = kwargs
+
+    def get_kahypar_kwarge(self):
+        """
+        Get kahypar parameters
+
+        Default: {'K': 2, 'eps': 0.1, 'seed': 2021, 'mode':0, 'objective':0}
+        """
+        if hasattr(self, 'kahypar_args'):
+            return self.kahypar_args
+        default = {'K': 2, 'eps': 0.1, 'seed': 2021, 'mode':0, 'objective':0}
+        return default
+
     def optimize(self, tensor_net):
         
         #tensor_net=qtensor.optimisation.QtreeTensorNet.from_qtree_gates(circ)
         #free_vars = tensor_net.free_vars
         ignored_vars = tensor_net.ket_vars + tensor_net.bra_vars
             
-        kwargs = self._get_kahyper_kwarge()
+        kwargs = self.get_kahypar_kwarge()
         #tn = generate_TN.circ2tn(circ)
         tn = generate_TN.tn2tn(tensor_net)
         
