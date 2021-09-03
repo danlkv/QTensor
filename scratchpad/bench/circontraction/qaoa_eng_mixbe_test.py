@@ -97,7 +97,7 @@ I/O: -> list, np.ndarray
 '''
 def gen_mixed_lc_report(G, gamma, beta, edge, peo, backend_name, gen_base = 0):
 
-    curr_backend = get_mixed_perf_backend(backend_name[0], backend_name[1], backend_name[2])   
+    curr_backend = get_mixed_perf_backend(backend_name[0], backend_name[1])   
     curr_sim = QAOAQtreeSimulator(QtreeQAOAComposer,backend=curr_backend)
     circuit = curr_sim._edge_energy_circuit(G, gamma, beta, edge)
     curr_sim.simulate_batch(circuit, peo = peo)
@@ -245,17 +245,14 @@ def reduce_bucket_reports(G, gamma, beta, edge, peo, backend_name, repeat, gen_b
 def process_reduced_data(G, gamma, beta, edge, peo, backend_name, problem, repeat, gen_base, lc_index, opt_algo):
     if type(backend_name) == list:
         final_backend_name = backend_name[0]+"-"+backend_name[1]
-        threshold = backend_name[2]
     else:
         final_backend_name = backend_name
-        threshold = 0
     titles, bi_2_reduced = reduce_bucket_reports(G, gamma, beta, edge, peo, backend_name, repeat, gen_base)
     GPU_PROPS = get_gpu_props_json()
     lc_collection = []
     for bi, report in bi_2_reduced.items():
         bi_json_usable = {}
         bi_json_usable["backend"] = final_backend_name
-        bi_json_usable["threshold"] = threshold
         bi_json_usable["device_props"] = dict(name=platform.node(), gpu=GPU_PROPS)
         bi_json_usable["lightcone_index"] = lc_index
         bi_json_usable["bucket_index"] = bi
@@ -304,7 +301,7 @@ if __name__ == "__main__":
     # mixed_be.gpu_be.gen_report(show = True)
     gen_sim = QAOAQtreeSimulator(QtreeQAOAComposer)
     my_algo = "greedy"
-    backends = ["einsum","torch_gpu",["einsum", "torch_gpu",9]]
+    backends = ["einsum","torch_gpu",["torch_cpu", "torch_gpu"]]
     
     for pb in [paramtest[0]]:
         with timing(callback=lambda x: None) as gen_pb:
@@ -313,13 +310,13 @@ if __name__ == "__main__":
             peos, widths = get_fixed_peos_for_a_pb(G, gamma, beta, algo = my_algo, sim = gen_sim)
         gen_base = gen_pb.result
 
-        for be in backends:
+        for be in [backends[2]]:
             
             for i, pack in enumerate(zip(G.edges, peos)):
                 edge, peo = pack
 
                 curr_report =process_reduced_data(G, gamma, beta, edge, peo, be, pb, 3, gen_base, i, my_algo)
-                for c in curr_report:
-                     print(json.dumps(c))
+                # for c in curr_report:
+                #      print(json.dumps(c))
 
         
