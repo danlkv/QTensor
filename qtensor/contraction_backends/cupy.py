@@ -1,6 +1,7 @@
 import qtree
 from qtensor.tools.lazy_import import cupy as cp
 from qtensor.contraction_backends import ContractionBackend
+from qtensor.contraction_backends.numpy import get_einsum_expr
 
 mempool = mempool = cp.get_default_memory_pool()
 
@@ -45,6 +46,36 @@ class CuPyBackend(ContractionBackend):
         else:
             result = qtree.optimizer.Tensor(f'E{tag}', result_indices,
                                 data=cp.sum(result_data, axis=0))
+        return result
+
+    def process_bucket_merged(self, ixs, bucket, no_sum=False):
+        result_indices = bucket[0].indices
+        result_data = bucket[0].data
+        all_indices = set(sum((list(t.indices) for t in bucket), []))
+        result_indices = all_indices - set(ixs)
+        all_indices_list = list(all_indices)
+        to_small_int = lambda x: all_indices_list.index(x)
+        
+        expr = get_einsum_expr(bucket, all_indices_list, result_indices)
+
+        params = []
+        for tensor in bucket:
+            params.append(tensor.data)
+            params.append(list(map(to_small_int, tensor.indices)))
+        params.append(list(map(to_small_int, result_indices)))
+        
+        expect = len(result_indices)
+
+        result_data = cp.einsum(*params)
+
+        if len(result_indices) > 0:
+            first_index, *_ = result_indices
+            tag = str(first_index)
+        else:
+            tag = 'f'
+
+        result = qtree.optimizer.Tensor(f'E{tag}', result_indices,
+                            data=result_data)
         return result
 
     def get_sliced_buckets(self, buckets, data_dict, slice_dict):

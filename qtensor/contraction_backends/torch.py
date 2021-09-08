@@ -3,6 +3,7 @@ import qtree
 import numpy as np
 from qtree import np_framework
 from qtensor.contraction_backends import ContractionBackend
+from qtensor.contraction_backends.numpy import get_einsum_expr
 def qtree2torch_tensor(tensor, data_dict):
     """ Converts qtree tensor to pytorch tensor using data dict"""
     if isinstance(tensor.data, torch.Tensor):
@@ -19,15 +20,28 @@ def qtree2torch_tensor(tensor, data_dict):
 class TorchBackend(ContractionBackend):
     def __init__(self, device='cpu'):
         self.device = device
+        self.dtype = ['float', 'double', 'complex64', 'complex128']
+        self.width_dict = [set() for i in range(30)]
+        self.width_bc = [[0,0] for i in range(30)] #(#distinct_bc, #bc)
+        self.exprs = {}
+
 
     def process_bucket(self, bucket, no_sum=False):
         result_indices = bucket[0].indices
         result_data = bucket[0].data
+        width = len(set(bucket[0].indices))
+        print("w:",width)
+
         for tensor in bucket[1:]:
 
             expr = qtree.utils.get_einsum_expr(
                 list(map(int, result_indices)), list(map(int, tensor.indices))
             )
+
+            if expr not in self.exprs.keys():
+                self.exprs[expr] = 1
+            else:
+                self.exprs[expr] += 1
 
             result_data = torch.einsum(expr, result_data, tensor.data)
 
@@ -36,6 +50,14 @@ class TorchBackend(ContractionBackend):
                 set(result_indices + tensor.indices),
                 key=int)
             )
+            
+            size = len(set(tensor.indices))
+            if size > width:
+                width = size
+
+            self.width_dict[width].add(expr)
+            self.width_bc[width][0] = len(self.width_dict[width])
+            self.width_bc[width][1] += 1
 
         if len(result_indices) > 0:
             if not no_sum:  # trim first index
@@ -54,6 +76,54 @@ class TorchBackend(ContractionBackend):
         else:
             result = qtree.optimizer.Tensor(f'E{tag}', result_indices,
                                 data=torch.sum(result_data, axis=0))
+        
+        print("summary:",sorted(self.exprs.items(), key=lambda x: x[1], reverse=True))
+        print("stats:",self.width_bc)
+        return result
+
+    def process_bucket_merged(self, ixs, bucket, no_sum=False):
+        result_indices = bucket[0].indices
+        # print("result_indices", result_indices)
+        result_data = bucket[0].data
+        all_indices = set(sum((list(t.indices) for t in bucket), []))
+        result_indices = all_indices - set(ixs)
+        all_indices_list = list(all_indices)
+        to_small_int = lambda x: all_indices_list.index(x)
+        tensors = []
+        is128 = False
+        for tensor in bucket:
+            if tensor.data.dtype in [torch.float64]:
+                tensors.append(tensor.data.type(torch.complex64))
+            else:
+                tensors.append(tensor.data)
+            if tensor.data.dtype == torch.complex128:
+                is128 = True
+        
+        if is128:
+            for i in range(len(tensors)):
+                tensors[i] = tensors[i].type(torch.complex128)
+        
+        expr = get_einsum_expr(bucket, all_indices_list, result_indices)
+        # print("expr:", expr)
+        if expr not in self.exprs.keys():
+            self.exprs[expr] = 1
+        else:
+            self.exprs[expr] += 1
+
+        expect = len(result_indices)
+        result_data = torch.einsum(expr, *tensors)
+
+        if len(result_indices) > 0:
+            first_index, *_ = result_indices
+            tag = str(first_index)
+        else:
+            tag = 'f'
+
+        result = qtree.optimizer.Tensor(f'E{tag}', result_indices,
+                            data=result_data)
+        
+        # print("summary:",sorted(self.exprs.items(), key=lambda x: x[1], reverse=True))
+        # print("# distinct buckets:", len(self.exprs))
         return result
 
     def get_sliced_buckets(self, buckets, data_dict, slice_dict):

@@ -201,9 +201,10 @@ def process_reduced_data(G, gamma, beta, edge, peo, backend_name, problem, repea
 
 if __name__ == '__main__':
     gen_sim = QAOAQtreeSimulator(QtreeQAOAComposer)
-    backends = ['tr_cutensor', 'tr_cupy', 'tr_torch', 'tr_einsum', 
-                'cutensor', 'cupy', 'torch_gpu', 
-                'torch_cpu', 'einsum',  'opt_einsum']
+    backends = ['tr_cutensor', 'tr_cupy', 'tr_torch', 'tr_einsum'
+                , 'cupy', 'torch_gpu' 
+                , 'torch_cpu', 'einsum',  'opt_einsum'
+                , 'cutensor']
 
 
     my_algo = 'rgreedy_0.05_30'
@@ -224,7 +225,7 @@ if __name__ == '__main__':
             all_lightcones_report = []
             for i, pack in enumerate(zip(G.edges, peos)): # i = lightcone
 
-                if i == 9:
+                if i <= 10:
                     edge, peo = pack
                     curr_report = process_reduced_data(G, gamma, beta, edge, peo, be, pb, 3, 114514, i, my_algo)
                     for c in curr_report:
