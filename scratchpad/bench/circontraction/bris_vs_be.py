@@ -32,7 +32,7 @@ def get_gpu_props_json():
         return None
 
 paramtest = [
-    [4,24,0]
+    [6,40,0]
 ]
 
 def mean_mmax(x: list):
@@ -122,8 +122,8 @@ def gen_circ_peo_report_mix(circuit, peo, backend_name, gen_base):
     curr_sim = QAOAQtreeSimulator(QtreeQAOAComposer,backend=curr_backend)
     curr_sim.simulate_batch(circuit, peo = peo)
     
-    curr_backend.cpu_be.gen_report(show = True)
-    curr_backend.gpu_be.gen_report(show = True)
+    curr_backend.cpu_be.gen_report(show = False)
+    curr_backend.gpu_be.gen_report(show = False)
 
     '''
     Merging two report table together
