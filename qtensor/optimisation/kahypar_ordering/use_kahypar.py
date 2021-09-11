@@ -58,13 +58,6 @@ def ka_hg_init(tn): # tn: a dictionary from circ2tn
         edge_weights.append(1)
         
     return nodes, edges, hyperedge_indices, hyperedges, edge_weights, node_weights, l
-     
-# def num_same_element(a:list, b:list):
-#     num = 0
-#     for i in a:
-#         if (i in b):
-#             num = num + 1
-#     return num    
 
 def single_partition(tn,**kwargs): 
     K = int(kwargs.get('K'))
@@ -72,8 +65,7 @@ def single_partition(tn,**kwargs):
     hypergraph = kahypar.Hypergraph(len(nodes), len(edges), hyperedge_indices, \
                                     hyperedges, K, edge_weights, node_weights)
     
-    ### Set context
-    # context = set_context(K = K, eps = 0.03, mode = 1, objective = 0)    
+    ### Set context  
     context = set_context(**kwargs)
     
     ### perform partition
@@ -103,10 +95,7 @@ def subgraph_partition(tn,**kwargs):
             if check is True:       
                 tn_partite[edge] = vertex 
                 continue 
-            # else: 
-            #     if num_same_element(partite_nodes_name, vertex) >= 2:
-            #         tn_partite[edge] = list(set(partite_nodes_name).intersection(set(vertex)))
-            #         continue                   
+                 
         tn_partite_list.append(tn_partite)
         
     return tn_partite_list
@@ -114,7 +103,6 @@ def subgraph_partition(tn,**kwargs):
 
 def recur_partition(tn,**kwargs):          
     # construct a tree, grow layer by layer
-    # order = []
     layer = 0;
     tn_partite_list = [[]]     
     # first partition     
@@ -165,12 +153,10 @@ def tree2order(tn,tn_partite_list):
     # find the order from top to bottom, arbitary K
     all_edge = list(tn.keys())
     layer_num = len(tn_partite_list) 
-    #K = len(tn_partite_list[0])
     order = []
     import copy
     order_tree = copy.deepcopy(tn_partite_list)
-    t = 0 # count the temp result in order_tree
-    #sub_opt = False # local order search for the subgraph               
+    t = 0 # count the temp result in order_tree               
     for layer in range(layer_num):
         if layer == 0: 
             # top layer   
@@ -224,173 +210,6 @@ def tree2order(tn,tn_partite_list):
     order_tree= [result] + order_tree
     return order,order_tree
 
-def tree2order_old(tn,tn_partite_list):
-    # find the order from top to bottom, K=2 only
-    all_edge = list(tn.keys())
-    layer_num = len(tn_partite_list) 
-    order = []
-    import copy
-    order_tree = copy.deepcopy(tn_partite_list)
-    t = 0 # count the temp result in order_tree
-    #sub_opt = False # local order search for the subgraph
-    for layer in range(layer_num):
-        if layer == 0: 
-            # top layer          
-            set_last1 = set(list(tn_partite_list[layer][0].keys()))
-            set_last2 = set(list(tn_partite_list[layer][1].keys()))  
-            result = list(set(all_edge) - set_last1 - set_last2)
-            if result == [] :
-                result = [f'temp_{t}']
-                t = t + 1
-            order.extend(result) 
-            
-            # layer0 and layer1
-            for (count,subgraph) in enumerate(tn_partite_list[layer]): 
-                set_last1 = set(list(tn_partite_list[layer+1][2*count].keys()))
-                set_last2 = set(list(tn_partite_list[layer+1][2*count+1].keys()))
-                result = list(set(subgraph) - set_last1 - set_last2)
-                if result == [] :
-                            result = [f'temp_{t}']
-                            t = t + 1
-                order[0:0]=result
-                order_tree[layer][count] = result
-        else:                        
-            #Middle layers, need to insert order 
-            for (count,subgraph) in enumerate(tn_partite_list[layer]):
-                if subgraph != {} : 
-                    node_list = list({l for word in list(subgraph.values()) for l in word}) 
-                    ind_last = []
-                    if layer != layer_num - 1: 
-                        # find the child node of the subgraph
-                        for (count_last,subgraph_last) in enumerate(tn_partite_list[layer+1]):
-                            if subgraph_last != {}:
-                                node_list_last = list({l for word in list(subgraph_last.values()) for l in word}) 
-                                check =  all(item in node_list for item in node_list_last) 
-                                if check is True:
-                                    ind_last.append(count_last)
-                    
-                    # if sub_opt is True: 
-                    #           # TODO: when the subgraph is small, call other order optimizor)
-                    #           #result=(local_search(subgraph))
-                    #           find parent set ...
-                    
-                            
-                    if len(ind_last) == 2:    
-                        set_last1 = set(list(tn_partite_list[layer+1][ind_last[0]].keys()))
-                        set_last2 = set(list(tn_partite_list[layer+1][ind_last[1]].keys()))
-                        result = list(set(subgraph) - set_last1 - set_last2)
-                        if result == [] :
-                            result = [f'temp_{t}']
-                            t = t + 1
-                            
-                        for (count_last,subgraph_last) in enumerate(tn_partite_list[layer-1]):      
-                            node_list_last = list({l for word in list(subgraph_last.values()) for l in word}) 
-                            check =  all(item in node_list_last for item in node_list)
-                            if check is True:
-                                partent_ind = count_last
-                        #assert len(partent_ind) == 1
-                        parent_set = list(order_tree[layer-1][partent_ind])
-                        '''
-                        while parent_set == []:
-                            temp_layer = layer
-                            if (partent_ind % 2 == 0):
-                                parent_set = list(order_tree[temp_layer-1][partent_ind+1])
-                                exist_order = [order.index(x) for x in list(parent_set) if x in order]
-                            else:
-                                parent_set = list(order_tree[temp_layer-1][partent_ind-1])
-                                exist_order = [order.index(x) for x in list(parent_set) if x in order]
-                            temp_layer = temp_layer - 1 
-                            for (count_last,subgraph_last) in enumerate(tn_partite_list[temp_layer-1]):      
-                                node_list_last = list({l for word in list(subgraph_last.values()) for l in word}) 
-                                check =  all(item in node_list_last for item in node_list)
-                                if check is True:
-                                    partent_ind = count_last
-                        '''
-                        exist_order = [order.index(x) for x in list(parent_set) if x in order]
-                        ind = min(exist_order)
-                        order[ind:ind]=result
-                        order_tree[layer][count] = result
-
-                    if len(ind_last) == 1: 
-                        set_last = set(list(tn_partite_list[layer+1][ind_last[0]].keys()))
-                        result = list(set(subgraph) - set_last)
-                        if result == [] :
-                            result = [f'temp_{t}']
-                            t = t + 1
-                        for (count_last,subgraph_last) in enumerate(tn_partite_list[layer-1]):      
-                            node_list_last = list({l for word in list(subgraph_last.values()) for l in word}) 
-                            check =  all(item in node_list_last for item in node_list)
-                            if check is True:
-                                partent_ind = count_last
-                        #assert len(partent_ind) == 1
-                        parent_set = list(order_tree[layer-1][partent_ind])
-                        '''
-                        while parent_set == []:
-                            temp_layer = layer
-                            if (partent_ind % 2 == 0):
-                                parent_set = list(order_tree[temp_layer-1][partent_ind+1])
-                                exist_order = [order.index(x) for x in list(parent_set) if x in order]
-                            else:
-                                parent_set = list(order_tree[temp_layer-1][partent_ind-1])
-                                exist_order = [order.index(x) for x in list(parent_set) if x in order]
-                            temp_layer = temp_layer - 1 
-                            for (count_last,subgraph_last) in enumerate(tn_partite_list[temp_layer-1]):      
-                                node_list_last = list({l for word in list(subgraph_last.values()) for l in word}) 
-                                check =  all(item in node_list_last for item in node_list)
-                                if check is True:
-                                    partent_ind = count_last
-                        '''
-                        exist_order = [order.index(x) for x in list(parent_set) if x in order]
-                        ind = min(exist_order)
-                        order[ind:ind]=result
-                    order_tree[layer][count] = result
-                    
-                    if len(ind_last) == 0:
-                        result = list(subgraph)
-                        if result == [] :
-                            result = [f'temp_{t}']
-                            t = t + 1
-                        for (count_last,subgraph_last) in enumerate(tn_partite_list[layer-1]):      
-                            node_list_last = list({l for word in list(subgraph_last.values()) for l in word}) 
-                            check =  all(item in node_list_last for item in node_list)
-                            if check is True:
-                                partent_ind = count_last
-                        #assert len(partent_ind) == 1
-                        parent_set = list(order_tree[layer-1][partent_ind])
-                        '''
-                        while parent_set == []:
-                            temp_layer = layer
-                            if (partent_ind % 2 == 0):
-                                parent_set = list(order_tree[temp_layer-1][partent_ind+1])
-                                exist_order = [order.index(x) for x in list(parent_set) if x in order]
-                            else:
-                                parent_set = list(order_tree[temp_layer-1][partent_ind-1])
-                                exist_order = [order.index(x) for x in list(parent_set) if x in order]
-                            temp_layer = temp_layer - 1 
-                            if temp_layer >= 0:
-                                for (count_last,subgraph_last) in enumerate(tn_partite_list[temp_layer-1]):      
-                                    node_list_last = list({l for word in list(subgraph_last.values()) for l in word}) 
-                                    check =  all(item in node_list_last for item in node_list)
-                                    if check is True:
-                                        partent_ind = count_last
-                            else:
-                                continue
-                        '''
-                        exist_order = [order.index(x) for x in list(parent_set) if x in order]
-                        ind = min(exist_order)
-                        order[ind:ind]=result
-                        order_tree[layer][count] = result
-                        
-    order = [x for x in order if type(x) != str]
-    assert len(order) == len(all_edge)
-    # complete the top of order_tree
-    set_last1 = set(list(tn_partite_list[0][0].keys()))
-    set_last2 = set(list(tn_partite_list[0][1].keys()))  
-    result = list(set(all_edge) - set_last1 - set_last2)
-    order_tree= [result] + order_tree
-    return order,order_tree
-
-def tree2order_old_2(tn,tn_partite_list):
     # find the order from bottom to top
     # correct order_tree, 
     # TODO: there is some bugs in order insertion (find the index of children)
@@ -534,4 +353,4 @@ def tree2order_old_2(tn,tn_partite_list):
     assert len(order) == len(all_edge)
     order_tree = order_tree[::-1]
     
-    return order, order_tree
+    return order, order_tre
