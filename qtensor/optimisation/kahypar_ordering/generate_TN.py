@@ -1,7 +1,7 @@
 from typing import List, Dict, Hashable, Iterable
 import qtree
 import qtensor
-
+from qtensor.optimisation.TensorNet import QtreeTensorNet
 
 Edge = Iterable[Hashable]
 Hypergraph = Dict[Hashable, Edge]
@@ -24,8 +24,7 @@ def circ2tn(circuit: List[qtree.operators.Gate]):
     TN = dual_hg(dual_tn)
     return TN
 
-def tn2tn(tn: qtensor.optimisation.TensorNet.QtreeTensorNet): 
-    #tn = qtensor.optimisation.QtreeTensorNet.from_qtree_gates(circuit)
+def tn2tn(tn: QtreeTensorNet): 
     dual_tn = { str(hex(id(t))):t.indices for t in tn.tensors }
     TN = dual_hg(dual_tn)
     return TN
