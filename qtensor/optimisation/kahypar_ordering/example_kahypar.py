@@ -26,8 +26,9 @@ k = 2
 hypergraph = kahypar.Hypergraph(num_nodes, num_nets, hyperedge_indices, hyperedges, k, edge_weights, node_weights)
 
 context = kahypar.Context()
-context.loadINIconfiguration("/Users/zichanghe/Desktop/kahypar/config/cut_rKaHyPar_sea20.ini")
-
+#context.loadINIconfiguration("/Users/zichanghe/Desktop/kahypar/config/cut_rKaHyPar_sea20.ini")
+context.loadINIconfiguration("/Users/zichanghe/Desktop/QTensor/qtensor/optimisation/kahypar_ordering/config\
+/cut_rKaHyPar_sea20.ini")
 context.setK(k)
 context.setEpsilon(0.03)
 

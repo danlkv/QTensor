@@ -1,8 +1,10 @@
+#!/usr/bin/env python
 #####
-# For myself reference only
+# This script for myself reference only
 #####
 import qtensor
 from qtensor.optimisation.kahypar_ordering import generate_TN
+import numpy as np
 
 def test_dual_hg():
     hg = {1: [1, 2, 3], 2: [1, 4], 3: []}
@@ -65,25 +67,25 @@ def test_Kahypar(tn, compare = True, plot = False):
         kahypar_peo, _ = kahypar_opt.optimize(tn)
     kahypar_contraction_width = kahypar_opt.treewidth
     print(kahypar_peo)
-    
+    kahypar_peo = [int(x) for x in kahypar_peo]
     if compare == True: 
         ### compare with random 
         # from itertools import permutations
         # from random import choice
         # permutation_list = list(permutations(range(min(peo), max(peo)+1))
         # sequence = [i for i in range(len(permutation_list))]
-        contraction_width_list = []; 
-        import numpy as np
-        np.random.seed(1)
-        with timing() as t_random:
-            for _ in range(1):
-                random_peo=np.random.permutation(kahypar_peo)
-                nodes, ngh = utils.get_neighbors_path(line_graph, list(random_peo))
-                contraction_width_list.append(max(ngh))
+        # contraction_width_list = []; 
+        # import numpy as np
+        # np.random.seed(1)
+        # with timing() as t_random:
+        #     for _ in range(1):
+        #         random_peo=np.random.permutation(kahypar_peo)
+        #         nodes, ngh = utils.get_neighbors_path(line_graph, list(random_peo))
+        #         contraction_width_list.append(max(ngh))
                 
         
         ### compare with tamaki 
-        tamaki_opt = TamakiOptimizer(wait_time=1) # time to run tamaki, in seconds
+        tamaki_opt = TamakiOptimizer(wait_time=10) # time to run tamaki, in seconds
         with timing() as t_tamaki:
             tamaki_peo, _ = tamaki_opt.optimize(tn)
         #tamaki_peo = tamaki_peo[2*N:len(tamaki_peo)]
@@ -101,14 +103,14 @@ def test_Kahypar(tn, compare = True, plot = False):
         greedy_contraction_width = greed_opt.treewidth
         print('--Width--')
         print(f'Partition contraction width: {kahypar_contraction_width}') 
-        print(f'Min random contraction width: {min(contraction_width_list)}') 
+        # print(f'Min random contraction width: {min(contraction_width_list)}') 
         print(f'Tamaki contraction width: {tamaki_contraction_width}')
         print(f'Greedy contraction width: {greedy_contraction_width}')
         print()
         
         print('--Time--')
         print(f'Kahypa: {t_kahypar.result}') 
-        print(f'Random: {t_random.result}') 
+        # print(f'Random: {t_random.result}') 
         print(f'Tamaki: {t_tamaki.result}')
         print(f'Greedy: {t_greedy.result}')
         print()
@@ -170,17 +172,18 @@ if __name__=='__main__':
     #tn ={'v_1': ['A','C'], 'v_2':['A','B'], 'v_3':['B','C','D'], 
     #         'v_4':['C','E'], 'v_5':['D','F'], 'v_6':['E','F']}
     import networkx as nx
-    N = 50 # the larger the harder
-    p = 3 # the larger the harder
+    N = 40 # the larger the harder
+    p = 2 # the larger the harder
     #g = nx.path_graph(N) # simple graph structure
     g = nx.random_regular_graph(3, N) # more complicated structure
-    comp = qtensor.DefaultQAOAComposer(g, gamma=[1]*p, beta=[2]*p)
+    #comp = qtensor.DefaultQAOAComposer(g, gamma=[1]*p, beta=[2]*p)
+    comp = qtensor.DefaultQAOAComposer(g, gamma=[np.pi/5]*p, beta=[np.pi/5]*p)
     comp.ansatz_state()
     circ = comp.circuit
     tn=qtensor.optimisation.QtreeTensorNet.from_qtree_gates(circ)
     
     ### test via optimizer class
-    test_Kahypar(tn, compare = False)
+    test_Kahypar(tn, compare = True)
     
     ### test without optimizer class
     # from qtensor.optimisation.kahypar_ordering import use_kahypar
