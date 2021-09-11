@@ -29,6 +29,14 @@ class NumpyTranspoedBackend(TransposedBackend):
     @staticmethod
     def get_argsort(*args):
         return np.argsort(*args)
+    
+    def get_dtype(self, dtype:str):
+        return {
+            'float32': 'float'
+            , 'float64': 'double'
+            , 'complex64': 'complex64'
+            , 'complex128': 'complex128'
+        }[dtype]
 
 
 class TorchTransposedBackend(TransposedBackend):
@@ -63,7 +71,24 @@ class TorchTransposedBackend(TransposedBackend):
             else:
                 data = torch.from_numpy(data)
         return data
-
+    
+    def get_dtype(self, dtype:str):
+        return {
+            'torch.float32': 'float'
+            , 'torch.float64': 'double'
+            , 'torch.complex64': 'complex64'
+            , 'torch.complex128': 'complex128'
+        }[dtype]
+    
+    def convert_type(self, a, b):
+        a_type = self.get_dtype(str(a.dtype))
+        b_type = self.get_dtype(str(b.dtype))
+        if a_type != b_type:
+            if self.dtype.index(a_type) > self.dtype.index(b_type):
+                b = b.type(a.dtype)
+            else:
+                a = a.type(b.dtype)
+        return a, b
 
 
 class CupyTransposedBackend(TransposedBackend):
@@ -94,6 +119,14 @@ class CupyTransposedBackend(TransposedBackend):
         if self.device == 'gpu':
             data = cp.asarray(data)
         return data
+    
+    def get_dtype(self, dtype:str):
+        return {
+            'float32': 'float'
+            , 'float64': 'double'
+            , 'complex64': 'complex64'
+            , 'complex128': 'complex128'
+        }[dtype]
 
 
 class CutensorTransposedBackend(CupyTransposedBackend):
@@ -113,9 +146,7 @@ class CutensorTransposedBackend(CupyTransposedBackend):
     def get_transpose(data, *axis):
         return data.transpose(*axis)
     
-    @staticmethod
-    def get_ready(contraction, a, b):
-
+    def get_ready(self, contraction, a, b):
         # get ready
         inp, out = contraction.split('->')
         size = inp.split(',')
@@ -126,10 +157,10 @@ class CutensorTransposedBackend(CupyTransposedBackend):
         # generate tensor c
         shape_a, shape_b = a.shape, b.shape
         shape_c = tuple((shape_a[1], shape_a[2], shape_b[2]))
-        c = cp.random.rand(*shape_c).astype(a.dtype)
 
-        # manually cast b to a's type
-        b = b.astype(a.dtype)
+        # manually cast type
+        a, b = self.convert_type(a, b)
+        c = cp.random.rand(*shape_c).astype(a.dtype)
 
         # generate tensor descriptor
         desc_a = cupy_cutensor.create_tensor_descriptor(a)

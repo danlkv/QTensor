@@ -46,6 +46,12 @@ class PerfBackend(ContractionBackend):
                          , callback=self._profile_callback):
             return self.backend.process_bucket(bucket, no_sum=no_sum)
 
+    def process_bucket_merged(self, ixs, bucket, no_sum=False):
+        indices = [tensor.indices for tensor in bucket]
+        with timing('process bucket time', indices
+                         , callback=self._profile_callback):
+            return self.backend.process_bucket_merged(ixs, bucket, no_sum=no_sum)
+
     def get_sliced_buckets(self, buckets, data_dict, slice_dict):
         return self.backend.get_sliced_buckets(buckets, data_dict, slice_dict)
 
@@ -109,12 +115,14 @@ class PerfBackend(ContractionBackend):
         # -- report on totals
         # max_line should not be inolved for recording
         for indices, time in  data:
+            max_size = len(set.union(*[set(i) for i in indices]))
             self.report_table.record(
                 bucket_len = len(indices)
                 , time = time
                 , flop = self._perfect_bucket_flop(indices)
                 , FLOPS = self._perfect_bucket_flop(indices)/time
-                , max_size = max([len(ixs) for ixs in indices])
+                # , max_size = max([len(ixs) for ixs in indices])
+                , max_size = max_size
                 , min_size = min([len(ixs) for ixs in indices])
                 , width = _accurateBucketWidth(indices)
                 , result_size = len(set.union(*[set(i) for i in indices])) - 1
@@ -151,6 +159,9 @@ class GPUPerfBackend(PerfBackend):
         end.record()
         torch.cuda.synchronize()
         time= start.elapsed_time(end)/1000
+
+        # sorted(self.backend.exprs.items(), key=lambda x: x[1], reverse=True)
+        # print("summary:",sorted(self.backend.exprs.items(), key=lambda x: x[1], reverse=True))
 
         self._profile_callback(time,'process bucket time',indices)
         return out

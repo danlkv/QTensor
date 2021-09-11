@@ -3,6 +3,7 @@ import qtree
 import numpy as np
 from qtree import np_framework
 from qtensor.contraction_backends import ContractionBackend
+from qtensor.contraction_backends.numpy import get_einsum_expr
 def qtree2torch_tensor(tensor, data_dict):
     """ Converts qtree tensor to pytorch tensor using data dict"""
     if isinstance(tensor.data, torch.Tensor):
@@ -19,6 +20,11 @@ def qtree2torch_tensor(tensor, data_dict):
 class TorchBackend(ContractionBackend):
     def __init__(self, device = "gpu"):
         self.device = device
+        self.dtype = ['float', 'double', 'complex64', 'complex128']
+        self.width_dict = [set() for i in range(30)]
+        self.width_bc = [[0,0] for i in range(30)] #(#distinct_bc, #bc)
+        self.exprs = {}
+
 
     def process_bucket(self, bucket, no_sum=False):
         result_indices = bucket[0].indices
@@ -92,6 +98,82 @@ class TorchBackend(ContractionBackend):
                                 data=torch.sum(result_data, axis=0))
         return result
 
+    def process_bucket_merged(self, ixs, bucket, no_sum=False):
+        result_indices = bucket[0].indices
+        # print("result_indices", result_indices)
+        result_data = bucket[0].data
+
+        if not isinstance(result_data, torch.Tensor):
+            #print("Encountering: ",type(result_data))           
+            if self.device == 'gpu' and torch.cuda.is_available():
+                cuda = torch.device('cuda')
+                result_data = torch.from_numpy(result_data).to(cuda)
+            else:
+                result_data = torch.from_numpy(result_data)
+
+
+
+
+        all_indices = set(sum((list(t.indices) for t in bucket), []))
+        result_indices = all_indices - set(ixs)
+        all_indices_list = list(all_indices)
+        to_small_int = lambda x: all_indices_list.index(x)
+        tensors = []
+        is128 = False
+        for tensor in bucket:
+
+            if not isinstance(tensor._data, torch.Tensor):             
+                if self.device == 'gpu' and torch.cuda.is_available():
+                    cuda = torch.device('cuda')
+                    tensor._data = torch.from_numpy(tensor._data).to(cuda)
+                else:
+                    tensor._data = torch.from_numpy(tensor._data)
+            
+            if self.device == 'gpu':
+                if result_data.device != "gpu":
+                    result_data = result_data.to(torch.device('cuda'))
+                if tensor.data.device != "gpu":
+                    tensor._data = tensor._data.to(torch.device("cuda"))
+            else:
+                if result_data.device != "cpu":
+                    result_data = result_data.cpu()
+                if tensor.data.device != "cpu":
+                    tensor._data = tensor._data.cpu()
+
+            if tensor.data.dtype in [torch.float64]:
+                tensors.append(tensor.data.type(torch.complex64))
+            else:
+                tensors.append(tensor.data)
+            if tensor.data.dtype == torch.complex128:
+                is128 = True
+        
+        if is128:
+            for i in range(len(tensors)):
+                tensors[i] = tensors[i].type(torch.complex128)
+        
+        expr = get_einsum_expr(bucket, all_indices_list, result_indices)
+        # print("expr:", expr)
+        if expr not in self.exprs.keys():
+            self.exprs[expr] = 1
+        else:
+            self.exprs[expr] += 1
+
+        expect = len(result_indices)
+        result_data = torch.einsum(expr, *tensors)
+
+        if len(result_indices) > 0:
+            first_index, *_ = result_indices
+            tag = str(first_index)
+        else:
+            tag = 'f'
+
+        result = qtree.optimizer.Tensor(f'E{tag}', result_indices,
+                            data=result_data)
+        
+        # print("summary:",sorted(self.exprs.items(), key=lambda x: x[1], reverse=True))
+        # print("# distinct buckets:", len(self.exprs))
+        return result
+        
     def get_sliced_buckets(self, buckets, data_dict, slice_dict):
         sliced_buckets = []
         for bucket in buckets:

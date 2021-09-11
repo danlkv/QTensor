@@ -57,6 +57,7 @@ def AccurateBucketWidth(bucket):
 
 '''
 I/O: Actual BE Objects -> Wrapped Class
+TODO: process_bucket_merged() for its own, when when we test the merged simulators, we create the merged simulator
 '''
 
 class MixBackend(ContractionBackend):
@@ -76,6 +77,13 @@ class MixBackend(ContractionBackend):
             return self.gpu_be.process_bucket(bucket, no_sum)
         else:
             return self.cpu_be.process_bucket(bucket, no_sum)
+
+    def process_bucket_merged(self,ixs, bucket, no_sum=False):
+        accu_width = AccurateBucketWidth(bucket)
+        if accu_width >= self.watershed:
+            return self.gpu_be.process_bucket_merged(ixs, bucket, no_sum)
+        else:
+            return self.cpu_be.process_bucket_merged(ixs, bucket, no_sum)
 
     def get_sliced_buckets(self, buckets, data_dict, slice_dict):
         return self.cpu_be.get_sliced_buckets(buckets, data_dict, slice_dict)

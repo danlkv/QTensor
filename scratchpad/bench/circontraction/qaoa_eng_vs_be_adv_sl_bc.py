@@ -9,7 +9,7 @@ from qtensor import QtreeQAOAComposer
 from qtensor import QAOAQtreeSimulator
 from qtensor.contraction_backends import get_backend, get_cpu_perf_backend, get_gpu_perf_backend
 
-gpu_backends = ['torch_gpu', 'cupy', 'tr_torch', 'tr_cupy', 'tr_cutensor']
+gpu_backends = ['torch_gpu', 'cupy', 'cutensor', 'tr_torch', 'tr_cupy', 'tr_cutensor']
 cpu_backends = ['einsum', 'torch_cpu', 'mkl', 'opt_einsum', 'tr_einsum', 'opt_einsum']
 
 timing = pyrofiler.timing
@@ -44,9 +44,10 @@ def get_gpu_props_json():
         return None
 
 paramtest = [
-    [4,4,3,"random"]
-    ,[10, 5, 2, 'random']
-    ,[14, 1, 3, 'random']
+     [24, 4, 3, 'random']
+    # [4,4,3,"random"]
+    # ,[10, 5, 2, 'random']
+    # ,[14, 1, 3, 'random']
     # ,[3, 3, 0, 'grid2d']
     # ,[8, 4, 0, 'line']
 ]
@@ -190,7 +191,7 @@ def process_reduced_data(G, gamma, beta, edge, peo, backend_name, problem, repea
                     "d" :problem[2] ,
                     'type': problem[3]
                     }
-        bi_json_usable["experiment_group"] = "Angela_nslb_circuit"
+        bi_json_usable["experiment_group"] = "Angela_nslb_circuit_all"
         lc_collection.append(bi_json_usable)
     #print(json.dumps(lc_collection, indent = 4))
 
@@ -201,7 +202,11 @@ def process_reduced_data(G, gamma, beta, edge, peo, backend_name, problem, repea
 
 if __name__ == '__main__':
     gen_sim = QAOAQtreeSimulator(QtreeQAOAComposer)
-    backends = ['einsum', 'torch_cpu', 'opt_einsum', 'tr_einsum', 'opt_einsum', 'torch_gpu', 'cupy', 'tr_cupy', 'tr_cutensor'] #'tr_torch'
+    backends = ['tr_cutensor', 'tr_cupy', 'tr_torch', 'tr_einsum'
+                , 'cupy', 'torch_gpu' 
+                , 'torch_cpu', 'einsum',  'opt_einsum'
+                , 'cutensor']
+
 
     my_algo = 'rgreedy_0.05_30'
 
