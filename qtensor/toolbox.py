@@ -15,18 +15,20 @@ from qtensor import tools
 import qtensor
 
 def bethe_graph(p, degree):
-    def add_two_nodes_to_leafs(graph):
+    def add_nodes_to_leafs(graph, deg=3):
         """ Works in-place """
-        leaves = [n for n in graph.nodes() if graph.degree(n) <= degree-2]
+        leaves = [n for n in graph.nodes() if graph.degree(n) <= 1]
         n = graph.number_of_nodes()
         for leaf in leaves:
-            next_edges = [(leaf, n+x) for x in range(1, degree)]
+            next_edges = [(leaf, n+x) for x in range(1, deg)]
             graph.add_edges_from(next_edges)
-            n += 2
+            n += deg-1
     graph = nx.Graph()
     graph.add_edges_from([(0,1)])
     for i in range(p):
-        add_two_nodes_to_leafs(graph)
+        add_nodes_to_leafs(graph, deg=degree)
+    n = graph.number_of_nodes()
+    assert n == 2*sum([(degree-1)**y for y in range(p+1)])
     return graph
 
 def random_graph(nodes, type='random', **kwargs):

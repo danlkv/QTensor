@@ -101,7 +101,14 @@ def simplify_qtree_circuit(qtreeCircuit):
     for gate in simplified:
         GateClass = GATE_MAP[gate.__class__]
         if issubclass(GateClass, ParametricGate):
-            qtree_gate = GateClass(*gate.index, alpha=gate.angle)
+            try:
+                qtree_gate = GateClass(*gate.index, alpha=gate.angle, beta=gate.angle)
+            except:
+                pass
+            try:
+                qtree_gate = GateClass(*gate.index, alpha=gate.angle)
+            except:
+                pass
         else:
             qtree_gate = GateClass(*gate.index)
         qtree_circuit.append(qtree_gate)
