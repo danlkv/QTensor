@@ -205,7 +205,7 @@ def collect_reports(circuit, peo, backend_name, repeat, gen_base):
         if type(backend_name) == list:
             if backend_name[-1] == "merged":
                 if len(backend_name) == 2:
-                    titles, report_table = gen_circ_peo_report(circuit, peo, backend_name, gen_base, True)
+                    titles, report_table = gen_circ_peo_report(circuit, peo, backend_name[0], gen_base, True)
                 else:
                     titles, report_table = gen_circ_peo_report_mix(circuit, peo, backend_name, gen_base, True)
             else:
@@ -277,7 +277,7 @@ def process_reduced_data(circuit, peo, backend_name, problem, repeat, gen_base, 
 
 
 if __name__ == '__main__':
-    backends = [["einsum","cupy",16,"merged"], ["einsum","cupy",16],"einsum"] #'tr_torch'
+    backends = [["einsum","merged"]] #'tr_torch'
     my_algo = 'greedy'
     my_reap = 3
     for pb in [paramtest[0]]:
