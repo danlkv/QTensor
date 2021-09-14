@@ -1,5 +1,6 @@
 import json
-from functools import lru_cache
+from functools import lru_cache, reduce
+from scratchpad.bench.circontraction.qaoa_eng_vs_be_adv_sl_bc import get_test_problem
 import numpy as np
 import networkx as nx
 import platform
@@ -34,7 +35,7 @@ def get_gpu_props_json():
         return None
 
 paramtest = [
-    [6,40,0]
+    [12,4,3,"random"]
 ]
 
 def mean_mmax(x: list):
@@ -57,22 +58,29 @@ def format_flops(flops):
 '''
 TODO:
 Objective 1:
-I/O: problem description -> circ collection
+I/O: problem description -> circuits for the entire graph
 '''
-def gen_bris_circ(d,l,s):
-    _, circ = qc.get_bris_circuit(d,l,s)
-    circ = sum(circ, [])
-    return circ
+def gen_QAOA_circs(G, gamma, beta):
+    gen_sim = QAOAQtreeSimulator(QtreeQAOAComposer)
+    circs = []
+    for edge in G.edges:
+        circ = gen_sim._edge_energy_circuit(G, gamma, beta, edge)
+        circs.append(circ)
+    return circs
+
 
 '''
 TODO:
-I/O: a circuit -> gets peos
+I/O: circuits -> gets peos
 '''
-def gen_circ_peo(circuit, algo):
-    tn = qtensor.optimisation.TensorNet.QtreeTensorNet.from_qtree_gates(circuit)
-    opt = qtensor.toolbox.get_ordering_algo(algo)
-    peo, _ = opt.optimize(tn)
-    return peo
+def gen_circs_peos(circuits, algo):
+    peos = []
+    for circ  in circuits:
+        tn = qtensor.optimisation.TensorNet.QtreeTensorNet.from_qtree_gates(circ)
+        opt = qtensor.toolbox.get_ordering_algo(algo)
+        peo, _ = opt.optimize(tn)
+        peos.append(peo)
+    return peos
 
 '''
 TODO:
@@ -252,11 +260,12 @@ def process_reduced_data(circuit, peo, backend_name, problem, repeat, gen_base, 
             else:
                 bi_json_usable[attr] = report[i]
         bi_json_usable["problem"] = {
-                    "d" :problem[0] , 
-                    "l" :problem[1] ,
-                    "s" :problem[2]
+                    "n" :problem[0] , 
+                    "p" :problem[1] ,
+                    "d" :problem[2] ,
+                    "type": problem[3]
                     }
-        bi_json_usable["experiment_group"] = "Chen_Bris_Test"
+        bi_json_usable["experiment_group"] = "Chen_QAOA_Mix_Merge_Test"
         lc_collection.append(bi_json_usable)
     #print(json.dumps(lc_collection, indent = 4))
 
@@ -268,16 +277,20 @@ def process_reduced_data(circuit, peo, backend_name, problem, repeat, gen_base, 
 
 
 if __name__ == '__main__':
-    backends = [["torch_cpu","torch_gpu",12,"merged"]] #'tr_torch'
+    backends = [["einsum","cupy",16,"merged"], ["einsum","cupy",16],"einsum"] #'tr_torch'
     my_algo = 'greedy'
     my_reap = 3
     for pb in [paramtest[0]]:
-        d,l,s = pb
+        n, p, d, ttype = pb
         with timing(callback=lambda x: None) as gen_pb:
-            curr_circ = gen_bris_circ(d,l,s)
-            curr_peo = gen_circ_peo(curr_circ, my_algo)
+            G, gamma, beta = get_test_problem(n = n, p = p, d = d, type = ttype)
+            circs = gen_QAOA_circs(G, gamma, beta)
+            peos = gen_circs_peos(circs,my_algo)
+
         gen_base = gen_pb.result
-        for be in [backends[0]]:
-            lc_collection = process_reduced_data(curr_circ, curr_peo, be, pb, my_reap, gen_base, my_algo)
-            for c in lc_collection:
-                print(json.dumps(c))
+        for be in backends:
+            for i, pack in enumerate(zip(circs, peos)):
+                circ, peo = pack
+                curr_report = process_reduced_data(circ,peo, be, pb, my_reap, gen_base, my_algo)
+                for c in curr_report:
+                    print(json.dumps(c))
