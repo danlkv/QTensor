@@ -51,7 +51,7 @@ class CircuitComposer():
         for q in self.qubits:
             self.apply_gate(self.operators.H, q)
 
-    def expectation(self, operator, *qubits, **params):
+    def expectation(self, operator, *qubits, simplify='auto', **params):
         """
         Args:
             operator: an element from OpFactory
@@ -71,6 +71,11 @@ class CircuitComposer():
 
         circ = first_part.circuit + second_part.circuit
         do_simplify = len(circ) < 100
+        if simplify is True:
+            do_simplify = True
+        if simplify is False:
+            do_simplify = False
+
         if do_simplify:
             try:
                 circ = qtensor.simplify_circuit.simplify_qtree_circuit(circ)
