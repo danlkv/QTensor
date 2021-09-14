@@ -34,8 +34,7 @@ def get_gpu_props_json():
         return None
 
 paramtest = [
-    [6,40,0],
-    [30,4,3,"random"]
+    [6,40,0]
 ]
 
 def mean_mmax(x: list):
@@ -269,7 +268,7 @@ def process_reduced_data(circuit, peo, backend_name, problem, repeat, gen_base, 
 
 
 if __name__ == '__main__':
-    backends = [["einsum","cupy",12,"merged"]] #'tr_torch'
+    backends = [["torch_cpu","torch_gpu",12,"merged"]] #'tr_torch'
     my_algo = 'greedy'
     my_reap = 3
     for pb in [paramtest[0]]:
