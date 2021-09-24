@@ -16,7 +16,7 @@ dtype_t = {
     ,'complex128': np.complex128
 }
 
-m = 4096
+m = 8192
 sizes = [m, m]
 for type in dtype:
     mat_a = np.random.rand(*sizes).astype(dtype_t[type])
