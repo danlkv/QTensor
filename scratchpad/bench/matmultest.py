@@ -16,14 +16,16 @@ dtype_t = {
     ,'complex128': np.complex128
 }
 
-sizes = [8192, 8192]
+m = 4096
+sizes = [m, m]
 for type in dtype:
     mat_a = np.random.rand(*sizes).astype(dtype_t[type])
     mat_b = np.random.rand(*sizes).astype(dtype_t[type])
     with pyrofiler.timing(callback=lambda x: None) as gen:
         mat_c = np.matmul(mat_a, mat_b)
-    print(gen.result)
+    # print(gen.result)
     ops = 8192 * 8192 * 8192
     flops = prefix[type] * ops / gen.result
+    print("************************")
     print("dtype:", type)
     print("flops:", flops)
