@@ -5,6 +5,7 @@ Created on Tue Oct 27 14:54:39 2020
 @author: jonat
 """
 from numpy import pi, argsort, sqrt, diff, array, random
+import numpy as np
 import time
 from qtensor.simplify_circuit.gates import zzphase, xphase, yphase, zphase, hadamard, ident, cnot, toffoli
 
@@ -66,8 +67,15 @@ def does_this_simplify(op1,op2,return_ops = True):
     
     # This could be sped up with inplace operations...
     # 1100nsec
+    if isinstance(op1.angle, dict) and isinstance(op2.angle, dict):
+        if all([np.isclose(a, -b) for a, b in zip(op1.angle.values(), op2.angle.values())]):
+            return ident(), ident()
+
+
+
+
     if abs(op1.angle+op2.angle)<1e-5: # Two gates cancel
-        return ident(),ident()
+        return ident(), ident()
     # 1200nsec
     return ident(),type(op1)(*op1.index,op1.angle + op2.angle) # DIRTY DIRTY CODE
 

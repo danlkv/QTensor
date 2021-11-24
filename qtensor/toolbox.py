@@ -6,7 +6,15 @@ import time
 from multiprocessing.dummy import Pool
 
 from qtensor.optimisation.TensorNet import QtreeTensorNet
-from qtensor.optimisation.Optimizer import GreedyOptimizer, TamakiOptimizer, WithoutOptimizer, TamakiTrimSlicing, DefaultOptimizer, KahyparOptimizer
+from qtensor.optimisation.Optimizer import (
+    GreedyOptimizer,
+    TamakiOptimizer,
+    TamakiExactOptimizer,
+    WithoutOptimizer,
+    TamakiTrimSlicing,
+    DefaultOptimizer,
+    KahyparOptimizer
+)
 
 from qtensor.optimisation import RGreedyOptimizer, LateParOptimizer
 from qtensor.utils import get_edge_subgraph
@@ -78,6 +86,8 @@ def get_ordering_algo(ordering_algo, par_vars=0, **kwargs) -> qtensor.optimisati
         if 'slice' in ordering_algo:
             max_tw = 25
             optimizer = TamakiTrimSlicing(max_tw=max_tw, wait_time=wait_time, **kwargs)
+        if 'exact' in ordering_algo:
+            optimizer = TamakiExactOptimizer(**kwargs)
         else:
             optimizer = TamakiOptimizer(wait_time=wait_time, **kwargs)
     elif 'rgreedy' in ordering_algo:

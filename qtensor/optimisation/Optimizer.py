@@ -253,6 +253,23 @@ class TamakiOptimizer(GreedyOptimizer):
         self.treewidth = tw
         return peo, [tw]
 
+class TamakiExactOptimizer(GreedyOptimizer):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+    def _get_ordering(self, graph, inplace=True):
+        node_names = nx.get_node_attributes(graph, 'name')
+        node_sizes = nx.get_node_attributes(graph, 'size')
+        peo, tw = qtree.graph_model.peo_calculation.get_upper_bound_peo_pace2017_interactive(
+                graph, method="tamaki_exact", max_time=np.inf)
+
+
+        peo = [qtree.optimizer.Var(var, size=node_sizes[var],
+                        name=node_names[var])
+                    for var in peo]
+        self.treewidth = tw
+        return peo, [tw]
+
 class TreeTrimSplitter(SlicesOptimizer):
     cost_type = 'length'
     def _split_graph(self, p_graph, max_tw):

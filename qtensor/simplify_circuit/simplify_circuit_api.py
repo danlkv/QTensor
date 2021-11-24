@@ -92,7 +92,8 @@ def simplify_qtree_circuit(qtreeCircuit):
             sign_of_param = -1 if '+' in qtreeGate.name else 1
             if hasattr(qtreeGate, 'parameter_count'):
                 if qtreeGate.parameter_count > 1:
-                    gate = GateClass(*qtreeGate.qubits, angle=qtreeGate.parameters)
+                    params = {k: sign_of_param*v for k, v in qtreeGate.parameters.items()}
+                    gate = GateClass(*qtreeGate.qubits, angle=params)
                 else:
                     gate = GateClass(*qtreeGate.qubits, angle=sign_of_param*qtreeGate.parameters['alpha'])
             else:
@@ -101,6 +102,7 @@ def simplify_qtree_circuit(qtreeCircuit):
             gate = GateClass(*qtreeGate.qubits)
         circuit.append(gate)
 
+    #print('circ', circuit)
     simplified = simplify_circuit(circuit)
 
     qtree_circuit = []
