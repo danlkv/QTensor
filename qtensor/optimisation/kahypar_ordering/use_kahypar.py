@@ -3,7 +3,7 @@ This module implements interface to KaHypar program.
 """
 #import qtensor
 #from qtensor.optimisation.kahypar_ordering import generate_TN
-import kahypar as kahypar
+from qtensor.tools.lazy_import import kahypar
 from os.path import join, abspath, dirname
 
 # -- Timing
