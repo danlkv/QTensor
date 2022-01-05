@@ -8,11 +8,16 @@ import qtensor
 from qtensor import QtreeQAOAComposer
 from qtensor import QAOAQtreeSimulator
 from qtensor.contraction_backends import get_cpu_perf_backend, get_gpu_perf_backend
+from scipy.optimize import curve_fit
+import matplotlib.pyplot as plt
 
 gpu_backends = ['torch_gpu', 'cupy', 'tr_torch', 'tr_cupy', 'tr_cutensor']
 cpu_backends = ['einsum', 'torch_cpu', 'mkl', 'opt_einsum', 'tr_einsum', 'opt_einsum']
 timing = pyrofiler.timing
 
+def func(x,a,b,c,d):
+    # return (a*np.power(x1,-n))
+    return a*np.power(b, c*x) + d
 
 @lru_cache
 def get_test_problem(n=10, p=2, d=3, type='random'):
@@ -198,6 +203,7 @@ def process_reduced_data(G, gamma, beta, edge, peo, backend_name, problem, repea
 
 '''
 Function: Takes in the total report for a backend, and generate the array_index -> sum time
+Update1: Change sum time to mean time
 '''
 def process_all_lc_reports(be_lc_reports:list):
 
@@ -212,39 +218,108 @@ def process_all_lc_reports(be_lc_reports:list):
             else:
                 width2times[width].append(time)
     
-    width2sumTime = [0] * len(width2times)
+    width2meanTime = [0] * len(width2times)
     for width, times in width2times.items():
-        width2sumTime[int(width-1)] = sum(times)
+        width2meanTime[int(width-1)] = sum(times)/len(times)
 
-    return width2sumTime
+    return width2meanTime
 
 '''
-Fundtion: Takes in a dict of be->time distro, find the best threshold between cpu and gpu
-TODO: Improve the Scaliability in the future
+Fundtion: Takes in a dict of be->time distro, find the best threshold between cpu and gpu, single log transforming y
 '''
 def threshold_finding(dict_of_distro:dict):
     
+    '''
+    1. Obtain Original Array
+    '''
     npDistro = dict_of_distro["einsum"]
     cpDistro = dict_of_distro["cupy"]
     tcpuDistro = dict_of_distro["torch_cpu"]
     tgpuDistro = dict_of_distro["torch_gpu"]
 
+
     '''
-    Testing einsum_cupy
+    2. Transform into natural log scale
     '''
-    for i in range(len(npDistro)):
-        if cpDistro[i] <= npDistro[i]:
-            print("einsum-cupy threshold is: {}".format(i))
+    npLog = np.log(npDistro)
+    cpLog = np.log(cpDistro)
+    tcpuLog =np.log(tcpuDistro)
+    tgpuLog = np.log(tgpuDistro)
+
+    '''
+    3. Apply Shifting to avoid negative value
+    '''
+    shift = min(min(npLog), min(cpLog), min(tcpuLog), min(tgpuLog))
+
+    npFinal = npLog - shift
+    cpFinal = cpLog - shift
+    tcpuFinal = tcpuLog - shift
+    tgpuFinal = tgpuLog - shift
+
+    '''
+    4. Curve Fitting to original X
+    '''
+    X = np.arange(1,len(npDistro)+1)
+    npOPT, npCOV = curve_fit(func, X, npFinal, maxfev=1000000)
+    cpOPT, cpCOV = curve_fit(func, X, cpFinal, maxfev=1000000)
+    tcpuOPT, tcpuCOV = curve_fit(func, X, tcpuFinal, maxfev=1000000)
+    tgpuOPT, tgpuCOV = curve_fit(func, X, tgpuFinal, maxfev=1000000)
+    
+
+    '''
+    3. Plotting X vs. Final Log Transformation
+    '''
+    plt.scatter(X, npFinal, color = 'blue', s = 2)
+    plt.scatter(X, cpFinal, color = 'green', s=2)
+    plt.scatter(X, tcpuFinal, color = 'black', s=2)
+    plt.scatter(X, tgpuFinal, color = 'red',s=2)
+
+    '''
+    4. Plotting Line
+    '''
+    plt.plot(X, func(X, *npOPT), color="blue", linewidth=0.5, label = "Numpy: {:0.3e}*{:0.3f}^({:0.3f}*x) + {:0.3f}".format(*npOPT))
+    plt.plot(X, func(X, *cpOPT), color="green", linewidth=0.5, label = "CuPy: {:0.3e}*{:0.3f}^({:0.3f}*x) + {:0.3f}".format(*cpOPT))
+    plt.plot(X, func(X, *tcpuOPT), color="black", linewidth=0.5, label = "TCPU: {:0.3e}*{:0.3f}^({:0.3f}*x) + {:0.3f}".format(*tcpuOPT))
+    plt.plot(X, func(X, *tgpuOPT), color="red", linewidth=0.5, label = "TGPU: {:0.3e}*{:0.3f}^({:0.3f}*x) + {:0.3f}".format(*tgpuOPT))
+
+    plt.xticks(X)
+    plt.yticks()
+    plt.xlabel('Width')
+    plt.legend(loc = "upper left", prop={'size': 6})
+    plt.title("Mean Time vs Width")
+    plt.savefig("Probing.png")
+
+    print("Numpy: {:0.3e}*{:0.3f}^({:0.3f}*x) + {:0.3f}".format(*npOPT))
+    print("CuPy: {:0.3e}*{:0.3f}^({:0.3f}*x) + {:0.3f}".format(*cpOPT))
+    print("TCPU: {:0.3e}*{:0.3f}^({:0.3f}*x) + {:0.3f}".format(*tcpuOPT))
+    print("TGPU: {:0.3e}*{:0.3f}^({:0.3f}*x) + {:0.3f}".format(*tgpuOPT))
+
+    '''
+    5. Output threshold information
+    '''
+    npPred = np.array([func(i, *npOPT) for i in X])
+    cpPred = np.array([func(i, *cpOPT) for i in X])
+    tcpuPred = np.array([func(i, *tcpuOPT) for i in X])
+    tgpuPred = np.array([func(i, *tgpuOPT) for i in X])
+
+    for idx in range(len(X)):
+        if cpPred[idx] <= npPred[idx]:
+            print("Numpy-Cupy Threshold is {}.".format(idx+1))
             break
     
-    for i in range(len(npDistro)):
-        if tgpuDistro[i] <= npDistro[i]:
-            print("einsum-torch_gpu threshold is: {}".format(i))
+    for idx in range(len(X)):
+        if cpPred[idx] <= tcpuPred[idx]:
+            print("TCPU-Cupy Threshold is {}.".format(idx+1))
             break
-
-    for i in range(len(npDistro)):
-        if tgpuDistro[i] <= tcpuDistro[i]:
-            print("torch_cpu-torch_gpu threshold is: {}".format(i))
+    
+    for idx in range(len(X)):
+        if tgpuPred[idx] <= tcpuPred[idx]:
+            print("TCPU-TGPU Threshold is {}.".format(idx+1))
+            break
+    
+    for idx in range(len(X)):
+        if tgpuPred[idx] <= npPred[idx]:
+            print("Numpy-TGPU Threshold is {}.".format(idx+1))
             break
 
 
@@ -253,7 +328,7 @@ if __name__ == '__main__':
     gen_sim = QAOAQtreeSimulator(QtreeQAOAComposer)
     backends = ['einsum', 'torch_cpu', 'torch_gpu', 'cupy'] #'tr_torch'
 
-    my_algo = 'rgreedy_0.05_5'
+    my_algo = 'greedy'
 
     for pb in [paramtest[0]]:
 
@@ -271,7 +346,7 @@ if __name__ == '__main__':
             all_lightcones_report = []
             for i, pack in enumerate(zip(G.edges, peos)):
                 edge, peo = pack
-                curr_report = process_reduced_data(G, gamma, beta, edge, peo, be, pb, 3, gen_base, i, my_algo)
+                curr_report = process_reduced_data(G, gamma, beta, edge, peo, be, pb, 5, gen_base, i, my_algo)
                 all_lightcones_report.append(curr_report)
             distro = process_all_lc_reports(all_lightcones_report)
             be2timeDistro[be] = distro
