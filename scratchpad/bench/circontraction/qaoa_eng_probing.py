@@ -10,6 +10,7 @@ from qtensor import QAOAQtreeSimulator
 from qtensor.contraction_backends import get_cpu_perf_backend, get_gpu_perf_backend
 from scipy.optimize import curve_fit
 import matplotlib.pyplot as plt
+from scipy.optimize import fsolve
 
 gpu_backends = ['torch_gpu', 'cupy', 'tr_torch', 'tr_cupy', 'tr_cutensor']
 cpu_backends = ['einsum', 'torch_cpu', 'mkl', 'opt_einsum', 'tr_einsum', 'opt_einsum']
@@ -18,6 +19,9 @@ timing = pyrofiler.timing
 def func(x,a,b,c,d):
     # return (a*np.power(x1,-n))
     return a*np.power(b, c*x) + d
+
+def diff(x, OPT1, OPT2):
+    return func(x, *OPT1) - func(x, *OPT2)
 
 @lru_cache
 def get_test_problem(n=10, p=2, d=3, type='random'):
@@ -296,31 +300,18 @@ def threshold_finding(dict_of_distro:dict):
 
     '''
     5. Output threshold information
+    TODO: SOLVE THE EQUATION
     '''
-    npPred = np.array([func(i, *npOPT) for i in X])
-    cpPred = np.array([func(i, *cpOPT) for i in X])
-    tcpuPred = np.array([func(i, *tcpuOPT) for i in X])
-    tgpuPred = np.array([func(i, *tgpuOPT) for i in X])
 
-    for idx in range(len(X)):
-        if cpPred[idx] <= npPred[idx]:
-            print("Numpy-Cupy Threshold is {}.".format(idx+1))
-            break
-    
-    for idx in range(len(X)):
-        if cpPred[idx] <= tcpuPred[idx]:
-            print("TCPU-Cupy Threshold is {}.".format(idx+1))
-            break
-    
-    for idx in range(len(X)):
-        if tgpuPred[idx] <= tcpuPred[idx]:
-            print("TCPU-TGPU Threshold is {}.".format(idx+1))
-            break
-    
-    for idx in range(len(X)):
-        if tgpuPred[idx] <= npPred[idx]:
-            print("Numpy-TGPU Threshold is {}.".format(idx+1))
-            break
+    np_cpT = fsolve(diff,10, args=(npOPT, cpOPT))
+    np_tgpuT = fsolve(diff,10, args=(npOPT, tgpuOPT))
+    tcpu_cpT = fsolve(diff,10, args=(tcpuOPT, cpOPT))
+    tcpu_tgpuT = fsolve(diff,10, args=(tcpuOPT, tgpuOPT))
+
+    print("Numpy-Cupy Threshold is {}.".format(np_cpT))
+    print("Numpy-TGPU Threshold is {}.".format(np_tgpuT))
+    print("TCPU-Cupy Threshold is {}.".format(tcpu_cpT))
+    print("TCPU-TGPU Threshold is {}.".format(tcpu_tgpuT))
 
 
 
