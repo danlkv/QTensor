@@ -94,3 +94,11 @@ def get_rect_circuit(sidea=4, sideb=None, layers=24, seed=0):
     stream = get_rect_stream(sidea=sidea, sideb=sideb, layers=layers, seed=seed)
     n, circ = qtree.operators.read_circuit_stream(stream)
     return n, circ
+
+def get_syc_file(s, d, i=0):
+    return FILEDIR.parent.parent.parent.parent / f'qtree/test_circuits/inst/sycamore/n{s}_m{d}/circuit_n{s}_m{d}_s0_e0_pABCDCDAB.qsim'
+
+def get_syc_circ(s, d, i=0):
+    fil = get_syc_file(s, d, i)
+    n, circ = qtree.operators.read_circuit_file(fil)
+    return n, circ
