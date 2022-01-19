@@ -330,7 +330,7 @@ def threshold_finding(dict_of_distro:dict):
     npChi2, npChiP = chisquare(npFinal, npPred)
     cpChi2, cpChiP = chisquare(cpFinal, cpPred)
     tcpuChi2, tcpuChiP = chisquare(tcpuFinal, tcpuPred)
-    tgpuChi2, tgpuChiP = chisquare(tcpuFinal, tgpuPred)
+    tgpuChi2, tgpuChiP = chisquare(tgpuFinal, tgpuPred)
 
     npPear, npPear_p = pearsonr(X, npPred)
     cpPear, cpPear_p = pearsonr(X, cpPred)
