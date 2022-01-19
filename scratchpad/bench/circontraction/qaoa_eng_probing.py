@@ -11,6 +11,8 @@ from qtensor.contraction_backends import get_cpu_perf_backend, get_gpu_perf_back
 from scipy.optimize import curve_fit
 import matplotlib.pyplot as plt
 from scipy.optimize import fsolve
+from sklearn.metrics import r2_score
+from scipy.stats import chisquare, pearsonr
 
 gpu_backends = ['torch_gpu', 'cupy', 'tr_torch', 'tr_cupy', 'tr_cutensor']
 cpu_backends = ['einsum', 'torch_cpu', 'mkl', 'opt_einsum', 'tr_einsum', 'opt_einsum']
@@ -300,9 +302,8 @@ def threshold_finding(dict_of_distro:dict):
 
     '''
     5. Output threshold information
-    TODO: SOLVE THE EQUATION
+    TODO: SOLVE THE EQUATIO
     '''
-
     np_cpT = fsolve(diff,10, args=(npOPT, cpOPT))
     np_tgpuT = fsolve(diff,10, args=(npOPT, tgpuOPT))
     tcpu_cpT = fsolve(diff,10, args=(tcpuOPT, cpOPT))
@@ -313,6 +314,34 @@ def threshold_finding(dict_of_distro:dict):
     print("TCPU-Cupy Threshold is {}.".format(tcpu_cpT))
     print("TCPU-TGPU Threshold is {}.".format(tcpu_tgpuT))
 
+    '''
+    6. Output Strength Information
+    '''
+    npPred = np.array([func(i, *npOPT) for i in X])
+    cpPred = np.array([func(i, *cpOPT) for i in X])
+    tcpuPred = np.array([func(i, *tcpuOPT) for i in X])
+    tgpuPred = np.array([func(i, *tgpuOPT) for i in X])
+
+    npR2 = r2_score(npFinal, npPred)
+    cpR2 = r2_score(cpFinal, cpPred)
+    tcpuR2 = r2_score(tcpuFinal, tcpuPred)
+    tgpuR2 = r2_score(tgpuFinal, tgpuPred)
+
+    npChi2, npChiP = chisquare(npFinal, npPred)
+    cpChi2, cpChiP = chisquare(cpFinal, cpPred)
+    tcpuChi2, tcpuChiP = chisquare(tcpuFinal, tcpuPred)
+    tgpuChi2, tgpuChiP = chisquare(tcpuFinal, tgpuPred)
+
+    npPear, npPear_p = pearsonr(X, npPred)
+    cpPear, cpPear_p = pearsonr(X, cpPred)
+    tcpuPear, tcpuPear_p = pearsonr(X, tcpuPred)
+    tgpuPear, tgpuPear_p = pearsonr(X, tgpuPred)
+
+    print("Numpy Test: R2={:0.3f} Chi2={:0.3f} Pearson={:0.3f}".format(npR2, npChi2, npPear))
+    print("CuPy Test: R2={:0.3f} Chi2={:0.3f} Pearson={:0.3f}".format(cpR2, cpChi2, cpPear))
+    print("TCPU Test: R2={:0.3f} Chi2={:0.3f} Pearson={:0.3f}".format(tcpuR2, tcpuChi2, tcpuPear))
+    print("TGPU Test: R2={:0.3f} Chi2={:0.3f} Pearson={:0.3f}".format(tgpuR2, tgpuChi2, tgpuPear))
+    
 
 
 if __name__ == '__main__':
