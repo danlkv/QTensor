@@ -43,12 +43,16 @@ class NumpyBackend(ContractionBackend):
         result_indices = all_indices - set(ixs)
         all_indices_list = list(all_indices)
         to_small_int = lambda x: all_indices_list.index(x)
+        
+        expr = get_einsum_expr(bucket, all_indices_list, result_indices)
+        # print(expr)
+
         params = []
         for tensor in bucket:
             params.append(tensor.data)
             params.append(list(map(to_small_int, tensor.indices)))
         params.append(list(map(to_small_int, result_indices)))
-        #print(expr)
+        
         expect = len(result_indices)
         # used to check how well optimizer performs
         #if 2**expect < 0:# info.largest_intermediate:
@@ -57,8 +61,8 @@ class NumpyBackend(ContractionBackend):
         #return opt_einsum.contract(contraction, *tensors, optimize=path)
 
 
-        #print('result_indices',len(result_indices),  result_indices)
-        #print('einsumparams', params)
+        # print('result_indices',len(result_indices),  result_indices)
+        # print('einsumparams', *params)
         #result_data = np.einsum(*params)
         if expect > 33:
             result_data = opt_einsum.contract(*params)

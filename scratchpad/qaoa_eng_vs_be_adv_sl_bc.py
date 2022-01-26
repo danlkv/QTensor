@@ -7,8 +7,10 @@ import pyrofiler
 import qtensor
 from qtensor import QtreeQAOAComposer
 from qtensor import QAOAQtreeSimulator
-from qtensor.contraction_backends import get_backend, get_perf_backend
+from qtensor.contraction_backends import get_backend, get_cpu_perf_backend, get_gpu_perf_backend
 
+gpu_backends = ['torch_gpu', 'cupy', 'cutensor', 'tr_torch', 'tr_cupy', 'tr_cutensor']
+cpu_backends = ['einsum', 'torch_cpu', 'mkl', 'opt_einsum', 'tr_einsum', 'opt_einsum']
 
 timing = pyrofiler.timing
 
@@ -42,12 +44,12 @@ def get_gpu_props_json():
         return None
 
 paramtest = [
-    [4,4,3,"random"]
-    ,[4, 4, 3, 'random']
-    ,[10, 5, 2, 'random']
-    ,[14, 1, 3, 'random']
-    ,[3, 3, 0, 'grid2d']
-    ,[8, 4, 0, 'line']
+     [24, 4, 3, 'random']
+    # [4,4,3,"random"]
+    # ,[10, 5, 2, 'random']
+    # ,[14, 1, 3, 'random']
+    # ,[3, 3, 0, 'grid2d']
+    # ,[8, 4, 0, 'line']
 ]
 
 def mean_mmax(x: list):
@@ -90,7 +92,10 @@ CHANGE: Rid aggregation methods
 '''
 def gen_be_lc_report(G, gamma, beta, edge, peo, backend_name, gen_base = 0):
 
-    curr_backend = get_perf_backend(backend_name)
+    if backend_name in gpu_backends:
+        curr_backend = get_gpu_perf_backend(backend_name)
+    else:
+        curr_backend = get_cpu_perf_backend(backend_name)
     curr_sim = QAOAQtreeSimulator(QtreeQAOAComposer,backend=curr_backend)
     circuit = curr_sim._edge_energy_circuit(G, gamma, beta, edge)
     curr_sim.simulate_batch(circuit, peo = peo)
@@ -185,7 +190,7 @@ def process_reduced_data(G, gamma, beta, edge, peo, backend_name, problem, repea
                     "d" :problem[2] ,
                     'type': problem[3]
                     }
-        bi_json_usable["experiment_group"] = "Chen_AV100_Test"
+        bi_json_usable["experiment_group"] = "Angela_nslb_circuit_all"
         lc_collection.append(bi_json_usable)
     #print(json.dumps(lc_collection, indent = 4))
 
@@ -196,10 +201,15 @@ def process_reduced_data(G, gamma, beta, edge, peo, backend_name, problem, repea
 
 if __name__ == '__main__':
     gen_sim = QAOAQtreeSimulator(QtreeQAOAComposer)
-    backends = ["cupy","torch_gpu","einsum","torch","tr_einsum","opt_einsum"]
+    backends = ['tr_cutensor', 'tr_cupy', 'tr_torch', 'tr_einsum'
+                , 'cupy', 'torch_gpu' 
+                , 'torch_cpu', 'einsum',  'opt_einsum'
+                , 'cutensor']
+
+
     my_algo = 'rgreedy_0.05_30'
 
-    for pb in [paramtest[0]]:
+    for pb in paramtest:
 
         '''
         Generate fixed peos for a given problem, thus be used for various backends
@@ -213,10 +223,12 @@ if __name__ == '__main__':
         agg_reports = []
         for be in backends:
             all_lightcones_report = []
-            for i, pack in enumerate(zip(G.edges, peos)):
-                edge, peo = pack
-                curr_report = process_reduced_data(G, gamma, beta, edge, peo, be, pb, 3, 114514, i, my_algo)
-                for c in curr_report:
-                    print(json.dumps(c))
-                #all_lightcones_report.append(curr_report)
+            for i, pack in enumerate(zip(G.edges, peos)): # i = lightcone
+
+                if i <= 10:
+                    edge, peo = pack
+                    curr_report = process_reduced_data(G, gamma, beta, edge, peo, be, pb, 3, 114514, i, my_algo)
+                    for c in curr_report:
+                        print(json.dumps(c))
+                    #all_lightcones_report.append(curr_report)
             agg_reports.append(all_lightcones_report)
