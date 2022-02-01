@@ -24,7 +24,7 @@ def get_backend(name):
         'tr_torch': TorchTransposedBackend,
         'tr_cupy': CupyTransposedBackend,
         'tr_cutensor': CutensorTransposedBackend
-    }[name]()
+    }
     if name in ["torch_gpu", "tr_torch"]:
         return backend_dict['torch'](device = name[-3:])
     else:
