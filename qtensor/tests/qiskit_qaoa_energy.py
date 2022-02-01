@@ -1,162 +1,115 @@
-import qiskit
 import numpy as np
 import networkx as nx
 from functools import partial
 
-import qiskit
-
-def qiskit_imports():
-    # pylint: disable-msg=no-name-in-module, import-error
-    # qiskit version workaround
-    if qiskit.__version__ > '0.15.0':
-        # new
-        from qiskit.aqua.algorithms.minimum_eigen_solvers.qaoa.var_form import QAOAVarForm
-        from qiskit.optimization.applications.ising.max_cut import get_operator as get_maxcut_operator
-    else:
-        # old
-        from qiskit.optimization.ising.max_cut import get_operator as get_maxcut_operator
-        from qiskit.aqua.algorithms.adaptive.qaoa.var_form import QAOAVarForm
-    return get_maxcut_operator, QAOAVarForm
-
-get_maxcut_operator, QAOAVarForm = qiskit_imports()
-
-# Use these lines for import with new qiskit(>=0.19). The resulting QAOA energy will be wrong
-# The change is somewhere in this file: https://github.com/Qiskit/qiskit-aqua/blob/0.7.5/qiskit/aqua/algorithms/minimum_eigen_solvers/qaoa/var_form.py
-# It's ridiculous that nobody found this and never fixed, August 2020
-
-
-# from qiskit.optimization.applications.ising.max_cut import get_operator as get_maxcut_operator
-# from qiskit.aqua.algorithms.minimum_eigen_solvers.qaoa.var_form import QAOAVarForm
+from qiskit import QuantumCircuit, ClassicalRegister, QuantumRegister
 from qiskit import Aer, execute
-from qiskit.compiler import transpile
+from qiskit.circuit import Parameter
 
-def state_num2str(basis_state_as_num, nqubits):
-    return '{0:b}'.format(basis_state_as_num).zfill(nqubits)
 
-def state_str2num(basis_state_as_str):
-    return int(basis_state_as_str, 2)
-
-def state_reverse(basis_state_as_num, nqubits):
-    basis_state_as_str = state_num2str(basis_state_as_num, nqubits)
-    new_str = basis_state_as_str[::-1]
-    return state_str2num(new_str)
-
-def change_state_qubit_order(basis_state_as_num, mapper):
+def maxcut_obj(x, G):
     """
-    Converts state order as described by mapper.
+    Given a bitstring as a solution, this function returns
+    the number of edges shared between the two partitions
+    of the graph.
+
     Args:
-        basis_state_as_num (int): index of state in order
-        mapper (dict): mapper[old qubit index] = new qubit index,
-            should have unique values
+        x: str
+           solution bitstring
+        G: networkx graph
+
     Returns:
-        int
+        obj: float
     """
-    nqubits = len(mapper)
-    _new2old = {v:k for k,v in mapper.items()}
-    assert len(_new2old) == len(mapper), "Mapper should have unique vaues"
-    basis_state_as_str = state_num2str(basis_state_as_num, nqubits)
-    new_str = ''.join(basis_state_as_str[_new2old[i]] for i in range(nqubits))
-    return state_str2num(new_str)
-
-def get_adjusted_state(state, endian='little', index_map=None):
-    nqubits = np.log2(state.shape[0])
-    if nqubits % 1:
-        raise ValueError("Input vector is not a valid statevector for qubits.")
-    nqubits = int(nqubits)
-
-    if index_map is None:
-        if endian == 'little':
-            index_map = {i:j for i,j in enumerate(reversed(range(nqubits)))}
-        else:
-            index_map = {i:j for i,j in enumerate(range(nqubits))}
-
-    adjusted_state = np.zeros(2**nqubits, dtype=complex)
-    for basis_state in range(2**nqubits):
-        _new_state_ix = change_state_qubit_order(basis_state, mapper=index_map)
-        adjusted_state[_new_state_ix] = state[basis_state]
-
-    return adjusted_state
+    obj = 0
+    for i, j in G.edges():
+        if x[i] != x[j]:
+            obj -= 1
+    return obj
 
 
-def state_to_ampl_counts(vec, eps=1e-15):
-    """Converts a statevector to a dictionary
-    of bitstrings and corresponding amplitudes
+def compute_expectation(counts, G):
     """
-    qubit_dims = np.log2(vec.shape[0])
-    if qubit_dims % 1:
-        raise ValueError("Input vector is not a valid statevector for qubits.")
-    qubit_dims = int(qubit_dims)
-    counts = {}
-    str_format = '0{}b'.format(qubit_dims)
-    for kk in range(vec.shape[0]):
-        val = vec[kk]
-        if val.real**2+val.imag**2 > eps:
-            counts[format(kk, str_format)] = val
-    return counts
+    Computes expectation value based on measurement results
 
-
-def obj_from_statevector(sv, obj_f, precomputed=None, endian='little'):
-    """Compute objective from Qiskit statevector
-    For large number of qubits, this is slow. 
-    To speed up for larger qubits, pass a vector of precomputed energies
-    for QAOA, precomputed should be the same as the diagonal of the cost Hamiltonian
-    """
-    if precomputed is None:
-        adj_sv = get_adjusted_state(sv, endian=endian)
-        counts = state_to_ampl_counts(adj_sv)
-        assert(np.isclose(sum(np.abs(v)**2 for v in counts.values()), 1))
-        return sum(obj_f(np.array([int(x) for x in k])) * (np.abs(v)**2) for k, v in counts.items())
-    else:
-        return np.dot(precomputed, np.abs(sv)**2)
-
-def maxcut_obj(x,w):
-    """Compute -1 times the value of a cut.
     Args:
-        x (numpy.ndarray): binary string as numpy array.
-        w (numpy.ndarray): adjacency matrix.
-    Returns:
-        float: value of the cut.
-    """
-    X = np.outer(x, (1 - x))
-    return -np.sum(w * X)
+        counts: dict
+                key as bitstring, val as count
 
-def simulate_qiskit_amps_new(G, gamma, beta):
+        G: networkx graph
+
+    Returns:
+        avg: float
+             expectation value
+    """
+    avg = 0
+    sum_count = 0
+    for bitstring, count in counts.items():
+        # Qiskit uses little-endian format, this is corrected from their official nb
+        obj = maxcut_obj(bitstring[::-1], G)
+        avg += obj * count
+        sum_count += count
+    return avg/sum_count
+
+
+# We will also bring the different circuit components that
+# build the qaoa circuit under a single function
+def create_qaoa_circ(G, theta):
+    """
+    Creates a parametrized qaoa circuit
+
+    Args:
+        G: networkx graph
+        theta: list
+               unitary parameters
+
+    Returns:
+        qc: qiskit circuit
+    """
+    nqubits = len(G.nodes())
+    p = len(theta)//2  # number of alternating unitaries
+    qc = QuantumCircuit(nqubits)
+    beta = theta[:p]
+    gamma = theta[p:]
+    # initial_state
+    for i in range(0, nqubits):
+        qc.h(i)
+    for irep in range(0, p):
+        # problem unitary
+        for pair in list(G.edges()):
+            qc.rzz(2 * gamma[irep], pair[0], pair[1])
+
+        # mixer unitary
+        for i in range(0, nqubits):
+            qc.rx(2 * beta[irep], i)
+    qc.measure_all()
+    return qc
+
+# Finally we write a function that executes the circuit on the chosen backend
+def get_expectation(G, shots=512):
+    """
+    Runs parametrized circuit
+    Args:
+        G: networkx graph
+        p: int,
+           Number of repetitions of unitaries
+    """
+    backend = Aer.get_backend('qasm_simulator')
+
+    def execute_circ(theta):
+        qc = create_qaoa_circ(G, theta)
+        counts = backend.run(qc, seed_simulator=10,
+                             shots=shots).result().get_counts()
+        return compute_expectation(counts, G)
+    return execute_circ
+
+def simulate_qiskit_amps(G, gamma, beta, shots=100_000):
     assert len(gamma) == len(beta)
     p = len(gamma)
-    # note the ordere of parameters
-    parameters = np.concatenate([-np.array(gamma), np.array(beta)])
-    w = nx.adjacency_matrix(G, nodelist=list(G.nodes())).toarray()
-    qubitOp, offset = get_maxcut_operator(w)
-    qc1 = QAOAVarForm(qubitOp.to_opflow(), p=p, initial_state=None).construct_circuit(parameters)
-    ex1=execute(qc1, backend=Aer.get_backend('statevector_simulator'))
-    sv = ex1.result().get_statevector()
-    adj_sv = sv #get_adjusted_state(sv)
-    E_0 = qubitOp.evaluate_with_statevector(adj_sv)[0].real
-    return -(E_0 + offset)
-
-def simulate_qiskit_amps(G, gamma, beta, method='automatic'):
-    assert len(gamma) == len(beta)
-    p = len(gamma)
-
-    if qiskit.__version__ > '0.15.0':
-        return simulate_qiskit_amps_new(G, gamma, beta)
-
-    w = nx.adjacency_matrix(G, nodelist=list(G.nodes())).toarray()
-    obj = partial(maxcut_obj,w=w)
-    C, offset = get_maxcut_operator(w)
-    parameters = np.concatenate([beta, -np.array(gamma)])
-
-    # When transitioning to newer qiskit this raises error.
-    # Adding C.to_opflow() removes the error, but the values are still wrong
-    # qiskit version workaround
-    varform = QAOAVarForm(p=p,cost_operator=C)
-    circuit = varform.construct_circuit(parameters)
-
-    #circuit_qiskit = transpile(circuit, optimization_level=0,basis_gates=['u1', 'u2', 'u3', 'cx'])
-    sv = execute(circuit, backend=Aer.get_backend("statevector_simulator")).result().get_statevector()
-
-    res = - obj_from_statevector(sv, obj)
-    return res
+    theta = np.concatenate([np.array(beta), -np.array(gamma)/2])
+    expectation = get_expectation(G, shots=shots)
+    res = expectation(theta)
+    return -res
 
 def test_simulate_qiskit_amps():
     elist = [[0, 1], [1, 2], [2, 3], [3, 4], [4, 0], [0, 5], [1, 6], [2, 7], [3, 8], [4, 9], [5, 7], [5, 8], [6, 8], [6, 9], [7, 9]]
@@ -169,7 +122,6 @@ def test_simulate_qiskit_amps():
     gamma = -parameters[9:]
 
     result = simulate_qiskit_amps(G, gamma, beta)
-    print(result)
     assert abs(abs(result) - 12) < 1e-2
 
 if __name__ == "__main__":
