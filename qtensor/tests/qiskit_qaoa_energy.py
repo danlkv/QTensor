@@ -8,14 +8,9 @@ import qiskit
 def qiskit_imports():
     # pylint: disable-msg=no-name-in-module, import-error
     # qiskit version workaround
-    if qiskit.__version__ > '0.15.0':
-        # new
-        from qiskit.aqua.algorithms.minimum_eigen_solvers.qaoa.var_form import QAOAVarForm
-        from qiskit.optimization.applications.ising.max_cut import get_operator as get_maxcut_operator
-    else:
-        # old
-        from qiskit.optimization.ising.max_cut import get_operator as get_maxcut_operator
-        from qiskit.aqua.algorithms.adaptive.qaoa.var_form import QAOAVarForm
+    # new
+    from qiskit.algorithms.minimum_eigen_solvers.qaoa.var_form import QAOAVarForm
+    from qiskit_optimization.applications.ising.max_cut import get_operator as get_maxcut_operator
     return get_maxcut_operator, QAOAVarForm
 
 get_maxcut_operator, QAOAVarForm = qiskit_imports()
