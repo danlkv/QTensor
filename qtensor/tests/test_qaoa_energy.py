@@ -19,6 +19,7 @@ def get_test_problem(n=10, p=2, d=3, type='random'):
         G = nx.random_regular_graph(d, n)
     elif type == 'grid2d':
         G = nx.grid_2d_graph(n,n)
+        G = nx.relabel.convert_node_labels_to_integers(G)
     elif type == 'line':
         G = nx.Graph()
         G.add_edges_from(zip(range(n-1), range(1, n)))
@@ -40,6 +41,10 @@ paramtest = [
     ,[8, 4, 0, 'line']
 ]
 
+QISKIT_SHOTS = 20_000
+# 0.7 gives a bit tighter margin of error
+REL_MARGIN = 0.7*1/np.sqrt(QISKIT_SHOTS)
+
 @pytest.mark.parametrize('test_problem', paramtest ,indirect=True)
 def test_default_qaoa_energy_vs_qiskit(test_problem):
     G, gamma, beta = test_problem
@@ -51,8 +56,8 @@ def test_default_qaoa_energy_vs_qiskit(test_problem):
 
     gamma, beta = -np.array(gamma)*2*np.pi, np.array(beta)*np.pi
     with prof.timing('Qiskit energy time'):
-        qiskit_E = simulate_qiskit_amps(G, gamma, beta)
-    assert np.isclose(E, qiskit_E)
+        qiskit_E = simulate_qiskit_amps(G, gamma, beta, shots=QISKIT_SHOTS)
+    assert np.isclose(E, qiskit_E, rtol=REL_MARGIN)
 
 @pytest.mark.parametrize('test_problem', paramtest ,indirect=True)
 def test_CC_qaoa_energy_vs_qiskit(test_problem):
@@ -65,8 +70,8 @@ def test_CC_qaoa_energy_vs_qiskit(test_problem):
 
     gamma, beta = -np.array(gamma)*2*np.pi, np.array(beta)*np.pi
     with prof.timing('Qiskit energy time'):
-        qiskit_E = simulate_qiskit_amps(G, gamma, beta)
-    assert np.isclose(E, qiskit_E)
+        qiskit_E = simulate_qiskit_amps(G, gamma, beta, shots=QISKIT_SHOTS)
+    assert np.isclose(E, qiskit_E, rtol=REL_MARGIN)
 
 
 @pytest.mark.parametrize('test_problem', paramtest ,indirect=True)
@@ -80,8 +85,8 @@ def test_qaoa_energy_vs_qiskit(test_problem):
 
     gamma, beta = -np.array(gamma)*2*np.pi, np.array(beta)*np.pi
     with prof.timing('Qiskit energy time'):
-        qiskit_E = simulate_qiskit_amps(G, gamma, beta)
-    assert np.isclose(E, qiskit_E)
+        qiskit_E = simulate_qiskit_amps(G, gamma, beta, shots=QISKIT_SHOTS)
+    assert np.isclose(E, qiskit_E, rtol=REL_MARGIN)
 
 def test_qaoa_energy_multithread():
     G, gamma, beta = get_test_problem()
