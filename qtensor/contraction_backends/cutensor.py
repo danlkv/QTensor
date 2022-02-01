@@ -2,9 +2,9 @@ import qtree
 from qtensor.tools.lazy_import import cupy as cp
 from qtensor.contraction_backends import ContractionBackend
 from qtensor.contraction_backends import CuPyBackend
-from cupy import cutensor as cupy_cutensor
+from qtensor.tools.lazy_import import cutensor as cupy_cutensor
 
-mempool = mempool = cp.get_default_memory_pool()
+#mempool = mempool = cp.get_default_memory_pool()
 
 class CuTensorBackend(CuPyBackend):
     
