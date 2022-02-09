@@ -93,16 +93,16 @@ def get_mixed_backend(cpu_name, gpu_name, threshold = 11):
 
     cpu_be = get_backend(cpu_name)
     gpu_be = get_backend(gpu_name)
-    mix_name = cpu_name + gpu_name
+    # mix_name = cpu_name +"-"+ gpu_name
     
-    threshold_dict = {
-        "einsum-cupy":16,
-        "torch_cpu-torch_gpu":11,
-        "einsum-torch_gpu":13
-    }
+    # threshold_dict = {
+    #     "einsum-cupy":16,
+    #     "torch_cpu-torch_gpu":11,
+    #     "einsum-torch_gpu":13
+    # }
 
-    if mix_name in threshold_dict:
-        threshold = threshold_dict[mix_name]
+    # if mix_name in threshold_dict:
+    #     threshold = threshold_dict[mix_name]
 
     return MixBackend(cpu_be, gpu_be, threshold)
 
@@ -111,7 +111,7 @@ def get_mixed_perf_backend(cpu_name, gpu_name,threshold = 11):
     
     cpu_be = get_cpu_perf_backend(cpu_name)
     gpu_be = get_gpu_perf_backend(gpu_name)
-    mix_name = cpu_name + gpu_name
+    mix_name = cpu_name +"-"+ gpu_name
     
     threshold_dict = {
         "einsum-cupy":16,
