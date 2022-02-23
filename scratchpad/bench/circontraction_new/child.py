@@ -3,8 +3,11 @@ import time
 
 def func1(x,y):
     # use PROF defined in profile_with_context_advanced.py
-    with pyrofiler.PROF.cpu(desc='Func 1', reference=(x,y)):
+    @pyrofiler.PROF.cpu(desc='Func 1', reference=(x,y))
+    def sleep1():
         time.sleep(.1)
+    
+    sleep1()
     return 1
 
 def func2(x,y):
@@ -38,8 +41,8 @@ def total():
         for x in range(3):
             for y in range(3):
                 func1(x,y)
-                func2(x,y)
-                func3(x,y)
+                # func2(x,y)
+                # func3(x,y)
 
-                with pyrofiler.PROF.timing("Func 4", reference = (x,y)):
-                    time.sleep(0.4)
+                # with pyrofiler.PROF.timing("Func 4", reference = (x,y)):
+                #     time.sleep(0.4)

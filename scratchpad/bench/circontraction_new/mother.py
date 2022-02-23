@@ -6,26 +6,26 @@ from pyrofiler import callbacks
 from collections import defaultdict
 import time
 
-# class MyProfiler(Profiler):
-#     def __init__(self, callback=None):
-#         super().__init__(callback=callback)
-#         self.use_append()
+class MyProfiler(Profiler):
+    def __init__(self, callback=None):
+        super().__init__(callback=callback)
+        self.use_append()
 
-#     def get_stats(self, label):
-#         data = [x['value'] for x in self.data[label]]
-#         return dict(
-#             mean=np.mean(data),
-#             max = np.max(data),
-#             std = np.std(data),
-#             min = np.min(data)
-#         )
+    def get_stats(self, label):
+        data = [x['value'] for x in self.data[label]]
+        return dict(
+            mean=np.mean(data),
+            max = np.max(data),
+            std = np.std(data),
+            min = np.min(data)
+        )
     
-#     # Transform the table to be
-#     # ref fun1 fun2
-#     def get_refs(self):
-#         pass
+    # Transform the table to be
+    # ref fun1 fun2
+    def get_refs(self):
+        pass
 
-prof = Profiler()
+prof = MyProfiler()
 
 '''
 1. Pass the profiler globally
@@ -54,7 +54,7 @@ def main():
     '''
     Directly calls the function that is wrapped
     '''
-    callbacks.disable_printing()
+    # callbacks.disable_printing()
     child.total()
 
 main()
@@ -103,4 +103,4 @@ def describeData(data):
 # described = describeData(reordered)
 
 
-# print(described)
+print(prof.data)
