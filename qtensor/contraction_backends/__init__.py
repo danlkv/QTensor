@@ -5,13 +5,14 @@ from .torch import TorchBackend
 from .cupy import CuPyBackend
 from .mkl import CMKLExtendedBackend
 from .cupy import CuPyBackend
-from .cutensor import CuTensorBackend
+# from .cutensor import CuTensorBackend
 from .transposed import TransposedBackend
 from .opt_einsum import OptEinusmBackend
-from .transpose_backend import NumpyTranspoedBackend, TorchTransposedBackend, CupyTransposedBackend, CutensorTransposedBackend
+# from .transpose_backend import NumpyTranspoedBackend, TorchTransposedBackend, CupyTransposedBackend, CutensorTransposedBackend
 from .torch_mix import TorchMixBackend
 from .performance_measurement_decorator import PerfNumpyBackend, PerfBackend, GPUPerfBackend
 from .mix_decorator import MixBackend
+from .torch_profiled import TorchEmbeddedBackend
 
 def get_backend(name):
     backend_dict = {
@@ -21,12 +22,22 @@ def get_backend(name):
         'torch_cpu': TorchBackend,
         'torch_gpu': TorchBackend,
         'cupy': CuPyBackend,
-        'cutensor': CuTensorBackend,
-        'tr_einsum': NumpyTranspoedBackend,
-        'tr_torch': TorchTransposedBackend,
-        'tr_cupy': CupyTransposedBackend,
-        'tr_cutensor': CutensorTransposedBackend,
+        # 'cutensor': CuTensorBackend,
+        # 'tr_einsum': NumpyTranspoedBackend,
+        # 'tr_torch': TorchTransposedBackend,
+        # 'tr_cupy': CupyTransposedBackend,
+        # 'tr_cutensor': CutensorTransposedBackend,
         'torch_mix': TorchMixBackend
+    }
+    if name == "torch_cpu":
+        return backend_dict['torch_cpu'](device = "cpu")
+    else:
+        return backend_dict[name]()
+
+
+def get_embedded_backend(name):
+    backend_dict = {
+        'torch_gpu': TorchEmbeddedBackend
     }
     if name == "torch_cpu":
         return backend_dict['torch_cpu'](device = "cpu")
@@ -40,7 +51,7 @@ def get_cpu_perf_backend(name):
             'einsum':NumpyBackend,
             'opt_einsum': OptEinusmBackend,
             'torch_cpu': TorchBackend,     
-            'tr_einsum': NumpyTranspoedBackend,
+            # 'tr_einsum': NumpyTranspoedBackend,
         }[name]
 
     if name == "torch_cpu":
@@ -53,10 +64,10 @@ def get_gpu_perf_backend(name):
         Backend = {
             'torch_gpu': TorchBackend,
             'cupy': CuPyBackend,
-            'cutensor': CuTensorBackend,
-            'tr_torch': TorchTransposedBackend,
-            'tr_cupy': CupyTransposedBackend,
-            'tr_cutensor': CutensorTransposedBackend
+            # 'cutensor': CuTensorBackend,
+            # 'tr_torch': TorchTransposedBackend,
+            # 'tr_cupy': CupyTransposedBackend,
+            # 'tr_cutensor': CutensorTransposedBackend
         }[name]
 
     if name == "torch_gpu":
