@@ -50,48 +50,46 @@ class TorchEmbeddedBackend(ContractionBackend):
             '''
             Entry Point 1
             '''
-            # with pyrofiler.PROF.timing('Get Einsum Expr', reference=(bucket_index,t)):
-            #     expr = qtree.utils.get_einsum_expr(
-            #         list(map(int, result_indices)), list(map(int, tensor.indices))
-            #     )
-
-            @pyrofiler.PROF.cpu(desc='Get Einsum Expr', reference=(bucket_index,t))
-            def get_expr(result_indices, tensor):
-                return qtree.utils.get_einsum_expr(
+            with pyrofiler.PROF.timing('Get Einsum Expr', reference=(bucket_index,t)):
+                expr = qtree.utils.get_einsum_expr(
                     list(map(int, result_indices)), list(map(int, tensor.indices))
                 )
+
+            # @pyrofiler.PROF.cpu(desc='Get Einsum Expr', reference=(bucket_index,t))
+            # def get_expr(result_indices, tensor):
+            #     return qtree.utils.get_einsum_expr(
+            #         list(map(int, result_indices)), list(map(int, tensor.indices))
+            #     )
             
-            expr = get_expr(result_indices, tensor)
+            # expr = get_expr(result_indices, tensor)
 
             '''
             Entry Point 2
             '''
-            @pyrofiler.PROF.cpu(desc='Data Type Adjust', reference=(bucket_index,t))
-            def adjustType(tensor):
+
+            with pyrofiler.PROF.timing('Data Type Adjust', reference=(bucket_index,t)):
                 if not isinstance(tensor._data, torch.Tensor):             
                     if self.device == 'gpu' and torch.cuda.is_available():
                         cuda = torch.device('cuda')
                         tensor._data = torch.from_numpy(tensor._data).to(cuda)
                     else:
                         tensor._data = torch.from_numpy(tensor._data)
-            adjustType(tensor)
+
+
+            # @pyrofiler.PROF.cpu(desc='Data Type Adjust', reference=(bucket_index,t))
+            # def adjustType(tensor):
+            #     if not isinstance(tensor._data, torch.Tensor):             
+            #         if self.device == 'gpu' and torch.cuda.is_available():
+            #             cuda = torch.device('cuda')
+            #             tensor._data = torch.from_numpy(tensor._data).to(cuda)
+            #         else:
+            #             tensor._data = torch.from_numpy(tensor._data)
+            # adjustType(tensor)
 
             '''
             Entry Point 3
             '''
-            # with pyrofiler.PROF.timing('Device Transport', reference=(bucket_index,t)):
-            #     if self.device == 'gpu':
-            #         if result_data.device != "gpu":
-            #             result_data = result_data.to(torch.device('cuda'))
-            #         if tensor.data.device != "gpu":
-            #             tensor._data = tensor._data.to(torch.device("cuda"))
-            #     else:
-            #         if result_data.device != "cpu":
-            #             result_data = result_data.cpu()
-            #         if tensor.data.device != "cpu":
-            #             tensor._data = tensor._data.cpu()
-            @pyrofiler.PROF.cpu(desc="Device Transport", reference=(bucket_index,t))            
-            def transportData(tensor, result_data):
+            with pyrofiler.PROF.timing('Device Transport', reference=(bucket_index,t)):
                 if self.device == 'gpu':
                     if result_data.device != "gpu":
                         result_data = result_data.to(torch.device('cuda'))
@@ -102,29 +100,52 @@ class TorchEmbeddedBackend(ContractionBackend):
                         result_data = result_data.cpu()
                     if tensor.data.device != "cpu":
                         tensor._data = tensor._data.cpu()
+            # @pyrofiler.PROF.cpu(desc="Device Transport", reference=(bucket_index,t))            
+            # def transportData(tensor, result_data):
+            #     if self.device == 'gpu':
+            #         if result_data.device != "gpu":
+            #             result_data = result_data.to(torch.device('cuda'))
+            #         if tensor.data.device != "gpu":
+            #             tensor._data = tensor._data.to(torch.device("cuda"))
+            #     else:
+            #         if result_data.device != "cpu":
+            #             result_data = result_data.cpu()
+            #         if tensor.data.device != "cpu":
+            #             tensor._data = tensor._data.cpu()
             
-            transportData(tensor, result_data)
+            # transportData(tensor, result_data)
 
             '''
             Entry Point 4
             '''
-            @pyrofiler.PROF.cpu('Einsum Compute', reference=(bucket_index,t))
-            def computeEinsum(expr, result_data, tensor):
-                return torch.einsum(expr, result_data, tensor.data)
+            with pyrofiler.PROF.timing('Einsum Compute', reference=(bucket_index,t)):
+                result_data = torch.einsum(expr, result_data, tensor.data)
 
-            result_data = computeEinsum(expr, result_data, tensor)
+
+            # @pyrofiler.PROF.cpu('Einsum Compute', reference=(bucket_index,t))
+            # def computeEinsum(expr, result_data, tensor):
+            #     return torch.einsum(expr, result_data, tensor.data)
+
+            # result_data = computeEinsum(expr, result_data, tensor)
 
             '''
             Entry Point 5
             '''
-            @pyrofiler.PROF.cpu('Result Indices', reference=(bucket_index,t))
-            def getResultIndices(result_indices, tensor):
-                return tuple(sorted(
+
+            with pyrofiler.PROF.timing('Result Indices', reference=(bucket_index,t)):
+                result_indices = tuple(sorted(
                     set(result_indices + tensor.indices),
                     key=int)
                 )
+
+            # @pyrofiler.PROF.cpu('Result Indices', reference=(bucket_index,t))
+            # def getResultIndices(result_indices, tensor):
+            #     return tuple(sorted(
+            #         set(result_indices + tensor.indices),
+            #         key=int)
+            #     )
             
-            result_indices = getResultIndices(result_indices, tensor)
+            # result_indices = getResultIndices(result_indices, tensor)
 
         if len(result_indices) > 0:
             if not no_sum:  # trim first index
