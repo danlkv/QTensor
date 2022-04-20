@@ -30,7 +30,7 @@ class TorchBackend(ContractionBackend):
         result_indices = bucket[0].indices
         result_data = bucket[0].data
         width = len(set(bucket[0].indices))
-        print("w:",width)
+        #print("w:",width)
 
         for tensor in bucket[1:]:
 
@@ -77,8 +77,8 @@ class TorchBackend(ContractionBackend):
             result = qtree.optimizer.Tensor(f'E{tag}', result_indices,
                                 data=torch.sum(result_data, axis=0))
         
-        print("summary:",sorted(self.exprs.items(), key=lambda x: x[1], reverse=True))
-        print("stats:",self.width_bc)
+        #print("summary:",sorted(self.exprs.items(), key=lambda x: x[1], reverse=True))
+        #print("stats:",self.width_bc)
         return result
 
     def process_bucket_merged(self, ixs, bucket, no_sum=False):
