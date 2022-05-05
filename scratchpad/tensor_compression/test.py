@@ -56,7 +56,7 @@ def main():
     bucket_widths = np.array(list(map(bucket_size, buckets)))
     print('Bucket sizes', bucket_widths)
     # sizes in bytes
-    requested_sizes = [100, 400, 100*DIMS.M]
+    requested_sizes = [0.5*DIMS.M, 100*DIMS.M]
     filename_prefix = 'tensor'
     for size in requested_sizes:
         tw = DIMS.get_tw_mem(size)
