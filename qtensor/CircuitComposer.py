@@ -94,6 +94,7 @@ class OldQAOAComposer(CircuitComposer):
         super().__init__(*args, **kwargs)
 
         self.graph = graph
+        self.qubit_map = {n: i for i, n in enumerate(graph.nodes())}
 
     def _get_builder(self):
         return self._get_builder_class()(self.n_qubits)
@@ -139,7 +140,7 @@ class OldQAOAComposer(CircuitComposer):
     def mixer_operator(self, beta, nodes=None):
         if nodes is None: nodes = self.graph.nodes()
         for n in nodes:
-            qubit = self.qubits[n]
+            qubit = self.qubit_map[n]
             self.x_term(qubit, beta)
 
     def append_zz_term(self, q1, q2, gamma):
@@ -149,7 +150,7 @@ class OldQAOAComposer(CircuitComposer):
     def cost_operator_circuit(self, gamma, edges=None):
         if edges is None: edges = self.graph.edges()
         for i, j in edges:
-            u, v = self.qubits[i], self.qubits[j]
+            u, v = self.qubit_map[i], self.qubit_map[j]
             self.append_zz_term(u, v, gamma)
 
 
@@ -165,7 +166,7 @@ class OldQAOAComposer(CircuitComposer):
             self.mixer_operator(beta[i])
 
     def energy_edge(self, i, j):
-        u, v = self.qubits[i], self.qubits[j]
+        u, v = self.qubit_map[i], self.qubit_map[j]
         self.apply_gate(self.operators.Z, u)
         self.apply_gate(self.operators.Z, v)
 
@@ -227,5 +228,5 @@ class WeightedZZQAOAComposer(ZZQAOAComposer):
 
     def cost_operator_circuit(self, gamma, edges=None):
         for i, j, w in self.graph.edges.data('weight', default=1):
-            u, v = self.qubits[i], self.qubits[j]
+            u, v = self.qubit_map[i], self.qubit_map[j]
             self.append_zz_term(u, v, gamma*w)

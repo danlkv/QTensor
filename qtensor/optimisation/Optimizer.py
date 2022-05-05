@@ -38,6 +38,9 @@ class WithoutOptimizer(Optimizer):
                         name=graph.nodes[var]['name'])
                     for var in peo]
         if free_vars:
+            graph = qtree.graph_model.make_clique_on(graph, free_vars)
+            graph_copy = copy.deepcopy(graph)
+            self.graph = graph_copy
             peo = qtree.graph_model.get_equivalent_peo(graph, peo, free_vars)
 
         peo = ignored_vars + peo
