@@ -4,10 +4,15 @@ import quimb as qu
 import networkx as nx
 import time
 import re
+import random
+import numpy as np
+SEED = 10
+random.seed(SEED)
+np.random.seed(SEED)
 
 from quimb.tensor.tensor_core import concat, _gen_output_inds, _inds_to_eq
 
-N = 32
+N = 38
 p = 4
 gamma, beta = [.2]*p, [.3]*p
 G = nx.random_regular_graph(3, N)
@@ -32,7 +37,7 @@ print('QTensor = ', end='', flush=True)
 comp = qt.DefaultQAOAComposer(G, gamma=gamma, beta=beta)
 comp.ansatz_state()
 tn = qt.optimisation.QtreeTensorNet.from_qtree_gates(comp.circuit)
-opt = qt.toolbox.get_ordering_algo('tamaki_5')
+opt = qt.toolbox.get_ordering_algo('tamaki_20')
 start = time.time()
 peo, tw = opt.optimize(tn)
 end = time.time()
@@ -57,8 +62,8 @@ network = cq.Network(eq, *tdata)
 # 2. Use 16 hyperoptimizer samples. 
 start = time.time()
 slicer_opt = cq.SlicerOptions(disable_slicing=True)
-reconf_opt = cq.ReconfigOptions(num_iterations=0)   
-samples, threads = 16, 2
+reconf_opt = cq.ReconfigOptions(num_iterations=0)
+samples, threads = 8, 1
 path, info = network.contract_path(optimize={'samples' : samples, 'threads' : threads,  'slicing': slicer_opt, 'reconfiguration' : reconf_opt})
 end = time.time()
 
@@ -95,7 +100,10 @@ print(end - start)
 print('QTensor *contraction only* GPU time = ', end='', flush=True)
 comp = qt.DefaultQAOAComposer(G, gamma=gamma, beta=beta)
 comp.ansatz_state()
-sim = qt.QtreeSimulator(optimizer=opt, backend=qt.contraction_backends.TorchBackend())
+#sim = qt.QtreeSimulator(optimizer=opt, backend=
+backend = qt.contraction_backends.get_mixed_backend('einsum', 'cupy', 12)
+#backend = qt.contraction_backends.get_mixed_backend('torch_cpu', 'torch_gpu', 12)
+sim = qt.QtreeSimulator(optimizer=opt, backend=backend)
 start = time.time()
 sim.simulate_batch(comp.circuit, peo=peo)
 end = time.time()

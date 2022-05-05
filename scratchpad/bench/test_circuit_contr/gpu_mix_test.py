@@ -4,10 +4,11 @@ import time
 import re
 import random
 import numpy as np
-random.seed(13)
-np.random.seed(13)
+SEED = 19
+random.seed(SEED)
+np.random.seed(SEED)
 
-N = 34
+N = 38
 p = 4
 gamma, beta = [.2]*p, [.3]*p
 G = nx.random_regular_graph(3, N)

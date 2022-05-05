@@ -73,7 +73,7 @@ class MixBackend(ContractionBackend):
         # if accc_width != bucket_width:
         #      print(accc_width, bucket_width)
         if accc_width >= self.watershed:
-            #print("In GPU")
+            #print(f"In GPU, width {accc_width}")
             return self.gpu_be.process_bucket(bucket, no_sum)
         else:
             return self.cpu_be.process_bucket(bucket, no_sum)
