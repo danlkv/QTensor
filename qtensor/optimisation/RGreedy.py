@@ -20,13 +20,14 @@ class RGreedyOptimizer(GreedyOptimizer):
     using boltzman probabilities.
 
     """
-    def __init__(self, *args, temp=0.002, repeats=10,
-                 max_time=np.inf,
+    def __init__(self, max_width=None, *args, temp=0.002, repeats=10,
+                 max_time=np.inf, 
                  **kwargs):
         super().__init__(*args, **kwargs)
         self.temp = temp
         self.repeats = repeats
         self.max_time = max_time
+        self.max_width = max_width
 
     def _get_ordering(self, graph, **kwargs):
         #mapping = {i:k for i, k in enumerate(graph.nodes)}
@@ -84,6 +85,10 @@ class RGreedyOptimizer(GreedyOptimizer):
 
             if time.time() - start_time > self.max_time:
                 break
+
+            if self.max_width is not None:
+                if max(widths) <= self.max_width:
+                    break
 
         return best_peo, best_widths
 

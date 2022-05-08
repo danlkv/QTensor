@@ -239,15 +239,16 @@ class SlicesOptimizer(GreedyOptimizer):
         return self.peo, self.parallel_vars, tensor_net
 
 class TamakiOptimizer(GreedyOptimizer):
-    def __init__(self, *args, wait_time=5, **kwargs):
+    def __init__(self, max_width=None, *args, wait_time=5, **kwargs):
         super().__init__(*args, **kwargs)
         self.wait_time = wait_time
+        self.max_width = max_width
 
     def _get_ordering(self, graph, inplace=True):
         node_names = nx.get_node_attributes(graph, 'name')
         node_sizes = nx.get_node_attributes(graph, 'size')
         peo, tw = qtree.graph_model.peo_calculation.get_upper_bound_peo_pace2017_interactive(
-                graph, method="tamaki", max_time=self.wait_time)
+                graph, method="tamaki", max_time=self.wait_time, max_width=self.max_width)
 
 
         peo = [qtree.optimizer.Var(var, size=node_sizes[var],
