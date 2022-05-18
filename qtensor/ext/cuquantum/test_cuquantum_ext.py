@@ -12,7 +12,7 @@ logging.basicConfig(level=logging.DEBUG,
 format='%(asctime)s %(levelname)-8s %(message)s', force=True )
 
 def test_cuquantum():
-    G, gamma, beta = get_test_problem(14, 2, d=3)
+    G, gamma, beta = get_test_problem(16, 3, d=3)
     composer = DefaultQAOAComposer(
             graph=G, gamma=gamma, beta=beta)
     composer.ansatz_state()
@@ -20,7 +20,7 @@ def test_cuquantum():
     print('circ', circ)
     print('circ len', len(circ))
     tn = cq.CuTensorNet.from_qtree_gates(circ)
-    slicer_opt = cq.cq.SlicerOptions(disable_slicing=True)
+    slicer_opt = cq.cq.SlicerOptions()
     reconf_opt = cq.cq.ReconfigOptions(num_iterations=0)   
     print('Cuquantum equation', tn._eq)
     print('Cuquantum tensor count', len(tn))
