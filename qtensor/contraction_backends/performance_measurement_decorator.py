@@ -1,7 +1,7 @@
 from qtensor.contraction_backends import ContractionBackend, NumpyBackend
 from qtensor.utils import ReportTable
 from pyrofiler import timing
-import torch
+from qtensor.tools.lazy_import import torch
 
 class PerfBackend(ContractionBackend):
     Backend = ContractionBackend
