@@ -45,7 +45,6 @@ class CuTensorNet(TensorNet):
         eq = eq_lh + '->' + result_ix
         tdata = [x.astype(dtype) for x in all_data]
         return cls(eq, *tdata)
-        
 
 
 # -- Cuquantum Optimizer
@@ -79,6 +78,7 @@ class CuQuantumOptimizer(qopt.Optimizer):
 # -- Cuquantum Simulator
 
 from qtensor import QtreeSimulator
+from qtensor.QAOASimulator import QAOASimulator
 
 class CuQuantumSimulator(QtreeSimulator):
     def __init__(self, optimizer=None, max_tw=None):
@@ -108,3 +108,6 @@ class CuQuantumSimulator(QtreeSimulator):
         else:
             path = peo
         return cq.contract(qtn._eq, *qtn.tensors, optimize={'path': path})
+
+class QAOACuQuantumSimulator(QAOASimulator, CuQuantumSimulator):
+    pass

@@ -1,6 +1,6 @@
 from qtensor.ext import cuquantum as cq
 from qtensor.tests import get_test_problem
-from qtensor import DefaultQAOAComposer, QtreeSimulator
+from qtensor import DefaultQAOAComposer, QtreeSimulator, QAOAQtreeSimulator
 import random, numpy as np
 
 random.seed(10)
@@ -71,4 +71,15 @@ def test_cuquantum_sim_batch():
 
     sim2 = QtreeSimulator()
     res2 = sim2.simulate_batch(circ, batch_vars=6)
+    assert np.allclose(res.flatten(), res2)
+
+def test_cuquantum_sim_qaoa_energy():
+    G, gamma, beta = get_test_problem(16, 2, d=3)
+    slicer_opt = cq.cq.SlicerOptions()
+    opt = cq.CuQuantumOptimizer(slicing=slicer_opt, threads=1, samples=2)
+    sim = cq.QAOACuQuantumSimulator(DefaultQAOAComposer, optimizer=opt)
+    res = sim.energy_expectation(G, gamma, beta)
+
+    sim2 = QAOAQtreeSimulator(DefaultQAOAComposer)
+    res2 = sim2.energy_expectation(G, gamma, beta)
     assert np.allclose(res.flatten(), res2)
