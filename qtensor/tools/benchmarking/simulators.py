@@ -9,7 +9,6 @@ import qtensor
 from qtensor.tests.acqdp_qaoa import qaoa as acqdp_qaoa
 import pyrofiler.c as profiles
 from tqdm.auto import tqdm
-from typing import Any
 
 
 def get_test_gamma_beta(p):
@@ -82,10 +81,10 @@ class BenchSimulator:
     def simulate_qaoa_energy(self, G, p):
         raise NotImplementedError()
 
-    def optimize(self, problem) -> tuple[Any, ContractionEstimation, float]:
+    def optimize(self, problem):
         raise NotImplementedError()
 
-    def simulate(self, circuit, opt) -> tuple[Any, float, float]:
+    def simulate(self, circuit, opt):
         raise NotImplementedError()
 
     def simulate_prof(self, circuit, opt, *args, **kwargs):
