@@ -3,12 +3,13 @@ import time
 from qtensor.tools.lazy_import import quimb, acqdp
 from qtensor.tools.lazy_import import cotengra as ctg
 from qtensor.tools.lightcone_orbits import get_edge_orbits_lightcones
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 import qtensor.tests.qiskit_qaoa_energy
 import qtensor
 from qtensor.tests.acqdp_qaoa import qaoa as acqdp_qaoa
 import pyrofiler.c as profiles
 from tqdm.auto import tqdm
+from typing import Any
 
 
 def get_test_gamma_beta(p):
@@ -81,10 +82,10 @@ class BenchSimulator:
     def simulate_qaoa_energy(self, G, p):
         raise NotImplementedError()
 
-    def optimize(self, circuit):
+    def optimize(self, problem) -> tuple[Any, ContractionEstimation, float]:
         raise NotImplementedError()
 
-    def simulate(self, circuit, opt):
+    def simulate(self, circuit, opt) -> tuple[Any, float, float]:
         raise NotImplementedError()
 
     def simulate_prof(self, circuit, opt, *args, **kwargs):
@@ -119,10 +120,11 @@ class QiskitSimulator(BenchSimulator):
 
 
 class QtensorSimulator(BenchSimulator):
-    def __init__(self, backend='einsum', accelerated=False, **kwargs):
+    def __init__(self, backend='einsum', accelerated=False, ordering_algo='greedy', **kwargs):
         super().__init__(**kwargs)
         self.backend = backend
         self.accelerated = accelerated
+        self.ordering_algo = ordering_algo
 
     def _iterate_edges_accelerated(self, G, p):
         with profiles.timing() as t:
@@ -144,15 +146,17 @@ class QtensorSimulator(BenchSimulator):
 
     def _get_simulator(self):
         backend = self.backend
-        return qtensor.QAOAQtreeSimulator(
+        sim = qtensor.QAOAQtreeSimulator(
             qtensor.DefaultQAOAComposer,
             backend=qtensor.contraction_backends.get_backend(backend)
         )
-
+        return sim
     def optimize_qaoa_energy(self, G, p,
-                             ordering_algo='greedy',
+                             ordering_algo=None,
                              opt_kwargs={}
                             ):
+        if ordering_algo is None:
+            ordering_algo = self.ordering_algo
         opt = qtensor.toolbox.get_ordering_algo(ordering_algo, **opt_kwargs)
         gamma, beta = get_test_gamma_beta(p)
         # convert gamma beta to qtensor format
@@ -191,6 +195,7 @@ class QtensorSimulator(BenchSimulator):
                     circuit = sim._edge_energy_circuit(G, gamma, beta, edge)
                     res += sim.simulate_batch(circuit, peo=peo)
         return res, t.result, m.result
+
 
     def optimize(self, circuit, ordering_algo='greedy'):
         opt = qtensor.toolbox.get_ordering_algo(ordering_algo)
