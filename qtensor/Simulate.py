@@ -1,5 +1,5 @@
 import qtree
-import cirq
+from qtensor.tools.lazy_import import cirq
 from qtensor.contraction_backends import NumpyBackend, ContractionBackend
 
 from qtensor.optimisation.TensorNet import QtreeTensorNet

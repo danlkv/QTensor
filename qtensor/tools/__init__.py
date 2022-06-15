@@ -1,9 +1,9 @@
 from qtensor.tools import mpi
 from qtensor.tools import maxcut
 from qtensor.tools import lazy_import
-from qtensor.tools import benchmarking
-from qtensor.tools.lib_interface import qiskit_circuit
 from qtensor.tools.lazy_import import LasyModule
+benchmarking = lazy_import.LasyModule('qtensor.tools.benchmarking')
+from qtensor.tools.lib_interface import qiskit_circuit
 
 #-- gamma, beta for optimized bethe lattice
 # val: QAOA approximation value expectation

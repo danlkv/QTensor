@@ -3,7 +3,7 @@ import time
 import numpy as np
 import itertools
 import qtree
-import matplotlib.pyplot as plt
+from qtensor.tools.lazy_import import plt
 import networkx as nx
 from tqdm.auto import tqdm
 import functools

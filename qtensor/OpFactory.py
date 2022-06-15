@@ -1,12 +1,10 @@
-import cirq
 import qtree
 from functools import partial
-# Qiskit >=0.19
-#import qiskit.circuit.library as qiskit_lib
-#qiskit_lib = qtensor.tools.LasyModule('qiskit.extensions.standard')
+from qtensor.tools.lazy_import import LasyModule
 from qtensor.tools.lazy_import import qiskit
 from qtensor.tools.lazy_import import qiskit_lib
 from qtensor.tools.lazy_import import torch
+from qtensor.tools.lazy_import import cirq
 import numpy as np
 
 class OpFactory:
@@ -16,10 +14,21 @@ class TorchFactory:
     pass
 
 class CirqFactory:
-    H=cirq.H
-    cX=cirq.CX
-    Z=cirq.Z
-    X=cirq.X
+    @staticmethod
+    def H(q):
+        return cirq.H(q)
+
+    @staticmethod
+    def cX(*args):
+        return cirq.CX(*args)
+    
+    @staticmethod
+    def Z(q):
+        return cirq.Z(q)
+
+    @staticmethod
+    def X(q):
+        return cirq.X(q)
 
     @staticmethod
     def ZPhase(x, alpha):
@@ -33,7 +42,9 @@ class CirqFactory:
     def XPhase(x, alpha):
         return cirq.XPowGate(exponent=float(alpha)).on(x)
 
-    cZ=cirq.CZ
+    @staticmethod
+    def cZ(*x):
+        return cirq.CZ(*x)
 
 QtreeFactory = qtree.operators
 class ZZFull(qtree.operators.ParametricGate):
@@ -46,7 +57,7 @@ class ZZFull(qtree.operators.ParametricGate):
         tensor = np.diag([m, p ,p, m])
         return tensor.reshape((2,)*4)
 
-QtreeFullFactory = qtree.operators_full_matrix
+QtreeFullFactory = LasyModule('qtree.operators_full_matrix')
 QtreeFullFactory.ZZ = ZZFull
 
 class ZZ(qtree.operators.ParametricGate):
@@ -239,7 +250,8 @@ class CirqBuilder(CircuitBuilder):
         self._circuit = cirq.Circuit()
 
     def apply_gate(self, gate, *qubits, **params):
-        self._circuit.append(gate(*qubits, **params))
+        qubits = [self.qubits[i] for i in qubits]
+        self._circuit.append(gate(**params).on(*qubits))
 
     def inverse(self):
         self._circuit = cirq.inverse(self._circuit)
