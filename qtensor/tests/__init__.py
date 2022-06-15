@@ -29,3 +29,18 @@ def get_test_problem(n=10, p=2, d=3, type='random'):
     gamma, beta = [np.pi/5]*p, [np.pi/2]*p
     return G, gamma, beta
 
+@lru_cache
+def get_test_1d_problem(N=10, d=5, Builder=None):
+    if Builder is None:
+        from qtensor.OpFactory import QtreeBuilder
+        Builder = QtreeBuilder
+    builder = Builder(N)
+    for l in range(d*2):
+        for i in range(N):
+            builder.apply_gate(builder.operators.YPhase, i, alpha=.25)
+        s = l % 2
+        for i in range(N//2-s):
+            u, v = s+2*i, s+2*i + 1
+            builder.apply_gate(builder.operators.cX, u, v)
+    return builder.circuit
+
