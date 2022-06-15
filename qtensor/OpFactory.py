@@ -15,20 +15,20 @@ class TorchFactory:
 
 class CirqFactory:
     @staticmethod
-    def H(q):
-        return cirq.H(q)
+    def H(*args):
+        return cirq.H(*args)
 
     @staticmethod
     def cX(*args):
         return cirq.CX(*args)
     
     @staticmethod
-    def Z(q):
-        return cirq.Z(q)
+    def Z(*args):
+        return cirq.Z(*args)
 
     @staticmethod
-    def X(q):
-        return cirq.X(q)
+    def X(*args):
+        return cirq.X(*args)
 
     @staticmethod
     def ZPhase(x, alpha):
@@ -250,8 +250,8 @@ class CirqBuilder(CircuitBuilder):
         self._circuit = cirq.Circuit()
 
     def apply_gate(self, gate, *qubits, **params):
-        qubits = [self.qubits[i] for i in qubits]
-        self._circuit.append(gate(**params).on(*qubits))
+        qubits = [self.qubits[i] if isinstance(i, int) else i for i in qubits]
+        self._circuit.append(gate(*qubits, **params))
 
     def inverse(self):
         self._circuit = cirq.inverse(self._circuit)
