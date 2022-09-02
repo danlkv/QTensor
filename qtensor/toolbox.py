@@ -6,11 +6,15 @@ import time
 from multiprocessing.dummy import Pool
 
 from qtensor.optimisation.TensorNet import QtreeTensorNet
-from qtensor.optimisation.Optimizer import (
+from qtensor.optimisation import (
+    AdaptiveOptimizer,
     GreedyOptimizer,
     TamakiOptimizer,
-    TamakiExactOptimizer,
     WithoutOptimizer,
+)
+
+from qtensor.optimisation.Optimizer import (
+    TamakiExactOptimizer,
     TamakiTrimSlicing,
     DefaultOptimizer,
     KahyparOptimizer
@@ -113,6 +117,8 @@ def get_ordering_algo(ordering_algo, par_vars=0, **kwargs) -> qtensor.optimisati
         optimizer = WithoutOptimizer()
     elif ordering_algo == 'kahypar':
         optimizer = KahyparOptimizer()
+    elif ordering_algo == 'adaptive':
+        optimizer = AdaptiveOptimizer()
     else:
         raise ValueError('Ordering algorithm not supported')
     return optimizer
