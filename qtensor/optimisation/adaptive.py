@@ -7,7 +7,8 @@ from qtensor.optimisation import (
 
 # Expected time to contract by width
 _contraction_time_map = {
-    20:0.2,
+    20:0.1,
+    21:0.2,
     22:0.4,
     23:1,
     24:2,
