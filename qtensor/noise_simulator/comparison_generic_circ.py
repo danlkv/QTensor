@@ -3,8 +3,10 @@ import numpy as np
 from qtree.operators import from_qiskit_circuit
 from qiskit import execute, Aer
 from qtensor import QiskitQAOAComposer
+import qtensor
 import networkx as nx
 import qiskit.providers.aer.noise as noise
+from qiskit.providers.aer import AerSimulator
 import time
 
 def get_circs(S, d):
@@ -13,9 +15,11 @@ def get_circs(S, d):
     comp = QiskitCZBrickworkComposer(S)
     comp.two_qubit_rnd(layers=d)
 
-    ###
-    #gamma = [0.3] * d
-    #beta = [0.3] * d
+    ##
+    gammabeta = np.array(qtensor.tools.BETHE_QAOA_VALUES[str(d)]['angles'])
+
+    gamma = -gammabeta[:d]
+    beta = gammabeta[d:]
     #comp = QiskitQAOAComposer(G, gamma=gamma, beta=beta)
     #comp.ansatz_state()
     n, qtensor_circ = from_qiskit_circuit(comp.circuit)
@@ -27,7 +31,10 @@ def get_circs(S, d):
 
 def simulate_qiskit_density_matrix(circuit, noise_model_qiskit, take_trace = True):
     start = time.time_ns() / (10 ** 9)
-    result = execute(circuit, Aer.get_backend('aer_simulator_density_matrix'), shots=1, noise_model=noise_model_qiskit).result()
+    backend = AerSimulator(method='density_matrix', noise_model=noise_model_qiskit)
+
+    result = execute(circuit, backend, shots=1).result()
+    #result = execute(circuit, Aer.get_backend('aer_simulator_density_matrix'), shots=1, noise_model=noise_model_qiskit).result()
     if take_trace:
         qiskit_probs = np.diagonal(result.results[0].data.density_matrix.real)
         end = time.time_ns() / (10 ** 9)
@@ -49,7 +56,7 @@ if __name__=="__main__":
     prob_2 = 0.1
 
     S = 2
-    d = 3
+    d = 1
     qtensor_circ, qiskit_circ = get_circs(S, d)
     num_qubits = S**2
     # Qiskit Noise Model
@@ -58,7 +65,8 @@ if __name__=="__main__":
 
     noise_model_qiskit = noise.NoiseModel()
     noise_model_qiskit.add_all_qubit_quantum_error(depol_chan_qiskit_1Q, ['x', 'y', 'z'])
-    noise_model_qiskit.add_all_qubit_quantum_error(depol_chan_qiskit_2Q, ['cx'])
+    noise_model_qiskit.add_all_qubit_quantum_error(depol_chan_qiskit_1Q, ['rz', 'ry', 'rx', 'h'])
+    noise_model_qiskit.add_all_qubit_quantum_error(depol_chan_qiskit_2Q, ['cx', 'cz'])
 
     # QTensor Noise Model
     depol_chan_qtensor_1Q = DepolarizingChannel(prob_1, 1)
@@ -66,7 +74,8 @@ if __name__=="__main__":
 
     noise_model_qtensor = NoiseModel()
     noise_model_qtensor.add_channel_to_all_qubits(depol_chan_qtensor_1Q, ['X', 'Y', 'Z'])
-    noise_model_qtensor.add_channel_to_all_qubits(depol_chan_qtensor_2Q, ['cX'])
+    #noise_model_qtensor.add_channel_to_all_qubits(depol_chan_qtensor_1Q, ['XPhase', 'YPhase', 'ZPhase'])
+    noise_model_qtensor.add_channel_to_all_qubits(depol_chan_qtensor_2Q, ['cX',])
 
     noise_sim = NoiseSimulator(noise_model_qtensor)
 
