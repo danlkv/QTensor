@@ -74,7 +74,7 @@ if __name__=="__main__":
 
     noise_model_qtensor = NoiseModel()
     noise_model_qtensor.add_channel_to_all_qubits(depol_chan_qtensor_1Q, ['X', 'Y', 'Z'])
-    #noise_model_qtensor.add_channel_to_all_qubits(depol_chan_qtensor_1Q, ['XPhase', 'YPhase', 'ZPhase'])
+    noise_model_qtensor.add_channel_to_all_qubits(depol_chan_qtensor_1Q, ['XPhase', 'YPhase', 'ZPhase', 'H'])
     noise_model_qtensor.add_channel_to_all_qubits(depol_chan_qtensor_2Q, ['cX',])
 
     noise_sim = NoiseSimulator(noise_model_qtensor)
