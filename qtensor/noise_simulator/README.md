@@ -36,3 +36,9 @@ When running in both modes E and B, increasing error rate in channel reduces the
 In some cases hovewer, there was convergence of error in mode E
 
 These results are preliminary.
+
+When running in mode E with a layer of Hadamards at the beginning and end of the circuit, a depolazing error on 0.01 on single qubit gates but no error on two-qubit gates had significant error. 
+
+When running in mode E with a layer of Hadamards at the beginning and end of the circuit, a depolazing error on 0.01 on single qubit gates and 0.1 on two-qubit gates significantly reduced the error. 
+
+When running in mode E with a layer of Hadamards at the beginning and end of the circuit, a depolazing error on 0.25 on single qubit gates and 0.1 on two-qubit gates caused the error to return. 
