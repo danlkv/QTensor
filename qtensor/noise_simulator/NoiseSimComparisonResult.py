@@ -50,7 +50,7 @@ class NoiseSimComparisonResult:
         self.total_time_taken = self.experiment_end_time - self.experiment_start_time
         self._calc_similarity()
 
-    def save_result(self, qiskit_probs, qtensor_probs, num_circs, num_circs_simulated, G, gamma, beta, qtensor_time_total, qiskit_time_total):
+    def save_result(self, qiskit_probs, qtensor_probs, exact_qtensor_amps, num_circs, num_circs_simulated, G, gamma, beta, qtensor_time_total, qiskit_time_total):
         self.qiskit_probs = qiskit_probs
         self.qtensor_probs = qtensor_probs
         self.num_circs = num_circs
@@ -62,20 +62,24 @@ class NoiseSimComparisonResult:
         self.qiskit_time_taken = qiskit_time_total
         self.experiment_end_time =  time.time_ns() / (10 ** 9) 
         self.experiment_time_taken = self.experiment_end_time - self.experiment_start_time
+        self.exact_qtensor_amps = exact_qtensor_amps
         self._calc_similarity_of_probs()
         self._to_dict()
 
     def print_result(self):
         print("\nExperiment with n = {}, p = {}, d = {}, num_circs = {}, actual_num_circs = {}".format(self.n, self.p, self.d, self.num_circs, self.num_circs_simulated))
-        if type(self.fidelity) is str:
-            print(
+        # if type(self.fidelity) is str:
+        #     print(
+        #         f"{'Cosine Similarity:':<20}{np.round(self.cos_sim.real, 7):<10}",
+        #         f"{'Total time taken:':<20}{self.experiment_time_taken:<10}")
+        # else:
+        print(
                 f"{'Cosine Similarity:':<20}{np.round(self.cos_sim.real, 7):<10}",
-                f"{'Total time taken:':<20}{self.experiment_time_taken:<10}")
-        else:
-            print(
-                f"{'Cosine Similarity:':<20}{np.round(self.cos_sim.real, 7):<10}",
-                f"\n{'Fidelity:':<20}{np.round(self.fidelity.real, 7):<10}",
-                f"{'Total time taken:':<20}{self.experiment_time_taken:<10}")
+                f"\n{'Noisy Fidelity:':<20}{np.round(self.noisy_fidelity.real, 7):<10}",
+                f"\n{'Noiseless Fidelity:':<20}{np.round(self.noiseless_fidelity.real, 7):<10}",
+                f"\n{'Uniform Qiskit Fidelity: ':<20}{np.round(self.uniform_qiskit_fidelity.real, 7):<10}",
+                f"\n{'Uniform QTensor Fidelity: ':<20}{np.round(self.uniform_qtensor_fidelity.real, 7):<10}",
+                f"\n{'Total time taken:':<20}{self.experiment_time_taken:<10}")
 
     def print_noise_model(self):
         print(self.noise_model_str)
@@ -97,11 +101,24 @@ class NoiseSimComparisonResult:
     def _calc_similarity_of_probs(self):
         qiskit_probs_root = np.sqrt(self.qiskit_probs)
         qtensor_probs_root = np.sqrt(self.qtensor_probs)
+        noiseless_qtensor_probs_root = np.sqrt(np.abs(self.exact_qtensor_amps)**2)
+        uniform_probs_root = np.sqrt(np.ones(2**self.n)/2**self.n)
 
-        self.cos_sim = cosine_similarity(self.qiskit_probs, self.qtensor_probs)
         # we don't need to take the conjugate, as both population density vectors are strictly 
         # real by the time they have made it here. 
-        self.fidelity = (np.inner(qiskit_probs_root, qtensor_probs_root))**2
+
+        """Measures the fidelity between the qiskit density matrix noisy state and the qtensoir stochastic noisy state"""
+        self.noisy_fidelity = (np.inner(qiskit_probs_root, qtensor_probs_root))**2
+
+        """Measures the fidelity between a noisy qtensor state and the noiseless version of the same state"""
+        self.noiseless_fidelity = (np.inner(noiseless_qtensor_probs_root, qtensor_probs_root))**2
+
+        """Measures the fidelity between a qiskit noisy state and a uniform distribution state"""
+        self.uniform_qiskit_fidelity = (np.inner(uniform_probs_root, qiskit_probs_root))**2
+
+        """Measures the fidelity between a qtensor noisy state and a uniform distribution state"""
+        self.uniform_qtensor_fidelity = (np.inner(uniform_probs_root, qtensor_probs_root))**2
+        self.cos_sim = cosine_similarity(self.qiskit_probs, self.qtensor_probs)
 
     def _to_dict(self):
         #self.experiment_dict['name'] = self.name
@@ -113,7 +130,10 @@ class NoiseSimComparisonResult:
         self.data['gamma'] = self.gamma
         self.data['beta'] = self.beta
         self.data['cosine_similarity'] = self.cos_sim.real
-        self.data['fidelity'] = self.fidelity
+        self.data['noisy_fidelity'] = self.noisy_fidelity
+        self.data['noiseless_fidelity'] = self.noiseless_fidelity
+        self.data['uniform_qiskit_fidelity'] = self.uniform_qiskit_fidelity
+        self.data['uniform_qtensor_fidelity'] = self.uniform_qtensor_fidelity
         self.data['noise_model_string'] = self.noise_model_str_condensed
         self.data['noise_model_pickle'] = self.pickled_qtensor_noise_model
         self.data['experiment_date'] = self.experiment_date

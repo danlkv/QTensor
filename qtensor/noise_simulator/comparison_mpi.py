@@ -5,11 +5,12 @@ from NoiseSimComparisonResult import *
 from helper_functions import *
 import qiskit.providers.aer.noise as noise
 from qtensor.tests.test_composers import *
+from ComparisonSimulator import QAOAComparisonSimulator
 
 
 ### Noise model, simulation, and results of a QAOA algorithmm  ###
-prob_1 = 0.01
-prob_2 = 0.1
+prob_1 = 0.003
+prob_2 = 0.03
 
 # Qiskit Noise Model
 depol_chan_qiskit_1Q = noise.depolarizing_error(prob_1, 1)
@@ -36,10 +37,15 @@ max_p = 3
 min_d = 2
 max_d = 3
 
+# num samples determines how many samples of a particular n, p, d, and num_circs we take
+# generally we want to get >30 to reduce sampling noise 
 num_samples = 3
-num_circs_list = [10, 18, 32, 100, 178, 316]
-num_nodes = 1
-num_jobs_per_node = 3
+
+num_nodes = 2
+# num jobs per node is equivalent to the number of cores per node
+num_jobs_per_node = 2
+
+num_circs_list = [10, 18, 32, 100, 178, 316, 1000, 1780, 3160, 10000]
 
 outfile_name = '{}.json'.format(datetime.now().isoformat())
 results = []

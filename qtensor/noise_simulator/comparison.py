@@ -8,8 +8,8 @@ from ComparisonSimulator import QAOAComparisonSimulator
 from qtensor.tests.test_composers import *
 
 
-prob_1 = 0.01
-prob_2 = 0.1
+prob_1 = 0.003
+prob_2 = 0.03
 
 # Qiskit Noise Model
 depol_chan_qiskit_1Q = noise.depolarizing_error(prob_1, 1)
@@ -27,21 +27,21 @@ noise_model_qtensor = NoiseModel()
 noise_model_qtensor.add_channel_to_all_qubits(depol_chan_qtensor_1Q, ['H', 'XPhase', 'ZPhase'])
 noise_model_qtensor.add_channel_to_all_qubits(depol_chan_qtensor_2Q, ['cX'])
 
-min_n = 5
-max_n = 7
 
-min_p = 2
-max_p = 3
-
-min_d = 2
-max_d = 3
-
-num_samples = 1
-num_circs_list = [10, 18, 32, 100, 178, 316]
+num_samples = 30
+num_circs_list = [10, 18, 32, 100, 178, 316, 1000, 1780, 3160, 10000]
 results = []
 
 outfile_name = '{}.json'.format(datetime.now().isoformat())
 
+min_n = 5
+max_n = 16
+
+min_p = 2
+max_p = 3
+
+min_d = 4
+max_d = 5
 
 for n in range(min_n, max_n):
     for p in range(min_p, max_p):

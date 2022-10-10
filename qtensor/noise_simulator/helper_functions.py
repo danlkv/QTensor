@@ -12,6 +12,8 @@ import networkx as nx
 from datetime import datetime
 from os import SEEK_SET
 
+import qtensor
+
 def decimal_to_binary(n):
 # converting decimal to binary
 # and removing the prefix(0b)
@@ -57,8 +59,14 @@ def get_qaoa_params(n, p, d):
 
     print('Circuit params: n: {}, p: {}, d: {}'.format(n, p, d))
     G = nx.random_regular_graph(d, n)
-    gamma = [np.random.uniform(0, 2*np.pi) for _ in range(p)]
-    beta = [np.random.uniform(0, np.pi) for _ in range(p)]
+    gammabeta = np.array(qtensor.tools.BETHE_QAOA_VALUES[str(d)]['angles'])
+    #gammabeta = gammabeta.tolist()
+    gamma = gammabeta[:d]
+    beta = gammabeta[d:]
+    gamma = gamma.tolist()
+    beta = beta.tolist()
+    #gamma = [np.random.uniform(0, 2*np.pi) for _ in range(p)]
+    #beta = [np.random.uniform(0, np.pi) for _ in range(p)]
     return G, gamma, beta
 
 def save_dict_to_file(dict, name):

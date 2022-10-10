@@ -9,6 +9,8 @@ from qtensor import QiskitQAOAComposer
 from qtree.operators import from_qiskit_circuit
 from qtensor import tools
 from itertools import repeat
+from qiskit import execute, Aer
+from qiskit.providers.aer import AerSimulator
 
 class ComparisonSimulator:
     def __init__(self):
@@ -44,34 +46,36 @@ class QAOAComparisonSimulator(ComparisonSimulator):
         G, gamma, beta = get_qaoa_params(n = self.n, p = self.p, d = self.d)
         self._get_circuits(G, gamma, beta)
         noise_sim = NoiseSimulator(self.noise_model_qtensor)
+        exact_sim = QtreeSimulator()
 
         # Run simulation
         for num_circs, i in zip(self.num_circs_list, range(len(self.num_circs_list))):
             result = NoiseSimComparisonResult(self.qiskit_circ, self.qtensor_circ, self.noise_model_qiskit, 
                 self.noise_model_qtensor, self.n, self.p, self.d)
 
-            if i == 0 or recompute_previous_ensemble == True:
+            if i == 0 or recompute_previous_ensemble == False:
                 self.num_circs_simulated.append(num_circs)
-                noise_sim.simulate_batch_ensemble(self.qtensor_circ, num_circs, self.num_qubits)
+                noise_sim.simulate_batch_ensemble(sum(self.qtensor_circ, []), num_circs, self.num_qubits)
                 #print("num_circs: {}".format(num_circs))
-                qtensor_probs = noise_sim.normalized_ensemble_probs 
+                self.qtensor_probs = noise_sim.normalized_ensemble_probs
             else: 
                 actual_num_circs = num_circs - self.num_circs_list[i - 1]
                 self.num_circs_simulated.append(actual_num_circs)
                 #print("num_circs: {}, actual_num_circs: {}".format(num_circs, actual_num_circs_to_sim))
-                noise_sim.simulate_batch_ensemble(self.qtensor_circ, actual_num_circs, self.num_qubits)
+                noise_sim.simulate_batch_ensemble(sum(self.qtensor_circ, []), actual_num_circs, self.num_qubits)
                 prev_qtensor_probs = self.prev_probs
                 curr_qtensor_probs = noise_sim.normalized_ensemble_probs
-                qtensor_probs = (curr_qtensor_probs + prev_qtensor_probs) / 2
+                self.qtensor_probs = (curr_qtensor_probs + prev_qtensor_probs) / 2
             
-            if recompute_previous_ensemble == False:
-                self.prev_probs = qtensor_probs
+            if recompute_previous_ensemble == True:
+                self.prev_probs = self.qtensor_probs
 
             qtensor_sim_time = noise_sim.time_taken
             self.simulate_qiskit_density_matrix(self.qiskit_circ, self.noise_model_qiskit)    
+            self.exact_qtensor_amps = exact_sim.simulate_batch(sum(self.qtensor_circ, []), batch_vars=self.num_qubits)
 
             # Save results
-            result.save_result(self.qiskit_probs, qtensor_probs, num_circs, 
+            result.save_result(self.qiskit_probs, self.qtensor_probs, self.exact_qtensor_amps, num_circs,
                 self.num_circs_simulated[i], G, gamma, beta, qtensor_sim_time, self.qiskit_sim_time)
             self.results.append(result.data)
             if print_stats:
@@ -80,7 +84,7 @@ class QAOAComparisonSimulator(ComparisonSimulator):
     def _mpi_parallel_unit(self, args):
         noise_sim, qtensor_circ, num_circs, num_qubits = args
         #print("this workers num_circs: ", num_circs)
-        noise_sim.simulate_batch_ensemble(qtensor_circ, num_circs, num_qubits)
+        noise_sim.simulate_batch_ensemble(sum(qtensor_circ, []), num_circs, num_qubits)
         fraction_of_qtensor_probs = noise_sim.normalized_ensemble_probs
         return fraction_of_qtensor_probs
 
@@ -93,6 +97,7 @@ class QAOAComparisonSimulator(ComparisonSimulator):
         G, gamma, beta = get_qaoa_params(n = self.n, p = self.p, d = self.d)
         self._get_circuits(G, gamma, beta)
         self.noise_sim = NoiseSimulator(self.noise_model_qtensor)
+        exact_sim = QtreeSimulator()
 
         for num_circs, i in zip(self.num_circs_list, range(len(self.num_circs_list))):
             result = NoiseSimComparisonResult(self.qiskit_circ, self.qtensor_circ, self.noise_model_qiskit, 
@@ -101,28 +106,28 @@ class QAOAComparisonSimulator(ComparisonSimulator):
             qtensor_probs_list = tools.mpi.mpi_map(self._mpi_parallel_unit, self._arggen, pbar=pbar, total=num_nodes)
             self._check_correct_num_circs_simulated(i)
             if qtensor_probs_list:
-                if i == 0 or recompute_previous_ensemble == True: 
-                    qtensor_probs = sum(qtensor_probs_list) / self._total_jobs
+                if i == 0 or recompute_previous_ensemble == False: 
+                    self.qtensor_probs = sum(qtensor_probs_list) / self._total_jobs
                 else:
                     #prev_qtensor_probs = self.results[i - 1].qtensor_probs
                     prev_qtensor_probs = self.prev_probs
                     curr_qtensor_probs = sum(qtensor_probs_list) / self._total_jobs
-                    qtensor_probs = (curr_qtensor_probs + prev_qtensor_probs) / 2
+                    self.qtensor_probs = (curr_qtensor_probs + prev_qtensor_probs) / 2
                 qtensor_sim_time = self.noise_sim.time_taken
-                if recompute_previous_ensemble == False:
-                    self.prev_probs = qtensor_probs
+                if recompute_previous_ensemble == True:
+                    self.prev_probs = self.qtensor_probs
 
                 self.simulate_qiskit_density_matrix(self.qiskit_circ, self.noise_model_qiskit)
-
+                self.exact_qtensor_amps = exact_sim.simulate_batch(sum(self.qtensor_circ, []), batch_vars=self.num_qubits)
                 # Save results 
-                result.save_result(self.qiskit_probs, qtensor_probs, num_circs,
+                result.save_result(self.qiskit_probs, self.qtensor_probs, self.exact_qtensor_amps, num_circs,
                     self.num_circs_simulated[i], G, gamma, beta, qtensor_sim_time, self.qiskit_sim_time)
                 self.results.append(result.data) 
                 if print_stats:
                     tools.mpi.print_stats()
                     result.print_result()
 
-    def qtensor_qiskit_noisy_qaoa_density(self, recompute_previous_ensemble: bool = True):
+    def qtensor_qiskit_noisy_qaoa_density(self, recompute_previous_ensemble: bool = False):
         self.recompute_previous_ensemble = recompute_previous_ensemble
         # Prepare circuits, simulator, and area to save results
         G, gamma, beta = get_qaoa_params(n = self.n, p = self.p, d = self.d)
@@ -136,28 +141,28 @@ class QAOAComparisonSimulator(ComparisonSimulator):
             if i == 0 or recompute_previous_ensemble == True: 
                 self.num_circs_simulated.append(num_circs)
                 noise_sim.simulate_batch_ensemble_density(self.qtensor_circ, num_circs, self.n)
-                qtensor_density_matrix = noise_sim.normalized_ensemble_density_matrix
+                self.qtensor_density_matrix = noise_sim.normalized_ensemble_density_matrix
             else: 
                 actual_num_circs = num_circs - self.num_circs_list[i - 1]
                 self.num_circs_simulated.append(actual_num_circs)
                 noise_sim.simulate_batch_ensemble_density(self.qtensor_circ, actual_num_circs, self.n)
                 prev_density_matrix = self.prev_qtensor_density_matrix
                 curr_density_matrix = noise_sim.normalized_ensemble_probs
-                qtensor_density_matrix = (curr_density_matrix + prev_density_matrix) / 2
+                self.qtensor_density_matrix = (curr_density_matrix + prev_density_matrix) / 2
             qtensor_sim_time = noise_sim.time_taken
             self.simulate_qiskit_density_matrix(self.qiskit_circ, self.noise_model_qiskit, take_trace = False)
 
             if recompute_previous_ensemble == False: 
-                self.prev_qtensor_density_matrix = qtensor_density_matrix
+                self.prev_qtensor_density_matrix = self.qtensor_density_matrix
             # Save results
-            result.save_results_density(self.qiskit_density_matrix, qtensor_density_matrix, num_circs, 
+            result.save_results_density(self.qiskit_density_matrix, self.qtensor_density_matrix, num_circs, 
                 self.num_circs_simulated[i], G, gamma, beta, qtensor_sim_time, self.qiskit_sim_time)
             self.results.append(result.data)
 
 
     # Prepare arguments to be sent to each unit of work 
     def _get_args(self, i):
-        if i == 0 or self.recompute_previous_ensemble == True:
+        if i == 0 or self.recompute_previous_ensemble == False:
             num_circs = self.num_circs_list[i]
         else:
             num_circs = self.num_circs_list[i] - self.num_circs_list[i - 1]
@@ -195,7 +200,10 @@ class QAOAComparisonSimulator(ComparisonSimulator):
 
     def simulate_qiskit_density_matrix(self, circuit, noise_model_qiskit, take_trace = True):
         start = time.time_ns() / (10 ** 9)
-        result = execute(circuit, Aer.get_backend('aer_simulator_density_matrix'), shots=1, noise_model=noise_model_qiskit).result()
+        backend = AerSimulator(method='density_matrix', noise_model=noise_model_qiskit, fusion_enable=False, fusion_verbose=True)
+        result = execute(circuit, backend, shots=1).result()
+        result = backend.run(circuit).result()
+        #result = execute(circuit, Aer.get_backend('aer_simulator_density_matrix'), shots=1, noise_model=noise_model_qiskit).result()
         if take_trace:
             self.qiskit_probs = np.diagonal(result.results[0].data.density_matrix.real)
             end = time.time_ns() / (10 ** 9)
