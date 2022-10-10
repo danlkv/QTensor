@@ -28,6 +28,22 @@ noise_model_qtensor = NoiseModel()
 noise_model_qtensor.add_channel_to_all_qubits(depol_chan_qtensor_1Q, ['H', 'XPhase', 'ZPhase'])
 noise_model_qtensor.add_channel_to_all_qubits(depol_chan_qtensor_2Q, ['cX'])
 
+"""
+num samples determines how many samples of a particular n, p, d, and num_circs we take
+generally we want to get >30 to reduce sampling noise 
+"""
+num_samples = 30
+
+num_nodes = 10
+
+"""num jobs per node is equivalent to the number of cores per node"""
+num_jobs_per_node = 56
+
+num_circs_list = [10, 18, 32, 100, 178, 316, 1000, 1780, 3160, 10000]
+
+outfile_name = '{}.json'.format(datetime.now().isoformat())
+results = []
+
 min_n = 5
 max_n = 7
 
@@ -36,19 +52,6 @@ max_p = 3
 
 min_d = 2
 max_d = 3
-
-# num samples determines how many samples of a particular n, p, d, and num_circs we take
-# generally we want to get >30 to reduce sampling noise 
-num_samples = 3
-
-num_nodes = 2
-# num jobs per node is equivalent to the number of cores per node
-num_jobs_per_node = 2
-
-num_circs_list = [10, 18, 32, 100, 178, 316, 1000, 1780, 3160, 10000]
-
-outfile_name = '{}.json'.format(datetime.now().isoformat())
-results = []
 
 for n in range(min_n, max_n):
     for p in range(min_p, max_p):
