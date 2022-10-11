@@ -162,9 +162,6 @@ class QAOAComparisonSimulator(ComparisonSimulator):
 
 
     # Prepare arguments to be sent to each unit of work 
-    """Function needs a rewrite. If mod(num_circs/num_circs_per_job) !=, the job 
-    is not bounded above in the number of circuits it can simulate. The proper way for this to run
-    is for num_circuits_in_last_job <= num_circuits_per_job """
     def _get_args(self, i):
         if i == 0 or self.recompute_previous_ensemble == False:
             num_circs = self.num_circs_list[i]
@@ -180,7 +177,7 @@ class QAOAComparisonSimulator(ComparisonSimulator):
             total_jobs = int(np.ceil(num_circs / num_circs_per_job))
         else: 
             total_jobs = self.num_nodes * self.num_jobs_per_node
-            num_circs_per_job = int(np.ceil(num_circs / total_jobs))
+            num_circs_per_job = int(np.floor(num_circs / total_jobs))
 
         ## We make sure that regardless of how many nodes and jobs per node we have, we always 
         ## simulate the exact number of circuits in the ensemble specified. 
@@ -191,21 +188,24 @@ class QAOAComparisonSimulator(ComparisonSimulator):
             self.num_circs_simulated.append(num_circs)
             #print("num_circs: {}, actual num_circs simulated on this iteration: {}".format(self.num_circs_list[i], num_circs))
         else: 
-            # self._arggen = list(zip(repeat(self.noise_sim, total_jobs - 1), repeat(self.qtensor_circ, total_jobs - 1), 
-            #     repeat(num_circs_per_job, total_jobs - 1), repeat(self.n, total_jobs - 1)))
-            # num_circs_in_last_job = num_circs % num_circs_per_job
-            self._arggen = list(zip(repeat(self.noise_sim, total_jobs - 1), repeat(self.qtensor_circ, total_jobs - 1), 
-                repeat(num_circs_per_job - 1, total_jobs - 1), repeat(self.n, total_jobs - 1)))
             if num_circs_per_job == min_circs_per_job:
+                self._arggen = list(zip(repeat(self.noise_sim, total_jobs - 1), repeat(self.qtensor_circ, total_jobs - 1), 
+                    repeat(num_circs_per_job, total_jobs - 1), repeat(self.n, total_jobs - 1)))
                 num_circs_in_last_job = num_circs % num_circs_per_job
                 actual_num_circs = (total_jobs - 1) * num_circs_per_job + num_circs_in_last_job
+                self._arggen.append((self.noise_sim, self.qtensor_circ, num_circs_in_last_job, self.n))
             else: 
-                num_circs_in_last_job = num_circs - (total_jobs - 1) * (num_circs_per_job - 1)
-                actual_num_circs = (total_jobs - 1) * (num_circs_per_job - 1) + num_circs_in_last_job
-            self._arggen.append((self.noise_sim, self.qtensor_circ, num_circs_in_last_job, self.n))
+                first_set_of_jobs = num_circs - (total_jobs * num_circs_per_job)
+                second_set_of_jobs = total_jobs - first_set_of_jobs
+                print("first_set_of_jobs: {}, secomd_set_of_jobs: {}".format(first_set_of_jobs, second_set_of_jobs))
+                self._arggen = list(zip(repeat(self.noise_sim, first_set_of_jobs), repeat(self.qtensor_circ,  first_set_of_jobs), 
+                    repeat(num_circs_per_job + 1,  first_set_of_jobs), repeat(self.n, first_set_of_jobs)))
+                self._arggen.extend(list(zip(repeat(self.noise_sim, second_set_of_jobs), repeat(self.qtensor_circ,  second_set_of_jobs), 
+                    repeat(num_circs_per_job,  second_set_of_jobs), repeat(self.n, second_set_of_jobs))))  
+                actual_num_circs = first_set_of_jobs * (num_circs_per_job + 1) + second_set_of_jobs * num_circs_per_job
             self._total_jobs = total_jobs
-            print("actual_num_circs: {}, num_circs: {}, num_nodes: {}, num_jobs_per_node: {}, total_jobs: {}, num_circs_per_job: {}, num_circs_in_last_job: {}".format(
-                actual_num_circs, num_circs, self.num_nodes, self.num_jobs_per_node, self._total_jobs, num_circs_per_job -1 , num_circs_in_last_job))
+            print("actual_num_circs: {}, num_circs: {}, num_nodes: {}, num_jobs_per_node: {}, total_jobs: {}".format(
+                actual_num_circs, num_circs, self.num_nodes, self.num_jobs_per_node, self._total_jobs))
             assert num_circs == actual_num_circs
             self.num_circs_simulated.append(actual_num_circs)
             #print("num_circs: {}, actual num_circs simulated on this iteration: {}, total jobs: {}".format(self.num_circs_list[i], actual_num_circs, total_jobs))
