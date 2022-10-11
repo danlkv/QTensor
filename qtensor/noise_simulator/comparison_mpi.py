@@ -34,7 +34,7 @@ generally we want to get >30 to reduce sampling noise
 """
 num_samples = 30
 
-num_nodes = 10
+num_nodes = 5
 
 """num jobs per node is equivalent to the number of cores per node"""
 num_jobs_per_node = 56
