@@ -68,6 +68,7 @@ class QAOAComparisonSimulator(ComparisonSimulator):
                 self.qtensor_probs = (curr_qtensor_probs + prev_qtensor_probs) / 2
             
             if recompute_previous_ensemble == True:
+                #self._check_correct_num_circs_simulated(i)
                 self.prev_probs = self.qtensor_probs
 
             qtensor_sim_time = noise_sim.time_taken
@@ -104,7 +105,6 @@ class QAOAComparisonSimulator(ComparisonSimulator):
                 self.noise_model_qtensor, self.n, self.p, self.d)
             self._get_args(i)
             qtensor_probs_list = tools.mpi.mpi_map(self._mpi_parallel_unit, self._arggen, pbar=pbar, total=num_nodes)
-            self._check_correct_num_circs_simulated(i)
             if qtensor_probs_list:
                 if i == 0 or recompute_previous_ensemble == False: 
                     self.qtensor_probs = sum(qtensor_probs_list) / self._total_jobs
@@ -115,6 +115,7 @@ class QAOAComparisonSimulator(ComparisonSimulator):
                     self.qtensor_probs = (curr_qtensor_probs + prev_qtensor_probs) / 2
                 qtensor_sim_time = self.noise_sim.time_taken
                 if recompute_previous_ensemble == True:
+                    self._check_correct_num_circs_simulated(i)
                     self.prev_probs = self.qtensor_probs
 
                 self.simulate_qiskit_density_matrix(self.qiskit_circ, self.noise_model_qiskit)
@@ -138,7 +139,7 @@ class QAOAComparisonSimulator(ComparisonSimulator):
         for num_circs, i in zip(self.num_circs_list, range(len(self.num_circs_list))):
             result = NoiseSimComparisonResult(self.qiskit_circ, self.qtensor_circ, self.noise_model_qiskit, 
                 self.noise_model_qtensor, self.n, self.p, self.d)
-            if i == 0 or recompute_previous_ensemble == True: 
+            if i == 0 or recompute_previous_ensemble == False: 
                 self.num_circs_simulated.append(num_circs)
                 noise_sim.simulate_batch_ensemble_density(self.qtensor_circ, num_circs, self.n)
                 self.qtensor_density_matrix = noise_sim.normalized_ensemble_density_matrix
