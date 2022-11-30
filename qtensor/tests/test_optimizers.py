@@ -123,6 +123,24 @@ def test_adaptive_optimizer_adapts():
     assert dur2>dur1
     assert w2>w1
 
+def test_adaptive_optimizer_max_time():
+    for p in [3, 6, 12]:
+        G, gamma, beta = get_test_problem(36, p=p, d=3)
+
+        composer = QtreeQAOAComposer(
+                graph=G, gamma=gamma, beta=beta)
+        composer.ansatz_state()
+
+        opt = qtensor.toolbox.get_ordering_algo('adaptive')
+        opt.max_time = 5
+
+        tn  = qtensor.optimisation.QtreeTensorNet.from_qtree_gates(composer.circuit)
+        start1 = time.time()
+        opt.optimize(tn)
+        dur = time.time() - start1
+        print(f"Duration: {dur}, MaxTime: {opt.max_time}")
+        assert dur < opt.max_time + 2
+
 
 if __name__ == '__main__':
     test_tamaki_trimming_opt()
