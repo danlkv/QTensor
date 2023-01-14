@@ -6,7 +6,7 @@ import numpy as np
 def test_compressed_contract():
     A_ixs = [Var(x) for x in [8,7,6,5,4,3, 2]]
     A_comp = [Var(x) for x in [8, 7, 6]]
-    B_ixs = [Var(x) for x in [9, 3, 4, 2]]
+    B_ixs = [Var(x) for x in [10, 9, 3, 4, 2]]
     contract_ixs = [Var(x) for x in [3,2]]
 
     A_data = np.ones(2**len(A_ixs))
