@@ -198,7 +198,7 @@ def contract_with_cost(TN, comp_ixs, dual_TN, vertex,
     return cost
 
 
-def compressed_contraction_cost(tn, peo, mem_limit=np.inf):
+def compressed_contraction_cost(tn, peo, mem_limit=np.inf, compression_ratio=100):
     """
     Compute the cost of a contraction with compression.
     """
@@ -209,6 +209,6 @@ def compressed_contraction_cost(tn, peo, mem_limit=np.inf):
     dual_TN = dual_hg(TN)
     comp_ixs = {}
     for i in peo:
-        cost = contract_with_cost(TN, comp_ixs, dual_TN, i, mem_limit)
+        cost = contract_with_cost(TN, comp_ixs, dual_TN, i, mem_limit, compression_ratio)
         costs.append(cost)
     return costs
