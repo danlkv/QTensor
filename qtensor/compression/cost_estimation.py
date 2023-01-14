@@ -30,7 +30,7 @@ class Cost:
     def __add__(self, other):
         return Cost(
             self.flops + other.flops,
-            self.memory + other.memory,
+            max(self.memory, other.memory),
             max(self.width, other.width),
             self.compressions + other.compressions,
             self.decompressions + other.decompressions,
@@ -56,45 +56,69 @@ def dual_hg(hg: Hypergraph) -> Hypergraph:
             dual[vert].append(iedge)
     return dual
 
+def remove_vertices_tensors(TN, dual_TN, vertices=[], tensors=[]):
+    for t in tensors:
+        # -- remove tensor
+        for v in dual_TN[t]:
+            TN[v].remove(t)
+        del dual_TN[t]
+
+    for vertex in vertices:
+        # remove vertex
+        for t in TN[vertex]:
+            dual_TN[t].remove(vertex)
+        del TN[vertex]
+
 def tn2tn(tn: QtreeTensorNet, peo=None): 
     ignored_vars = tn.bra_vars + tn.ket_vars
     # Vertices --> indices
     # Edges --> tensors
     dual_tn = { str(hex(id(t))):[x for x in t.indices if x not in ignored_vars]
                for t in tn.tensors }
-    if peo:
-        dual_tn = { str(hex(id(t))):[peo.index(x) for x in t.indices if x not in ignored_vars]
-                   for t in tn.tensors }
 
     # Vertices --> tensors
     # Edges --> indices
     TN = dual_hg(dual_tn)
     return TN
 
-def pairwise_cost(indices, comp_ixs, mem_limit, contracted_ixs_count=0):
+def tensor_memory(indices, mem_limit, compression_ratio):
+    if len(indices) > mem_limit:
+        return 2**len(indices)/compression_ratio
+    else:
+        return 2**len(indices)
+def pairwise_cost(indices, comp_ixs, contracted_ixs=[],
+                  mem_limit=np.inf,
+                  compression_ratio=30,
+                 ):
     """
     Computes the cost of contracting a pair of tensors, assuming last
     `contracted_ixs_count` indices are contrated
     """
+    contracted_ixs_count = len(contracted_ixs)
     all_indices = set().union(*indices) 
     next_indices = list(all_indices)
     next_indices.sort(key=int, reverse=True)
-    next_indices = next_indices[:-contracted_ixs_count]
+    for i in contracted_ixs:
+        next_indices.remove(i)
 
     if len(next_indices) > mem_limit or any(comp_ixs):
         next_comp_ixs= next_indices[:-mem_limit]
         rm_comp = set().union(*comp_ixs) - set(next_comp_ixs)
-        decompressions = 2**(len(rm_comp)+len(next_comp_ixs))
+        decompressions = 2**(len(rm_comp) + len(next_comp_ixs))
         compressions = 2**len(next_comp_ixs)
     else:
         next_comp_ixs = []
         decompressions = 0
         compressions = 0
+    mem = 0
+    for ilist in [next_indices]+indices:
+        mem += tensor_memory(ilist, mem_limit, compression_ratio)
+
     return (
         next_indices,
         next_comp_ixs,
         Cost(
-            memory = 2**len(next_indices),
+            memory = mem,
             flops = 2**len(all_indices),
             width = len(next_indices),
             compressions = compressions,
@@ -103,25 +127,43 @@ def pairwise_cost(indices, comp_ixs, mem_limit, contracted_ixs_count=0):
     )
 
 
-def bucket_contract_cost(indices, comp_ixs, mem_limit):
+def bucket_contract_cost(indices, comp_ixs, contracted_indices, **kwargs):
+    """
+    Computes the cost of contracting a bucket of tensors
+
+    Args:
+        indices: indices of tensors in the bucket
+        comp_ixs: indices that are compressed
+        contracted_indices: indices that are contracted
+        **kwargs: passed to pairwise_cost
+    """
     ixs, compixs = indices[0], comp_ixs[0]
     costs = []
     for i in range(1, len(indices)-1):
         ixs, compixs, cost = pairwise_cost(
             [ixs, indices[i]],
             [compixs, comp_ixs[i]],
-            mem_limit, contracted_ixs_count=0
+            **kwargs
         )
         costs.append(cost)
+    # -- contract last two tensors
     new_ixs, new_comp_ixs, cost = pairwise_cost(
         [ixs, indices[-1]],
         [compixs, comp_ixs[-1]],
-        mem_limit, contracted_ixs_count=1
+        contracted_ixs=contracted_indices,
+        **kwargs,
     )
     costs.append(cost)
-    return new_ixs, new_comp_ixs, sum(costs[1:], costs[0])
+    new_ixs = set().union(*indices) - set(contracted_indices)
+    sum_cost = sum(costs[1:], costs[0])
+    sum_cost.width = len(new_ixs)
+    ## Naive Flops calculation
+    # sum_cost.flops = 2**len(set().union(*indices))*(len(indices)+1)
+    return new_ixs, new_comp_ixs, sum_cost
 
-def contract_with_cost(TN, comp_ixs, dual_TN, vertex, mem_limit=30):
+def contract_with_cost(TN, comp_ixs, dual_TN, vertex,
+                       mem_limit=np.inf,
+                       compression_ratio=100):
     """
     Contracts vertex from TN
     TN is a mapping from indices to [tensor]
@@ -130,23 +172,22 @@ def contract_with_cost(TN, comp_ixs, dual_TN, vertex, mem_limit=30):
     # contract
     tensors.sort(key=lambda t: len(dual_TN[t]))
     indices = [dual_TN[t] for t in tensors]
-    comp_itensors = [comp_ixs.get(t, []) for t in tensors]
-    _, compressed, cost = bucket_contract_cost(indices, comp_itensors, mem_limit)
+    comp_indices = [comp_ixs.get(t, []) for t in tensors]
+    result_ixs, compressed, cost = bucket_contract_cost(indices, comp_indices, [vertex],
+                                                        mem_limit=mem_limit,
+                                                        compression_ratio=compression_ratio
+                                                       )
+    # calculate current memory
+    for t_id, indices in dual_TN.items():
+        if t_id in tensors:
+            # these tensors are accounted in bucket_contract_cost
+            continue
+        cost.memory += tensor_memory(indices, mem_limit, compression_ratio)
 
-    result_ixs = set().union(*indices)
-    result_ixs.remove(vertex)
     # This can be random but should be unique
     tensor_id = str(hex(id(vertex)))
     comp_ixs[tensor_id] = compressed
-    # -- remove tensors
-    for t in tensors:
-        for v in dual_TN[t]:
-            TN[v].remove(t)
-        del dual_TN[t]
-    # remove vertex
-    for t in TN[vertex]:
-        dual_TN[t].remove(vertex)
-    del TN[vertex]
+    remove_vertices_tensors(TN, dual_TN, [vertex], tensors)
     # -- add result
     for ix in result_ixs:
         if TN.get(ix) is None:
@@ -157,7 +198,7 @@ def contract_with_cost(TN, comp_ixs, dual_TN, vertex, mem_limit=30):
     return cost
 
 
-def compressed_contraction_cost(tn, peo, mem_limit=None):
+def compressed_contraction_cost(tn, peo, mem_limit=np.inf):
     """
     Compute the cost of a contraction with compression.
     """
