@@ -1,7 +1,3 @@
-#from qtensor.noise_simulator import NoiseGate
-# from NoiseGate import *
-# import attr
-
 class NoiseModel:
     _1qubit_gate = set([
         'M', 'I', 'H', 'Z', 'T', 'Tdag', 'S', 'Sdag', 'X_1_2', 'Y_1_2', 'W_1_2'

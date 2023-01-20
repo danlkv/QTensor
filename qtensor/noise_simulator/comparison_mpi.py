@@ -1,12 +1,9 @@
-from NoiseChannels import *
-from NoiseSimulator import * 
-from NoiseModel import *
-from NoiseSimComparisonResult import *
-from helper_functions import *
+from NoiseChannels import DepolarizingChannel
+from NoiseModel import NoiseModel
 import qiskit.providers.aer.noise as noise
-from qtensor.tests.test_composers import *
 from ComparisonSimulator import QAOAComparisonSimulator
-
+from datetime import datetime
+from helper_functions import save_dict_to_file
 
 ### Noise model, simulation, and results of a QAOA algorithmm  ###
 prob_1 = 0.003
@@ -40,7 +37,7 @@ num_nodes = 2
 num_jobs_per_node = 1
 
 # num_circs_list = [10, 18, 32, 100, 178, 316, 1000, 1780, 3160, 10000]
-num_circs_list = [1000]
+num_circs_list = [10]
 
 outfile_name = '{}.json'.format(datetime.now().isoformat())
 results = []

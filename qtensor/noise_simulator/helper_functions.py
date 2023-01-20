@@ -1,6 +1,3 @@
-from logging import raiseExceptions
-from qtree.operators import *
-
 from collections import OrderedDict
 import numpy as np
 import numpy as np
@@ -9,8 +6,6 @@ from numpy.linalg import norm
 import json
 import jsbeautifier
 import networkx as nx
-from datetime import datetime
-from os import SEEK_SET
 
 import qtensor
 

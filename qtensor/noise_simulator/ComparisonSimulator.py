@@ -1,16 +1,18 @@
-from NoiseChannels import *
-from NoiseSimulator import * 
-from NoiseModel import *
-from NoiseSimComparisonResult import *
-from helper_functions import *
-from qiskit import execute, Aer
-from qtensor.tests.test_composers import *
+from NoiseSimulator import NoiseSimulator
+from NoiseModel import NoiseModel 
+from NoiseSimComparisonResult import NoiseSimComparisonResult
+from helper_functions import get_qaoa_params
+from qtensor.tests.test_composers import QtreeSimulator
 from qtensor import QiskitQAOAComposer
 from qtree.operators import from_qiskit_circuit
 from qtensor import tools
+
+from qiskit import execute
+from qiskit.providers.aer import AerSimulator, noise
+
+import numpy as np
 from itertools import repeat
-from qiskit import execute, Aer
-from qiskit.providers.aer import AerSimulator
+import time
 
 class ComparisonSimulator:
     def __init__(self):

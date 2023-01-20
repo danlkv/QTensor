@@ -1,10 +1,12 @@
-from helper_functions import *
+# from helper_functions import *
+from helper_functions import fidelity, cosine_similarity
 
 from datetime import datetime
 import time
 import json
 import jsbeautifier
 import jsonpickle
+import numpy as np
 
 from qtensor import QiskitQAOAComposer
 import qiskit.providers.aer.noise as noise

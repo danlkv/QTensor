@@ -1,7 +1,8 @@
-from qtensor.Simulate import *
-from qtensor.OpFactory import *
-from qtree import *
-from NoiseModel import *
+from qtensor.Simulate import QtreeSimulator, NumpyBackend
+import qtree
+from NoiseModel import NoiseModel
+
+import numpy as np
 import time
 
 class NoiseSimulator(QtreeSimulator):
