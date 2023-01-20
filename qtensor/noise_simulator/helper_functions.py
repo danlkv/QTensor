@@ -89,3 +89,6 @@ def get_total_jobs(num_circs: int, num_nodes: int, num_jobs_per_node: int, min_c
         num_circs_per_job = int(np.ceil(num_circs / total_jobs))
     return total_jobs, num_circs_per_job
 
+
+if __name__ == '__main__':
+    G, gamma, beta = get_qaoa_params(3,2,2)

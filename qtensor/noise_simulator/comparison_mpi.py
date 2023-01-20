@@ -32,26 +32,27 @@ noise_model_qtensor.add_channel_to_all_qubits(depol_chan_qtensor_2Q, ['cX'])
 num samples determines how many samples of a particular n, p, d, and num_circs we take
 generally we want to get >30 to reduce sampling noise 
 """
-num_samples = 30
+num_samples = 1
 
-num_nodes = 5
+num_nodes = 2
 
 """num jobs per node is equivalent to the number of cores per node"""
-num_jobs_per_node = 56
+num_jobs_per_node = 1
 
-num_circs_list = [10, 18, 32, 100, 178, 316, 1000, 1780, 3160, 10000]
+# num_circs_list = [10, 18, 32, 100, 178, 316, 1000, 1780, 3160, 10000]
+num_circs_list = [1000]
 
 outfile_name = '{}.json'.format(datetime.now().isoformat())
 results = []
 
 min_n = 5
-max_n = 7
+max_n = 6
 
 min_p = 2
 max_p = 3
 
-min_d = 2
-max_d = 3
+min_d = 4
+max_d = 5
 
 for n in range(min_n, max_n):
     for p in range(min_p, max_p):
@@ -70,5 +71,5 @@ for n in range(min_n, max_n):
                 comparison = QAOAComparisonSimulator(n, p, d, noise_model_qiskit, noise_model_qtensor, num_circs_list)
                 comparison.qtensor_qiskit_noisy_qaoa_mpi(num_nodes=num_nodes, num_jobs_per_node=num_jobs_per_node)
                 results.extend(comparison.results)
-
-save_dict_to_file(results, name = outfile_name) 
+if results:
+    save_dict_to_file(results, name = outfile_name) 

@@ -108,16 +108,16 @@ class NoiseSimComparisonResult:
         # real by the time they have made it here. 
 
         """Measures the fidelity between the qiskit density matrix noisy state and the qtensoir stochastic noisy state"""
-        self.noisy_fidelity = (np.inner(qiskit_probs_root, qtensor_probs_root))**2
+        self.noisy_fidelity = np.abs((np.inner(qiskit_probs_root, qtensor_probs_root)))**2
 
         """Measures the fidelity between a noisy qtensor state and the noiseless version of the same state"""
-        self.noiseless_fidelity = (np.inner(noiseless_qtensor_probs_root, qtensor_probs_root))**2
+        self.noiseless_fidelity = np.abs((np.inner(noiseless_qtensor_probs_root, qtensor_probs_root)))**2
 
         """Measures the fidelity between a qiskit noisy state and a uniform distribution state"""
-        self.uniform_qiskit_fidelity = (np.inner(uniform_probs_root, qiskit_probs_root))**2
+        self.uniform_qiskit_fidelity = np.abs((np.inner(uniform_probs_root, qiskit_probs_root)))**2
 
         """Measures the fidelity between a qtensor noisy state and a uniform distribution state"""
-        self.uniform_qtensor_fidelity = (np.inner(uniform_probs_root, qtensor_probs_root))**2
+        self.uniform_qtensor_fidelity = np.abs((np.inner(uniform_probs_root, qtensor_probs_root)))**2
         self.cos_sim = cosine_similarity(self.qiskit_probs, self.qtensor_probs)
 
     def _to_dict(self):

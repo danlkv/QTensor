@@ -87,6 +87,7 @@ class QAOAComparisonSimulator(ComparisonSimulator):
         #print("this workers num_circs: ", num_circs)
         noise_sim.simulate_batch_ensemble(sum(qtensor_circ, []), num_circs, num_qubits)
         fraction_of_qtensor_probs = noise_sim.normalized_ensemble_probs
+        # fraction_of_qtensor_probs = [0] * 2**self.n
         return fraction_of_qtensor_probs
 
     def qtensor_qiskit_noisy_qaoa_mpi(self, num_nodes: int, num_jobs_per_node: int, recompute_previous_ensemble: bool = False, print_stats: bool = True, pbar: bool = True):
@@ -155,7 +156,7 @@ class QAOAComparisonSimulator(ComparisonSimulator):
 
             if recompute_previous_ensemble == False: 
                 self.prev_qtensor_density_matrix = self.qtensor_density_matrix
-            # Save results
+            #Save results
             result.save_results_density(self.qiskit_density_matrix, self.qtensor_density_matrix, num_circs, 
                 self.num_circs_simulated[i], G, gamma, beta, qtensor_sim_time, self.qiskit_sim_time)
             self.results.append(result.data)
@@ -209,6 +210,7 @@ class QAOAComparisonSimulator(ComparisonSimulator):
             assert num_circs == actual_num_circs
             self.num_circs_simulated.append(actual_num_circs)
             #print("num_circs: {}, actual num_circs simulated on this iteration: {}, total jobs: {}".format(self.num_circs_list[i], actual_num_circs, total_jobs))
+        print("total_jobs: ", total_jobs)
 
 
     def simulate_qiskit_density_matrix(self, circuit, noise_model_qiskit, take_trace = True):
