@@ -20,7 +20,7 @@ def test_compressed_contract():
     B_data = B_data.reshape(*(v.size for v in B_ixs))
 
     A = CompressedTensor('A', A_ixs, data=A_data)
-    A.slice(A_comp)
+    A.compress_indices(A_comp)
     B = Tensor('B', B_ixs, data=B_data)
     print(f"Tensor A: {A}")
     print(f"Tensor B: {B}")

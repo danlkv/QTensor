@@ -55,11 +55,17 @@ class CompressedTensor(Tensor):
         super().__init__(name, indices, data_key=data_key, data=data)
         self.slice_indices = slice_indices
         self.compressor = compressor
+        if data is not None:
+            self._dtype = data.dtype
+        else:
+            self._dtype = None
 
-    def slice(self, indices: list):
+    def compress_indices(self, indices: list):
         """
         Slice the self.data along dimensions in `indices`,
         store them compressed
+
+        Does not support compressing when already compressed
         """
         slice_dict = {
             i: slice(None) for i in self.indices
@@ -78,6 +84,13 @@ class CompressedTensor(Tensor):
         self.slice_indices = indices
 
     @property
+    def dtype(self):
+        """
+        DataType of wrapped chunks.
+        """
+        return self._dtype
+
+    @property
     def array_indices(self):
         return [x for x in self.indices if x not in self.slice_indices]
 
@@ -91,6 +104,13 @@ class CompressedTensor(Tensor):
         return self.compressor.decompress(ptr)
 
     def set_chunk(self, ivals, chunk:np.array):
+        # -- Check for consistent data types between chunks
+        if self._dtype is None:
+            self._dtype = chunk.dtype
+        else:
+            assert self.dtype == chunk.dtype, f"Chunk dtype {chunk.dtype} does not match tensor dtype {self.dtype}"
+        # --
+
         if self._data is None:
             self._data = np.empty(2**len(self.slice_indices), dtype=object)
         dims = [v.size for v in self.slice_indices]
@@ -99,6 +119,29 @@ class CompressedTensor(Tensor):
         else:
             flat_ix = np.ravel_multi_index(ivals, dims)
         self._data[flat_ix] = self.compressor.compress(chunk)
+
+    def __getitem__(self, key):
+        """
+        Get a slice of the tensor along the indices in `key`
+        Currently slicing over all compressed indices is required.
+        Slices over compressed indices must be ints
+        """
+        slices_ints, new_indices = self._parse_getitem_key(key)
+        slice_dict = {}
+        chunk_slices_ints = []
+        compression_ints = []
+        for ix, ival in zip(self.indices, slices_ints):
+            slice_dict[ix] = ival
+            if ix in self.slice_indices:
+                compression_ints.append(ival)
+            else:
+                chunk_slices_ints.append(ival)
+        chunk = self.get_chunk(compression_ints)
+        new_name = f"{self.name}[sliced]"
+        # careful: chunk will not be collected even if slice is small
+        chunk_slice = chunk[tuple(chunk_slices_ints)]
+        return Tensor(new_name, new_indices, data=chunk_slice)
+
 
     def __str__(self):
         array_ix = ','.join(map(str, self.array_indices))

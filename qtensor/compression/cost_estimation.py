@@ -213,8 +213,8 @@ def convert_TN_peo(tn, peo):
     """
     TN = tn2tn(tn)
     relabel_dict = {int(p):i for i, p in enumerate(peo)}
-    peo = [x for x in peo if int(x) not in ignored_vars]
     ignored_vars = list(map(int, tn.bra_vars + tn.ket_vars))
+    peo = [x for x in peo if int(x) not in ignored_vars]
 
     TN = {
         relabel_dict[int(v)]: ix for v, ix in TN.items()
