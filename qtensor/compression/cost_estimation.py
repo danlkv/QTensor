@@ -38,7 +38,8 @@ class Cost:
 
     def format_number(self, n):
         if self.use_log:
-            return f"{np.log2(n):.2f}"
+            # log from ints may result in error
+            return f"{np.log2(n*1.):.2f}"
         else:
             return f"{n}"
 
@@ -70,11 +71,15 @@ def remove_vertices_tensors(TN, dual_TN, vertices=[], tensors=[]):
         del TN[vertex]
 
 def tn2tn(tn: QtreeTensorNet, peo=None): 
-    ignored_vars = tn.bra_vars + tn.ket_vars
+    ignored_vars = list(map(int, tn.bra_vars + tn.ket_vars))
     # Vertices --> indices
     # Edges --> tensors
-    dual_tn = { str(hex(id(t))):[x for x in t.indices if x not in ignored_vars]
+    dual_tn = { str(hex(id(t))):[x for x in t.indices if int(x) not in ignored_vars and x.size>1]
                for t in tn.tensors }
+    # clean up empty edges
+    for t in list(dual_tn.keys()):
+        if len(dual_tn[t]) == 0:
+            del dual_tn[t]
 
     # Vertices --> tensors
     # Edges --> indices
@@ -198,13 +203,30 @@ def contract_with_cost(TN, comp_ixs, dual_TN, vertex,
     return cost
 
 
+def convert_TN_peo(tn, peo):
+    """
+    Convert qtensor.QtreeTensorNet to a hypergraph
+    relabel peo accordingly.
+    Args:
+        tn: qtensor.QtreeTensorNet
+        peo: list of indices
+    """
+    TN = tn2tn(tn)
+    relabel_dict = {int(p):i for i, p in enumerate(peo)}
+    peo = [x for x in peo if int(x) not in ignored_vars]
+    ignored_vars = list(map(int, tn.bra_vars + tn.ket_vars))
+
+    TN = {
+        relabel_dict[int(v)]: ix for v, ix in TN.items()
+    }
+    peo = [relabel_dict[int(p)] for p in peo]
+    return TN, peo
+
 def compressed_contraction_cost(tn, peo, mem_limit=np.inf, compression_ratio=100):
     """
     Compute the cost of a contraction with compression.
     """
-    TN = tn2tn(tn)
-    ignored_vars = tn.bra_vars + tn.ket_vars
-    peo = [x for x in peo if x not in ignored_vars]
+    TN, peo = convert_TN_peo(tn, peo)
     costs = []
     dual_TN = dual_hg(TN)
     comp_ixs = {}
