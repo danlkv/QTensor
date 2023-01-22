@@ -2,10 +2,13 @@ from NoiseSimulator import NoiseSimulator
 from NoiseModel import NoiseModel 
 from NoiseSimComparisonResult import NoiseSimComparisonResult
 from helper_functions import get_qaoa_params
-from qtensor.tests.test_composers import QtreeSimulator
+# from qtensor.tests.test_composers import QtreeSimulator, NumpyBackend
+from qtensor.Simulate import QtreeSimulator, NumpyBackend
+from qtensor.contraction_backends import CuPyBackend
 from qtensor import QiskitQAOAComposer
 from qtree.operators import from_qiskit_circuit
 from qtensor import tools
+
 
 from qiskit import execute
 from qiskit.providers.aer import AerSimulator, noise
@@ -42,13 +45,13 @@ class QAOAComparisonSimulator(ComparisonSimulator):
         self._check_params()
         self.num_circs_list.sort()
 
-    def qtensor_qiskit_noisy_qaoa(self, recompute_previous_ensemble: bool = False, print_stats: bool = False):
+    def qtensor_qiskit_noisy_qaoa(self, backend = NumpyBackend(), recompute_previous_ensemble: bool = False, print_stats: bool = False):
         self.recompute_previous_ensemble = recompute_previous_ensemble
         # Prepare circuits, simulator
         G, gamma, beta = get_qaoa_params(n = self.n, p = self.p, d = self.d)
         self._get_circuits(G, gamma, beta)
-        noise_sim = NoiseSimulator(self.noise_model_qtensor)
-        exact_sim = QtreeSimulator()
+        noise_sim = NoiseSimulator(self.noise_model_qtensor, bucket_backend=backend)
+        exact_sim = QtreeSimulator(backend=backend)
 
         # Run simulation
         for num_circs, i in zip(self.num_circs_list, range(len(self.num_circs_list))):
@@ -92,7 +95,7 @@ class QAOAComparisonSimulator(ComparisonSimulator):
         # fraction_of_qtensor_probs = [0] * 2**self.n
         return fraction_of_qtensor_probs
 
-    def qtensor_qiskit_noisy_qaoa_mpi(self, num_nodes: int, num_jobs_per_node: int, recompute_previous_ensemble: bool = False, print_stats: bool = True, pbar: bool = True):
+    def qtensor_qiskit_noisy_qaoa_mpi(self,  num_nodes: int, num_jobs_per_node: int, backend = NumpyBackend(), recompute_previous_ensemble: bool = False, print_stats: bool = True, pbar: bool = True):
         self.num_nodes = num_nodes 
         self.num_jobs_per_node = num_jobs_per_node
         self.recompute_previous_ensemble = recompute_previous_ensemble
@@ -100,8 +103,8 @@ class QAOAComparisonSimulator(ComparisonSimulator):
         # Prepare circuit, simulator, and area to save results, 
         G, gamma, beta = get_qaoa_params(n = self.n, p = self.p, d = self.d)
         self._get_circuits(G, gamma, beta)
-        self.noise_sim = NoiseSimulator(self.noise_model_qtensor)
-        exact_sim = QtreeSimulator()
+        self.noise_sim = NoiseSimulator(self.noise_model_qtensor, bucket_backend=backend)
+        exact_sim = QtreeSimulator(backend=backend)
 
         for num_circs, i in zip(self.num_circs_list, range(len(self.num_circs_list))):
             result = NoiseSimComparisonResult(self.qiskit_circ, self.qtensor_circ, self.noise_model_qiskit, 
@@ -131,12 +134,12 @@ class QAOAComparisonSimulator(ComparisonSimulator):
                     tools.mpi.print_stats()
                     result.print_result()
 
-    def qtensor_qiskit_noisy_qaoa_density(self, recompute_previous_ensemble: bool = False):
+    def qtensor_qiskit_noisy_qaoa_density(self, backend = NumpyBackend(), recompute_previous_ensemble: bool = False):
         self.recompute_previous_ensemble = recompute_previous_ensemble
         # Prepare circuits, simulator, and area to save results
         G, gamma, beta = get_qaoa_params(n = self.n, p = self.p, d = self.d)
         self._get_circuits(G, gamma, beta)
-        noise_sim = NoiseSimulator(self.noise_model_qtensor)
+        noise_sim = NoiseSimulator(self.noise_model_qtensor, bucket_backend=backend)
         
         # Simulate
         for num_circs, i in zip(self.num_circs_list, range(len(self.num_circs_list))):

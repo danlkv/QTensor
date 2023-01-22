@@ -77,7 +77,7 @@ class NoiseSimulator(QtreeSimulator):
         
     def _apply_channel(self, gate):
         """A noisy gate has all of the proper noise channels applied to it"""
-        
+
         for i in range(len(self.noise_model.noise_gates[gate.name].channels)):
             error_name = self.noise_model.noise_gates[gate.name].channels[i].name
             if error_name == 'depolarizing':

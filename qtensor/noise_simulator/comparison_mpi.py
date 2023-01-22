@@ -2,8 +2,9 @@ from NoiseChannels import DepolarizingChannel
 from NoiseModel import NoiseModel
 import qiskit.providers.aer.noise as noise
 from ComparisonSimulator import QAOAComparisonSimulator
-from datetime import datetime
 from helper_functions import save_dict_to_file
+from qtensor.contraction_backends import CuPyBackend
+from datetime import datetime
 
 ### Noise model, simulation, and results of a QAOA algorithmm  ###
 prob_1 = 0.003
@@ -32,12 +33,14 @@ generally we want to get >30 to reduce sampling noise
 num_samples = 1
 
 num_nodes = 2
+num_cores_per_node = 1
+num_threads_per_core = 1
+num_gpus_per_node = 4
 
-"""num jobs per node is equivalent to the number of cores per node"""
-num_jobs_per_node = 1
+num_jobs_per_node = num_cores_per_node * num_threads_per_core * num_gpus_per_node
 
-# num_circs_list = [10, 18, 32, 100, 178, 316, 1000, 1780, 3160, 10000]
-num_circs_list = [10]
+num_circs_list = [10, 18, 32, 100, 178, 316, 1000, 1780, 3160, 10000]
+#num_circs_list = [10]
 
 outfile_name = '{}.json'.format(datetime.now().isoformat())
 results = []
@@ -66,7 +69,8 @@ for n in range(min_n, max_n):
             for _ in range(num_samples):
                 print("\n\nnum_circs_list:", num_circs_list)
                 comparison = QAOAComparisonSimulator(n, p, d, noise_model_qiskit, noise_model_qtensor, num_circs_list)
-                comparison.qtensor_qiskit_noisy_qaoa_mpi(num_nodes=num_nodes, num_jobs_per_node=num_jobs_per_node)
+                comparison.qtensor_qiskit_noisy_qaoa_mpi(num_nodes=num_nodes, num_jobs_per_node=num_jobs_per_node, backend=CuPyBackend())
+                #comparison.qtensor_qiskit_noisy_qaoa_mpi(num_nodes=num_nodes, num_jobs_per_node=num_jobs_per_node)
                 results.extend(comparison.results)
 if results:
     save_dict_to_file(results, name = outfile_name) 
