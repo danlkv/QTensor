@@ -12,10 +12,15 @@ class NoiseSimulator(QtreeSimulator):
             raise ValueError("Error: noise_model value must be of type NoiseModel")
         self.noise_model = noise_model
 
-    # If all you want is the probabiltiies, and not the amplitudes, this is a better function to call. It does not create the density matrix, 
-    # only a state vector, so it will take up much less memeory 
-    # The vector returned is dim(2^n), where n = number of qubits
+
     def simulate_batch_ensemble(self, qc, num_circs, batch_vars=0, peo=None):
+        """Stoachastic noise simulator using statevector approach
+        
+        This method uses significantly less memory than the density matrix approach (2^n vs 4^n). However, one should note that 
+        while this uses the statevector approach to simulate, the user never gets the amplitudes, only probabilities. 
+        This is because we must take the modulus squared of each statevector in the ensemble to conserve probability. Thus the user will 
+        receive a probability density vector, not a probability amplitude vector.  
+        """
         start = time.time_ns() / (10 ** 9)
         if num_circs < 0 or not isinstance(num_circs, int):
             raise Exception("Error: The argument num_circs must be a positive integer")
@@ -32,10 +37,12 @@ class NoiseSimulator(QtreeSimulator):
         self.time_taken = end - start
         #return normalized_ensemble_probs
 
-    # This returns a density matrix, which contains all of the amplitudes of the final state. 
-    # If we want the probabilities, we can take the trace of that matrix
-    # The density matrix returned will be dimension m x m where m = 2^n and n = number of qubits  
     def simulate_batch_ensemble_density(self, qc, num_circs, batch_vars=0, peo=None):
+        """Stochastic noise simulator using density matrix apporach.
+        
+        Uses significantly more memory than the statevector approach, but gives more information. 
+        The user will get the relative phaseses as well as the probabilities.
+        """
         start = time.time_ns() / (10 ** 9)
         if num_circs < 0 or not isinstance(num_circs, int):
             raise Exception("Error: The argument num_circs must be a positive integer")
@@ -53,8 +60,8 @@ class NoiseSimulator(QtreeSimulator):
         #normalized_ensemble_density_matrix = np.divide(unnormalized_ensemble_density_matrix, num_circs)
         #return normalized_ensemble_density_matrix
     
-    # Simulates and returns only the first amplitude of the ensemble  
     def simulate_ensemble(self, qc, num_circs):
+        """Simulates and returns only the first amplitude of the ensemble"""
         return self.simulate_state(qc, num_circs)
 
     def simulate_state_ensemble(self, qc, num_circs, peo=None):
@@ -69,6 +76,8 @@ class NoiseSimulator(QtreeSimulator):
                 self._apply_channel(gate)
         
     def _apply_channel(self, gate):
+        """A noisy gate has all of the proper noise channels applied to it"""
+        
         for i in range(len(self.noise_model.noise_gates[gate.name].channels)):
             error_name = self.noise_model.noise_gates[gate.name].channels[i].name
             if error_name == 'depolarizing':

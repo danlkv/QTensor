@@ -1,13 +1,15 @@
 import itertools as it
 
-# In a depolarizing channel, there is a depolarizing parameter lambda.
-# which is given by λ = 4^n / (4^n - 1) , where n is the number of qubits
-# when we run this function, we pass in a parameter term param, where 
-# 0 <= param <= λ. The probability of an error occuring is related to param and λ by
-# prob_depol_error = param/λ, and the probability of an particular pauli error 
-# from the depolarizing channel is given by param / 4^n 
-
 class DepolarizingChannel: 
+    """
+    In a depolarizing channel, there is a depolarizing parameter lambda
+    which is given by λ = 4^n / (4^n - 1) , where n is the number of qubits
+    when we run this function, we pass in a parameter term param, where 
+    0 <= param <= λ. The probability of an error occuring is related to param and λ by
+    prob_depol_error = param/λ, and the probability of an particular pauli error 
+    from the depolarizing channel is given by param / 4^n
+    """
+
     def __init__(self, param, num_qubits):
 
         num_terms = 4**num_qubits
@@ -28,7 +30,6 @@ class DepolarizingChannel:
         self._get_channel()
 
     def _get_channel(self):
-        
         pauli_error_prob = self.param / self.num_terms
         identity_prob = 1 - self.param / self.lam
         depol_channel_probs = [identity_prob] + (self.num_terms - 1) * [pauli_error_prob]

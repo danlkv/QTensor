@@ -16,8 +16,9 @@ class NoiseModel:
         # not used currently. Just here in case it needs to be referenced for some later use. Channels is accessed in NoiseGate class
         self.channels = []
 
-    # applies noise to all qubits that a gate is acting on
     def add_channel_to_all_qubits(self, channel, gates):
+        """Applies noise to all qubits that a gate is acting on"""
+
         for gate in gates:
             if gate in self.noise_gates:
                 self._check_gate_with_channel(gate, channel)
@@ -31,10 +32,12 @@ class NoiseModel:
                 self.noise_gates[gate] = noise_gate
                 self.channels.append(channel)
 
-    # applies noise to only specific qubits that a gate is acting on. Only matters
-    # for multi qubit gates. Eg: if a gate is 'cx' applied to qubits (0, 1), but the
-    # list qubits = [1], then noise from channel will only be applied to qubit 1
     def add_channel_to_specific_qubits(self, channel, gates, qubits):
+        """Applies noise to only specific qubits that a gate is acting on. 
+        
+        Only matters for multi qubit gates. Eg: if a gate is 'cx' applied to qubits (0, 1), but the
+        list qubits = [1], then noise from channel will only be applied to qubit 1
+        """
         for gate in gates:
             if gate in self.noise_gates:
                 self._check_gate_with_channel(gate, channel)
@@ -49,6 +52,8 @@ class NoiseModel:
                 self.channels.append(channel)
                 
     def _check_gate_with_channel(self, gate, channel):
+        """TODO: Add a warning or error if a bad gate name is given"""
+        
         if gate in self._1qubit_gate and channel.num_qubits != 1:
             raise Exception("{} qubit channel ".format(channel.num_qubits) + \
                             "cannot be applied to 1-qubit gate {}".format(gate))
@@ -58,7 +63,7 @@ class NoiseModel:
         if gate in self._3qubit_gate and channel.num_qubits != 3:
             raise Exception("{} qubit channel ".format(channel.num_qubits) + \
                             "cannot be applied to 3-qubit gate {}".format(gate))
-    ## TODO: Add a warning or error if a bad gate name is given    
+
 
 class NoiseGate: 
     def __init__(self, name):
