@@ -4,6 +4,7 @@ import time
 from test_circuits import gen_qaoa_maxcut_circuit
 import qtensor
 import qtree
+from qtensor.merged_indices.transposed_bucket_elimination import bucket_elimination
 import numpy as np
 import pandas as pd
 import pyrofiler
@@ -14,7 +15,7 @@ from qtensor import toolbox
 from qtensor.contraction_backends import get_backend, PerfBackend
 
 def bucket_contraction_report(tn, buckets, backend,
-                              bucket_elimination=qtree.optimizer.bucket_elimination
+                              bucket_elimination=bucket_elimination
                              ):
     """
     Returns:
@@ -41,7 +42,6 @@ def get_buckets_tn(circ, backend, ordering_algo:str, batch_vars=0, seed=10):
     sim = QtreeSimulator(optimizer=opt, backend=backend)
     sim.prepare_buckets(circ, batch_vars=batch_vars)
     return sim.buckets, tn
-
 
 '''
 Function: Generate a collection of above report, and process them into final usable form

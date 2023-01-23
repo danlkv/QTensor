@@ -17,6 +17,37 @@ def qtree2torch_tensor(tensor, data_dict):
     return tensor.copy(data=torch_t)
 
 
+def get_einsum_expr(idx1, idx2):
+    """
+    Takes two tuples of indices and returns an einsum expression
+    to evaluate the sum over repeating indices
+
+    Parameters
+    ----------
+    idx1 : list-like
+          indices of the first argument
+    idx2 : list-like
+          indices of the second argument
+
+    Returns
+    -------
+    expr : str
+          Einsum command to sum over indices repeating in idx1
+          and idx2.
+    """
+    result_indices = sorted(list(set(idx1 + idx2)), reverse=True)
+    # remap indices to reduce their order, as einsum does not like
+    # large numbers
+    idx_to_least_idx = {old_idx: new_idx for new_idx, old_idx
+                        in enumerate(result_indices)}
+
+    str1 = ''.join(qtree.utils.num_to_alpha(idx_to_least_idx[ii]) for ii in idx1)
+    str2 = ''.join(qtree.utils.num_to_alpha(idx_to_least_idx[ii]) for ii in idx2)
+    str3 = ''.join(qtree.utils.num_to_alpha(idx_to_least_idx[ii]) for ii in result_indices)
+    return str1 + ',' + str2 + '->' + str3
+
+
+
 class TorchBackend(ContractionBackend):
     def __init__(self, device='cpu'):
         self.device = device
@@ -34,7 +65,7 @@ class TorchBackend(ContractionBackend):
 
         for tensor in bucket[1:]:
 
-            expr = qtree.utils.get_einsum_expr(
+            expr = get_einsum_expr(
                 list(map(int, result_indices)), list(map(int, tensor.indices))
             )
 
@@ -48,7 +79,8 @@ class TorchBackend(ContractionBackend):
             # Merge and sort indices and shapes
             result_indices = tuple(sorted(
                 set(result_indices + tensor.indices),
-                key=int)
+                key=int, reverse=True
+            )
             )
             
             size = len(set(tensor.indices))
@@ -61,7 +93,8 @@ class TorchBackend(ContractionBackend):
 
         if len(result_indices) > 0:
             if not no_sum:  # trim first index
-                first_index, *result_indices = result_indices
+                first_index = result_indices[-1]
+                result_indices = result_indices[:-1]
             else:
                 first_index, *_ = result_indices
             tag = first_index.identity
@@ -75,7 +108,7 @@ class TorchBackend(ContractionBackend):
                                 data=result_data)
         else:
             result = qtree.optimizer.Tensor(f'E{tag}', result_indices,
-                                data=torch.sum(result_data, axis=0))
+                                data=torch.sum(result_data, axis=-1))
         
         #print("summary:",sorted(self.exprs.items(), key=lambda x: x[1], reverse=True))
         #print("stats:",self.width_bc)
@@ -133,7 +166,7 @@ class TorchBackend(ContractionBackend):
             for tensor in bucket:
                 # get data
                 # sort tensor dimensions
-                transpose_order = np.argsort(list(map(int, tensor.indices)))
+                transpose_order = np.argsort(list(map(int, tensor.indices)))[::-1]
                 data = data_dict[tensor.data_key]
                 if not isinstance(data, torch.Tensor):             
                     if self.device == 'gpu' and torch.cuda.is_available():
