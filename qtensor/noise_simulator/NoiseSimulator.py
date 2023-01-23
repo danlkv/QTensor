@@ -1,4 +1,6 @@
 from qtensor.Simulate import QtreeSimulator, NumpyBackend
+from qtensor.contraction_backends import CuPyBackend
+from qtensor.tools.lazy_import import cupy as cp
 import qtree
 from NoiseModel import NoiseModel
 
@@ -11,6 +13,7 @@ class NoiseSimulator(QtreeSimulator):
         if not isinstance(noise_model, NoiseModel):
             raise ValueError("Error: noise_model value must be of type NoiseModel")
         self.noise_model = noise_model
+        self.backend = bucket_backend
 
 
     def simulate_batch_ensemble(self, qc, num_circs, batch_vars=0, peo=None):
@@ -21,15 +24,22 @@ class NoiseSimulator(QtreeSimulator):
         This is because we must take the modulus squared of each statevector in the ensemble to conserve probability. Thus the user will 
         receive a probability density vector, not a probability amplitude vector.  
         """
+    
         start = time.time_ns() / (10 ** 9)
         if num_circs < 0 or not isinstance(num_circs, int):
             raise Exception("Error: The argument num_circs must be a positive integer")
-        
-        unnormalized_ensemble_probs = [0] * 2**batch_vars
-        for _ in range(num_circs):
-            noisy_state_amps = self.simulate_batch(qc, batch_vars, peo)
-            noisy_state_probs = np.square(np.absolute(noisy_state_amps))
-            unnormalized_ensemble_probs += noisy_state_probs
+        if isinstance(self.backend, CuPyBackend):
+            unnormalized_ensemble_probs = cp.zeros(shape = 2**batch_vars, dtype = cp.complex128)
+            for _ in range(num_circs):
+                noisy_state_amps = self.simulate_batch(qc, batch_vars, peo)
+                noisy_state_probs = cp.square(cp.absolute(noisy_state_amps))
+                unnormalized_ensemble_probs += noisy_state_probs
+        elif isinstance(self.backend, NumpyBackend):
+            unnormalized_ensemble_probs = [0] * 2**batch_vars
+            for _ in range(num_circs):
+                noisy_state_amps = self.simulate_batch(qc, batch_vars, peo)
+                noisy_state_probs = np.square(np.absolute(noisy_state_amps))
+                unnormalized_ensemble_probs += noisy_state_probs
         
         normalized_ensemble_probs = unnormalized_ensemble_probs / num_circs
         self.normalized_ensemble_probs = normalized_ensemble_probs

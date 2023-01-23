@@ -1,5 +1,7 @@
 # from helper_functions import *
 from helper_functions import fidelity, cosine_similarity
+from qtensor.contraction_backends import CuPyBackend, NumpyBackend
+from qtensor.tools.lazy_import import cupy as cp
 
 from datetime import datetime
 import time
@@ -7,6 +9,8 @@ import json
 import jsbeautifier
 import jsonpickle
 import numpy as np
+from numpy.linalg import norm as Norm
+
 
 from qtensor import QiskitQAOAComposer
 import qiskit.providers.aer.noise as noise
@@ -14,7 +18,7 @@ import qiskit.providers.aer.noise as noise
 from NoiseModel import NoiseModel
 
 class NoiseSimComparisonResult:
-    def __init__(self, qiskit_circ, qtensor_circ, qiskit_noise_model, qtensor_noise_model, n, p, d, name = ""):
+    def __init__(self, qiskit_circ, qtensor_circ, qiskit_noise_model, qtensor_noise_model, n, p, d, backend, name = ""):
         self.name = name
         self.experiment_date =  datetime.now().isoformat()
         self.experiment_start_time = time.time_ns() / (10 ** 9) # convert to floating-point seconds
@@ -34,6 +38,7 @@ class NoiseSimComparisonResult:
         self.d = d
         self.qiskit_noise_model = qiskit_noise_model
         self.qtensor_noise_model = qtensor_noise_model
+        self.backend = backend
         self.data = {}
         self._get_noise_model_string()
         self.pickled_qtensor_noise_model = jsonpickle.encode(self.qtensor_noise_model)
@@ -81,6 +86,8 @@ class NoiseSimComparisonResult:
                 f"\n{'Noiseless Fidelity:':<20}{np.round(self.noiseless_fidelity.real, 7):<10}",
                 f"\n{'Uniform Qiskit Fidelity: ':<20}{np.round(self.uniform_qiskit_fidelity.real, 7):<10}",
                 f"\n{'Uniform QTensor Fidelity: ':<20}{np.round(self.uniform_qtensor_fidelity.real, 7):<10}",
+                f"\n{'Qiskit time taken:':<20}{self.qiskit_time_taken:<10}",
+                f"\n{'QTensor time taken:':<20}{self.qtensor_time_taken:<10}",
                 f"\n{'Total time taken:':<20}{self.experiment_time_taken:<10}")
 
     def print_noise_model(self):
@@ -101,26 +108,41 @@ class NoiseSimComparisonResult:
         self.fidelity = fidelity(self.qiskit_density_matrix.data, self.qtensor_density_matrix)
 
     def _calc_similarity_of_probs(self):
-        qiskit_probs_root = np.sqrt(self.qiskit_probs)
-        qtensor_probs_root = np.sqrt(self.qtensor_probs)
-        noiseless_qtensor_probs_root = np.sqrt(np.abs(self.exact_qtensor_amps)**2)
-        uniform_probs_root = np.sqrt(np.ones(2**self.n)/2**self.n)
+        if isinstance(self.backend, NumpyBackend):
+            qiskit_probs_root = np.sqrt(self.qiskit_probs)
+            qtensor_probs_root = np.sqrt(self.qtensor_probs)
+            noiseless_qtensor_probs_root = np.sqrt(np.abs(self.exact_qtensor_amps)**2)
+            uniform_probs_root = np.sqrt(np.ones(2**self.n)/2**self.n)
 
-        # we don't need to take the conjugate, as both population density vectors are strictly 
-        # real by the time they have made it here. 
+            # we don't need to take the conjugate, as both population density vectors are strictly 
+            # real by the time they have made it here. 
 
-        """Measures the fidelity between the qiskit density matrix noisy state and the qtensoir stochastic noisy state"""
-        self.noisy_fidelity = np.abs((np.inner(qiskit_probs_root, qtensor_probs_root)))**2
+            """Measures the fidelity between the qiskit density matrix noisy state and the qtensoir stochastic noisy state"""
+            self.noisy_fidelity = np.abs((np.inner(qiskit_probs_root, qtensor_probs_root)))**2
 
-        """Measures the fidelity between a noisy qtensor state and the noiseless version of the same state"""
-        self.noiseless_fidelity = np.abs((np.inner(noiseless_qtensor_probs_root, qtensor_probs_root)))**2
+            """Measures the fidelity between a noisy qtensor state and the noiseless version of the same state"""
+            self.noiseless_fidelity = np.abs((np.inner(noiseless_qtensor_probs_root, qtensor_probs_root)))**2
 
-        """Measures the fidelity between a qiskit noisy state and a uniform distribution state"""
-        self.uniform_qiskit_fidelity = np.abs((np.inner(uniform_probs_root, qiskit_probs_root)))**2
+            """Measures the fidelity between a qiskit noisy state and a uniform distribution state"""
+            self.uniform_qiskit_fidelity = np.abs((np.inner(uniform_probs_root, qiskit_probs_root)))**2
 
-        """Measures the fidelity between a qtensor noisy state and a uniform distribution state"""
-        self.uniform_qtensor_fidelity = np.abs((np.inner(uniform_probs_root, qtensor_probs_root)))**2
-        self.cos_sim = cosine_similarity(self.qiskit_probs, self.qtensor_probs)
+            """Measures the fidelity between a qtensor noisy state and a uniform distribution state"""
+            self.uniform_qtensor_fidelity = np.abs((np.inner(uniform_probs_root, qtensor_probs_root)))**2
+            #self.cos_sim = cosine_similarity(self.qiskit_probs, self.qtensor_probs)
+            self.cos_sim = np.inner(self.qiskit_probs, self.qtensor_probs) / (Norm(self.qiskit_probs)* Norm(self.qtensor_probs)) 
+
+        elif isinstance(self.backend, CuPyBackend):
+            qiskit_probs_root = cp.sqrt(self.qiskit_probs)
+            qtensor_probs_root = cp.sqrt(self.qtensor_probs)
+            noiseless_qtensor_probs_root = cp.sqrt(cp.abs(self.exact_qtensor_amps)**2)
+            uniform_probs_root = cp.sqrt(cp.ones(2**self.n)/2**self.n)
+
+            self.noisy_fidelity = cp.abs((cp.inner(qiskit_probs_root, qtensor_probs_root)))**2
+            self.noiseless_fidelity = cp.abs((cp.inner(noiseless_qtensor_probs_root, qtensor_probs_root)))**2
+            self.uniform_qiskit_fidelity = cp.abs((cp.inner(uniform_probs_root, qiskit_probs_root)))**2
+            self.uniform_qtensor_fidelity = cp.abs((cp.inner(uniform_probs_root, qtensor_probs_root)))**2
+            # self.cos_sim = cosine_similarity(self.qiskit_probs, self.qtensor_probs)
+            self.cos_sim = cp.inner(self.qiskit_probs, self.qtensor_probs) / (cp.linalg.norm(self.qiskit_probs)* cp.norm(self.qtensor_probs)) 
 
     def _to_dict(self):
         #self.experiment_dict['name'] = self.name

@@ -11,9 +11,10 @@ from qtensor import tools
 
 
 from qiskit import execute
-from qiskit.providers.aer import AerSimulator, noise
+from qiskit.providers.aer import AerSimulator, noise, AerError
 
 import numpy as np
+from qtensor.tools.lazy_import import cupy as cp
 from itertools import repeat
 import time
 
@@ -56,7 +57,7 @@ class QAOAComparisonSimulator(ComparisonSimulator):
         # Run simulation
         for num_circs, i in zip(self.num_circs_list, range(len(self.num_circs_list))):
             result = NoiseSimComparisonResult(self.qiskit_circ, self.qtensor_circ, self.noise_model_qiskit, 
-                self.noise_model_qtensor, self.n, self.p, self.d)
+                self.noise_model_qtensor, self.n, self.p, self.d, backend)
 
             if i == 0 or recompute_previous_ensemble == False:
                 self.num_circs_simulated.append(num_circs)
@@ -89,7 +90,11 @@ class QAOAComparisonSimulator(ComparisonSimulator):
 
     def _mpi_parallel_unit(self, args):
         noise_sim, qtensor_circ, num_circs, num_qubits = args
-        #print("this workers num_circs: ", num_circs)
+        # #print("this workers num_circs: ", num_circs)
+        # if noise_sim.backend == CuPyBackend():
+        #     noise_sim.simulate_batch_ensemble(cupy.array(sum(qtensor_circ, [])), num_circs, num_qubits)
+        # else: 
+        #     noise_sim.simulate_batch_ensemble(sum(qtensor_circ, []), num_circs, num_qubits)
         noise_sim.simulate_batch_ensemble(sum(qtensor_circ, []), num_circs, num_qubits)
         fraction_of_qtensor_probs = noise_sim.normalized_ensemble_probs
         # fraction_of_qtensor_probs = [0] * 2**self.n
@@ -108,7 +113,7 @@ class QAOAComparisonSimulator(ComparisonSimulator):
 
         for num_circs, i in zip(self.num_circs_list, range(len(self.num_circs_list))):
             result = NoiseSimComparisonResult(self.qiskit_circ, self.qtensor_circ, self.noise_model_qiskit, 
-                self.noise_model_qtensor, self.n, self.p, self.d)
+                self.noise_model_qtensor, self.n, self.p, self.d, backend)
             self._get_args(i)
             qtensor_probs_list = tools.mpi.mpi_map(self._mpi_parallel_unit, self._arggen, pbar=pbar, total=num_nodes)
             if qtensor_probs_list:
@@ -124,7 +129,7 @@ class QAOAComparisonSimulator(ComparisonSimulator):
                     self._check_correct_num_circs_simulated(i)
                     self.prev_probs = self.qtensor_probs
 
-                self.simulate_qiskit_density_matrix(self.qiskit_circ, self.noise_model_qiskit)
+                self.simulate_qiskit_density_matrix(self.qiskit_circ, self.noise_model_qiskit, backend)
                 self.exact_qtensor_amps = exact_sim.simulate_batch(sum(self.qtensor_circ, []), batch_vars=self.num_qubits)
                 # Save results 
                 result.save_result(self.qiskit_probs, self.qtensor_probs, self.exact_qtensor_amps, num_circs,
@@ -203,7 +208,7 @@ class QAOAComparisonSimulator(ComparisonSimulator):
             else: 
                 first_set_of_jobs = num_circs - (total_jobs * num_circs_per_job)
                 second_set_of_jobs = total_jobs - first_set_of_jobs
-                print("first_set_of_jobs: {}, secomd_set_of_jobs: {}".format(first_set_of_jobs, second_set_of_jobs))
+                print("first_set_of_jobs: {}, second_set_of_jobs: {}".format(first_set_of_jobs, second_set_of_jobs))
                 self._arggen = list(zip(repeat(self.noise_sim, first_set_of_jobs), repeat(self.qtensor_circ,  first_set_of_jobs), 
                     repeat(num_circs_per_job + 1,  first_set_of_jobs), repeat(self.n, first_set_of_jobs)))
                 self._arggen.extend(list(zip(repeat(self.noise_sim, second_set_of_jobs), repeat(self.qtensor_circ,  second_set_of_jobs), 
@@ -218,20 +223,31 @@ class QAOAComparisonSimulator(ComparisonSimulator):
         print("total_jobs: ", total_jobs)
 
 
-    def simulate_qiskit_density_matrix(self, circuit, noise_model_qiskit, take_trace = True):
+    def simulate_qiskit_density_matrix(self, circuit, noise_model_qiskit, backend, take_trace = True):
         start = time.time_ns() / (10 ** 9)
-        backend = AerSimulator(method='density_matrix', noise_model=noise_model_qiskit, fusion_enable=False, fusion_verbose=True)
-        result = execute(circuit, backend, shots=1).result()
-        result = backend.run(circuit).result()
+        if isinstance(backend, NumpyBackend):
+            qiskit_backend = AerSimulator(method='density_matrix', noise_model=noise_model_qiskit, fusion_enable=False, fusion_verbose=True)
+        elif isinstance(backend, CuPyBackend):
+            try: 
+                qiskit_backend = AerSimulator(method='density_matrix', noise_model=noise_model_qiskit, fusion_enable=False, fusion_verbose=True)
+                # qiskit_backend.set_options(device='GPU')
+            except AerError as e:
+                print(e)
+        result = execute(circuit, qiskit_backend, shots=1).result()
+        result = qiskit_backend.run(circuit).result()
         #result = execute(circuit, Aer.get_backend('aer_simulator_density_matrix'), shots=1, noise_model=noise_model_qiskit).result()
+        print(type(backend))
         if take_trace:
-            self.qiskit_probs = np.diagonal(result.results[0].data.density_matrix.real)
-            end = time.time_ns() / (10 ** 9)
-            self.qiskit_sim_time = end - start
+            if isinstance(backend, NumpyBackend):
+                self.qiskit_probs = np.diagonal(result.results[0].data.density_matrix.real)
+            elif isinstance(backend, CuPyBackend):
+                ## TODO: Simulate Qiskit on GPU instead. copying from CPU to GPU will have a serious performance cost
+                #self.qiskit_probs = cp.diagonal(result.results[0].data.density_matrix.real)
+                self.qiskit_probs = cp.diagonal(cp.array(result.results[0].data.density_matrix.real))
         else:
             self.qiskit_density_matrix = result.results[0].data.density_matrix.real
-            end = time.time_ns() / (10 ** 9)
-            self.qiskit_sim_time = end - start
+        end = time.time_ns() / (10 ** 9)
+        self.qiskit_sim_time = end - start
 
     def _get_circuits(self, G, gamma, beta):
         # Create Qiskit circuit 

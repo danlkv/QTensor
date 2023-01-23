@@ -69,8 +69,8 @@ for n in range(min_n, max_n):
             for _ in range(num_samples):
                 print("\n\nnum_circs_list:", num_circs_list)
                 comparison = QAOAComparisonSimulator(n, p, d, noise_model_qiskit, noise_model_qtensor, num_circs_list)
-                comparison.qtensor_qiskit_noisy_qaoa_mpi(num_nodes=num_nodes, num_jobs_per_node=num_jobs_per_node, backend=CuPyBackend())
-                #comparison.qtensor_qiskit_noisy_qaoa_mpi(num_nodes=num_nodes, num_jobs_per_node=num_jobs_per_node)
+                #comparison.qtensor_qiskit_noisy_qaoa_mpi(num_nodes=num_nodes, num_jobs_per_node=num_jobs_per_node, backend=CuPyBackend())
+                comparison.qtensor_qiskit_noisy_qaoa_mpi(num_nodes=num_nodes, num_jobs_per_node=num_jobs_per_node)
                 results.extend(comparison.results)
 if results:
     save_dict_to_file(results, name = outfile_name) 
