@@ -1,7 +1,7 @@
+import numpy as np
 from qtensor.contraction_backends import ContractionBackend, NumpyBackend
-from qtensor.utils import ReportTable
 from pyrofiler import timing
-from qtensor.tools.lazy_import import torch
+from qtensor.tools.lazy_import import torch, pandas
 
 class PerfBackend(ContractionBackend):
     Backend = ContractionBackend
@@ -11,7 +11,7 @@ class PerfBackend(ContractionBackend):
         self._print = print
         self.max_lines = num_lines
         self._profile_results = {}
-        self.report_table = ReportTable(measure=['max','mean','sum'], max_records=num_lines)
+        self.report_table = pandas.DataFrame(columns=['bucket_len', 'time', 'flop', 'FLOPS', 'max_size', 'min_size', 'result_size'])
 
     def _profile_callback(self, time, label, indices):
         if self._print:
@@ -44,45 +44,48 @@ class PerfBackend(ContractionBackend):
     def get_result_data(self, result):
         return self.backend.get_result_data(result)
 
-    def _perfect_bucket_flop(self, bucket_indices, show = False):
-        # L46 taking all indices that are invilved in current bucket contraction
+    def _pairwise_flop_mem(self, indices, contract_last=0):
+        """
+        Args:
+            indices: list of two index lists
+        Returns:
+            next_indices: list of indices after contraction
+            tuple(flops, mem): required resources for contraction
+        """
+        next_indices = list(set().union(*indices))
+        next_indices.sort(key=int, reverse=True)
+        flop = np.prod([i.size for i in next_indices])
+        next_indices = next_indices[:-contract_last]
+        mem = 0
+        for ilist in [next_indices]+indices:
+            mem += np.prod([i.size for i in ilist])
+        return next_indices, (flop, mem)
 
+    def _perfect_bucket_flop_mem(self, bucket_indices, show = False):
+        """
+        Returns estimation of flops for a bucket
+        """
+        bucket_indices = sorted(bucket_indices, key=lambda x: len(x))
+        flop_list = []
+        mem_list = []
+        accum = bucket_indices[0]
+        for ixs in bucket_indices[1:1]:
+            indices = [accum, ixs]
+            # -- Get pairwise contraction flops
+            accum, (flop, mem) = self._pairwise_flop_mem(indices)
+            # --
+            flop_list.append(flop)
+            mem_list.append(mem)
+            accum = next_indices
+        # -- last contraction removes the smallest index
+        indices = [accum, bucket_indices[-1]]
+        _, (flop, mem) = self._pairwise_flop_mem(indices, contract_last=1)
+        # --
+        flop_list.append(flop)
+        mem_list.append(mem)
 
-        # r_i is arr of index objects
-        # each index object has a size
-        # SO, I want a list of the sizes; si
+        return sum(flop_list), max(mem_list)
 
-        # Store the first tensor
-        # remove it from the resulting indices
-
-        first_index = bucket_indices[0][0]
-        #print("first tensor",first_tensor)
-
-
-        resulting_indices = list(set.union(*[set(ixs) for ixs in bucket_indices]))
-        # The first index is contracted
-        #resulting_indices = resulting_indices[1:]
-        #print("resultting indices:",resulting_indices)
-        if first_index in resulting_indices:
-            resulting_indices.remove(first_index)
-        # don't take index size into account
-        sizes = [x.size for x in resulting_indices]
-
-        if show:
-            print("sizes:", sizes)
-            print("resulting indices:", resulting_indices)
-        # n_multiplications = len(bucket_indices)
-        # size_of_result = 2**len(resulting_indices)
-        # summation_index_size = 2
-        # n_summations = summation_index_size - 1
-
-        # A list of lists of indices
-        # Each list of indices is description of tensor
-        # To get the total number of memory use, is 
-        op = 1
-        for size in sizes:
-            op = op * size
-        return op
 
 
     def gen_report(self, show = True):
@@ -93,28 +96,41 @@ class PerfBackend(ContractionBackend):
         # -- report on largest contractions
         max_lines = self.max_lines
 
-        report_lines =  [str([i, ixs, time ]) for i, (ixs, time) in enumerate(data[:max_lines])]
-        rep = '\n'.join(report_lines[:max_lines])
-        if len(report_lines) > max_lines:
+        df = pandas.DataFrame(data, columns=['indices', 'time'])
+
+        df.sort_values(by='time', ascending=False, inplace=True)
+        rep = df.head(max_lines).to_string()
+        if len(data) > max_lines:
             rep += f'\n ... and {len(data)-max_lines} lines more...'
 
         # -- report on totals
         # max_line should not be inolved for recording
+
+        report_data = {
+            'bucket_len': [],
+            'time': [],
+            'flop': [],
+            'FLOPS': [],
+            'max_size': [],
+            'min_size': [],
+            'result_size': [],
+        }
         for indices, time in  data:
-            max_size = len(set.union(*[set(i) for i in indices]))
-            self.report_table.record(
-                bucket_len = len(indices)
-                , time = time
-                , flop = self._perfect_bucket_flop(indices)
-                , FLOPS = self._perfect_bucket_flop(indices)/time
-                # , max_size = max([len(ixs) for ixs in indices])
-                , max_size = max_size
-                , min_size = min([len(ixs) for ixs in indices])
-                , result_size = len(set.union(*[set(i) for i in indices])) - 1
-            )
-        
+            max_size = max([len(i) for i in indices])
+            min_size = min([len(i) for i in indices])
+            flop, mem = self._perfect_bucket_flop_mem(indices)
+            result_size = len(set.union(*[set(i) for i in indices])) - 1
+            report_data['bucket_len'].append(len(indices))
+            report_data['time'].append(time)
+            report_data['flop'].append(flop)
+            report_data['FLOPS'].append(flop/time)
+            report_data['max_size'].append(max_size)
+            report_data['min_size'].append(min_size)
+            report_data['result_size'].append(result_size)
+
+        self.report_table = pandas.DataFrame(report_data)
         if show:
-            print(self.report_table.markdown())
+            print(self.report_table.to_markdown())
 
 
         # -- report on totals
