@@ -18,6 +18,7 @@ def get_backend(name):
         'opt_einsum': OptEinusmBackend,
         'torch_cpu': TorchBackend,
         'torch_gpu': TorchBackend,
+        'torch': TorchBackend,
         'cupy': CuPyBackend,
         'cutensor': CuTensorBackend,
         'tr_einsum': NumpyTranspoedBackend,

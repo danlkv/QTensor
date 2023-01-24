@@ -1,5 +1,6 @@
 import sys
 sys.path.append('.')
+import time
 from test_circuits import gen_qaoa_maxcut_circuit
 import qtensor
 import qtree
@@ -52,10 +53,13 @@ def collect_process_be_pt_report(repeat: int, backend, circ):
         buckets, tn = get_buckets_tn(circ, backend, 'rgreedy_0.02_10', batch_vars=0)
 
     tables = []
+    wall_start = time.time()
     for _ in range(repeat):
         b_copy = [l.copy() for l in buckets]
         table = bucket_contraction_report(tn, b_copy, backend)
         tables.append(table)
+    wall_end = time.time()
+    print("Wall time per run: ", (wall_end - wall_start) / repeat)
     report = pd.concat(tables, keys=range(repeat), names=['repeat', 'step'])
     return report
 
