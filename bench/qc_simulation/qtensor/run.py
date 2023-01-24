@@ -31,7 +31,7 @@ def bucket_contraction_report(tn, buckets, backend,
     perf_backend.get_result_data(result).flatten()
     # compute report_table
     rep_txt = perf_backend.gen_report(show=False)
-    return rep_txt, perf_backend.report_table, perf_backend._profile_results
+    return perf_backend.report_table
 
 def get_buckets_tn(circ, backend, ordering_algo:str, batch_vars=0, seed=10):
     np.random.seed(seed)
@@ -41,24 +41,20 @@ def get_buckets_tn(circ, backend, ordering_algo:str, batch_vars=0, seed=10):
     sim.prepare_buckets(circ, batch_vars=batch_vars)
     return sim.buckets, tn
 
-def gen_circuit_simulation_report(backend, circ):
-    timing = pyrofiler.timing
-    with timing(callback=lambda x: None) as gen:
-        buckets, tn = get_buckets_tn(circ, backend, 'greedy', batch_vars=0)
-
-    text, report_table, profile_results = bucket_contraction_report(tn, buckets, backend)
-
-    return report_table
 
 '''
 Function: Generate a collection of above report, and process them into final usable form
 I/O: ... -> processed data is a dict, directly usable by json
 '''
 def collect_process_be_pt_report(repeat: int, backend, circ):
-    tables = []
+    timing = pyrofiler.timing
+    with timing(callback=lambda x: None) as gen:
+        buckets, tn = get_buckets_tn(circ, backend, 'rgreedy_0.02_10', batch_vars=0)
 
+    tables = []
     for _ in range(repeat):
-        table = gen_circuit_simulation_report(backend, circ)
+        b_copy = [l.copy() for l in buckets]
+        table = bucket_contraction_report(tn, b_copy, backend)
         tables.append(table)
     report = pd.concat(tables, keys=range(repeat), names=['repeat', 'step'])
     return report
