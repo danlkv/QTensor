@@ -67,28 +67,39 @@ def mean_mmax(x: list):
     return np.mean(x)
 
 def main():
-    N = 24
+    Ns = [24, 26, 28, 30]
     p = 3
+    top_K = 15
     backend_name = 'torch_cpu'
-    backend = get_backend(backend_name)
-    circ = gen_qaoa_maxcut_circuit(N, p)
-    report = collect_process_be_pt_report(9, backend, circ)
+    print("backend: ", backend_name)
+    for N in Ns:
+        print(f"N={N}")
+        backend = get_backend(backend_name)
+        circ = gen_qaoa_maxcut_circuit(N, p)
+        report = collect_process_be_pt_report(9, backend, circ)
 
-    stats = report[["time"]].groupby('step').agg(['mean', 'min', 'max', 'std'])
-    stats = pd.concat([
-        stats,
-        report[["flop","FLOPS", 'result_size', 'bucket_len']].groupby('step').agg(['mean']),
-    ], axis=1)
-    stats.sort_values(by=[('time', 'mean')], ascending=False, inplace=True)
-    top_K = 12
-    print(f"Top {top_K} steps by time:")
-    print(stats.head(top_K))
-    print(f"Top {top_K} bucket info:")
+        stats = report[["time"]].groupby('step').agg(['mean', 'min', 'max', 'std'])
+        stats = pd.concat([
+            stats,
+            report[["flop","FLOPS", 'result_size', 'bucket_len']].groupby('step').agg(['mean']),
+        ], axis=1)
+        stats.sort_values(by=[('time', 'mean')], ascending=False, inplace=True)
+        print(f"Top {top_K} steps by time:")
+        print(stats.head(top_K))
+        print(f"Top {top_K} bucket info:")
 
-    ixs = report['indices'].groupby('step').first()
-    for i in stats.head(top_K).index:
-        print(f"Step {i}: {ixs.loc[i]}")
-    print(stats[('time', 'mean')].sum())
+        ixs = report['indices'].groupby('step').first()
+        for i in stats.head(top_K).index:
+            print(f"Step {i}: {ixs.loc[i]}")
+        print("Time by bucket size:")
+
+        stats = pd.concat([
+            report[["time"]].groupby('step').agg('mean'),
+            report[["flop","FLOPS", 'result_size', 'bucket_len']].groupby('step').first()
+        ], axis=1)
+        print(stats[['time', 'result_size', 'FLOPS']].groupby('result_size').agg(['mean', 'sum']))
+        print("Total time:")
+        print(stats['time'].sum())
 
 if __name__=="__main__":
     main()
