@@ -4,6 +4,10 @@ import qtree
 import io
 from qtree.optimizer import Tensor, Var
 
+from szx.src.cuszx_wrapper import cuszx_host_compress, cuszx_host_decompress, cuszx_device_compress, cuszx_device_decompress
+
+CUSZX_BLOCKSIZE = 256
+
 def iterate_indices(indices: list):
     if len(indices)==0:
         return [tuple()]
@@ -22,6 +26,42 @@ class Compressor():
         print(f"Loading arr.")
         return  np.load(ptr)['arr_0']
 
+    
+    ### Compression API with cuSZx ###
+    # Parameters:
+    # - isCuPy = boolean, true if data is CuPy array, otherwise is numpy array
+    # - data = Numpy or Cupy ndarray, assumed to be 1-D, np.float32 type
+    # - num_elements = Number of floating point elements in data
+    # - r2r_error = relative-to-value-range error bound for lossy compression
+    # - r2r_threshold = relative-to-value-range threshold to floor values to zero
+    # Returns:
+    # - cmp_bytes = Unsigned char pointer to compressed bytes
+    # - outSize_ptr = Pointer to size_t representing length in bytes of cmp_bytes
+    def cuszx_compress(self, isCuPy, data, num_elements, r2r_error, r2r_threshold):
+        
+        if not isCuPy:
+            cmp_bytes, outSize_ptr = cuszx_host_compress(data, r2r_error, num_elements, CUSZX_BLOCKSIZE, r2r_threshold)
+        else:
+            cmp_bytes, outSize_ptr = cuszx_device_compress(data, r2r_error, num_elements, CUSZX_BLOCKSIZE, r2r_threshold)
+        return cmp_bytes, outSize_ptr
+
+    ### Decompression API with cuSZx ###
+    # Parameters:
+    # - isCuPy = boolean, true if data is CuPy array, otherwise is numpy array
+    # - cmp_bytes = Unsigned char pointer to compressed bytes
+    # - num_elements = Number of floating point elements in original data
+    # Returns:
+    # - decompressed_data = Float32 pointer to decompressed data
+    #
+    # Notes: Use ctypes to cast decompressed data to Numpy or CuPy type
+
+    def cuszx_decompress(self, isCuPy, cmp_bytes, num_elements):
+        if not isCuPy:
+            decompressed_data = cuszx_host_decompress(num_elements, cmp_bytes)
+        else:
+            decompressed_data = cuszx_device_decompress(num_elements, cmp_bytes)
+
+        return decompressed_data
 
 class CompressedTensor(Tensor):
     """
