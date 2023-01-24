@@ -1,7 +1,55 @@
 import numpy as np
+from dataclasses import dataclass
 from qtensor.contraction_backends import ContractionBackend, NumpyBackend
 from pyrofiler import timing
 from qtensor.tools.lazy_import import torch, pandas
+import string
+
+@dataclass
+class BucketContnractionStats:
+    """
+    Time for contraction in seconds
+    """
+    time: float
+    """ tensor indices"""
+    indices: list
+    """ Strides for each tensor. List of lists of ints"""
+    strides: list
+
+    @classmethod
+    def from_bucket_time(cls, bucket: list, time: float):
+        # Note: do not store bucket data to avoid memory leak
+        indices = [t.indices for t in bucket]
+        strides = []
+        for t in bucket:
+            # numpy
+            if hasattr(t.data, 'strides'):
+                tstr = [s/t.data.itemsize for s in t.data.strides]
+                tstr = [int(np.log2(s)) for s in tstr]
+                strides.append(tstr)
+            # Torch
+            elif hasattr(t.data, 'stride'):
+                tstr = [int(np.log2(s)) for s in t.data.stride()]
+                strides.append(tstr)
+            else:
+                strides.append([0]*len(t.indices))
+
+        return cls(time, indices, strides)
+
+    def indices_info(self):
+        """ String representation of bucket data"""
+        info = ""
+        all_indices = sorted(sum(map(list, self.indices), []), key=int)
+        ix_to_char = {i:string.ascii_letters[j] for j, i in enumerate(all_indices)}
+        for ix, strides in zip(self.indices, self.strides):
+            tensor_info = ""
+            for i, s in zip(ix, strides):
+                tensor_info += f"{ix_to_char[i]}{s} "
+            info += f"({tensor_info})"
+        smallest = all_indices[0]
+        return f"Σ{ix_to_char[smallest]} {info}"
+
+REPORT_COLUMNS = ('bucket_len', 'time', 'flop', 'FLOPS', 'max_size', 'min_size', 'result_size', 'indices')
 
 class PerfBackend(ContractionBackend):
     Backend = ContractionBackend
@@ -11,13 +59,12 @@ class PerfBackend(ContractionBackend):
         self._print = print
         self.max_lines = num_lines
         self._profile_results = {}
-        self.report_table = pandas.DataFrame(columns=['bucket_len', 'time', 'flop', 'FLOPS', 'max_size', 'min_size', 'result_size'])
+        self.report_table = pandas.DataFrame(columns=REPORT_COLUMNS)
 
-    def _profile_callback(self, time, label, indices):
+    def _profile_callback(self, time, label, bucket):
         if self._print:
             print(f"PROF:: perf data {label}: {time}")
-        self._profile_results[str(id(indices))] = indices, time
-        
+        self._profile_results[str(id(bucket))] = BucketContnractionStats.from_bucket_time(bucket, time)
 
     @classmethod
     def from_backend(cls, backend, *args, **kwargs):
@@ -27,14 +74,12 @@ class PerfBackend(ContractionBackend):
         return CustomGeneratedBackend(*args, **kwargs)
 
     def process_bucket(self, bucket, no_sum=False):
-        indices = [tensor.indices for tensor in bucket]
-        with timing('process bucket time', indices
+        with timing('process bucket time', bucket
                          , callback=self._profile_callback):
             return self.backend.process_bucket(bucket, no_sum=no_sum)
 
     def process_bucket_merged(self, ixs, bucket, no_sum=False):
-        indices = [tensor.indices for tensor in bucket]
-        with timing('process bucket time', indices
+        with timing('process bucket time', bucket
                          , callback=self._profile_callback):
             return self.backend.process_bucket_merged(ixs, bucket, no_sum=no_sum)
 
@@ -54,8 +99,9 @@ class PerfBackend(ContractionBackend):
         """
         next_indices = list(set().union(*indices))
         next_indices.sort(key=int, reverse=True)
-        flop = np.prod([i.size for i in next_indices])
-        next_indices = next_indices[:-contract_last]
+        flop = np.prod([2 for i in next_indices])
+        if contract_last:
+            next_indices = next_indices[:-contract_last]
         mem = 0
         for ilist in [next_indices]+indices:
             mem += np.prod([i.size for i in ilist])
@@ -69,14 +115,13 @@ class PerfBackend(ContractionBackend):
         flop_list = []
         mem_list = []
         accum = bucket_indices[0]
-        for ixs in bucket_indices[1:1]:
+        for ixs in bucket_indices[1:-1]:
             indices = [accum, ixs]
             # -- Get pairwise contraction flops
             accum, (flop, mem) = self._pairwise_flop_mem(indices)
             # --
             flop_list.append(flop)
             mem_list.append(mem)
-            accum = next_indices
         # -- last contraction removes the smallest index
         indices = [accum, bucket_indices[-1]]
         _, (flop, mem) = self._pairwise_flop_mem(indices, contract_last=1)
@@ -89,14 +134,14 @@ class PerfBackend(ContractionBackend):
 
 
     def gen_report(self, show = True):
-        data = self._profile_results.values()
+        data = list(self._profile_results.values())
         # -- sotrt data with respect to time
         #data = sorted(data, key= lambda pair: pair[1], reverse=True)
-        data = list(data)
+        data_repr = list((x.indices_info(), x.time) for x in data)
         # -- report on largest contractions
         max_lines = self.max_lines
 
-        df = pandas.DataFrame(data, columns=['indices', 'time'])
+        df = pandas.DataFrame(data_repr, columns=['indices', 'time'])
 
         df.sort_values(by='time', ascending=False, inplace=True)
         rep = df.head(max_lines).to_string()
@@ -114,8 +159,11 @@ class PerfBackend(ContractionBackend):
             'max_size': [],
             'min_size': [],
             'result_size': [],
+            'indices': [],
         }
-        for indices, time in  data:
+        for bucket_cstats in  data:
+            indices = bucket_cstats.indices
+            time = bucket_cstats.time
             max_size = max([len(i) for i in indices])
             min_size = min([len(i) for i in indices])
             flop, mem = self._perfect_bucket_flop_mem(indices)
@@ -127,6 +175,7 @@ class PerfBackend(ContractionBackend):
             report_data['max_size'].append(max_size)
             report_data['min_size'].append(min_size)
             report_data['result_size'].append(result_size)
+            report_data['indices'].append(bucket_cstats.indices_info())
 
         self.report_table = pandas.DataFrame(report_data)
         if show:
@@ -135,7 +184,7 @@ class PerfBackend(ContractionBackend):
 
         # -- report on totals
         total_data = len(data)
-        total_time = sum(d[1] for d in data)
+        total_time = sum(d.time for d in data)
         rep += '\n======\n'
         rep += 'Total time: ' + str(total_time)
         rep += '\nTotal bucket contractions: ' + str(total_data)

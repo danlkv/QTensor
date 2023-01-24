@@ -71,22 +71,27 @@ def mean_mmax(x: list):
     return np.mean(x)
 
 def main():
-    N = 22
+    N = 24
     p = 3
     backend_name = 'torch_cpu'
     backend = get_backend(backend_name)
     circ = gen_qaoa_maxcut_circuit(N, p)
-    report = collect_process_be_pt_report(15, backend, circ)
+    report = collect_process_be_pt_report(9, backend, circ)
 
     stats = report[["time"]].groupby('step').agg(['mean', 'min', 'max', 'std'])
     stats = pd.concat([
         stats,
-        report[['result_size']].groupby('step').agg(['mean'])
+        report[["flop","FLOPS", 'result_size', 'bucket_len']].groupby('step').agg(['mean']),
     ], axis=1)
     stats.sort_values(by=[('time', 'mean')], ascending=False, inplace=True)
     top_K = 12
     print(f"Top {top_K} steps by time:")
     print(stats.head(top_K))
+    print(f"Top {top_K} bucket info:")
+
+    ixs = report['indices'].groupby('step').first()
+    for i in stats.head(top_K).index:
+        print(f"Step {i}: {ixs.loc[i]}")
     print(stats[('time', 'mean')].sum())
 
 if __name__=="__main__":
