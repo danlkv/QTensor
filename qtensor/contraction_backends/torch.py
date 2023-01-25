@@ -3,7 +3,7 @@ import qtree
 import numpy as np
 from qtree import np_framework
 from qtensor.contraction_backends import ContractionBackend
-from qtensor.contraction_backends.numpy import get_einsum_expr
+
 def qtree2torch_tensor(tensor, data_dict):
     """ Converts qtree tensor to pytorch tensor using data dict"""
     if isinstance(tensor.data, torch.Tensor):
@@ -17,7 +17,7 @@ def qtree2torch_tensor(tensor, data_dict):
     return tensor.copy(data=torch_t)
 
 
-def get_einsum_expr(idx1, idx2):
+def get_einsum_expr(idx1, idx2, contract=0):
     """
     Takes two tuples of indices and returns an einsum expression
     to evaluate the sum over repeating indices
@@ -40,6 +40,7 @@ def get_einsum_expr(idx1, idx2):
     # large numbers
     idx_to_least_idx = {old_idx: new_idx for new_idx, old_idx
                         in enumerate(result_indices)}
+    result_indices = result_indices[:len(result_indices)-contract]
 
     str1 = ''.join(qtree.utils.num_to_alpha(idx_to_least_idx[ii]) for ii in idx1)
     str2 = ''.join(qtree.utils.num_to_alpha(idx_to_least_idx[ii]) for ii in idx2)
@@ -63,7 +64,7 @@ class TorchBackend(ContractionBackend):
         width = len(set(bucket[0].indices))
         #print("w:",width)
 
-        for tensor in bucket[1:]:
+        for tensor in bucket[1:-1]:
 
             expr = get_einsum_expr(
                 list(map(int, result_indices)), list(map(int, tensor.indices))
@@ -91,24 +92,33 @@ class TorchBackend(ContractionBackend):
             self.width_bc[width][0] = len(self.width_dict[width])
             self.width_bc[width][1] += 1
 
+        if len(bucket)>1:
+            tensor = bucket[-1]
+            expr = get_einsum_expr(
+                list(map(int, result_indices)), list(map(int, tensor.indices))
+                , contract = 1
+            )
+            result_data = torch.einsum(expr, result_data, tensor.data)
+            result_indices = tuple(sorted(
+                set(result_indices + tensor.indices),
+                key=int, reverse=True
+            ))
+        else:
+            result_data = result_data.sum(axis=-1)
+
+
+
         if len(result_indices) > 0:
-            if not no_sum:  # trim first index
-                first_index = result_indices[-1]
-                result_indices = result_indices[:-1]
-            else:
-                first_index, *_ = result_indices
+            first_index = result_indices[-1]
+            result_indices = result_indices[:-1]
             tag = first_index.identity
         else:
             tag = 'f'
             result_indices = []
 
         # reduce
-        if no_sum:
-            result = qtree.optimizer.Tensor(f'E{tag}', result_indices,
-                                data=result_data)
-        else:
-            result = qtree.optimizer.Tensor(f'E{tag}', result_indices,
-                                data=torch.sum(result_data, axis=-1))
+        result = qtree.optimizer.Tensor(f'E{tag}', result_indices,
+                            data=result_data)
         
         #print("summary:",sorted(self.exprs.items(), key=lambda x: x[1], reverse=True))
         #print("stats:",self.width_bc)
@@ -173,7 +183,7 @@ class TorchBackend(ContractionBackend):
                         cuda = torch.device('cuda')
                         data = torch.from_numpy(data).to(cuda)
                     else:
-                        data = torch.from_numpy(data)
+                        data = torch.from_numpy(data.astype(np.complex128))
 
                 data = data.permute(tuple(transpose_order))
                 # transpose indices
