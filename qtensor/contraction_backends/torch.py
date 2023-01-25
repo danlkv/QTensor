@@ -181,7 +181,7 @@ class TorchBackend(ContractionBackend):
                 if not isinstance(data, torch.Tensor):             
                     if self.device == 'gpu' and torch.cuda.is_available():
                         cuda = torch.device('cuda')
-                        data = torch.from_numpy(data).to(cuda)
+                        data = torch.from_numpy(data.astype(np.complex128)).to(cuda)
                     else:
                         data = torch.from_numpy(data.astype(np.complex128))
 
