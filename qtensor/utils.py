@@ -312,6 +312,9 @@ def _neighbors(graph, node):
 
 def get_neighbors_path(old_graph, peo=None):
     if peo is not None:
+        old_graph = copy.deepcopy(old_graph)
+        for (n1, n2, d) in old_graph.edges(data=True):
+            d.clear()
         graph, _ = reorder_graph(old_graph, peo)
     else:
         graph = copy.deepcopy(old_graph)
