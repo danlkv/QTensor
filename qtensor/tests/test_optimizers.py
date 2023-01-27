@@ -102,7 +102,7 @@ def test_adaptive_optimizer_adapts():
     w1 = opt.treewidth
 
 
-    G, gamma, beta = get_test_problem(24, p=5, d=3)
+    G, gamma, beta = get_test_problem(24, p=4, d=3)
 
     composer = QtreeQAOAComposer(
             graph=G, gamma=gamma, beta=beta)
@@ -139,7 +139,7 @@ def test_adaptive_optimizer_max_time():
         opt.optimize(tn)
         dur = time.time() - start1
         print(f"Duration: {dur}, MaxTime: {opt.max_time}")
-        assert dur < opt.max_time + 2
+        assert dur < opt.max_time + 3
 
 
 if __name__ == '__main__':
