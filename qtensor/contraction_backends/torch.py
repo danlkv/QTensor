@@ -71,6 +71,7 @@ class TorchBackend(ContractionBackend):
         self.width_bc = [[0,0] for i in range(30)] #(#distinct_bc, #bc)
 
     def process_bucket(self, bucket, no_sum=False):
+        bucket.sort(key = lambda x: len(x.indices))
         result_indices = bucket[0].indices
         result_data = bucket[0].data
         width = len(set(bucket[0].indices))
@@ -81,6 +82,7 @@ class TorchBackend(ContractionBackend):
                 list(map(int, result_indices)), list(map(int, tensor.indices))
             )
 
+            result_data = torch.einsum(expr, result_data, tensor.data)
 
             # Merge and sort indices and shapes
             result_indices = tuple(sorted(
@@ -103,6 +105,7 @@ class TorchBackend(ContractionBackend):
                 list(map(int, result_indices)), list(map(int, tensor.indices))
                 , contract = 1
             )
+            result_data = torch.einsum(expr, result_data, tensor.data)
             result_indices = tuple(sorted(
                 set(result_indices + tensor.indices),
                 key=int, reverse=True
