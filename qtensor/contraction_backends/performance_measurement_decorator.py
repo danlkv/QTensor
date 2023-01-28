@@ -39,7 +39,7 @@ class BucketContnractionStats:
     def indices_info(self):
         """ String representation of bucket data"""
         info = ""
-        all_indices = sorted(sum(map(list, self.indices), []), key=int)
+        all_indices = sorted(list(set(sum(map(list, self.indices), []))), key=int)
         ix_to_char = {i:string.ascii_letters[j] for j, i in enumerate(all_indices)}
         for ix, strides in zip(self.indices, self.strides):
             tensor_info = ""
