@@ -4,6 +4,7 @@ import time
 from test_circuits import gen_qaoa_maxcut_circuit
 import qtensor
 import qtree
+from qtensor.merged_indices.transposed_bucket_elimination import bucket_elimination
 import numpy as np
 import pandas as pd
 import pyrofiler
@@ -14,7 +15,7 @@ from qtensor import toolbox
 from qtensor.contraction_backends import get_backend, PerfBackend
 
 def bucket_contraction_report(tn, buckets, backend,
-                              bucket_elimination=qtree.optimizer.bucket_elimination
+                              bucket_elimination=bucket_elimination
                              ):
     """
     Returns:
@@ -29,7 +30,8 @@ def bucket_contraction_report(tn, buckets, backend,
         buckets, perf_backend.process_bucket,
         n_var_nosum=len(tn.free_vars)
     )
-    perf_backend.get_result_data(result).flatten()
+    result_data = perf_backend.get_result_data(result).flatten()
+    print("Result data:", result_data)
     # compute report_table
     rep_txt = perf_backend.gen_report(show=False)
     return perf_backend.report_table
@@ -42,15 +44,14 @@ def get_buckets_tn(circ, backend, ordering_algo:str, batch_vars=0, seed=10):
     sim.prepare_buckets(circ, batch_vars=batch_vars)
     return sim.buckets, tn
 
-
 '''
 Function: Generate a collection of above report, and process them into final usable form
 I/O: ... -> processed data is a dict, directly usable by json
 '''
-def collect_process_be_pt_report(repeat: int, backend, circ):
+def collect_process_be_pt_report(repeat: int, backend, circ, ordering_algo='greedy'):
     timing = pyrofiler.timing
     with timing(callback=lambda x: None) as gen:
-        buckets, tn = get_buckets_tn(circ, backend, 'rgreedy_0.02_10', batch_vars=0)
+        buckets, tn = get_buckets_tn(circ, backend, ordering_algo, batch_vars=0)
 
     tables = []
     wall_start = time.time()
@@ -71,8 +72,10 @@ def mean_mmax(x: list):
     return np.mean(x)
 
 def main():
-    Ns = [24, 26, 28, 30]
-    p = 3
+    Ns = [24]
+    p = 15
+    ordering_algo = 'greedy'
+    repeats = 2
     top_K = 15
     backend_name = 'torch_cpu'
     print("backend: ", backend_name)
@@ -80,7 +83,7 @@ def main():
         print(f"N={N}")
         backend = get_backend(backend_name)
         circ = gen_qaoa_maxcut_circuit(N, p)
-        report = collect_process_be_pt_report(9, backend, circ)
+        report = collect_process_be_pt_report(repeats, backend, circ, ordering_algo=ordering_algo)
 
         stats = report[["time"]].groupby('step').agg(['mean', 'min', 'max', 'std'])
         stats = pd.concat([
@@ -101,7 +104,7 @@ def main():
             report[["time"]].groupby('step').agg('mean'),
             report[["flop","FLOPS", 'result_size', 'bucket_len']].groupby('step').first()
         ], axis=1)
-        print(stats[['time', 'result_size', 'FLOPS']].groupby('result_size').agg(['mean', 'sum']))
+        print(stats[['time', 'result_size', 'FLOPS']].groupby('result_size').agg(['mean', 'sum', 'count']))
         print("Total time:")
         print(stats['time'].sum())
 
