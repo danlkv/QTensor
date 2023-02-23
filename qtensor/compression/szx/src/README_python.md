@@ -5,7 +5,7 @@
 2. Change directory to "SZx/szx/src/"
 
 3. Run the following NVCC command:
-nvcc --shared --compiler-options '-fPIC' -I ../include/ -I $CUDA_SAMPLES_PATH -o cuszx_wrapper.so *.cu *.c
+nvcc --shared --compiler-options '-fPIC' -I ../include/ -I $CUDA_SAMPLES_PATH -o libcuszx_wrapper.so *.cu *.c
 
     - $CUDA_SAMPLES_PATH should be the path to the include/ directory of CUDA's samples
 

@@ -1,6 +1,8 @@
 from qtensor.compression import CompressedTensor
-from qtree.optimizer import Tensor, Var
+from qtensor.compression.CompressedTensor import Compressor, CUSZCompressor
+from qtree.optimizer import Var
 from qtree.system_defs import NP_ARRAY_TYPE
+import pytest
 import numpy as np
 
 def test_empty_tensor():
@@ -10,6 +12,7 @@ def test_empty_tensor():
     assert t.name == "myT"
     assert t.indices == tuple(indices)
     assert t.shape == shape
+    assert t.data is not None
     assert t.data.shape == shape
     assert t.data.dtype == NP_ARRAY_TYPE
 
@@ -23,6 +26,7 @@ def test_slice_tensor():
     t = CompressedTensor.empty("myT", indices, dtype=np.uint32)
     t.compress_indices([indices[0]])
     S = t[{indices[0]: 1, indices[1]: slice(0, 1)}]
+    assert S.data is not None
     assert S.data.shape == (1, 4)
     assert indices[0] not in S.indices
     assert int(indices[1]) == int(S.indices[0])
@@ -35,5 +39,23 @@ def test_slice_tensor():
     t.compress_indices([indices[0], indices[1]])
     S = t[1, 2]
     assert indices[1] not in S.indices
+    assert S.data is not None
     assert np.allclose(t.get_chunk([1, 2]), S.data)
+
+@pytest.mark.parametrize(argnames=["shape", "compressor"],
+                         argvalues=[
+                             ((2, 3, 4), Compressor()),
+                             ((2, 3, 4), CUSZCompressor())]
+                        )
+def test_compressors(shape, compressor):
+    import cupy
+    shape = (2, 3, 4)
+    indices = [Var(i, size=s) for i, s in enumerate(shape)]
+    data = cupy.random.randn(*shape)
+    t = CompressedTensor("myT", indices, data=data, compressor=compressor)
+    t.compress_indices([indices[0]])
+
+    s = t[1]
+    assert s.data is not None
+    assert np.allclose(t.get_chunk([1]), s.data)
 

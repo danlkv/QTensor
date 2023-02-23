@@ -1,10 +1,12 @@
 import itertools
 import numpy as np
-import qtree
 import io
-from qtree.optimizer import Tensor, Var
+from qtree.optimizer import Tensor
+from qtree.system_defs import NP_ARRAY_TYPE
+import sys
+sys.path.append("./szx/src")
 
-from szx.src.cuszx_wrapper import cuszx_host_compress, cuszx_host_decompress, cuszx_device_compress, cuszx_device_decompress
+from cuszx_wrapper import cuszx_host_compress, cuszx_host_decompress, cuszx_device_compress, cuszx_device_decompress
 
 CUSZX_BLOCKSIZE = 256
 
@@ -26,6 +28,27 @@ class Compressor():
         print(f"Loading arr.")
         return  np.load(ptr)['arr_0']
 
+class CUSZCompressor():
+    def compress(self, data):
+        import cupy
+        if isinstance(data, cupy.ndarray):
+            isCuPy = True
+        else:
+            isCuPy = False
+        num_elements = data.size
+        r2r_error = 0.01
+        r2r_threshold = 0.01
+        cmp_bytes, outSize_ptr = self.cuszx_compress(isCuPy, data.flatten(), num_elements, r2r_error, r2r_threshold)
+        return (cmp_bytes, num_elements, isCuPy, data.shape)
+
+    def decompress(self, obj):
+        import cupy
+        cmp_bytes, num_elements, isCuPy, shape = obj
+        decompressed_ptr = self.cuszx_decompress(isCuPy, cmp_bytes, num_elements)
+        mem = cupy.cuda.UnownedMemory(decompressed_ptr, num_elements*8, self, device_id=0)
+        mem_ptr = cupy.cuda.memory.MemoryPointer(mem, 0)
+        arr = cupy.ndarray(shape, dtype=np.float64, memptr=mem_ptr)
+        return arr
     
     ### Compression API with cuSZx ###
     # Parameters:
@@ -100,6 +123,14 @@ class CompressedTensor(Tensor):
         else:
             self._dtype = None
 
+    @classmethod
+    def empty(cls, name, indices, slice_indices=[], compressor=Compressor(), dtype:type=NP_ARRAY_TYPE):
+        t = super().empty(name, indices, dtype)
+        t.compressor = compressor
+        if slice_indices:
+            t.compress_indices(slice_indices)
+        return t
+
     def compress_indices(self, indices: list):
         """
         Slice the self.data along dimensions in `indices`,
@@ -143,7 +174,7 @@ class CompressedTensor(Tensor):
         ptr = self._data[flat_ix]
         return self.compressor.decompress(ptr)
 
-    def set_chunk(self, ivals, chunk:np.array):
+    def set_chunk(self, ivals, chunk: np.ndarray):
         # -- Check for consistent data types between chunks
         if self._dtype is None:
             self._dtype = chunk.dtype
