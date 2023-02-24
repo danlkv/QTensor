@@ -39,13 +39,22 @@ class CUSZCompressor():
         r2r_error = 0.01
         r2r_threshold = 0.01
         cmp_bytes, outSize_ptr = self.cuszx_compress(isCuPy, data.flatten(), num_elements, r2r_error, r2r_threshold)
+        print("returning compressed data")
         return (cmp_bytes, num_elements, isCuPy, data.shape)
 
     def decompress(self, obj):
         import cupy
+        import ctypes
         cmp_bytes, num_elements, isCuPy, shape = obj
         decompressed_ptr = self.cuszx_decompress(isCuPy, cmp_bytes, num_elements)
-        mem = cupy.cuda.UnownedMemory(decompressed_ptr, num_elements*8, self, device_id=0)
+        # -- Workaround to convert GPU pointer to int
+        p_decompressed_ptr = ctypes.addressof(decompressed_ptr)
+        # cast to int64 pointer
+        # (effectively converting pointer to pointer to addr to pointer to int64)
+        p_decompressed_int= ctypes.cast(p_decompressed_ptr, ctypes.POINTER(ctypes.c_uint64))
+        decompressed_int = p_decompressed_int.contents
+        # --
+        mem = cupy.cuda.UnownedMemory(decompressed_int.value, num_elements*8, self, device_id=0)
         mem_ptr = cupy.cuda.memory.MemoryPointer(mem, 0)
         arr = cupy.ndarray(shape, dtype=np.float64, memptr=mem_ptr)
         return arr

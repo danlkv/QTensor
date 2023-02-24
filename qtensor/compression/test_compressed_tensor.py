@@ -45,17 +45,20 @@ def test_slice_tensor():
 @pytest.mark.parametrize(argnames=["shape", "compressor"],
                          argvalues=[
                              ((2, 3, 4), Compressor()),
-                             ((2, 3, 4), CUSZCompressor())]
+                             ((2, 3, 4), CUSZCompressor()),
+                             ((2,)*20, CUSZCompressor())
+                        ]
                         )
 def test_compressors(shape, compressor):
     import cupy
-    shape = (2, 3, 4)
     indices = [Var(i, size=s) for i, s in enumerate(shape)]
     data = cupy.random.randn(*shape)
+    print("Data size", data.nbytes)
     t = CompressedTensor("myT", indices, data=data, compressor=compressor)
     t.compress_indices([indices[0]])
 
     s = t[1]
+    print('got chunk')
     assert s.data is not None
     assert np.allclose(t.get_chunk([1]), s.data)
 
