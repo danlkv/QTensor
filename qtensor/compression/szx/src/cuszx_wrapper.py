@@ -4,7 +4,7 @@ from ctypes import *
 import random
 import cupy as cp
 
-LIB_PATH = 'szx/src/libcuszx_wrapper.so'
+LIB_PATH = './libcuszx_wrapper.so'
 
 # unsigned char* cuSZx_integrated_compress(float *data, float r2r_threshold, float r2r_err, size_t nbEle, int blockSize, size_t *outSize)
 
@@ -90,7 +90,7 @@ def cuszx_device_decompress(nbEle, cmpBytes):
 
 if __name__ == "__main__":
     
-    DATA_SIZE = 1024
+    DATA_SIZE = int(1024)
     MAX_D = 10.0
     MIN_D = -10.0
     RANGE = MAX_D - MIN_D
@@ -112,7 +112,7 @@ if __name__ == "__main__":
 
     in_vector = in_vector.astype('float32')
     in_vector_gpu = cp.asarray(in_vector)
-
+    
     # variable = ctypes.c_size_t(0)
     # outSize = ctypes.pointer(variable)
 
