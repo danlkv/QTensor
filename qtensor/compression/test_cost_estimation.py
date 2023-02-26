@@ -41,7 +41,7 @@ def test_compressed_contraction_cost():
     print("Path\n", path)
     # -- Estimate sliced contraction
     opt_par  = qtensor.optimisation.SlicesOptimizer(base_ordering=opt, max_tw=M_limit+1, max_slice=2+opt.treewidth-M_limit)
-    #opt_par  = TreeTrimSplitter(base_ordering=opt, max_tw=M_limit+1, max_slice=5+opt.treewidth-M_limit)
+    opt_par  = TreeTrimSplitter(base_ordering=opt, max_tw=M_limit+1, max_slice=5+opt.treewidth-M_limit)
     peo, par_vars, tn = opt_par.optimize(tn)
     print("Par vars", par_vars)
     tn.slice({i: slice(0, 1) for i in par_vars})
