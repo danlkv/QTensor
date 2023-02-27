@@ -44,8 +44,13 @@ def contract_two_tensors(A, B, T_out):
 
 
 def compressed_contract(A:Tensor, B: Tensor,
-                        result_ixs, contract_ixs,
+                        contract_ixs,
                         mem_limit):
+    """
+    Contract tensors A and B along `contract_ixs` and return the result
+
+    The result tensor indices will be ordered from largest to smallest
+    """
     all_indices = list(set(A.indices).union(B.indices))
     all_indices.sort(key=int, reverse=True)
     result_indices = list(set(all_indices) - set(contract_ixs))

@@ -52,7 +52,7 @@ def test_slice_tensor():
 def test_compressors(shape, compressor):
     import cupy
     indices = [Var(i, size=s) for i, s in enumerate(shape)]
-    data = cupy.random.randn(*shape)
+    data = cupy.random.random(shape, dtype=np.float32)*.00001
     print("Data size", data.nbytes)
     t = CompressedTensor("myT", indices, data=data, compressor=compressor)
     t.compress_indices([indices[0]])
@@ -60,5 +60,8 @@ def test_compressors(shape, compressor):
     s = t[1]
     print('got chunk')
     assert s.data is not None
-    assert np.allclose(t.get_chunk([1]), s.data)
+    ch = cupy.asnumpy(t.get_chunk([1]))
+    ref = cupy.asnumpy(s.data)
+
+    assert np.allclose(ch, ref)
 

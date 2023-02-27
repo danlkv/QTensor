@@ -4,7 +4,10 @@ import io
 from qtree.optimizer import Tensor
 from qtree.system_defs import NP_ARRAY_TYPE
 import sys
-sys.path.append("./szx/src")
+from pathlib import Path
+print(Path(__file__).parent/'szx/src/')
+sys.path.append(Path(__file__).parent/'szx/src/')
+sys.path.append('./szx/src')
 
 from cuszx_wrapper import cuszx_host_compress, cuszx_host_decompress, cuszx_device_compress, cuszx_device_decompress
 
@@ -18,6 +21,13 @@ def iterate_indices(indices: list):
 
 class Compressor():
     def compress(self, data):
+        raise NotImplementedError
+
+    def decompress(self, ptr):
+        raise NotImplementedError
+
+class NumpyCompressor(Compressor):
+    def compress(self, data):
         print(f"Compressing len {data.size}")
         comp = io.BytesIO()
         np.savez_compressed(comp, data)
@@ -28,7 +38,7 @@ class Compressor():
         print(f"Loading arr.")
         return  np.load(ptr)['arr_0']
 
-class CUSZCompressor():
+class CUSZCompressor(Compressor):
     def compress(self, data):
         import cupy
         if isinstance(data, cupy.ndarray):
@@ -36,6 +46,7 @@ class CUSZCompressor():
         else:
             isCuPy = False
         num_elements = data.size
+        print("Num elements", num_elements)
         r2r_error = 0.01
         r2r_threshold = 0.01
         cmp_bytes, outSize_ptr = self.cuszx_compress(isCuPy, data.flatten(), num_elements, r2r_error, r2r_threshold)
@@ -54,9 +65,9 @@ class CUSZCompressor():
         p_decompressed_int= ctypes.cast(p_decompressed_ptr, ctypes.POINTER(ctypes.c_uint64))
         decompressed_int = p_decompressed_int.contents
         # --
-        mem = cupy.cuda.UnownedMemory(decompressed_int.value, num_elements*8, self, device_id=0)
+        mem = cupy.cuda.UnownedMemory(decompressed_int.value, num_elements*4, self, device_id=0)
         mem_ptr = cupy.cuda.memory.MemoryPointer(mem, 0)
-        arr = cupy.ndarray(shape, dtype=np.float64, memptr=mem_ptr)
+        arr = cupy.ndarray(shape, dtype=np.float32, memptr=mem_ptr)
         return arr
     
     ### Compression API with cuSZx ###
