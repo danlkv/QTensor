@@ -7,7 +7,7 @@ import numpy as np
 import networkx as nx
 from qtensor.tests import get_test_problem
 
-from qtensor.contraction_algos import test_reverse_order_backend
+from qtensor.contraction_algos import is_reverse_order_backend
 
 
 def test_profiled(capsys):
@@ -31,11 +31,11 @@ def test_profiled(capsys):
 
 def test_reverse_order_switch():
     backend = qtensor.contraction_backends.get_backend('torch')
-    reverse = test_reverse_order_backend(backend)
+    reverse = is_reverse_order_backend(backend)
     assert reverse
 
     backend = qtensor.contraction_backends.get_backend('einsum')
-    reverse = test_reverse_order_backend(backend)
+    reverse = is_reverse_order_backend(backend)
     assert not reverse
 
 def test_compression_backend():
