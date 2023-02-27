@@ -2,7 +2,7 @@ import itertools
 import numpy as np
 from qtree.optimizer import Tensor, Var
 
-def test_reverse_order_backend(backend):
+def is_reverse_order_backend(backend):
     """
     Duck-test if the tensors are with reverse index order
     using slice_buckets method
