@@ -1,6 +1,7 @@
 import qtree
 from qtensor.tools.lazy_import import cirq
 from qtensor.contraction_backends import NumpyBackend, ContractionBackend
+from qtensor.contraction_algos import bucket_elimination
 
 from qtensor.optimisation.TensorNet import QtreeTensorNet
 from qtensor.optimisation.Optimizer import DefaultOptimizer, Optimizer
@@ -143,10 +144,8 @@ class QtreeSimulator(Simulator):
     def simulate_batch(self, qc, batch_vars=0, peo=None):
         self.prepare_buckets(qc, batch_vars, peo)
 
-        result = qtree.optimizer.bucket_elimination(
-            self.buckets, self.backend.process_bucket,
-            n_var_nosum=len(self.tn.free_vars)
-        )
+        result = bucket_elimination(self.buckets, self.backend,
+                                    n_var_nosum=len(self.tn.free_vars))
         return self.backend.get_result_data(result).flatten()
 
     def simulate(self, qc):

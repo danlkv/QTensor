@@ -38,3 +38,5 @@ def test_reverse_order_switch():
     reverse = test_reverse_order_backend(backend)
     assert not reverse
 
+def test_compression_backend():
+    pass
