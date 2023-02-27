@@ -4,7 +4,7 @@ from ctypes import *
 import random
 import cupy as cp
 
-LIB_PATH = '/home/mkshah5/clean_QTensor/QTensor/qtensor/compression/szx/src/libcuszx_wrapper.so'
+LIB_PATH = './libcuszx_wrapper.so'
 
 # unsigned char* cuSZx_integrated_compress(float *data, float r2r_threshold, float r2r_err, size_t nbEle, int blockSize, size_t *outSize)
 
@@ -91,29 +91,29 @@ def cuszx_device_decompress(nbEle, cmpBytes):
 
 if __name__ == "__main__":
     
-    DATA_SIZE = int(2**26)
+    DATA_SIZE = int(1024)
     MAX_D = 10.0
     MIN_D = -10.0
     RANGE = MAX_D - MIN_D
     r2r_threshold = 0.01
     r2r_error = 0.01
 
-    in_vector = np.fromfile("real_tensor_d26.f32", dtype=np.float32)
-    print(np.max(in_vector))
+    #in_vector = np.fromfile("real_tensor_d26.f32", dtype=np.float32)
+    #print(np.max(in_vector))
     #range_vr = np.max(in_vector)-np.min(in_vector)
     #r2r_threshold = r2r_threshold*range_vr
     #r2r_error = r2r_error*range_vr
-#    in_vector = np.zeros((DATA_SIZE,))
-#    for i in range(0,int(DATA_SIZE/4)):
-#        in_vector[i] = 0.0
-#    for i in range(int(DATA_SIZE/4), int(2*DATA_SIZE/4)):
-#        in_vector[i] = 5.0
-#    for i in range(int(2*DATA_SIZE/4), int(3*DATA_SIZE/4)):
-#        in_vector[i] = random.uniform(MIN_D, MAX_D)
-#    for i in range(int(3*DATA_SIZE/4), int(3*DATA_SIZE/4)+6):
-#        in_vector[i] = -7.0
-#    for i in range(int(3*DATA_SIZE/4)+6, DATA_SIZE):
-#        in_vector[i] = 0.001
+    in_vector = np.zeros((DATA_SIZE,))
+    for i in range(0,int(DATA_SIZE/4)):
+        in_vector[i] = 0.0
+    for i in range(int(DATA_SIZE/4), int(2*DATA_SIZE/4)):
+        in_vector[i] = 5.0
+    for i in range(int(2*DATA_SIZE/4), int(3*DATA_SIZE/4)):
+        in_vector[i] = random.uniform(MIN_D, MAX_D)
+    for i in range(int(3*DATA_SIZE/4), int(3*DATA_SIZE/4)+6):
+        in_vector[i] = -7.0
+    for i in range(int(3*DATA_SIZE/4)+6, DATA_SIZE):
+        in_vector[i] = 0.001
 
 
     in_vector = in_vector.astype('float32')
