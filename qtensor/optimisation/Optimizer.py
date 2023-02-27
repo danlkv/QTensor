@@ -235,24 +235,26 @@ class SlicesOptimizer(Optimizer):
         #log.info('peo {}', self.peo)
         return peo, [self.treewidth]
 
-class TamakiOptimizer(GreedyOptimizer):
+class TamakiOptimizer(Optimizer):
     def __init__(self, max_width=None, *args, wait_time=5, **kwargs):
         super().__init__(*args, **kwargs)
         self.wait_time = wait_time
         self.max_width = max_width
 
+    def _get_ordering_ints(self, graph, inplace=True):
+        peo, tw = qtree.graph_model.peo_calculation.get_upper_bound_peo_pace2017_interactive(
+                graph, method="tamaki", max_time=self.wait_time, max_width=self.max_width)
+        return peo, [tw]
+
     def _get_ordering(self, graph, inplace=True):
         node_names = nx.get_node_attributes(graph, 'name')
         node_sizes = nx.get_node_attributes(graph, 'size')
-        peo, tw = qtree.graph_model.peo_calculation.get_upper_bound_peo_pace2017_interactive(
-                graph, method="tamaki", max_time=self.wait_time, max_width=self.max_width)
-
-
+        peo, path = self._get_ordering_ints(graph, inplace=inplace)
         peo = [qtree.optimizer.Var(var, size=node_sizes[var],
                         name=node_names[var])
                     for var in peo]
-        self.treewidth = tw
-        return peo, [tw]
+        self.treewidth = max(path)
+        return peo, path
 
 class TamakiExactOptimizer(GreedyOptimizer):
     def __init__(self, *args, **kwargs):

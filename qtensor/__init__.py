@@ -21,7 +21,7 @@ from qtensor.contraction_backends import PerfNumpyBackend, NumpyBackend
 from qtensor import simplify_circuit
 from qtensor.simplify_circuit import simplify_qtree_circuit
 from qtensor import optimisation
-from qtensor import merged_indices
+from qtensor import contraction_algos
 from qtensor import problems
 from qtensor import MergedSimulator
 from qtensor import tools

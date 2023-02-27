@@ -1,5 +1,6 @@
 #from torch._C import device
 from .base_class import ContractionBackend
+from .common import slice_numpy_tensor
 from .numpy import NumpyBackend
 from .torch import TorchBackend
 from .cupy import CuPyBackend

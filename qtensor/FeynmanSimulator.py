@@ -161,7 +161,7 @@ class FeynmanMergedSimulator(FeynmanSimulator, MergedSimulator):
         self.merged_buckets = self.tn.buckets
         self.ibunch = self.ibunch
 
-        result = qtensor.merged_indices.bucket_elimination(
+        result = qtensor.contraction_algos.merged_bucket_elimination(
             self.tn.buckets,
             self.ibunch,
             self.backend.process_bucket_merged,

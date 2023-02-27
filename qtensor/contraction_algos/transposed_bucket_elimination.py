@@ -1,4 +1,17 @@
 import itertools
+import numpy as np
+from qtree.optimizer import Tensor, Var
+
+def is_reverse_order_backend(backend):
+    """
+    Duck-test if the tensors are with reverse index order
+    using slice_buckets method
+    """
+    a, b = Var(1), Var(2)
+    test_b = [[Tensor('T', [a, b], data_key='k')]]
+    data_dict={'k': np.random.rand(2, 2)}
+    sliced = backend.get_sliced_buckets(test_b, data_dict, {a: slice(None), b: slice(None)})
+    return sliced[0][0].indices[0] == b
 
 def bucket_elimination(buckets, process_bucket_fn,
                        n_var_nosum=0):
