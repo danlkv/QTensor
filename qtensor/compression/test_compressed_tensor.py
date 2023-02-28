@@ -1,5 +1,5 @@
 from qtensor.compression import CompressedTensor
-from qtensor.compression.CompressedTensor import Compressor, CUSZCompressor
+from qtensor.compression.CompressedTensor import NumpyCompressor, CUSZCompressor
 from qtree.optimizer import Var
 from qtree.system_defs import NP_ARRAY_TYPE
 import pytest
@@ -42,26 +42,33 @@ def test_slice_tensor():
     assert S.data is not None
     assert np.allclose(t.get_chunk([1, 2]), S.data)
 
-@pytest.mark.parametrize(argnames=["shape", "compressor"],
+@pytest.mark.parametrize(argnames=["shape", "compressor", "dtype"],
                          argvalues=[
-                             ((2, 3, 4), Compressor()),
-                             ((2, 3, 4), CUSZCompressor()),
-                             ((2,)*20, CUSZCompressor())
+                             ((2, 3, 4), NumpyCompressor(), np.float32),
+                             ((2, 3, 4), NumpyCompressor(), np.float64),
+                             ((2, 3, 4), CUSZCompressor(), np.float32),
+                             ((2, 3, 4), CUSZCompressor(), np.float64),
+                             ((2, 3, 4), CUSZCompressor(), np.complex128),
+                             ((2,)*20, CUSZCompressor(), np.float32),
+                             ((2,)*20, CUSZCompressor(), np.float64)
                         ]
                         )
-def test_compressors(shape, compressor):
+def test_compressors(shape, compressor, dtype):
+    print(shape, compressor, dtype)
     import cupy
     indices = [Var(i, size=s) for i, s in enumerate(shape)]
-    data = cupy.random.random(shape, dtype=np.float32)*.00001
-    print("Data size", data.nbytes)
+    if dtype is np.complex128:
+        data = cupy.random.random(shape, dtype=np.float64) + 1j*cupy.random.random(shape, dtype=np.float64)
+    else:
+        data = cupy.random.random(shape, dtype=dtype)
     t = CompressedTensor("myT", indices, data=data, compressor=compressor)
     t.compress_indices([indices[0]])
+    print("<--Compressed")
 
     s = t[1]
-    print('got chunk')
+    print("-->Decompressed")
     assert s.data is not None
     ch = cupy.asnumpy(t.get_chunk([1]))
     ref = cupy.asnumpy(s.data)
 
     assert np.allclose(ch, ref)
-

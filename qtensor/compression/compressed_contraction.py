@@ -2,6 +2,7 @@ import numpy as np
 
 from qtensor.compression import CompressedTensor
 from .CompressedTensor import Tensor, iterate_indices
+from .CompressedTensor import Compressor
 
 # taken from numpy/core/einsumfunc.py
 einsum_symbols = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ'
@@ -44,8 +45,8 @@ def contract_two_tensors(A, B, T_out):
 
 
 def compressed_contract(A:Tensor, B: Tensor,
-                        contract_ixs,
-                        mem_limit):
+                        contract_ixs, mem_limit,
+                        compressor:Compressor):
     """
     Contract tensors A and B along `contract_ixs` and return the result
 
@@ -84,7 +85,8 @@ def compressed_contract(A:Tensor, B: Tensor,
     remove_compress = exist_compressed - set(need_compressed)
     R = CompressedTensor(new_tensor_name,
                          result_indices,
-                         slice_indices=need_compressed
+                         slice_indices=need_compressed,
+                         compressor=compressor
                         )
 
     result_chunk_ixs = result_indices[-mem_limit:]

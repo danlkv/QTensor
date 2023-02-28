@@ -47,17 +47,22 @@ class CUSZCompressor(Compressor):
             isCuPy = False
         num_elements = data.size
         print("Num elements", num_elements)
+        # Adapt numele depending on itemsize
+        itemsize = data.dtype.itemsize
+        num_elements_eff = int(num_elements*itemsize/4) 
+
         r2r_error = 0.01
         r2r_threshold = 0.01
-        cmp_bytes, outSize_ptr = self.cuszx_compress(isCuPy, data.flatten(), num_elements, r2r_error, r2r_threshold)
+        dtype = data.dtype
+        cmp_bytes, outSize_ptr = self.cuszx_compress(isCuPy, data, num_elements_eff, r2r_error, r2r_threshold)
         print("returning compressed data")
-        return (cmp_bytes, num_elements, isCuPy, data.shape)
+        return (cmp_bytes, num_elements_eff, isCuPy, data.shape, dtype)
 
     def decompress(self, obj):
         import cupy
         import ctypes
-        cmp_bytes, num_elements, isCuPy, shape = obj
-        decompressed_ptr = self.cuszx_decompress(isCuPy, cmp_bytes, num_elements)
+        cmp_bytes, num_elements_eff, isCuPy, shape, dtype = obj
+        decompressed_ptr = self.cuszx_decompress(isCuPy, cmp_bytes, num_elements_eff)
         # -- Workaround to convert GPU pointer to int
         p_decompressed_ptr = ctypes.addressof(decompressed_ptr)
         # cast to int64 pointer
@@ -65,9 +70,9 @@ class CUSZCompressor(Compressor):
         p_decompressed_int= ctypes.cast(p_decompressed_ptr, ctypes.POINTER(ctypes.c_uint64))
         decompressed_int = p_decompressed_int.contents
         # --
-        mem = cupy.cuda.UnownedMemory(decompressed_int.value, num_elements*4, self, device_id=0)
+        mem = cupy.cuda.UnownedMemory(decompressed_int.value, num_elements_eff, self, device_id=0)
         mem_ptr = cupy.cuda.memory.MemoryPointer(mem, 0)
-        arr = cupy.ndarray(shape, dtype=np.float32, memptr=mem_ptr)
+        arr = cupy.ndarray(shape, dtype=dtype, memptr=mem_ptr)
         return arr
     
     ### Compression API with cuSZx ###
