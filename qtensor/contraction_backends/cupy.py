@@ -1,8 +1,8 @@
 import qtree
 from qtensor.tools.lazy_import import cupy as cp
 from qtensor.contraction_backends import ContractionBackend
-from qtensor.contraction_backends.numpy import get_einsum_expr
-from .common import slice_numpy_tensor
+#from qtensor.contraction_backends.numpy import get_einsum_expr
+from .common import slice_numpy_tensor, get_einsum_expr
 
 
 class CuPyBackend(ContractionBackend):
@@ -15,7 +15,7 @@ class CuPyBackend(ContractionBackend):
         result_data = bucket[0].data
         for tensor in bucket[1:]:
 
-            expr = qtree.utils.get_einsum_expr(
+            expr = get_einsum_expr(
                 list(map(int, result_indices)), list(map(int, tensor.indices))
             )
             
@@ -32,11 +32,11 @@ class CuPyBackend(ContractionBackend):
 
         if len(result_indices) > 0:
             if not no_sum:  # trim first index
-                contract_index, *result_indices = result_indices
+                contract_index = result_indices[-1]
                 result_indices = result_indices[:-1]
             else:
-                first_index, *_ = result_indices
-            tag = first_index.identity
+                contract_index = result_indices[-1]
+            tag = contract_index.identity
         else:
             tag = 'f'
             result_indices = []
@@ -47,7 +47,7 @@ class CuPyBackend(ContractionBackend):
                                 data=result_data)
         else:
             result = qtree.optimizer.Tensor(f'E{tag}', result_indices,
-                                data=cp.sum(result_data, axis=0))
+                                data=cp.sum(result_data, axis=-1))
         return result
 
     def process_bucket_merged(self, ixs, bucket, no_sum=False):
@@ -140,4 +140,4 @@ class CuPyBackend(ContractionBackend):
         return sliced_buckets
 
     def get_result_data(self, result):
-        return result.data
+        return cp.transpose(result.data)
