@@ -2,6 +2,7 @@ import qtree
 from qtensor.tools.lazy_import import cupy as cp
 from qtensor.contraction_backends import ContractionBackend
 from qtensor.contraction_backends.numpy import get_einsum_expr
+from .common import slice_numpy_tensor
 
 
 class CuPyBackend(ContractionBackend):
@@ -9,6 +10,7 @@ class CuPyBackend(ContractionBackend):
     # Replace all torch methods with cupy's analog
     
     def process_bucket(self, bucket, no_sum=False):
+        bucket.sort(key = lambda x: len(x.indices))
         result_indices = bucket[0].indices
         result_data = bucket[0].data
         for tensor in bucket[1:]:
@@ -25,12 +27,13 @@ class CuPyBackend(ContractionBackend):
             # Merge and sort indices and shapes
             result_indices = tuple(sorted(
                 set(result_indices + tensor.indices),
-                key=int)
+                key=int, reverse=True)
             )
 
         if len(result_indices) > 0:
             if not no_sum:  # trim first index
-                first_index, *result_indices = result_indices
+                contract_index, *result_indices = result_indices
+                result_indices = result_indices[:-1]
             else:
                 first_index, *_ = result_indices
             tag = first_index.identity
@@ -96,6 +99,7 @@ class CuPyBackend(ContractionBackend):
                 # cp.argsort requires input to be cp array
                 #print(tensor.indices)
                 transpose_order = cp.argsort(cp.asarray(list(map(int, tensor.indices)))).tolist()
+                transpose_order = list(reversed(transpose_order))
                 
                 '''
                 Change 2:
