@@ -50,7 +50,8 @@ def test_slice_tensor():
                              ((2, 3, 4), CUSZCompressor(), np.float64),
                              ((2, 3, 4), CUSZCompressor(), np.complex128),
                              ((2,)*20, CUSZCompressor(), np.float32),
-                             ((2,)*20, CUSZCompressor(), np.float64)
+                             ((2,)*20, CUSZCompressor(), np.complex64),
+                             #((2,)*20, CUSZCompressor(), np.float64)
                         ]
                         )
 def test_compressors(shape, compressor, dtype):
@@ -59,6 +60,8 @@ def test_compressors(shape, compressor, dtype):
     indices = [Var(i, size=s) for i, s in enumerate(shape)]
     if dtype is np.complex128:
         data = cupy.random.random(shape, dtype=np.float64) + 1j*cupy.random.random(shape, dtype=np.float64)
+    elif dtype is np.complex64:
+        data = cupy.random.random(shape, dtype=np.float32) + 1j*cupy.random.random(shape, dtype=np.float32)
     else:
         data = cupy.random.random(shape, dtype=dtype)
     t = CompressedTensor("myT", indices, data=data, compressor=compressor)
@@ -72,3 +75,4 @@ def test_compressors(shape, compressor, dtype):
     ref = cupy.asnumpy(s.data)
 
     assert np.allclose(ch, ref)
+    assert np.allclose(ch, data[1], rtol=0.1, atol=.01)
