@@ -9,7 +9,11 @@ print(Path(__file__).parent/'szx/src/')
 sys.path.append(str(Path(__file__).parent/'szx/src/'))
 sys.path.append('./szx/src')
 
-from cuszx_wrapper import cuszx_host_compress, cuszx_host_decompress, cuszx_device_compress, cuszx_device_decompress
+try:
+    from cuszx_wrapper import cuszx_host_compress, cuszx_host_decompress, cuszx_device_compress, cuszx_device_decompress
+except:
+    # Silently fail on missing build of cuszx
+    pass
 
 CUSZX_BLOCKSIZE = 256
 

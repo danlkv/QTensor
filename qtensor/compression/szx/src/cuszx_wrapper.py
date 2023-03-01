@@ -2,7 +2,7 @@ import numpy as np
 import ctypes
 from ctypes import *
 import random
-import cupy as cp
+from qtensor.tools.lazy_import import cupy as cp
 
 from pathlib import Path
 LIB_PATH = str(Path(__file__).parent/'libcuszx_wrapper.so')
