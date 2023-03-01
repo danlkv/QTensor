@@ -4,7 +4,8 @@ from ctypes import *
 import random
 import cupy as cp
 
-LIB_PATH = './libcuszx_wrapper.so'
+from pathlib import Path
+LIB_PATH = str(Path(__file__).parent/'libcuszx_wrapper.so')
 
 # unsigned char* cuSZx_integrated_compress(float *data, float r2r_threshold, float r2r_err, size_t nbEle, int blockSize, size_t *outSize)
 

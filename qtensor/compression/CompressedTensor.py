@@ -6,7 +6,7 @@ from qtree.system_defs import NP_ARRAY_TYPE
 import sys
 from pathlib import Path
 print(Path(__file__).parent/'szx/src/')
-sys.path.append(Path(__file__).parent/'szx/src/')
+sys.path.append(str(Path(__file__).parent/'szx/src/'))
 sys.path.append('./szx/src')
 
 from cuszx_wrapper import cuszx_host_compress, cuszx_host_decompress, cuszx_device_compress, cuszx_device_decompress
@@ -28,17 +28,19 @@ class Compressor():
 
 class NumpyCompressor(Compressor):
     def compress(self, data):
-        print(f"Compressing len {data.size}")
         comp = io.BytesIO()
         np.savez_compressed(comp, data)
         return comp
 
     def decompress(self, ptr):
         ptr.seek(0)
-        print(f"Loading arr.")
         return  np.load(ptr)['arr_0']
 
 class CUSZCompressor(Compressor):
+    def __init__(self, r2r_error=1e-3, r2r_threshold=1e-3):
+        self.r2r_error = r2r_error
+        self.r2r_threshold = r2r_threshold
+
     def compress(self, data):
         import cupy
         if isinstance(data, cupy.ndarray):
@@ -46,16 +48,12 @@ class CUSZCompressor(Compressor):
         else:
             isCuPy = False
         num_elements = data.size
-        print("Num elements", num_elements)
         # Adapt numele depending on itemsize
         itemsize = data.dtype.itemsize
         num_elements_eff = int(num_elements*itemsize/4) 
 
-        r2r_error = 0.01
-        r2r_threshold = 0.01
         dtype = data.dtype
-        cmp_bytes, outSize_ptr = self.cuszx_compress(isCuPy, data, num_elements_eff, r2r_error, r2r_threshold)
-        print("returning compressed data")
+        cmp_bytes, outSize_ptr = self.cuszx_compress(isCuPy, data, num_elements_eff, self.r2r_error, self.r2r_threshold)
         return (cmp_bytes, num_elements_eff, isCuPy, data.shape, dtype)
 
     def decompress(self, obj):
@@ -121,7 +119,7 @@ class CompressedTensor(Tensor):
     def __init__(self, name, indices,
                  data_key=None, data=None,
                  slice_indices=[],
-                 compressor=Compressor()
+                 compressor:Compressor=NumpyCompressor()
                 ):
         """
         Initialize the tensor

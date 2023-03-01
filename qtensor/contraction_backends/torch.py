@@ -3,7 +3,7 @@ import qtree
 import numpy as np
 from qtree import np_framework
 from qtensor.contraction_backends import ContractionBackend
-from .common import slice_numpy_tensor
+from .common import slice_numpy_tensor, get_einsum_expr
 import string
 CHARS = string.ascii_lowercase + string.ascii_uppercase
 
@@ -32,35 +32,6 @@ def get_einsum_expr_bucket(bucket, all_indices_list, result_indices):
     return expr
 
 
-def get_einsum_expr(idx1, idx2, contract=0):
-    """
-    Takes two tuples of indices and returns an einsum expression
-    to evaluate the sum over repeating indices
-
-    Parameters
-    ----------
-    idx1 : list-like
-          indices of the first argument
-    idx2 : list-like
-          indices of the second argument
-
-    Returns
-    -------
-    expr : str
-          Einsum command to sum over indices repeating in idx1
-          and idx2.
-    """
-    result_indices = sorted(list(set(idx1 + idx2)), reverse=True)
-    # remap indices to reduce their order, as einsum does not like
-    # large numbers
-    idx_to_least_idx = {old_idx: new_idx for new_idx, old_idx
-                        in enumerate(result_indices)}
-    result_indices = result_indices[:len(result_indices)-contract]
-
-    str1 = ''.join(qtree.utils.num_to_alpha(idx_to_least_idx[ii]) for ii in idx1)
-    str2 = ''.join(qtree.utils.num_to_alpha(idx_to_least_idx[ii]) for ii in idx2)
-    str3 = ''.join(qtree.utils.num_to_alpha(idx_to_least_idx[ii]) for ii in result_indices)
-    return str1 + ',' + str2 + '->' + str3
 
 
 

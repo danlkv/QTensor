@@ -1,4 +1,5 @@
 import numpy as np
+import qtree
 from qtree.optimizer import Tensor
 
 def permute_np_tensor_data(data:np.ndarray, indices_in, indices_out):
@@ -47,3 +48,33 @@ def slice_numpy_tensor(data:np.ndarray, indices_in, indices_out, slice_dict):
     assert len(indices_sliced) == len(s_data.shape)
     st_data = permute_np_tensor_data(s_data, indices_sliced, indices_out)
     return st_data, indices_out
+
+def get_einsum_expr(idx1, idx2, contract=0):
+    """
+    Takes two tuples of indices and returns an einsum expression
+    to evaluate the sum over repeating indices
+
+    Parameters
+    ----------
+    idx1 : list-like
+          indices of the first argument
+    idx2 : list-like
+          indices of the second argument
+
+    Returns
+    -------
+    expr : str
+          Einsum command to sum over indices repeating in idx1
+          and idx2.
+    """
+    result_indices = sorted(list(set(idx1 + idx2)), reverse=True)
+    # remap indices to reduce their order, as einsum does not like
+    # large numbers
+    idx_to_least_idx = {old_idx: new_idx for new_idx, old_idx
+                        in enumerate(result_indices)}
+    result_indices = result_indices[:len(result_indices)-contract]
+
+    str1 = ''.join(qtree.utils.num_to_alpha(idx_to_least_idx[ii]) for ii in idx1)
+    str2 = ''.join(qtree.utils.num_to_alpha(idx_to_least_idx[ii]) for ii in idx2)
+    str3 = ''.join(qtree.utils.num_to_alpha(idx_to_least_idx[ii]) for ii in result_indices)
+    return str1 + ',' + str2 + '->' + str3

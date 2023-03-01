@@ -3,18 +3,8 @@ import pytest
 import numpy as np
 from qtensor.contraction_backends import TorchBackend, NumpyBackend
 from qtensor import QtreeSimulator
+from qtensor.tests import get_test_qaoa_ansatz_circ
 torch = pytest.importorskip('torch')
-
-def get_test_qaoa_circ(n=10, p=2, d=3, type='random'):
-    G = qtensor.toolbox.random_graph(seed=10, degree=d, nodes=n, type=type)
-    print('Test problem: n, p, d', n, p, d)
-    gamma, beta = [np.pi/5]*p, [np.pi/2]*p
-
-    composer = qtensor.DefaultQAOAComposer(
-        graph=G, gamma=gamma, beta=beta)
-    composer.ansatz_state()
-    return composer.circuit
-
 
 def get_test_qaoa_tn(n=10, p=2, d=3, type='random'):
     G = qtensor.toolbox.random_graph(seed=10, degree=d, nodes=n, type=type)
@@ -29,7 +19,7 @@ def get_test_qaoa_tn(n=10, p=2, d=3, type='random'):
 
 
 def test_simulation():
-    circ = get_test_qaoa_circ(p=3)
+    circ = get_test_qaoa_ansatz_circ(p=3)
     btr = TorchBackend()
     bnp = NumpyBackend()
     simtr = QtreeSimulator(backend=btr)
