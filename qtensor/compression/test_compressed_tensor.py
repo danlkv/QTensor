@@ -51,6 +51,7 @@ def test_slice_tensor():
                              ((2, 3, 4), CUSZCompressor(), np.complex128),
                              ((2,)*20, CUSZCompressor(), np.float32),
                              ((2,)*20, CUSZCompressor(), np.complex64),
+                             # Not supported:
                              #((2,)*20, CUSZCompressor(), np.float64)
                         ]
                         )

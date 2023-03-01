@@ -147,7 +147,7 @@ class CompressedTensor(Tensor):
             self._dtype = None
 
     @classmethod
-    def empty(cls, name, indices, slice_indices=[], compressor=Compressor(), dtype:type=NP_ARRAY_TYPE):
+    def empty(cls, name, indices, slice_indices=[], compressor=NumpyCompressor(), dtype:type=NP_ARRAY_TYPE):
         t = super().empty(name, indices, dtype)
         t.compressor = compressor
         if slice_indices:

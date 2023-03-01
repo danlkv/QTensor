@@ -5,6 +5,7 @@ import numpy as np
 
 
 def test_compressed_contract():
+    compressor = NumpyCompressor()
     A_ixs = [Var(x) for x in [8,7,6,5,4,3, 2]]
     A_comp = [Var(x) for x in [8, 7, 6]]
     B_ixs = [Var(x) for x in [10, 9, 3, 4, 2]]
@@ -28,15 +29,15 @@ def test_compressed_contract():
 
     res_ixs = list(set(A_ixs).union(B_ixs) - set(contract_ixs))
     res_ixs.sort(key=int, reverse=True)
-    res = compressed_contract(A, B, res_ixs, contract_ixs,
-                              mem_limit=3)
+    res = compressed_contract(A, B, contract_ixs,
+                              mem_limit=3, compressor=compressor)
     print(f"Resulting Tensor: {res}")
 
-    res = compressed_contract(A, B, res_ixs, contract_ixs,
-                              mem_limit=10)
+    res = compressed_contract(A, B, contract_ixs,
+                              mem_limit=10, compressor=compressor)
 
     print(f"Resulting Tensor: {res}")
-    print(res.get_chunk(()).flatten())
+    print(res.data.flatten())
 
 
     A_str = ''.join(chr(97+int(v)) for v in A_ixs)
@@ -47,7 +48,7 @@ def test_compressed_contract():
     print(f"Ground truth:")
     print( C.flatten())
     
-    assert np.allclose(C, res.get_chunk(()))
+    assert np.allclose(C, res.data)
     print("Success!")
 
 def test_compressed_sum():
