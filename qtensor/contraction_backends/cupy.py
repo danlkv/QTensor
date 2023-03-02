@@ -103,7 +103,7 @@ class CuPyBackend(ContractionBackend):
                 data, new_indices = slice_numpy_tensor(data, tensor.indices, out_indices, slice_dict)
                 # transpose indices
                 try:
-                    data = cp.asarray(data)
+                    data = cp.asarray(data, dtype=cp.complex64)
                 except:
                     print("CuPy Backend doesn't support gradient.")
 

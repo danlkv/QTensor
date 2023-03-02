@@ -189,11 +189,40 @@ class SlicesOptimizer(Optimizer):
         # tw = log(cost/16) = log(cost) - 4
         return int(np.log2(avail)) - 4
 
-    def _update_peo_after_slice(self, p_graph):
+    def _update_peo_after_slice(self, p_graph, slice_vars):
         if self.peo_after_slice_strategy == 'run-again':
             peo_ints, path = self.base_ordering.get_ordering_ints(p_graph)
         elif self.peo_after_slice_strategy == 'TD-reuse':
-            pass
+            # Remove sliced vars from TD graph. Then, reconstruct peo from this TD
+            peo_old = self.peo_ints
+            peo_ints = [i for i in peo_old if i not in slice_vars]
+            nodes, path = qtensor.utils.get_neighbors_path(p_graph, peo_ints)
+            # -- Tree re-peo
+            g_components = list(nx.connected_components(p_graph))
+            print(f"# of components: {len(g_components)}, # of nodes total: {p_graph.number_of_nodes()}, # of nodes per component: {[len(c) for c in g_components]}")
+            from qtree.graph_model.clique_trees import (
+                get_tree_from_peo, get_peo_from_tree)
+            tree = get_tree_from_peo(p_graph, peo_ints)
+            clique_vertices = []
+            print("Calling get_peo_from_tree")
+            # ---- re-create peo from tree
+            peo_recreate = []
+            components = list(nx.connected_components(tree))
+            print("# of components: ", len(components))
+            for subtree in components:
+                peo_recreate += get_peo_from_tree(tree.subgraph(subtree).copy(), clique_vertices=clique_vertices)
+            # ----
+            nodes, path_recreate = qtensor.utils.get_neighbors_path(p_graph, peo_recreate)
+            log.info(f"Re-created peo width from tree: {max(path_recreate)}")
+            if max(path_recreate) < max(path):
+                log.info("Re-created peo is better than old peo. Using new peo.")
+                peo_ints = peo_recreate
+                path = path_recreate
+            # --
+
+        else:
+            raise ValueError('Unknown peo_after_slice_strategy: {}'
+                             .format(self.peo_after_slice_strategy))
 
         self.peo_ints = peo_ints
         self.treewidth = max(path)
@@ -206,7 +235,7 @@ class SlicesOptimizer(Optimizer):
             #nodes, path = utils.get_neighbors_path(graph, peo=peo_ints)
             tw = self.treewidth
             if tw < max_tw:
-                log.info('Found parvars: {}', searcher.result)
+                log.info(f'Found {len(searcher.result)} parvars: {searcher.result}')
                 break
             if self.max_slice is not None:
                 if len(searcher.result) > self.max_slice:
@@ -218,7 +247,7 @@ class SlicesOptimizer(Optimizer):
                 log.error('Memory is not enough. Max tw: {}', max_tw)
                 raise Exception('Estimated OOM')
 
-            self._update_peo_after_slice(p_graph)
+            self._update_peo_after_slice(p_graph, searcher.result)
 
         return self.peo_ints, searcher.result
 
@@ -323,7 +352,7 @@ class TreeTrimSplitter(SlicesOptimizer):
             pv_cnt = len(result)
             log.info('Parvars count: {}. Amps count: {}', pv_cnt, 2**pv_cnt)
 
-            peo_ints, path = self._update_peo_after_slice(p_graph)
+            peo_ints, path = self._update_peo_after_slice(p_graph, result)
             tw = max(path)
             self._slice_hist.append([pv_cnt, tw])
             delta = tw - max_tw

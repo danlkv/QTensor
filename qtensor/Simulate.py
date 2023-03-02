@@ -131,10 +131,10 @@ class QtreeSimulator(Simulator):
         self.peo = [identity_map[int(i)] for i in self.peo]
 
 
-        self._reorder_buckets()
+        perm_dict = self._reorder_buckets()
         slice_dict = self._get_slice_dict()
+        slice_extension = {perm_dict[k]: v for k, v in slice_extension.items()}
         slice_dict.update(slice_extension)
-        #log.info('batch slice {}', slice_dict)
 
         sliced_buckets = self.tn.slice(slice_dict)
         #self.backend.pbar.set_total ( len(sliced_buckets))
