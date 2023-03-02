@@ -15,7 +15,7 @@ from loguru import logger as log
 
 
 class Optimizer:
-    def _get_ordering_ints(self, graph, inplace=True):
+    def get_ordering_ints(self, graph, inplace=True):
         raise NotImplementedError
 
     def _get_ordering(self, graph: nx.Graph, inplace=True):
@@ -27,7 +27,7 @@ class Optimizer:
         """
         node_names = nx.get_node_attributes(graph, 'name')
         node_sizes = nx.get_node_attributes(graph, 'size')
-        peo, path = self._get_ordering_ints(graph, inplace=inplace)
+        peo, path = self.get_ordering_ints(graph, inplace=inplace)
         # compatibility with slicing
         self.peo_ints = [int(x) for x in peo]
 
@@ -69,7 +69,7 @@ class Optimizer:
 
 class WithoutOptimizer(Optimizer):
 
-    def _get_ordering_ints(self, graph, inplace=True):
+    def get_ordering_ints(self, graph, inplace=True):
         peo = sorted([int(v) for v in graph.nodes()])
         # magic line
         peo = list(reversed(peo))
@@ -77,7 +77,7 @@ class WithoutOptimizer(Optimizer):
         return peo, path
 
 class GreedyOptimizer(Optimizer):
-    def _get_ordering_ints(self, graph, free_vars=[]):
+    def get_ordering_ints(self, graph, free_vars=[]):
         #mapping = {a:b for a,b in zip(graph.nodes(), reversed(list(graph.nodes())))}
         #graph = nx.relabel_nodes(graph, mapping)
         peo_ints, path = utils.get_neighbors_peo(graph)
@@ -188,7 +188,6 @@ class SlicesOptimizer(Optimizer):
         return int(np.log2(avail)) - 4
 
     def _split_graph(self, p_graph, max_tw):
-        peo_ints, path = self.base_ordering._get_ordering_ints(p_graph)
         searcher = GreedyParvars(p_graph)
         while True:
             #nodes, path = utils.get_neighbors_path(graph, peo=peo_ints)
@@ -207,22 +206,22 @@ class SlicesOptimizer(Optimizer):
                 log.error('Memory is not enough. Max tw: {}', max_tw)
                 raise Exception('Estimated OOM')
 
-            peo_ints, path = self.base_ordering._get_ordering_ints(p_graph)
+            self.peo_ints, path = self.base_ordering.get_ordering_ints(p_graph)
             self.treewidth = max(path)
 
-        return peo_ints, searcher.result
+        return self.peo_ints, searcher.result
 
     def optimize(self, tensor_net):
         peo, tn = super().optimize(tensor_net)
         return peo+self.parallel_vars, self.parallel_vars, tn
 
-    def _get_ordering_ints(self, graph, inplace=True):
+    def get_ordering_ints(self, graph, inplace=True):
         p_graph = copy.deepcopy(graph)
         max_tw = self._get_max_tw()
         log.info('Maximum treewidth: {}', max_tw)
         max_tw = max_tw - self.tw_bias
 
-        self.peo_ints, path = self.base_ordering._get_ordering_ints(p_graph)
+        self.peo_ints, path = self.base_ordering.get_ordering_ints(p_graph)
         self.treewidth = max(path)
         peo, par_vars = self._split_graph(p_graph, max_tw)
 
@@ -241,7 +240,7 @@ class TamakiOptimizer(Optimizer):
         self.wait_time = wait_time
         self.max_width = max_width
 
-    def _get_ordering_ints(self, graph, inplace=True):
+    def get_ordering_ints(self, graph, inplace=True):
         peo, tw = qtree.graph_model.peo_calculation.get_upper_bound_peo_pace2017_interactive(
                 graph, method="tamaki", max_time=self.wait_time, max_width=self.max_width)
         return peo, [tw]
@@ -249,7 +248,7 @@ class TamakiOptimizer(Optimizer):
     def _get_ordering(self, graph, inplace=True):
         node_names = nx.get_node_attributes(graph, 'name')
         node_sizes = nx.get_node_attributes(graph, 'size')
-        peo, path = self._get_ordering_ints(graph, inplace=inplace)
+        peo, path = self.get_ordering_ints(graph, inplace=inplace)
         peo = [qtree.optimizer.Var(var, size=node_sizes[var],
                         name=node_names[var])
                     for var in peo]
@@ -313,7 +312,7 @@ class TreeTrimSplitter(SlicesOptimizer):
             pv_cnt = len(result)
             log.info('Parvars count: {}. Amps count: {}', pv_cnt, 2**pv_cnt)
 
-            peo_ints, path = self.base_ordering._get_ordering_ints(p_graph)
+            peo_ints, path = self.base_ordering.get_ordering_ints(p_graph)
             tw = max(path)
             log.info('Treewidth: {}', tw)
             self._slice_hist.append([pv_cnt, tw])
