@@ -121,7 +121,7 @@ class QtreeSimulator(Simulator):
             self.peo = peo
         self._slice_relabel_buckets()
 
-    def _slice_relabel_buckets(self):
+    def _slice_relabel_buckets(self, slice_extension={}):
         """
         Relabels peo according to bucket indices.
         Assumes self.tn and self.peo exists
@@ -133,6 +133,7 @@ class QtreeSimulator(Simulator):
 
         self._reorder_buckets()
         slice_dict = self._get_slice_dict()
+        slice_dict.update(slice_extension)
         #log.info('batch slice {}', slice_dict)
 
         sliced_buckets = self.tn.slice(slice_dict)
