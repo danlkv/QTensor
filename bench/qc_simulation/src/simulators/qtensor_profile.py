@@ -72,8 +72,8 @@ def mean_mmax(x: list):
     return np.mean(x)
 
 def main():
-    Ns = [24]
-    p = 15
+    Ns = [30]
+    p = 10
     ordering_algo = 'greedy'
     repeats = 2
     top_K = 15
