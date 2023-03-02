@@ -58,56 +58,55 @@ class AdaptiveOptimizer(Optimizer):
         self.max_time = max_time
         self.opt_sim_ratio = opt_sim_ratio
 
-    def log_progress(self, rt,  opt, etime):
-        width = opt.treewidth
+    def log_progress(self, rt, opt, etime, width):
         opt_name = opt.__class__.__name__
         if hasattr(self, 'verbose'):
             print(f"Qtensor adaptive optimizer: Time={rt:.4f}, width={width}, optimizer={opt_name}, expected contraction time={etime}")
 
-    def optimize(self, tensor_net):
+    def get_ordering_ints(self, graph, inplace=False):
         start = time.time()
         naive = WithoutOptimizer()
         # first, optimize with naive ordering and check treewidth
-        res = naive.optimize(tensor_net)
+        peo, path = naive.get_ordering_ints(graph)
+        width = max(path)
 
-        e1 = expected_contraction_time(naive.treewidth)
-        self.log_progress(time.time()-start, naive, e1)
+        e1 = expected_contraction_time(width)
+        self.log_progress(time.time()-start, naive, e1, width)
 
         if not should_optimize_more(e1, time.time()-start, self.opt_sim_ratio):
-            self.treewidth = naive.treewidth
-            return res
+            return peo, path
 
 
         # Next, greedy
         opt = GreedyOptimizer()
-        res = opt.optimize(tensor_net)
+        peo, path = opt.get_ordering_ints(graph)
+        width = max(path)
 
-        e1 = expected_contraction_time(opt.treewidth)
-        self.log_progress(time.time()-start, opt, e1)
+        e1 = expected_contraction_time(width)
+        self.log_progress(time.time()-start, opt, e1, width)
 
         if not should_optimize_more(e1, time.time()-start, self.opt_sim_ratio):
-            self.treewidth = opt.treewidth
-            return res
+            return peo, path
 
 
         # Next, rgreedy
-        rgreedy_time = expected_contraction_time(opt.treewidth-1)
+        rgreedy_time = expected_contraction_time(width-1)
         while rgreedy_time<5:
             opt = RGreedyOptimizer(temp=.02, max_time=rgreedy_time)
-            res = opt.optimize(tensor_net)
+            peo, path = opt.get_ordering_ints(graph)
+            width = max(path)
 
-            e1 = expected_contraction_time(opt.treewidth)
-            self.log_progress(time.time()-start, opt, e1)
+            e1 = expected_contraction_time(width)
+            self.log_progress(time.time()-start, opt, e1, width)
 
             if not should_optimize_more(e1, time.time()-start, self.opt_sim_ratio):
-                self.treewidth = opt.treewidth
-                return res
+                return peo, path
 
-            rgreedy_time = expected_contraction_time(opt.treewidth-1)
+            rgreedy_time = expected_contraction_time(width-1)
 
         # Next, Tamaki
         max_simulatable = 32
-        width = min(max_simulatable, opt.treewidth-1)
+        target_width = min(max_simulatable, width-1)
         while True:
             # terminate if reached max time - 1. No sense in running tamaki for 1 second
             # at this scale.
@@ -115,7 +114,7 @@ class AdaptiveOptimizer(Optimizer):
             if spent_so_far > self.max_time:
                 print("Adaptive ordering algo exceeded budget of",
                       f"{self.max_time} seconds. Returning prematurely")
-                return res
+                return peo, path
             wait_time = min(
                 expected_contraction_time(width),
                 # reserve a second for tamaki overhead
@@ -124,29 +123,31 @@ class AdaptiveOptimizer(Optimizer):
             # Tamaki may fail to process very large graphs if the budget is too small
             wait_time += 1
 
-            opt = TamakiOptimizer(max_width=width, wait_time=wait_time)
+            opt = TamakiOptimizer(max_width=target_width, wait_time=wait_time)
             # Detect termination reason. 
             # If terminated because reached max_width, then reduce the width
             # Othervise need more time
             start_opt = time.time()
-            t_out = opt.optimize(tensor_net)
+            t_peo, t_path = opt.get_ordering_ints(graph)
+            t_width = max(t_path)
             opt_duration = time.time() - start_opt
             # Record result if it's better than what we already have
             # (Sometimes it can decrease if we are close to time budget)
-            if opt.treewidth <= width:
-                res = t_out
+            if t_width <= target_width:
+                peo = t_peo
+                path = t_path
+                width = t_width
 
-            self.treewidth = opt.treewidth
-            e1 = expected_contraction_time(opt.treewidth)
-            self.log_progress(time.time()-start, opt, e1)
+            e1 = expected_contraction_time(width)
+            self.log_progress(time.time()-start, opt, e1, width)
 
             if not should_optimize_more(e1, time.time() - start, self.opt_sim_ratio):
-                return res
+                return peo, path
 
             # Do not reduce target treewidth if failed to converge to the previous one.
             if opt_duration < wait_time - 1:
-                width = opt.treewidth - 1
+                target_width = width - 1
 
 
-        return res
+        return peo, path
 
