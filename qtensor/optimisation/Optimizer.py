@@ -165,10 +165,12 @@ class SlicesOptimizer(Optimizer):
 
     def __init__(self, tw_bias=2, max_tw=None, max_slice=None
                  , base_ordering='greedy'
+                 , peo_after_slice_strategy='run-again'
                  , **kwargs):
         self.tw_bias = tw_bias
         self.max_tw = max_tw
         self.max_slice = max_slice
+        self.peo_after_slice_strategy = peo_after_slice_strategy
         if isinstance(base_ordering, str):
             self.base_ordering = qtensor.toolbox.get_ordering_algo(base_ordering)
         else:
@@ -187,12 +189,22 @@ class SlicesOptimizer(Optimizer):
         # tw = log(cost/16) = log(cost) - 4
         return int(np.log2(avail)) - 4
 
+    def _update_peo_after_slice(self, p_graph):
+        if self.peo_after_slice_strategy == 'run-again':
+            peo_ints, path = self.base_ordering.get_ordering_ints(p_graph)
+        elif self.peo_after_slice_strategy == 'TD-reuse':
+            pass
+
+        self.peo_ints = peo_ints
+        self.treewidth = max(path)
+        log.info('Treewidth after slice: {}', self.treewidth)
+        return peo_ints, path
+
     def _split_graph(self, p_graph, max_tw):
         searcher = GreedyParvars(p_graph)
         while True:
             #nodes, path = utils.get_neighbors_path(graph, peo=peo_ints)
             tw = self.treewidth
-            log.info('Treewidth: {}', tw)
             if tw < max_tw:
                 log.info('Found parvars: {}', searcher.result)
                 break
@@ -206,8 +218,7 @@ class SlicesOptimizer(Optimizer):
                 log.error('Memory is not enough. Max tw: {}', max_tw)
                 raise Exception('Estimated OOM')
 
-            self.peo_ints, path = self.base_ordering.get_ordering_ints(p_graph)
-            self.treewidth = max(path)
+            self._update_peo_after_slice(p_graph)
 
         return self.peo_ints, searcher.result
 
@@ -312,14 +323,10 @@ class TreeTrimSplitter(SlicesOptimizer):
             pv_cnt = len(result)
             log.info('Parvars count: {}. Amps count: {}', pv_cnt, 2**pv_cnt)
 
-            peo_ints, path = self.base_ordering.get_ordering_ints(p_graph)
+            peo_ints, path = self._update_peo_after_slice(p_graph)
             tw = max(path)
-            log.info('Treewidth: {}', tw)
             self._slice_hist.append([pv_cnt, tw])
-
             delta = tw - max_tw
-            self.treewidth = tw
-
 
         return peo_ints, result
 
