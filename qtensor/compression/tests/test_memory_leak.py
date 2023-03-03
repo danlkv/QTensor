@@ -15,15 +15,18 @@ def free_compressed(ptr):
     cupy.cuda.runtime.free(decompressed_int.value)
 
 def test_leak():
-    N = 1024*1024*8 # 64MB
+    N = 1024*1024//2 # 32MB
     a = cupy.zeros(N, dtype=float)
-    a[::1024] = .1
+    a[::1024] = .01
+    for i in range(1000):
+        a[32*i] = .005*(i%5+1)
 
-    c = CUSZCompressor()
-    for i in range(100):
+    c = CUSZCompressor(r2r_error=1e-2, r2r_threshold=1e-2)
+    for i in range(200):
         out = c.compress(a)
-        print(i, "Compressed size", c.compress_size(out)/1024**2, "MB")
+        print(i, "Compression ratio", 4*N/c.compress_size(out))
         b = c.decompress(out)
+        a[:] = b
         print(i, "Decompressed, 0, 1024", b[0], b[1024])
         c.free_decompressed()
         free_compressed(out)
