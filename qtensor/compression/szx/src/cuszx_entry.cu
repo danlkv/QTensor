@@ -617,6 +617,12 @@ unsigned char* device_ptr_cuSZx_compress_float(float *oriData, size_t *outSize, 
     // free(meta);
     // free(offsets);
     // free(midBytes);
+    checkCudaErrors(cudaFree(d_num_sig));
+    checkCudaErrors(cudaFree(d_blk_idx));
+    checkCudaErrors(cudaFree(d_blk_subidx));
+    checkCudaErrors(cudaFree(d_blk_vals));
+    checkCudaErrors(cudaFree(d_blk_sig));
+
     checkCudaErrors(cudaFree(d_meta));
     checkCudaErrors(cudaFree(d_offsets));
     checkCudaErrors(cudaFree(d_midBytes));
