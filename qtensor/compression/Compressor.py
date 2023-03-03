@@ -21,11 +21,74 @@ class Compressor():
     def decompress(self, ptr):
         raise NotImplementedError
 
+    def compress_size(self, ptr):
+        return ptr.nbytes
+
+# -- Debugging and profiling
+
+import time
+from dataclasses import dataclass
+@dataclass
+class CompressMeasure:
+    time: float = 0
+    size_in: int = 0
+    size_out: int = 0
+    label: str = ''
+
+    def __str__(self):
+        compress_ratio = self.size_in / self.size_out
+        return (f'Measure: {self.time:.3f}s, '
+                f'{self.size_in/1024**2:.2f}MB -> {self.size_out/1024**2:.2f}MB ({compress_ratio:.3f} in/out ratio)'
+        )
+
+class ProfileCompressor(Compressor):
+    def __init__(self, compressor:Compressor, trace=True):
+        self.trace = trace
+        self.compressor = compressor
+        self.profile_data = {'compress': [], 'decompress': []}
+
+    def compress(self, data):
+        start = time.time()
+        ptr = self.compressor.compress(data)
+        end = time.time()
+        out_size = self.compressor.compress_size(ptr)
+        cmeasure = CompressMeasure(end-start, data.nbytes, out_size)
+        self.profile_data['compress'].append(cmeasure)
+        if self.trace:
+            print(f'Compress: {cmeasure}')
+        return ptr
+
+    def decompress(self, ptr):
+        start = time.time()
+        data = self.compressor.decompress(ptr)
+        end = time.time()
+        in_size = self.compressor.compress_size(ptr)
+        dmeasure = CompressMeasure(end-start, in_size, data.nbytes)
+        self.profile_data['decompress'].append(dmeasure)
+        if self.trace:
+            print(f'Decompress: {dmeasure}')
+        return data
+
+    def get_profile_data(self):
+        return self.profile_data['compress'], self.profile_data['decompress']
+
+    def get_profile_stats(self):
+        compress, decompress = self.get_profile_data()
+        compress_time = sum([x.time for x in compress])
+        decompress_time = sum([x.time for x in decompress])
+        compress_ratios = np.mean([x.size_in/x.size_out for x in compress])
+        compress_size = sum([x.size_out for x in compress])
+        return compress_time, decompress_time, compress_size, compress_ratios
+# --
+
 class NumpyCompressor(Compressor):
     def compress(self, data):
         comp = io.BytesIO()
         np.savez_compressed(comp, data)
         return comp
+
+    def compress_size(self, ptr):
+        return ptr.getbuffer().nbytes
 
     def decompress(self, ptr):
         ptr.seek(0)
@@ -35,6 +98,25 @@ class CUSZCompressor(Compressor):
     def __init__(self, r2r_error=1e-3, r2r_threshold=1e-3):
         self.r2r_error = r2r_error
         self.r2r_threshold = r2r_threshold
+        self.decompressed_own = []
+
+    def free_decompressed(self):
+        import cupy
+        print("Cleanup", len(self.decompressed_own))
+        for x in self.decompressed_own:
+            print("CUDA Free", x)
+            cupy.cuda.runtime.free(x)
+        self.decompressed_own = []
+
+    def free_compressed(self, ptr):
+        import ctypes, cupy
+        cmp_bytes, num_elements_eff, isCuPy, shape, dtype, _ = ptr
+        p_decompressed_ptr = ctypes.addressof(cmp_bytes)
+        # cast to int64 pointer
+        # (effectively converting pointer to pointer to addr to pointer to int64)
+        p_decompressed_int= ctypes.cast(p_decompressed_ptr, ctypes.POINTER(ctypes.c_uint64))
+        decompressed_int = p_decompressed_int.contents
+        cupy.cuda.runtime.free(decompressed_int.value)
 
     def compress(self, data):
         import cupy
@@ -49,12 +131,15 @@ class CUSZCompressor(Compressor):
 
         dtype = data.dtype
         cmp_bytes, outSize_ptr = self.cuszx_compress(isCuPy, data, num_elements_eff, self.r2r_error, self.r2r_threshold)
-        return (cmp_bytes, num_elements_eff, isCuPy, data.shape, dtype)
+        return (cmp_bytes, num_elements_eff, isCuPy, data.shape, dtype, outSize_ptr.contents.value)
+
+    def compress_size(self, ptr):
+        return ptr[5]
 
     def decompress(self, obj):
         import cupy
         import ctypes
-        cmp_bytes, num_elements_eff, isCuPy, shape, dtype = obj
+        cmp_bytes, num_elements_eff, isCuPy, shape, dtype, _ = obj
         decompressed_ptr = self.cuszx_decompress(isCuPy, cmp_bytes, num_elements_eff)
         # -- Workaround to convert GPU pointer to int
         p_decompressed_ptr = ctypes.addressof(decompressed_ptr)
@@ -63,6 +148,7 @@ class CUSZCompressor(Compressor):
         p_decompressed_int= ctypes.cast(p_decompressed_ptr, ctypes.POINTER(ctypes.c_uint64))
         decompressed_int = p_decompressed_int.contents
         # --
+        self.decompressed_own.append(decompressed_int.value)
         mem = cupy.cuda.UnownedMemory(decompressed_int.value, num_elements_eff, self, device_id=0)
         mem_ptr = cupy.cuda.memory.MemoryPointer(mem, 0)
         arr = cupy.ndarray(shape, dtype=dtype, memptr=mem_ptr)
