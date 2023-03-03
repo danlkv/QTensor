@@ -101,12 +101,12 @@ def compressed_contract(A:Tensor, B: Tensor,
     result_chunk_ixs = result_indices[-mem_limit:]
     print(f"Chunk indices: {result_chunk_ixs}, remove_compress: {remove_compress}")
     slice_dict = {}
+    chunk = np.empty(2**len(result_chunk_ixs), dtype=B.dtype)
+    chunk = chunk.reshape(*(v.size for v in result_chunk_ixs))
+    chunk = move_data(chunk)
     for r_i in iterate_indices(need_compressed):
         for ix, sl in zip(need_compressed, r_i):
             slice_dict[ix] = sl
-        chunk = np.empty(2**len(result_chunk_ixs), dtype=B.dtype)
-        chunk = chunk.reshape(*(v.size for v in result_chunk_ixs))
-        chunk = move_data(chunk)
         for irm in iterate_indices(remove_compress):
             for i, ival in zip(remove_compress, irm):
                 slice_dict[i] = ival#slice(ival, ival+1)
@@ -119,6 +119,12 @@ def compressed_contract(A:Tensor, B: Tensor,
             C_ixs = [v for v in result_chunk_ixs if v not in exist_compressed]
             C = Tensor('tmp', indices=C_ixs, data=chunk_view)
             contract_two_tensors(A_slice, B_slice, C)
+            # Free temp slices
+            #import cupy
+            #print("Flags", A_slice.data.flags, B_slice.data.flags, C.data.flags)
+            #cupy.cuda.runtime.free(A_slice.data.data.ptr)
+            #cupy.cuda.runtime.free(B_slice.data.data.ptr)
+            compressor.compressor.free_decompressed()
         if len(need_compressed)==0:
             R = Tensor(new_tensor_name, result_indices, data=chunk)
         else:
@@ -174,12 +180,12 @@ def compressed_sum(A:Tensor, sum_ixs,
     result_chunk_ixs = result_indices[-mem_limit:]
     print(f"Chunk indices: {result_chunk_ixs}, remove_compress: {remove_compress}")
     slice_dict = {}
+    chunk = np.empty(2**len(result_chunk_ixs), dtype=A.dtype)
+    chunk = chunk.reshape(*(v.size for v in result_chunk_ixs))
+    chunk = move_data(chunk)
     for r_i in iterate_indices(need_compressed):
         for ix, sl in zip(need_compressed, r_i):
             slice_dict[ix] = sl
-        chunk = np.empty(2**len(result_chunk_ixs), dtype=A.dtype)
-        chunk = chunk.reshape(*(v.size for v in result_chunk_ixs))
-        chunk = move_data(chunk)
         for irm in iterate_indices(remove_compress):
             for i, ival in zip(remove_compress, irm):
                 slice_dict[i] = ival#slice(ival, ival+1)
@@ -196,4 +202,5 @@ def compressed_sum(A:Tensor, sum_ixs,
             R = Tensor(new_tensor_name, result_indices, data=chunk)
         else:
             R.set_chunk(r_i, chunk)
+        compressor.compressor.free_decompressed()
     return R

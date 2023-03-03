@@ -72,6 +72,13 @@ class ProfileCompressor(Compressor):
     def get_profile_data(self):
         return self.profile_data['compress'], self.profile_data['decompress']
 
+    def get_profile_data_json(self):
+        compress, decompress = self.get_profile_data()
+        return {
+            'compress': [c.asdict() for c in compress],
+            'decompress': [c.asdict() for c in decompress],
+        }
+
     def get_profile_stats(self):
         compress, decompress = self.get_profile_data()
         compress_time = sum([x.time for x in compress])
