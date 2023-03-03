@@ -35,3 +35,9 @@ cat estimations/bris/cpu/*greedy*
 
 This shows how UNIX utilities are used to filter and present data. In SQL this would be something like
 `SELECT * FROM simulations WHERE ordering_algo="greedy"`. 
+
+## Filetypes
+
+- `.txt` - gate sequence as in GRCS
+- `.qasm` - openqasm file
+- `.jsonterms` - json file of QAOA terms (`src/circuit_gen/qaoa.py`)

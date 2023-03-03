@@ -17,7 +17,7 @@ def slice_greedy(graph, p_bunch, ordering_algo='greedy'):
     """ Slice greedy and inplece """
     orderer = qtn.toolbox.get_ordering_algo(ordering_algo)
     searcher = GreedyParvars(graph)
-    peo_ints, path = orderer._get_ordering_ints(graph)
+    peo_ints, path = orderer.get_ordering_ints(graph)
     for _ in range(p_bunch):
         error = searcher.step()
         pv_cnt = len(searcher.result)
@@ -104,7 +104,7 @@ class LateParOptimizer(Optimizer):
             # Room for optimization: do not copy graph
             sliced_graph = graph.copy()
             slice_vars = self.slicer(sliced_graph, p_bunch=p_bunch)
-            _peo, _path = self.orderer._get_ordering_ints(sliced_graph)
+            _peo, _path = self.orderer.get_ordering_ints(sliced_graph)
             step_tw = qtn.utils.n_neighbors(graph, node) + 1
             largest_tw = max(step_tw, largest_tw)
             _tw = max(largest_tw, max(_path))
@@ -145,7 +145,7 @@ class LateParOptimizer(Optimizer):
         else:
             current_graph = line_graph
 
-        current_ordering, tw_path = self.orderer._get_ordering_ints(current_graph)
+        current_ordering, tw_path = self.orderer.get_ordering_ints(current_graph)
         contraction_schedule = []
         log.info(f"Initial treewidth: {max(tw_path)}")
 

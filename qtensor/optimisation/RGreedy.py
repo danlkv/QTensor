@@ -34,7 +34,7 @@ class RGreedyOptimizer(GreedyOptimizer):
         #graph = nx.convert_node_labels_to_integers(graph)
         node_names = nx.get_node_attributes(graph, 'name')
         node_sizes = nx.get_node_attributes(graph, 'size')
-        peo, path = self._get_ordering_ints(graph)
+        peo, path = self.get_ordering_ints(graph)
 
         peo = [qtree.optimizer.Var(var, size=node_sizes[var],
                         name=node_names[var])
@@ -42,7 +42,7 @@ class RGreedyOptimizer(GreedyOptimizer):
         #print('tw=', max(path))
         return peo, path
 
-    def _get_ordering_ints(self, old_graph, free_vars=[]):
+    def get_ordering_ints(self, old_graph, free_vars=[]):
         best_peo = None
         best_width = np.inf
         best_widths = None
@@ -94,7 +94,7 @@ class RGreedyOptimizer(GreedyOptimizer):
 
 class RGreedyOptimizerNk(RGreedyOptimizer):
 
-    def _get_ordering_ints(self, old_graph, free_vars=[]):
+    def get_ordering_ints(self, old_graph, free_vars=[]):
         best_peo = None
         best_width = np.inf
         best_widths = None

@@ -1,5 +1,5 @@
 from qtensor.compression import CompressedTensor
-from qtensor.compression.CompressedTensor import NumpyCompressor, CUSZCompressor
+from qtensor.compression import NumpyCompressor, CUSZCompressor
 from qtree.optimizer import Var
 from qtree.system_defs import NP_ARRAY_TYPE
 import pytest

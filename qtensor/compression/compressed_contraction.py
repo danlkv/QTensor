@@ -158,7 +158,7 @@ def compressed_sum(A:Tensor, sum_ixs,
     # -- Early return: if no need to compress, do the regular contraction
     if len(need_compressed)==0 and len(exist_compressed)==0:
         C = Tensor.empty(new_tensor_name, result_indices)
-        sum_axes = [A.indices.index(i) for i in sum_ixs]
+        sum_axes = tuple([A.indices.index(i) for i in sum_ixs])
         C.data = A.data.sum(axis=sum_axes)
         return C
     # --

@@ -44,7 +44,8 @@ def slice_numpy_tensor(data:np.ndarray, indices_in, indices_out, slice_dict):
         i for sl, i in zip(slice_bounds, indices_in) if not isinstance(sl, int)
     ]
     indices_sized = [v.copy(size=size) for v, size in zip(indices_sliced, s_data.shape)]
-    assert len(indices_out) == len(s_data.shape)
+    indices_out = [v for v in indices_out if not isinstance(slice_dict.get(v, None), int)]
+    assert len(indices_sized) == len(s_data.shape)
     assert len(indices_sliced) == len(s_data.shape)
     st_data = permute_np_tensor_data(s_data, indices_sliced, indices_out)
     return st_data, indices_out

@@ -98,43 +98,17 @@ class CuPyBackend(ContractionBackend):
                 # transpose_order = np.argsort(list(map(int, tensor.indices)))
                 # cp.argsort requires input to be cp array
                 #print(tensor.indices)
-                transpose_order = cp.argsort(cp.asarray(list(map(int, tensor.indices)))).tolist()
-                transpose_order = list(reversed(transpose_order))
-                
-                '''
-                Change 2:
-                Original: Data is all converted into torch.tensor and use torch api, the results are in torch
-                New:      Convert all data to CuPy.ndarray, will raise exceptional signal
-                '''
+                out_indices = list(sorted(tensor.indices, key=int, reverse=True))
                 data = data_dict[tensor.data_key]
+                data, new_indices = slice_numpy_tensor(data, tensor.indices, out_indices, slice_dict)
+                # transpose indices
                 try:
-                    data = cp.asarray(data)
-                    data = data.transpose(tuple(transpose_order))
+                    data = cp.asarray(data, dtype=cp.complex64)
                 except:
                     print("CuPy Backend doesn't support gradient.")
-                
-                # transpose indices
-                indices_sorted = [tensor.indices[pp]
-                                  for pp in transpose_order]
-
-                # slice data
-                slice_bounds = []
-                for idx in indices_sorted:
-                    try:
-                        slice_bounds.append(slice_dict[idx])
-                    except KeyError:
-                        slice_bounds.append(slice(None))
-
-                data = data[tuple(slice_bounds)]
-
-                # update indices
-                indices_sliced = [idx.copy(size=size) for idx, size in
-                                  zip(indices_sorted, data.shape)]
-                indices_sliced = [i for sl, i in zip(slice_bounds, indices_sliced) if not isinstance(sl, int)]
-                assert len(data.shape) == len(indices_sliced)
 
                 sliced_bucket.append(
-                    tensor.copy(indices=indices_sliced, data=data))
+                    tensor.copy(indices=new_indices, data=data))
             sliced_buckets.append(sliced_bucket)
 
         return sliced_buckets
