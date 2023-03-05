@@ -40,6 +40,24 @@ __host__ __device__ size_t convert_state_to_out(unsigned char* meta, size_t leng
     return out_length;
 }
 
+__global__ void convert_state_to_out_kernel(unsigned char* meta, size_t length, unsigned char *result, size_t out_length){
+    
+
+    for (int i = blockDim.x*blockIdx.x + threadIdx.x; i < out_length; i += blockDim.x*gridDim.x){
+        uint8_t tmp = 0;
+
+        for (size_t j = 0; j < 4; j++)
+        {
+            if (i*4 + j < length)
+            {
+                tmp |= (0x03 & meta[i*4+j]) << 2*j;
+            }
+            
+        }
+        result[i] = tmp;
+    }
+}
+
 // nbBlocks, r, stateNBBytes, stateArray
 __host__ __device__ size_t convert_out_to_state(size_t nbBlocks, unsigned char* cmp, unsigned char* out_state){
     size_t state_length;
@@ -64,6 +82,7 @@ __host__ __device__ size_t convert_out_to_state(size_t nbBlocks, unsigned char* 
 
 __host__ __device__ size_t convert_block2_to_out(unsigned char *result, uint32_t numBlocks, uint64_t num_sig, uint32_t *blk_idx, float *blk_vals, uint8_t *blk_subidx, uint8_t *blk_sig){
     size_t out_length = 0;
+    
     memcpy(result, blk_idx, numBlocks*sizeof(uint32_t));
     out_length += numBlocks*4;
     memcpy(result+out_length, blk_vals, num_sig*sizeof(float));
@@ -74,6 +93,49 @@ __host__ __device__ size_t convert_block2_to_out(unsigned char *result, uint32_t
     out_length+= numBlocks*sizeof(uint8_t);
 
     return out_length;
+}
+
+__global__ void convert_block2_to_out_kernel(unsigned char *result, uint32_t numBlocks, uint64_t num_sig, uint32_t *blk_idx, float *blk_vals, uint8_t *blk_subidx, uint8_t *blk_sig){
+    
+    size_t out_length = 0;
+    unsigned char *tmp_result = result;
+    for (int i = blockDim.x*blockIdx.x + threadIdx.x; i < numBlocks; i += blockDim.x*gridDim.x){
+        uint32_t local_blkidx = blk_idx[i];
+        tmp_result[4*i] = (local_blkidx) & 0xff;
+        tmp_result[4*i+1] = (local_blkidx >> (8*1)) & 0xff;
+        tmp_result[4*i+2] = (local_blkidx >> (8*2)) & 0xff;
+        tmp_result[4*i+3] = (local_blkidx >> (8*3)) & 0xff;
+    }
+    // memcpy(result, blk_idx, numBlocks*sizeof(uint32_t));
+    out_length += numBlocks*4;
+    tmp_result = result+out_length;
+    
+    for (int i = blockDim.x*blockIdx.x + threadIdx.x; i < num_sig; i += blockDim.x*gridDim.x){
+        float value = blk_vals[i];
+        tmp_result[4*i] = (value) & 0xff;
+        tmp_result[4*i+1] = (value >> (8*1)) & 0xff;
+        tmp_result[4*i+2] = (value >> (8*2)) & 0xff;
+        tmp_result[4*i+3] = (value >> (8*3)) & 0xff;
+    }
+    // memcpy(result+out_length, blk_vals, num_sig*sizeof(float));
+    out_length += num_sig*sizeof(float);
+    tmp_result = result+out_length;
+    
+    for (int i = blockDim.x*blockIdx.x + threadIdx.x; i < num_sig; i += blockDim.x*gridDim.x){
+        tmp_result[i] = blk_subidx[i];
+        
+    }
+
+    out_length += num_sig*sizeof(uint8_t);
+    tmp_result = result+out_length;
+    
+    for (int i = blockDim.x*blockIdx.x + threadIdx.x; i < numBlocks; i += blockDim.x*gridDim.x){
+        tmp_result[i] = blk_sig[i];
+        
+    }
+    out_length+= numBlocks*sizeof(uint8_t);
+
+    // return out_length;
 }
 
 __host__ __device__ size_t convert_out_to_block2(unsigned char *in_cmp, uint32_t numBlocks, uint64_t num_sig, uint32_t *blk_idx, float *blk_vals, uint8_t *blk_subidx, uint8_t *blk_sig){
@@ -420,6 +482,20 @@ __device__ inline void longToBytes_bigEndian_d(unsigned char *b, unsigned long n
 //		symTransform_8bytes(*b);
 }
 
+inline void longToBytes_bigEndian_memset(unsigned char *b, unsigned long num) 
+{
+    checkCudaErrors(cudaMemset(&b[0], (unsigned char)(num>>56), sizeof(char)));
+    checkCudaErrors(cudaMemset(&b[1], (unsigned char)(num>>48), sizeof(char)));
+    checkCudaErrors(cudaMemset(&b[2], (unsigned char)(num>>40), sizeof(char)));
+    checkCudaErrors(cudaMemset(&b[3], (unsigned char)(num>>32), sizeof(char)));
+    checkCudaErrors(cudaMemset(&b[4], (unsigned char)(num>>24), sizeof(char)));
+    checkCudaErrors(cudaMemset(&b[5], (unsigned char)(num>>16), sizeof(char)));
+    checkCudaErrors(cudaMemset(&b[6], (unsigned char)(num>>8), sizeof(char)));
+    checkCudaErrors(cudaMemset(&b[7], (unsigned char)(num), sizeof(char)));
+//	if(dataEndianType==LITTLE_ENDIAN_DATA)
+//		symTransform_8bytes(*b);
+}
+
 __device__ inline void shortToBytes_d(unsigned char* b, short value)
 {
 	lint16 buf;
@@ -427,7 +503,125 @@ __device__ inline void shortToBytes_d(unsigned char* b, short value)
 	memcpy(b, buf.byte, 2);
 }
 
-__global__ void device_post_proc(size_t *outSize, float *oriData, unsigned char *meta, short *offsets, unsigned char *midBytes, unsigned char *outBytes, size_t nbEle, int blockSize, uint64_t num_sig, uint32_t *blk_idx, float *blk_vals, uint8_t *blk_subidx, uint8_t *blk_sig)
+__global__ void getNumNonConstantBlocks(size_t nbBlocks, short *offsets, unsigned char *meta, int blockSize, size_t *nonconstant, int *out_size){
+    for (int tid = blockDim.x*blockIdx.x + threadIdx.x; tid < nbBlocks; tid += blockDim.x*gridDim.x){
+        if (meta[tid] == 3){ 
+            atomicAdd(nonconstant, 1);
+            atomicAdd(out_size,1+(blockSize/4)+offsets[tid]);
+        }
+    }
+}
+
+__global__ void ncblkCopy(unsigned char * c, unsigned char* o, unsigned char *nc, unsigned char* midBytes, unsigned char* meta,
+                        size_t nbBlocks, int blockSize, short *offsets, size_t mSize)
+{
+    for (int i=blockDim.x*blockIdx.x + threadIdx.x; i<nbBlocks; i+=blockDim.x*gridDim.x){
+        
+        if (meta[i]==0 || meta[i] == 1){
+            memcpy(c, meta+(nbBlocks+i*mSize), sizeof(float));
+            c += sizeof(float);
+        }else if(meta[i] == 3){
+           shortToBytes_d(o, offsets[i]);
+            o += sizeof(short);
+            memcpy(nc, meta+(nbBlocks+i*mSize), mSize);
+            nc += mSize; 
+            memcpy(nc, midBytes+(i*blockSize*sizeof(float)), offsets[i]);
+            nc += offsets[i];
+        } 
+    }
+}
+
+void better_post_proc(size_t *outSize, float *oriData, unsigned char *meta, 
+                                short *offsets, unsigned char *midBytes, unsigned char *outBytes, 
+                                size_t nbEle, int blockSize, uint64_t num_sig, uint32_t *blk_idx, 
+                                float *blk_vals, uint8_t *blk_subidx, uint8_t *blk_sig){
+    /**
+     * outSize: host pointer
+     * float *oriData: device pointer
+     * unsigned char* meta: device pointer
+     * short *offsets: device pointer
+     * 
+     * 
+     */
+    int out_size_h = 0;
+    int *out_size_d;
+    int tmp_outsize = 0;
+
+    size_t nbConstantBlocks = 0;
+    size_t nbBlocks = nbEle/blockSize;
+    size_t ncBytes = blockSize/4;
+    size_t mSize = sizeof(float)+1+ncBytes; //Number of bytes for each data block's metadata.
+    out_size_h += 5+sizeof(size_t)+sizeof(float)*nbBlocks;
+    if (nbBlocks%8==0)
+        out_size_h += nbBlocks/8;
+    else
+        out_size_h += nbBlocks/8+1;
+
+    size_t *nonconstant_d, *nonconstant_h;
+    
+    checkCudaErrors(cudaMalloc((void **)&nonconstant_d, sizeof(size_t)));
+    checkCudaErrors(cudaMalloc((void **)&out_size_d, sizeof(int)));
+
+    checkCudaErrors(cudaMemset(nonconstant_d, 0, sizeof(size_t)));
+    checkCudaErrors(cudaMemset(out_size_d, 0, sizeof(int)));
+
+
+    getNumNonConstantBlocks<<<40,64>>>(nbBlocks, offsets, meta, blockSize, nonconstant_d, out_size_d);
+    cudaDeviceSynchronize();
+
+    checkCudaErrors(cudaMemcpy(nonconstant_h, nonconstant_d, sizeof(size_t), cudaMemcpyDeviceToHost));
+    checkCudaErrors(cudaMemcpy(&tmp_outsize, out_size_d, sizeof(int), cudaMemcpyDeviceToHost));
+
+    nbConstantBlocks = nbBlocks - nonconstant_h;
+    out_size_h+=tmp_outsize;
+
+    out_size_h += (nbBlocks-nbConstantBlocks)*sizeof(short)+(nbEle%blockSize)*sizeof(float);
+
+    //outBytes = (unsigned char*)malloc(out_size);
+	unsigned char* r = outBytes;
+    unsigned char* r_old = outBytes;
+    checkCudaErrors(cudaMemset(r, SZx_VER_MAJOR, sizeof(char)));
+    checkCudaErrors(cudaMemset(r+1, SZx_VER_MINOR, sizeof(char)));
+    checkCudaErrors(cudaMemset(r+2, 1, sizeof(char)));
+    checkCudaErrors(cudaMemset(r+3, 0, sizeof(char)));
+    checkCudaErrors(cudaMemset(r+4, blockSize, sizeof(char)));
+
+	r=r+5; //1 byte
+	//sizeToBytes(r, nbConstantBlocks);
+    longToBytes_bigEndian_memset(r, nbConstantBlocks);
+	r += sizeof(size_t);
+    //sizeToBytes(r, (size_t) num_sig);
+    longToBytes_bigEndian_memset(r, (unsigned long)num_sig);
+    r += sizeof(size_t); 
+    size_t out_length;
+
+    if(nbBlocks%4==0)
+		out_length = nbBlocks/4;
+	else
+		out_length = nbBlocks/4+1;
+
+    convert_state_to_out_kernel<<<20,256>>>(meta, nbBlocks, r, out_length);
+    r+=out_length;
+    convert_block2_to_out_kernel<<<20,256>>>(r, nbBlocks,num_sig, blk_idx, blk_vals, blk_subidx, blk_sig);
+    r += nbBlocks*4 + num_sig*sizeof(float) + num_sig*sizeof(uint8_t) + nbBlocks*sizeof(uint8_t);
+
+    checkCudaErrors(cudaMemcpy(r, oriData+nbBlocks*blockSize, (nbEle%blockSize)*sizeof(float), cudaMemcpyDeviceToDevice));
+    // memcpy(r, oriData+nbBlocks*blockSize, (nbEle%blockSize)*sizeof(float));
+    r += (nbEle%blockSize)*sizeof(float);
+    unsigned char* c = r;
+    unsigned char* o = c+nbConstantBlocks*sizeof(float);
+    unsigned char* nc = o+(nbBlocks-nbConstantBlocks)*sizeof(short);
+    ncblkCopy<<<20,256>>>(c, o, nc, midBytes, meta,nbBlocks, blockSize, offsets, mSize);
+    cudaDeviceSynchronize();
+    checkCudaErrors(cudaMemset(outSize, (size_t)nc-r_old, sizeof(size_t)));
+    // *outSize = (size_t) (nc-r_old);
+    return outBytes;
+}
+
+__global__ void device_post_proc(size_t *outSize, float *oriData, unsigned char *meta, 
+                                short *offsets, unsigned char *midBytes, unsigned char *outBytes, 
+                                size_t nbEle, int blockSize, uint64_t num_sig, uint32_t *blk_idx, 
+                                float *blk_vals, uint8_t *blk_subidx, uint8_t *blk_sig)
 {
     int out_size = 0;
 
@@ -494,7 +688,7 @@ __global__ void device_post_proc(size_t *outSize, float *oriData, unsigned char 
     }
 
     // return out_size;
-    *outSize = (uint32_t) (nc-r_old);
+    *outSize = (size_t) (nc-r_old);
    // printf("outBytes 0 %d\n", (int) outBytes[0]);
     // return (uint32_t) (nc-r_old);
 }
@@ -508,6 +702,7 @@ unsigned char* device_ptr_cuSZx_compress_float(float *oriData, size_t *outSize, 
      *  unsigned char* outBytes
      * 
      */
+    timer_GPU.StartCounter();
 
     float sparsity_level = SPARSITY_LEVEL;
 
@@ -561,16 +756,17 @@ unsigned char* device_ptr_cuSZx_compress_float(float *oriData, size_t *outSize, 
     checkCudaErrors(cudaMalloc((void**)&d_midBytes, mbsz)); 
     checkCudaErrors(cudaMemset(d_midBytes, 0, mbsz));
 
-    timer_GPU.StartCounter();
+    
     // apply_threshold<<<80,256>>>(d_oriData, threshold, nbEle);
     // cudaDeviceSynchronize();
     dim3 dimBlock(32, blockSize/32);
     dim3 dimGrid(65536, 1);
     const int sMemsize = blockSize * sizeof(float) + dimBlock.y * sizeof(int);
+    printf("Malloc end timestamp: %f ms\n", timer_GPU.GetCounter());
     compress_float<<<dimGrid, dimBlock, sMemsize>>>(d_oriData, d_meta, d_offsets, d_midBytes, absErrBound, blockSize, nbBlocks, mSize, sparsity_level, d_blk_idx, d_blk_subidx,d_blk_vals, threshold, d_blk_sig);
     cudaError_t err = cudaGetLastError();        // Get error code
     printf("CUDA Error: %s\n", cudaGetErrorString(err));
-    printf("GPU compression timing: %f ms\n", timer_GPU.GetCounter());
+    printf("GPU compression timestamp: %f ms\n", timer_GPU.GetCounter());
     cudaDeviceSynchronize();
     get_numsig<<<1,1>>>(d_num_sig);
     cudaDeviceSynchronize();
@@ -605,9 +801,10 @@ unsigned char* device_ptr_cuSZx_compress_float(float *oriData, size_t *outSize, 
 
     checkCudaErrors(cudaMalloc(&d_outSize, sizeof(size_t)));
 
-    device_post_proc<<<1,1>>>(d_outSize, d_oriData, d_meta, d_offsets, d_midBytes, d_outBytes, nbEle, blockSize, *num_sig, d_blk_idx, d_blk_vals, d_blk_subidx, d_blk_sig);
-
-    cudaDeviceSynchronize();
+    // device_post_proc<<<1,1>>>(d_outSize, d_oriData, d_meta, d_offsets, d_midBytes, d_outBytes, nbEle, blockSize, *num_sig, d_blk_idx, d_blk_vals, d_blk_subidx, d_blk_sig);
+    better_post_proc(d_outSize, d_oriData, d_meta, d_offsets, d_midBytes, d_outBytes, nbEle, blockSize, *num_sig, d_blk_idx, d_blk_vals, d_blk_subidx, d_blk_sig);
+    // cudaDeviceSynchronize();
+    
     checkCudaErrors(cudaMemcpy(outSize, d_outSize, sizeof(size_t), cudaMemcpyDeviceToHost));
 
     // printf("completed compression\n");
@@ -621,6 +818,7 @@ unsigned char* device_ptr_cuSZx_compress_float(float *oriData, size_t *outSize, 
     checkCudaErrors(cudaFree(d_offsets));
     checkCudaErrors(cudaFree(d_midBytes));
 //    printf("completed compression\n");
+    printf("Compression end timestamp: %f ms\n", timer_GPU.GetCounter());
     return d_outBytes;
 }
 
