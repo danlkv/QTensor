@@ -112,10 +112,12 @@ __global__ void convert_block2_to_out_kernel(unsigned char *result, uint32_t num
     
     for (int i = blockDim.x*blockIdx.x + threadIdx.x; i < num_sig; i += blockDim.x*gridDim.x){
         float value = blk_vals[i];
-        tmp_result[(int)4*i] = (unsigned char)((value) & 0xff);
-        tmp_result[(int)4*i+1] = (unsigned char)((value >> (8*1)) & 0xff);
-        tmp_result[(int)4*i+2] = (unsigned char)((value >> (8*2)) & 0xff);
-        tmp_result[(int)4*i+3] = (unsigned char)((value >> (8*3)) & 0xff);
+	memcpy(&tmp_result[4*i], &value, sizeof(float));
+	//unsigned char *v = ()
+        //tmp_result[(int)4*i] = (unsigned char)((value) & 0xff);
+        //tmp_result[(int)4*i+1] = (unsigned char)((value >> (8*1)) & 0xff);
+        //tmp_result[(int)4*i+2] = (unsigned char)((value >> (8*2)) & 0xff);
+        //tmp_result[(int)4*i+3] = (unsigned char)((value >> (8*3)) & 0xff);
     }
     // memcpy(result+out_length, blk_vals, num_sig*sizeof(float));
     out_length += num_sig*sizeof(float);
@@ -772,11 +774,11 @@ unsigned char* device_ptr_cuSZx_compress_float(float *oriData, size_t *outSize, 
     dim3 dimBlock(32, blockSize/32);
     dim3 dimGrid(65536, 1);
     const int sMemsize = blockSize * sizeof(float) + dimBlock.y * sizeof(int);
-    printf("Malloc end timestamp: %f ms\n", timer_GPU.GetCounter());
+    //printf("Malloc end timestamp: %f ms\n", timer_GPU.GetCounter());
     compress_float<<<dimGrid, dimBlock, sMemsize>>>(d_oriData, d_meta, d_offsets, d_midBytes, absErrBound, blockSize, nbBlocks, mSize, sparsity_level, d_blk_idx, d_blk_subidx,d_blk_vals, threshold, d_blk_sig);
     cudaError_t err = cudaGetLastError();        // Get error code
-    printf("CUDA Error: %s\n", cudaGetErrorString(err));
-    printf("GPU compression timestamp: %f ms\n", timer_GPU.GetCounter());
+   // printf("CUDA Error: %s\n", cudaGetErrorString(err));
+    //printf("GPU compression timestamp: %f ms\n", timer_GPU.GetCounter());
     cudaDeviceSynchronize();
     get_numsig<<<1,1>>>(d_num_sig);
     cudaDeviceSynchronize();
@@ -811,11 +813,11 @@ unsigned char* device_ptr_cuSZx_compress_float(float *oriData, size_t *outSize, 
 
     checkCudaErrors(cudaMalloc(&d_outSize, sizeof(size_t)));
 
-    // device_post_proc<<<1,1>>>(d_outSize, d_oriData, d_meta, d_offsets, d_midBytes, d_outBytes, nbEle, blockSize, *num_sig, d_blk_idx, d_blk_vals, d_blk_subidx, d_blk_sig);
+   // device_post_proc<<<1,1>>>(d_outSize, d_oriData, d_meta, d_offsets, d_midBytes, d_outBytes, nbEle, blockSize, *num_sig, d_blk_idx, d_blk_vals, d_blk_subidx, d_blk_sig);
     *outSize = better_post_proc(d_outSize, d_oriData, d_meta, d_offsets, d_midBytes, d_outBytes, nbEle, blockSize, *num_sig, d_blk_idx, d_blk_vals, d_blk_subidx, d_blk_sig);
-    // cudaDeviceSynchronize();
+    //cudaDeviceSynchronize();
     
-    // checkCudaErrors(cudaMemcpy(outSize, d_outSize, sizeof(size_t), cudaMemcpyDeviceToHost));
+    //checkCudaErrors(cudaMemcpy(outSize, d_outSize, sizeof(size_t), cudaMemcpyDeviceToHost));
 
     // printf("completed compression\n");
     //free(blk_idx);
@@ -835,6 +837,8 @@ unsigned char* device_ptr_cuSZx_compress_float(float *oriData, size_t *outSize, 
     checkCudaErrors(cudaFree(d_midBytes));
 //    printf("completed compression\n");
     printf("Compression end timestamp: %f ms\n", timer_GPU.GetCounter());
+    
+    printf("CUDA Error: %s\n", cudaGetErrorString(err));
     return d_outBytes;
 }
 
