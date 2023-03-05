@@ -112,10 +112,10 @@ __global__ void convert_block2_to_out_kernel(unsigned char *result, uint32_t num
     
     for (int i = blockDim.x*blockIdx.x + threadIdx.x; i < num_sig; i += blockDim.x*gridDim.x){
         float value = blk_vals[i];
-        tmp_result[4*i] = (unsigned char)((value) & 0xff);
-        tmp_result[4*i+1] = (unsigned char)((value >> (8*1)) & 0xff);
-        tmp_result[4*i+2] = (unsigned char)((value >> (8*2)) & 0xff);
-        tmp_result[4*i+3] = (unsigned char)((value >> (8*3)) & 0xff);
+        tmp_result[(int)4*i] = (unsigned char)((value) & 0xff);
+        tmp_result[(int)4*i+1] = (unsigned char)((value >> (8*1)) & 0xff);
+        tmp_result[(int)4*i+2] = (unsigned char)((value >> (8*2)) & 0xff);
+        tmp_result[(int)4*i+3] = (unsigned char)((value >> (8*3)) & 0xff);
     }
     // memcpy(result+out_length, blk_vals, num_sig*sizeof(float));
     out_length += num_sig*sizeof(float);
