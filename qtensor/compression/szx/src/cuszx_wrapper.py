@@ -2,9 +2,10 @@ import numpy as np
 import ctypes
 from ctypes import *
 import random
-import cupy as cp
+from qtensor.tools.lazy_import import cupy as cp
 
-LIB_PATH = './libcuszx_wrapper.so'
+from pathlib import Path
+LIB_PATH = str(Path(__file__).parent/'libcuszx_wrapper.so')
 
 # unsigned char* cuSZx_integrated_compress(float *data, float r2r_threshold, float r2r_err, size_t nbEle, int blockSize, size_t *outSize)
 
@@ -68,10 +69,11 @@ def cuszx_host_decompress(nbEle, cmpBytes):
 
 def cuszx_device_compress(oriData, absErrBound, nbEle, blockSize,threshold):
     __cuszx_device_compress = get_device_compress()
-
+    
     variable = ctypes.c_size_t(0)
     outSize = ctypes.pointer(variable)
-
+    absErrBound = absErrBound*(cp.amax(oriData.get())-cp.amin(oriData.get()))
+    threshold = threshold*(cp.amax(oriData.get())-cp.amin(oriData.get()))
     oriData_p = ctypes.cast(oriData.data.ptr, ctypes.POINTER(c_float))
     
     o_bytes = __cuszx_device_compress(oriData_p, outSize,np.float32(absErrBound), np.ulonglong(nbEle), np.int32(blockSize),np.float32(threshold))
@@ -94,9 +96,14 @@ if __name__ == "__main__":
     MAX_D = 10.0
     MIN_D = -10.0
     RANGE = MAX_D - MIN_D
-    r2r_threshold = 0.1
-    r2r_error = 0.1
+    r2r_threshold = 0.01
+    r2r_error = 0.01
 
+    #in_vector = np.fromfile("real_tensor_d26.f32", dtype=np.float32)
+    #print(np.max(in_vector))
+    #range_vr = np.max(in_vector)-np.min(in_vector)
+    #r2r_threshold = r2r_threshold*range_vr
+    #r2r_error = r2r_error*range_vr
     in_vector = np.zeros((DATA_SIZE,))
     for i in range(0,int(DATA_SIZE/4)):
         in_vector[i] = 0.0

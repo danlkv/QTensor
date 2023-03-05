@@ -1,5 +1,6 @@
 #from torch._C import device
 from .base_class import ContractionBackend
+from .common import slice_numpy_tensor
 from .numpy import NumpyBackend
 from .torch import TorchBackend
 from .cupy import CuPyBackend
@@ -10,11 +11,14 @@ from .transposed import TransposedBackend
 from .opt_einsum import OptEinusmBackend
 from .transpose_backend import NumpyTranspoedBackend, TorchTransposedBackend, CupyTransposedBackend, CutensorTransposedBackend
 from .performance_measurement_decorator import PerfNumpyBackend, PerfBackend, GPUPerfBackend
+from .compression import CompressionBackend
+from qtensor.compression import NumpyCompressor
 
 def get_backend(name):
     backend_dict = {
         'mkl': CMKLExtendedBackend,
         'einsum':NumpyBackend,
+        'numpy':NumpyBackend,
         'opt_einsum': OptEinusmBackend,
         'torch_cpu': TorchBackend,
         'torch_gpu': TorchBackend,
@@ -26,7 +30,14 @@ def get_backend(name):
         'tr_cupy': CupyTransposedBackend,
         'tr_cutensor': CutensorTransposedBackend
     }
-    if name in ["torch_gpu", "tr_torch"]:
+    # -- add compression backend
+    compression_suffix = '_compressed'
+    ix = name.find(compression_suffix)
+    if ix != -1:
+        backend = get_backend(name[:ix])
+        return CompressionBackend(backend, NumpyCompressor(), 30)
+
+    if name in ["torch_gpu", "torch_cpu"]:
         return backend_dict['torch'](device = name[-3:])
     else:
         return backend_dict[name]()

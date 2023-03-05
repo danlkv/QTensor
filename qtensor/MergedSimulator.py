@@ -110,7 +110,7 @@ class MergedSimulator(qtensor.QtreeSimulator):
         if dry_run:
             return peo, max(width)
 
-        result = qtensor.merged_indices.bucket_elimination(
+        result = qtensor.contraction_algos.merged_bucket_elimination(
             self.tn.buckets,
             self.ibunch,
             self.backend.process_bucket_merged,

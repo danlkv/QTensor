@@ -178,7 +178,7 @@ int _post_proc(float *oriData, unsigned char *meta, short *offsets, unsigned cha
     	if(meta[i]==2) s2++;
     	if(meta[i]==3) s3++;
     }
-    printf("%d %d %d %d\n", s0, s1, s2, s3);
+//    printf("%d %d %d %d\n", s0, s1, s2, s3);
     out_size += (nbBlocks-nbConstantBlocks)*sizeof(short)+(nbEle%blockSize)*sizeof(float);
 
     //outBytes = (unsigned char*)malloc(out_size);
@@ -647,11 +647,12 @@ __global__ void device_post_proc(size_t *outSize, float *oriData, unsigned char 
     	if(meta[i]==2) s2++;
     	if(meta[i]==3) s3++;
     }
-   // printf("%d %d %d %d\n", s0, s1, s2, s3);
+  //  printf("%d %d %d %d\n", s0, s1, s2, s3);
     out_size += (nbBlocks-nbConstantBlocks)*sizeof(short)+(nbEle%blockSize)*sizeof(float);
 
     //outBytes = (unsigned char*)malloc(out_size);
 	unsigned char* r = outBytes;
+   // printf("outbytes %p\n",r);
     unsigned char* r_old = outBytes; 
 	r[0] = SZx_VER_MAJOR;
 	r[1] = SZx_VER_MINOR;
@@ -663,12 +664,20 @@ __global__ void device_post_proc(size_t *outSize, float *oriData, unsigned char 
     longToBytes_bigEndian_d(r, nbConstantBlocks);
 	r += sizeof(size_t);
     //sizeToBytes(r, (size_t) num_sig);
+
+   // printf("outbytes %p\n",r);
     longToBytes_bigEndian_d(r, (unsigned long)num_sig);
     r += sizeof(size_t); 
 	r += convert_state_to_out(meta, nbBlocks, r);
+   // printf("num sig %d\n", num_sig); 
+   // printf("outbytes %p\n",r);
     r += convert_block2_to_out(r, nbBlocks,num_sig, blk_idx, blk_vals, blk_subidx, blk_sig);
+    
+   // printf("outbytes %p\n",r);
     memcpy(r, oriData+nbBlocks*blockSize, (nbEle%blockSize)*sizeof(float));
     r += (nbEle%blockSize)*sizeof(float);
+
+   // printf("outbytes %p\n",r);
     unsigned char* c = r;
     unsigned char* o = c+nbConstantBlocks*sizeof(float);
     unsigned char* nc = o+(nbBlocks-nbConstantBlocks)*sizeof(short);
@@ -814,6 +823,12 @@ unsigned char* device_ptr_cuSZx_compress_float(float *oriData, size_t *outSize, 
     // free(meta);
     // free(offsets);
     // free(midBytes);
+    checkCudaErrors(cudaFree(d_num_sig));
+    checkCudaErrors(cudaFree(d_blk_idx));
+    checkCudaErrors(cudaFree(d_blk_subidx));
+    checkCudaErrors(cudaFree(d_blk_vals));
+    checkCudaErrors(cudaFree(d_blk_sig));
+
     checkCudaErrors(cudaFree(d_meta));
     checkCudaErrors(cudaFree(d_offsets));
     checkCudaErrors(cudaFree(d_midBytes));

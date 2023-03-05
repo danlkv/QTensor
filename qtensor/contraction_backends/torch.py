@@ -3,6 +3,7 @@ import qtree
 import numpy as np
 from qtree import np_framework
 from qtensor.contraction_backends import ContractionBackend
+from .common import slice_numpy_tensor, get_einsum_expr
 import string
 CHARS = string.ascii_lowercase + string.ascii_uppercase
 
@@ -31,35 +32,6 @@ def get_einsum_expr_bucket(bucket, all_indices_list, result_indices):
     return expr
 
 
-def get_einsum_expr(idx1, idx2, contract=0):
-    """
-    Takes two tuples of indices and returns an einsum expression
-    to evaluate the sum over repeating indices
-
-    Parameters
-    ----------
-    idx1 : list-like
-          indices of the first argument
-    idx2 : list-like
-          indices of the second argument
-
-    Returns
-    -------
-    expr : str
-          Einsum command to sum over indices repeating in idx1
-          and idx2.
-    """
-    result_indices = sorted(list(set(idx1 + idx2)), reverse=True)
-    # remap indices to reduce their order, as einsum does not like
-    # large numbers
-    idx_to_least_idx = {old_idx: new_idx for new_idx, old_idx
-                        in enumerate(result_indices)}
-    result_indices = result_indices[:len(result_indices)-contract]
-
-    str1 = ''.join(qtree.utils.num_to_alpha(idx_to_least_idx[ii]) for ii in idx1)
-    str2 = ''.join(qtree.utils.num_to_alpha(idx_to_least_idx[ii]) for ii in idx2)
-    str3 = ''.join(qtree.utils.num_to_alpha(idx_to_least_idx[ii]) for ii in result_indices)
-    return str1 + ',' + str2 + '->' + str3
 
 
 
@@ -172,41 +144,25 @@ class TorchBackend(ContractionBackend):
             for tensor in bucket:
                 # get data
                 # sort tensor dimensions
-                transpose_order = np.argsort(list(map(int, tensor.indices)))[::-1]
+                out_indices = list(sorted(tensor.indices, key=int, reverse=True))
                 data = data_dict[tensor.data_key]
+                # Works for torch tensors just fine
+                data, new_indices = slice_numpy_tensor(data, tensor.indices, out_indices, slice_dict)
+
                 if not isinstance(data, torch.Tensor):             
                     if self.device == 'gpu' and torch.cuda.is_available():
                         cuda = torch.device('cuda')
                         data = torch.from_numpy(data.astype(np.complex128)).to(cuda)
                     else:
                         data = torch.from_numpy(data.astype(np.complex128))
-
-                data = data.permute(tuple(transpose_order))
-                # transpose indices
-                indices_sorted = [tensor.indices[pp]
-                                  for pp in transpose_order]
-
+                else:
+                    data = data.type(torch.complex128)
                 # slice data
-                slice_bounds = []
-                for idx in indices_sorted:
-                    try:
-                        slice_bounds.append(slice_dict[idx])
-                    except KeyError:
-                        slice_bounds.append(slice(None))
-
-                data = data[tuple(slice_bounds)]
-
-                # update indices
-                indices_sliced = [idx.copy(size=size) for idx, size in
-                                  zip(indices_sorted, data.shape)]
-                indices_sliced = [i for sl, i in zip(slice_bounds, indices_sliced) if not isinstance(sl, int)]
-                assert len(data.shape) == len(indices_sliced)
-
                 sliced_bucket.append(
-                    tensor.copy(indices=indices_sliced, data=data))
+                    tensor.copy(indices=new_indices, data=data))
             sliced_buckets.append(sliced_bucket)
 
         return sliced_buckets
 
     def get_result_data(self, result):
-        return result.data
+        return np.transpose(result.data)

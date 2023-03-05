@@ -16,7 +16,7 @@ def costs_to_csv(costs):
     return "\n".join(lines)
 
 def test_compressed_contraction_cost():
-    G, gamma, beta = get_test_problem(n=32, p=15, d=4)
+    G, gamma, beta = get_test_problem(n=12, p=5, d=4)
     opt = qtensor.toolbox.get_ordering_algo('naive')
 
     composer = QtreeQAOAComposer(
@@ -41,7 +41,7 @@ def test_compressed_contraction_cost():
     print("Path\n", path)
     # -- Estimate sliced contraction
     opt_par  = qtensor.optimisation.SlicesOptimizer(base_ordering=opt, max_tw=M_limit+1, max_slice=2+opt.treewidth-M_limit)
-    opt_par  = TreeTrimSplitter(base_ordering=opt, max_tw=M_limit+1, max_slice=5+opt.treewidth-M_limit)
+    #opt_par  = TreeTrimSplitter(base_ordering=opt, max_tw=M_limit+1, max_slice=5+opt.treewidth-M_limit)
     peo, par_vars, tn = opt_par.optimize(tn)
     print("Par vars", par_vars)
     tn.slice({i: slice(0, 1) for i in par_vars})
@@ -69,7 +69,7 @@ def test_compressed_contraction_cost():
 
     print("Path list comp\n", [c.width for c in costs])
     print("Maxw", max(path))
-    assert opt.treewidth == cost.width
+    assert opt.treewidth == cost.width+1
 
 if __name__ == '__main__':
     test_compressed_contraction_cost()

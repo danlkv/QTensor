@@ -1,6 +1,7 @@
 import qtree
 from qtensor.tools.lazy_import import cirq
 from qtensor.contraction_backends import NumpyBackend, ContractionBackend
+from qtensor.contraction_algos import bucket_elimination
 
 from qtensor.optimisation.TensorNet import QtreeTensorNet
 from qtensor.optimisation.Optimizer import DefaultOptimizer, Optimizer
@@ -118,15 +119,22 @@ class QtreeSimulator(Simulator):
                     raise ValueError(f'Treewidth {self.optimizer.treewidth} is larger than max_tw={self.max_tw}.')
         else:
             self.peo = peo
+        self._slice_relabel_buckets()
 
+    def _slice_relabel_buckets(self, slice_extension={}):
+        """
+        Relabels peo according to bucket indices.
+        Assumes self.tn and self.peo exists
+        """
         all_indices = sum([list(t.indices) for bucket in self.tn.buckets for t in bucket], [])
         identity_map = {int(v): v for v in all_indices}
         self.peo = [identity_map[int(i)] for i in self.peo]
 
 
-        self._reorder_buckets()
+        perm_dict = self._reorder_buckets()
         slice_dict = self._get_slice_dict()
-        #log.info('batch slice {}', slice_dict)
+        slice_extension = {perm_dict[k]: v for k, v in slice_extension.items()}
+        slice_dict.update(slice_extension)
 
         sliced_buckets = self.tn.slice(slice_dict)
         #self.backend.pbar.set_total ( len(sliced_buckets))
@@ -137,10 +145,8 @@ class QtreeSimulator(Simulator):
     def simulate_batch(self, qc, batch_vars=0, peo=None):
         self.prepare_buckets(qc, batch_vars, peo)
 
-        result = qtree.optimizer.bucket_elimination(
-            self.buckets, self.backend.process_bucket,
-            n_var_nosum=len(self.tn.free_vars)
-        )
+        result = bucket_elimination(self.buckets, self.backend,
+                                    n_var_nosum=len(self.tn.free_vars))
         return self.backend.get_result_data(result).flatten()
 
     def simulate(self, qc):

@@ -258,9 +258,10 @@ __global__ void compress_float(float *oriData, unsigned char *meta, short *offse
     uchar4* cvalue = (uchar4*)shared;
     int* sums = &ivalue[bs];
 
-    //if(threadIdx.x == 0 && blockIdx.x == 0){
-//	printf("tid threshold: %f\n", threshold);
-  //  }
+    if(threadIdx.x == 0 && blockIdx.x == 0){
+	num_state2=0;
+	total_sig=0;	
+    }
 
     for (unsigned long b=bid; b<nb; b+=gridDim.x){
         if (tidx ==0 && tidy ==0)

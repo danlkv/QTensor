@@ -2,7 +2,7 @@ from . RGreedy import RGreedyOptimizer
 from qtensor.optimisation.Optimizer import TamakiTrimSlicing, TamakiOptimizer
 
 from qtensor.optimisation.Optimizer import GreedyOptimizer, WithoutOptimizer
-from qtensor.optimisation.Optimizer import Optimizer, SlicesOptimizer
+from qtensor.optimisation.Optimizer import Optimizer, SlicesOptimizer, TreeTrimSplitter
 from qtensor.optimisation.Greedy import GreedyParvars
 from qtensor.optimisation.late_parallelisation import LateParOptimizer
 
