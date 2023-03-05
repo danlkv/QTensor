@@ -112,10 +112,10 @@ __global__ void convert_block2_to_out_kernel(unsigned char *result, uint32_t num
     
     for (int i = blockDim.x*blockIdx.x + threadIdx.x; i < num_sig; i += blockDim.x*gridDim.x){
         float value = blk_vals[i];
-        tmp_result[4*i] = (value) & 0xff;
-        tmp_result[4*i+1] = (value >> (8*1)) & 0xff;
-        tmp_result[4*i+2] = (value >> (8*2)) & 0xff;
-        tmp_result[4*i+3] = (value >> (8*3)) & 0xff;
+        tmp_result[4*i] = (unsigned char)((value) & 0xff);
+        tmp_result[4*i+1] = (unsigned char)((value >> (8*1)) & 0xff);
+        tmp_result[4*i+2] = (unsigned char)((value >> (8*2)) & 0xff);
+        tmp_result[4*i+3] = (unsigned char)((value >> (8*3)) & 0xff);
     }
     // memcpy(result+out_length, blk_vals, num_sig*sizeof(float));
     out_length += num_sig*sizeof(float);
@@ -503,7 +503,7 @@ __device__ inline void shortToBytes_d(unsigned char* b, short value)
 	memcpy(b, buf.byte, 2);
 }
 
-__global__ void getNumNonConstantBlocks(size_t nbBlocks, short *offsets, unsigned char *meta, int blockSize, size_t *nonconstant, int *out_size){
+__global__ void getNumNonConstantBlocks(size_t nbBlocks, short *offsets, unsigned char *meta, int blockSize, int *nonconstant, int *out_size){
     for (int tid = blockDim.x*blockIdx.x + threadIdx.x; tid < nbBlocks; tid += blockDim.x*gridDim.x){
         if (meta[tid] == 3){ 
             atomicAdd(nonconstant, 1);
@@ -531,7 +531,7 @@ __global__ void ncblkCopy(unsigned char * c, unsigned char* o, unsigned char *nc
     }
 }
 
-void better_post_proc(size_t *outSize, float *oriData, unsigned char *meta, 
+size_t better_post_proc(size_t *outSize, float *oriData, unsigned char *meta, 
                                 short *offsets, unsigned char *midBytes, unsigned char *outBytes, 
                                 size_t nbEle, int blockSize, uint64_t num_sig, uint32_t *blk_idx, 
                                 float *blk_vals, uint8_t *blk_subidx, uint8_t *blk_sig){
@@ -557,19 +557,19 @@ void better_post_proc(size_t *outSize, float *oriData, unsigned char *meta,
     else
         out_size_h += nbBlocks/8+1;
 
-    size_t *nonconstant_d, *nonconstant_h;
+    int *nonconstant_d, nonconstant_h;
     
-    checkCudaErrors(cudaMalloc((void **)&nonconstant_d, sizeof(size_t)));
+    checkCudaErrors(cudaMalloc((void **)&nonconstant_d, sizeof(int)));
     checkCudaErrors(cudaMalloc((void **)&out_size_d, sizeof(int)));
 
-    checkCudaErrors(cudaMemset(nonconstant_d, 0, sizeof(size_t)));
+    checkCudaErrors(cudaMemset(nonconstant_d, 0, sizeof(int)));
     checkCudaErrors(cudaMemset(out_size_d, 0, sizeof(int)));
 
 
     getNumNonConstantBlocks<<<40,64>>>(nbBlocks, offsets, meta, blockSize, nonconstant_d, out_size_d);
     cudaDeviceSynchronize();
 
-    checkCudaErrors(cudaMemcpy(nonconstant_h, nonconstant_d, sizeof(size_t), cudaMemcpyDeviceToHost));
+    checkCudaErrors(cudaMemcpy(&nonconstant_h, nonconstant_d, sizeof(int), cudaMemcpyDeviceToHost));
     checkCudaErrors(cudaMemcpy(&tmp_outsize, out_size_d, sizeof(int), cudaMemcpyDeviceToHost));
 
     nbConstantBlocks = nbBlocks - nonconstant_h;
@@ -613,9 +613,10 @@ void better_post_proc(size_t *outSize, float *oriData, unsigned char *meta,
     unsigned char* nc = o+(nbBlocks-nbConstantBlocks)*sizeof(short);
     ncblkCopy<<<20,256>>>(c, o, nc, midBytes, meta,nbBlocks, blockSize, offsets, mSize);
     cudaDeviceSynchronize();
-    checkCudaErrors(cudaMemset(outSize, (size_t)nc-r_old, sizeof(size_t)));
+    return (size_t) (nc-r_old);
+    // checkCudaErrors(cudaMemcpy(outSize, (size_t)(nc-r_old), sizeof(size_t)));
     // *outSize = (size_t) (nc-r_old);
-    return outBytes;
+    // return outBytes;
 }
 
 __global__ void device_post_proc(size_t *outSize, float *oriData, unsigned char *meta, 
@@ -811,10 +812,10 @@ unsigned char* device_ptr_cuSZx_compress_float(float *oriData, size_t *outSize, 
     checkCudaErrors(cudaMalloc(&d_outSize, sizeof(size_t)));
 
     // device_post_proc<<<1,1>>>(d_outSize, d_oriData, d_meta, d_offsets, d_midBytes, d_outBytes, nbEle, blockSize, *num_sig, d_blk_idx, d_blk_vals, d_blk_subidx, d_blk_sig);
-    better_post_proc(d_outSize, d_oriData, d_meta, d_offsets, d_midBytes, d_outBytes, nbEle, blockSize, *num_sig, d_blk_idx, d_blk_vals, d_blk_subidx, d_blk_sig);
+    *outSize = better_post_proc(d_outSize, d_oriData, d_meta, d_offsets, d_midBytes, d_outBytes, nbEle, blockSize, *num_sig, d_blk_idx, d_blk_vals, d_blk_subidx, d_blk_sig);
     // cudaDeviceSynchronize();
     
-    checkCudaErrors(cudaMemcpy(outSize, d_outSize, sizeof(size_t), cudaMemcpyDeviceToHost));
+    // checkCudaErrors(cudaMemcpy(outSize, d_outSize, sizeof(size_t), cudaMemcpyDeviceToHost));
 
     // printf("completed compression\n");
     //free(blk_idx);
