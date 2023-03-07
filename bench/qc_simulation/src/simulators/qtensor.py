@@ -159,6 +159,7 @@ def estimate(in_file, out_file, C=100, M=30, F=1e12, T=1e9, **kwargs):
     time = totals.time(F, T, T, M)
     C = asdict(totals)
     C['time'] = time*2**len(par_vars)
+    C['slices'] = 2**len(par_vars)
     print("C", C)
     out_file += ".json"
     write_json(C, out_file)
@@ -183,10 +184,13 @@ def simulate(in_file, out_file, backend='einsum', compress=None, M=29, **kwargs)
     backend = qtensor.contraction_backends.get_backend(backend)
     if compress is not None:
         if compress == 'szx':
-            compressor = qtensor.compression.CUSZCompressor(r2r_error=1e-2, r2r_threshold=1e-2)
+            compressor = qtensor.compression.CUSZCompressor(r2r_error=5e-2, r2r_threshold=5e-2)
+            compressor = qtensor.compression.ProfileCompressor(compressor)
         else:
             raise ValueError(f"Unknown compression algorithm: {compress}")
         backend = qtensor.contraction_backends.CompressionBackend(backend, compressor, M)
+        from qtensor.contraction_backends.performance_measurement_decorator import MemProfBackend
+        backend = MemProfBackend(backend)
 
     relabelid = {}
     for tensor in tn.tensors:
@@ -205,15 +209,15 @@ def simulate(in_file, out_file, backend='einsum', compress=None, M=29, **kwargs)
     sim._slice_relabel_buckets(slice_ext)
     buckets = sim.tn.buckets
     # --dbg
-    ignore_vars  = sim.tn.bra_vars + sim.tn.ket_vars 
-    graph = qtree.graph_model.importers.buckets2graph(buckets, ignore_vars)
-    graph, label_dict = qtree.graph_model.relabel_graph_nodes(
-        graph, dict(zip(graph.nodes, np.array(list(graph.nodes)) - 127*2))
-    ) 
-    import networkx as nx
-    components = list(nx.connected_components(graph))
-    print(f"Sliced graph # nodes: {graph.number_of_nodes()} and #components: {len(components)} with sizes {[len(c) for c in components]}")
-    print(f"peo size without par_vars and ignore_vars: {len(peo) - len(ignore_vars)}")
+    #ignore_vars  = sim.tn.bra_vars + sim.tn.ket_vars 
+    #graph = qtree.graph_model.importers.buckets2graph(buckets, ignore_vars)
+    #graph, label_dict = qtree.graph_model.relabel_graph_nodes(
+        #graph, dict(zip(graph.nodes, np.array(list(graph.nodes)) - 127*2))
+    #) 
+    #import networkx as nx
+    #components = list(nx.connected_components(graph))
+    #print(f"Sliced graph # nodes: {graph.number_of_nodes()} and #components: {len(components)} with sizes {[len(c) for c in components]}")
+    #print(f"peo size without par_vars and ignore_vars: {len(peo) - len(ignore_vars)}")
     # --
 
     start = time.time()
