@@ -235,7 +235,12 @@ def simulate(in_file, out_file, backend='einsum', compress=None, M=29, **kwargs)
     end = time.time()
     print("D", end - start)
     out_file += ".json"
-    C = {'time': end - start}
+    C = {'time': 2**len(par_vars)*(end - start)}
+    C['memory'] = backend.max_mem
+    if compress is not None:
+        if isinstance(compressor, qtensor.compression.ProfileCompressor):
+            C['compression'] = compressor.get_profile_data_json()
+
     write_json(C, out_file)
     cupy.cuda.profiler.stop()
     return out_file

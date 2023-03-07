@@ -27,7 +27,7 @@ class Compressor():
 # -- Debugging and profiling
 
 import time
-from dataclasses import dataclass
+from dataclasses import dataclass, asdict
 @dataclass
 class CompressMeasure:
     time: float = 0
@@ -75,8 +75,8 @@ class ProfileCompressor(Compressor):
     def get_profile_data_json(self):
         compress, decompress = self.get_profile_data()
         return {
-            'compress': [c.asdict() for c in compress],
-            'decompress': [c.asdict() for c in decompress],
+            'compress': [asdict(c) for c in compress],
+            'decompress': [asdict(c) for c in decompress],
         }
 
     def get_profile_stats(self):

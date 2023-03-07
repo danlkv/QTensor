@@ -1,6 +1,7 @@
 import numpy as np
 from dataclasses import dataclass
-from qtensor.contraction_backends import ContractionBackend, NumpyBackend, CompressionBackend
+from qtensor.contraction_backends import ContractionBackend, NumpyBackend
+from qtensor.contraction_backends.compression import CompressionBackend
 from pyrofiler import timing
 from qtensor.tools.lazy_import import torch, pandas
 import string
