@@ -1,5 +1,5 @@
 from qtensor.contraction_backends import ContractionBackend
-from qtensor.compression import Compressor
+from qtensor.compression import Compressor, CompressedTensor, Tensor
 from qtensor.compression.compressed_contraction import compressed_contract, compressed_sum
 from qtensor.contraction_backends.common import slice_numpy_tensor
 from qtree.optimizer import Tensor
@@ -46,6 +46,7 @@ class CompressionBackend(ContractionBackend):
         """
         ctr_kw = dict(zip(['einsum', 'move_data'], self._get_backend_specific_fns(self.backend)))
         bucket.sort(key=lambda x: len(x.indices))
+        print("Processing bucket", bucket)
         accum = bucket[0]
         for t in bucket[1:-1]:
             accum = compressed_contract(
@@ -58,15 +59,52 @@ class CompressionBackend(ContractionBackend):
                 set().union(*[t.indices, accum.indices])
                 , key=int, reverse=True
             )
-            accum = compressed_contract(
+            accum_new = compressed_contract(
                 accum, t, [total_ixs[-1]], self.max_tw, self.compressor
                 ,**ctr_kw
             )
+            # free data
+            import cupy
+            for t in [accum, t]:
+                if isinstance(t, CompressedTensor):
+                    for c in t.data:
+                        cmp_bytes, num_elements_eff, isCuPy, shape, dtype, _ = c
+                        import ctypes
+                        p_decompressed_ptr = ctypes.addressof(cmp_bytes)
+                        # cast to int64 pointer
+                        # (effectively converting pointer to pointer to addr to pointer to int64)
+                        p_decompressed_int= ctypes.cast(p_decompressed_ptr, ctypes.POINTER(ctypes.c_uint64))
+                        decompressed_int = p_decompressed_int.contents
+                        print("Freeing mem", decompressed_int.value)
+                        cupy.cuda.runtime.free(decompressed_int.value)
+                    t.compressor.compressor.free_decompressed()
+                    #raise ValueError("Done")
+                else:
+                    #print("PTR", t.data.data.ptr)
+                    #cupy.cuda.runtime.free(t.data.data.ptr)
+                    pass
+                    
+            accum = accum_new
+
             return accum
         else:
-            # This assumes large buckets with one element don't exist
+            if len(accum.indices) < 1:
+                return accum
             indices = (accum.indices[-1], )
             res = compressed_sum(accum, indices, self.compressor, self.max_tw,  **ctr_kw)
+            if isinstance(accum, CompressedTensor):
+                import cupy
+                for c in accum.data:
+                    cmp_bytes, num_elements_eff, isCuPy, shape, dtype, _ = c
+                    import ctypes
+                    p_decompressed_ptr = ctypes.addressof(cmp_bytes)
+                    # cast to int64 pointer
+                    # (effectively converting pointer to pointer to addr to pointer to int64)
+                    p_decompressed_int= ctypes.cast(p_decompressed_ptr, ctypes.POINTER(ctypes.c_uint64))
+                    decompressed_int = p_decompressed_int.contents
+                    print("Freeing mem", decompressed_int.value)
+                    cupy.cuda.runtime.free(decompressed_int.value)
+                accum.compressor.compressor.free_decompressed()
             return res
 
     def get_sliced_buckets(self, buckets, data_dict, slice_dict):

@@ -1,9 +1,93 @@
 import numpy as np
 from dataclasses import dataclass
 from qtensor.contraction_backends import ContractionBackend, NumpyBackend
+from qtensor.contraction_backends.compression import CompressionBackend
 from pyrofiler import timing
 from qtensor.tools.lazy_import import torch, pandas
 import string
+
+# -- memory profiling
+from weakref import WeakValueDictionary
+
+class MemProfBackend(ContractionBackend):
+    def __init__(self, backend=NumpyBackend(), print=True):
+        self.backend = backend
+        self.object_store = WeakValueDictionary()
+        self.object_keys = []
+        self.print = print
+        self.max_mem = 0
+
+    def _print(self, *args, **kwargs):
+        if self.print:
+            print(*args, **kwargs)
+
+    def check_store(self):
+        import cupy
+        mempool = cupy.get_default_memory_pool()
+        total_mem = 0
+        deleted_keys = []
+        for key in self.object_keys:
+            tensor = self.object_store.get(key, None)
+            if tensor is None:
+                #self._print("Tensor", key, "was deleted")
+                deleted_keys.append(key)
+                continue
+            else:
+                size = self.tensor_size(tensor)
+                total_mem += size
+        for key in deleted_keys:
+            self.object_keys.remove(key)
+
+        if total_mem>1024**2:
+            self._print("Total memory usage", total_mem/1024/1024, "MB")
+        cupy_mem = mempool.used_bytes()
+        # get maximum memory usage
+        gpu_mem = cupy_mem
+        if isinstance(self.backend, CompressionBackend):
+            gpu_mem += 8*2**self.backend.max_tw
+        self.max_mem = max(self.max_mem, gpu_mem)
+        # --
+        if cupy_mem>1024**2:
+            self._print("CuPy memory usage", cupy_mem/1024/1024, "MB. Total MB:", mempool.total_bytes()/1024**2)
+
+    def tensor_size(self, tensor)->int:
+        from qtensor.compression import Tensor, CompressedTensor
+        if tensor.data is None:
+            return 0
+        if isinstance(tensor, Tensor):
+            return tensor.data.nbytes
+        elif isinstance(tensor, CompressedTensor):
+            chunks = tensor.data
+            sizes = [tensor.compressor.compress_size(x) for x in chunks]
+            return sum(sizes)
+        else:
+            raise ValueError("Unknown tensor type")
+
+    def add_tensor(self, tensor):
+        label = str(tensor)
+        self.object_store[label] = tensor
+        self.object_keys.append(label)
+        tsize = self.tensor_size(tensor)
+        if tsize>1024:
+            self._print("Added tensor with data size", tsize/1024, "KB")
+        self.check_store()
+
+    def process_bucket(self, bucket, no_sum=False):
+        res = self.backend.process_bucket(bucket, no_sum=no_sum)
+        self.add_tensor(res)
+        return res
+
+    def get_sliced_buckets(self, buckets, data_dict, slice_dict):
+        buckets = self.backend.get_sliced_buckets(buckets, data_dict, slice_dict)
+        for bucket in buckets:
+            for tensor in bucket:
+                self.add_tensor(tensor)
+        return buckets
+
+    def get_result_data(self, result):
+        return self.backend.get_result_data(result)
+
+# --
 
 @dataclass
 class BucketContnractionStats:
