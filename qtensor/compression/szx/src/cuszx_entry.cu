@@ -6,6 +6,7 @@
 #include "szx.h"
 #include <thrust/copy.h>
 #include <thrust/execution_policy.h>
+#include <cub/cub.cuh>
 
 #define SPARSITY_LEVEL 0.25
 
@@ -571,6 +572,8 @@ __device__ inline void shortToBytes_d(unsigned char* b, short value)
 	memcpy(b, buf.byte, 2);
 }
 
+
+
 __global__ void getNumNonConstantBlocks(size_t nbBlocks, short *offsets, unsigned char *meta, int blockSize, int *nonconstant, int *out_size){
     for (int tid = blockDim.x*blockIdx.x + threadIdx.x; tid < nbBlocks; tid += blockDim.x*gridDim.x){
         if (meta[tid] == 3){ 
@@ -578,6 +581,238 @@ __global__ void getNumNonConstantBlocks(size_t nbBlocks, short *offsets, unsigne
             atomicAdd(out_size,1+(blockSize/4)+offsets[tid]);
         }
     }
+}
+
+__global__ void generateFlags(unsigned char *states, uint64_t *cBlk_flags, uint64_t *ncBlk_flags,uint64_t* offset_indices,short* offsets, size_t nbBlocks){
+    for (int tid = blockDim.x*blockIdx.x + threadIdx.x; tid < nbBlocks; tid += blockDim.x*gridDim.x){
+        if (states[tid] == 0 || states[tid] == 1)
+        {
+            cBlk_flags[tid] = 1;
+            ncBlk_flags[tid] = 0;
+            offset_indices[tid] = 0;
+        }else if(states[tid]==3){
+            ncBlk_flags[tid] = 1;
+            cBlk_flags[tid] = 0;
+            offset_indices[tid] = (uint64_t) offsets[tid];
+        }else{
+            cBlk_flags[tid] = 0;
+            ncBlk_flags[tid] = 0;
+            offset_indices[tid] = 0;
+        }
+        
+    }
+}
+
+__global__ void nccopy_kernel2(unsigned char * c, unsigned char* o, unsigned char *nc, unsigned char* midBytes, unsigned char* meta,
+                        size_t nbBlocks, int blockSize, short *offsets, size_t mSize, uint64_t *cBlk_indices, uint64_t *ncBlk_indices, uint64_t* offset_indices){
+   // printf("blockdim %d blockidx %d threadidx %d griddim %d\n", blockDim.x, blockIdx.x, threadIdx.x, gridDim.x);
+    int i;
+    int num_threads = (blockDim.x*gridDim.x);
+    int tid = blockDim.x*blockIdx.x + threadIdx.x;
+    int blocks_per_thread = nbBlocks/num_threads;
+    int start_idx = tid*blocks_per_thread;
+    int end_idx = start_idx+blocks_per_thread;
+
+    if (tid == num_threads-1)
+    {
+        end_idx = nbBlocks;
+    }
+    
+    unsigned char* tmp_o = o+(sizeof(short)*ncBlk_indices[start_idx]);
+    unsigned char* tmp_nc= nc+(mSize*ncBlk_indices[i] + offset_indices[i]*ncBlk_indices[i]);
+    for (i=start_idx; i<end_idx; i++){
+        if(meta[i] == 3){
+	
+            
+            shortToBytes_d(o, offsets[i]);
+            tmp_o += sizeof(short);
+            memcpy(tmp_nc, meta+(nbBlocks+i*mSize), mSize);
+            tmp_nc += mSize; 
+            memcpy(tmp_nc, midBytes+(i*blockSize*sizeof(float)), offsets[i]);
+            tmp_nc += offsets[i];
+
+            // shortToBytes_d(o+(sizeof(short)*ncBlk_indices[i]), offsets[i]);
+            
+            // memcpy(nc+(mSize*ncBlk_indices[i] + offset_indices[i]*ncBlk_indices[i]), meta+(nbBlocks+i*mSize), mSize);
+
+
+            // memcpy(nc+(mSize*(ncBlk_indices[i]+1) + offset_indices[i]*ncBlk_indices[i]), midBytes+(i*blockSize*sizeof(float)), offsets[i]);
+        } 
+    }
+    
+}
+
+
+__global__ void nccopy_kernel(unsigned char * c, unsigned char* o, unsigned char *nc, unsigned char* midBytes, unsigned char* meta,
+                        size_t nbBlocks, int blockSize, short *offsets, size_t mSize, uint64_t *cBlk_indices, uint64_t *ncBlk_indices, uint64_t* offset_indices){
+   // printf("blockdim %d blockidx %d threadidx %d griddim %d\n", blockDim.x, blockIdx.x, threadIdx.x, gridDim.x);
+    int i;
+    // if(threadIdx.x==0){
+	// printf("c: %ld nc: %ld\n", cBlk_indices[nbBlocks-1], ncBlk_indices[nbBlocks-1]);
+    // }
+    for (i=blockDim.x*blockIdx.x + threadIdx.x; i<nbBlocks; i+=blockDim.x*gridDim.x){
+        //printf("meta %d i: %d\n",meta[i], i); 
+        if (meta[i]==0 || meta[i] == 1){
+            // printf("cblk\n");
+	        memcpy(c+(sizeof(float)*cBlk_indices[i]), meta+(nbBlocks+i*mSize), sizeof(float));
+	   
+            // printf("cblk done\n");
+	    // c += sizeof(float);
+	    // float g;
+	    // memcpy(&g, (meta+(nbBlocks+i*mSize)),sizeof(float));
+	    // printf("%d %f\n",i,g);
+        }
+        // else if(meta[i] == 3){
+	
+        // //     printf("ncblk 1\n");
+        //     shortToBytes_d(o+(sizeof(short)*ncBlk_indices[i]), offsets[i]);
+        //      // o += sizeof(short);
+
+        // //     printf("ncblk 2 nbBlocks %d %d \n", nbBlocks, i);
+        //     printf("nbBlkindices %ld offset_indices %ld\n", ncBlk_indices[i], offset_indices[i]);
+        // //     printf(" test 1%c\n",meta+(nbBlocks+i*mSize));
+        // //     printf("test 2%c\n", nc+(mSize*ncBlk_indices[i] + offset_indices[i]*ncBlk_indices[i]));
+        //     memcpy(nc+((mSize + offset_indices[i])*ncBlk_indices[i]), meta+(nbBlocks+i*mSize), mSize);
+        // //         // nc += mSize; 
+                
+        // //     printf("ncblk 3\n");
+        //     memcpy(nc+((mSize+mSize + offset_indices[i])*ncBlk_indices[i]), midBytes+(i*blockSize*sizeof(float)), offsets[i]);
+        // //         // nc += offsets[i];
+            
+        // //     printf("ncblk 4\n");
+        // } 
+    }
+    
+}
+
+//__global__ void nccopy_kernel(unsigned char * c, unsigned char* o, unsigned char *nc, unsigned char* midBytes, unsigned char* meta,
+//                        size_t nbBlocks, int blockSize, short *offsets, size_t mSize, int *cBlk_indices, int *ncBlk_indices, int* offset_indices){
+//    printf("blockdim %d blockidx %d threadidx %d griddim %d\n", blockDim.x, blockIdx.x, threadIdx.x, gridDim.x);
+//    int i;
+//    for (i=blockDim.x*blockIdx.x + threadIdx.x; i<nbBlocks; i+=blockDim.x*gridDim.x){
+        //printf("meta %d i: %d\n",meta[i], i); 
+//        if (meta[i]==0 || meta[i] == 1){
+            // printf("cblk\n");
+//	    memcpy(c+(sizeof(float)*cBlk_indices[i]), meta+(nbBlocks+i*mSize), sizeof(float));
+
+            // printf("cblk done\n");
+	    // c += sizeof(float);
+	    // float g;
+	    // memcpy(&g, (meta+(nbBlocks+i*mSize)),sizeof(float));
+	    // printf("%d %f\n",i,g);
+//        }else if(meta[i] == 3){
+	
+//           printf("ncblk 1\n");
+//           shortToBytes_d(o+(sizeof(short)*ncBlk_indices[i]), offsets[i]);
+            // o += sizeof(short);
+
+//           printf("ncblk 2 nbBlocks %d %d \n", nbBlocks, i);
+//	   printf("nbBlkindices %d offset_indices %d\n", ncBlk_indices[i], offset_indices[i]);
+//	   memcpy(nc+(mSize*ncBlk_indices[i] + offset_indices[i]*ncBlk_indices[i]), meta+(nbBlocks+i*mSize), mSize);
+            // nc += mSize; 
+            
+//           printf("ncblk 3\n");
+//	   memcpy(nc+(mSize*(ncBlk_indices[i]+1) + offset_indices[i]*ncBlk_indices[i]), midBytes+(i*blockSize*sizeof(float)), offsets[i]);
+            // nc += offsets[i];
+        
+//           printf("ncblk 4\n");
+//	} 
+//    }
+    
+//}
+
+__global__ void set_nc(unsigned char *nc, short *offsets, uint64_t *offset_indices, uint64_t *ncBlk_indices, size_t mSize, size_t nbBlocks){
+    if (threadIdx.x == 0 && blockIdx.x == 0)
+    {
+        nc = nc + (mSize*(ncBlk_indices[nbBlocks -1]+1) + offset_indices[nbBlocks - 1]*ncBlk_indices[nbBlocks - 1]) + offsets[nbBlocks-1];
+    }
+    
+}
+
+void ncblkCopy_fast(unsigned char * c, unsigned char* o, unsigned char *nc, unsigned char* midBytes, unsigned char* meta,
+                        size_t nbBlocks, int blockSize, short *offsets, size_t mSize){
+    uint64_t *cBlk_indices, *ncBlk_indices;
+    uint64_t *offset_indices;
+    TimingGPU timer2;
+
+    // timer2.StartCounter();
+    
+    checkCudaErrors(cudaMalloc(&cBlk_indices, sizeof(uint64_t)*nbBlocks));
+    checkCudaErrors(cudaMalloc(&ncBlk_indices, sizeof(uint64_t)*nbBlocks));
+    checkCudaErrors(cudaMalloc(&offset_indices, sizeof(uint64_t)*nbBlocks));
+
+    generateFlags<<<40,256>>>(meta, cBlk_indices, ncBlk_indices, offset_indices, offsets, nbBlocks);
+    cudaDeviceSynchronize();
+
+    thrust::exclusive_scan(thrust::device, cBlk_indices, cBlk_indices + nbBlocks, cBlk_indices, 0);
+    thrust::exclusive_scan(thrust::device, ncBlk_indices, ncBlk_indices + nbBlocks, ncBlk_indices, 0);
+    thrust::exclusive_scan(thrust::device, offset_indices, offset_indices + nbBlocks, offset_indices, 0);
+
+    nccopy_kernel<<<40,256>>>(c, o, nc, midBytes, meta, nbBlocks, blockSize, offsets, mSize, cBlk_indices,ncBlk_indices,offset_indices);
+    // nccopy_kernel2<<<1,1>>>(c, o, nc, midBytes, meta, nbBlocks, blockSize, offsets, mSize, cBlk_indices,ncBlk_indices,offset_indices);
+
+    cudaDeviceSynchronize();
+    // printf("%s\n", cudaGetErrorString(cudaGetLastError()));
+    // set_nc<<<1,1>>>(nc, offsets, offset_indices, ncBlk_indices, mSize, nbBlocks);
+    // cudaDeviceSynchronize();
+    // printf("ncblockcpy: %f ms\n", timer2.GetCounter());
+    checkCudaErrors(cudaFree(cBlk_indices));
+    checkCudaErrors(cudaFree(ncBlk_indices));
+    checkCudaErrors(cudaFree(offset_indices));
+}
+
+void ncblkCopy_h(unsigned char * c, unsigned char* o, unsigned char *nc, unsigned char* midBytes, unsigned char* meta,
+                        size_t nbBlocks, int blockSize, short *offsets, size_t mSize){
+    unsigned char *tmp_states;
+    unsigned char *ncold = nc;
+    uint64_t col_off = 0;
+    short *tmp_offsets;
+    tmp_offsets = (short*)malloc(sizeof(short)*nbBlocks);
+    tmp_states = (unsigned char *)malloc(sizeof(char)*nbBlocks);
+    checkCudaErrors(cudaMemcpy(tmp_states, meta, sizeof(char)*nbBlocks, cudaMemcpyDeviceToHost));
+    checkCudaErrors(cudaMemcpy(tmp_offsets,offsets,sizeof(short)*nbBlocks,cudaMemcpyDeviceToHost));
+    cudaStream_t stream[3];
+    cudaStreamCreate(&stream[0]);
+    cudaStreamCreate(&stream[1]);
+    cudaStreamCreate(&stream[2]);
+
+    //printf("here\n");
+    //checkCudaErrors(cudaMemcpy((void**)&d_offsets, nbBlocks*sizeof(short))); 
+    for (int i = 0; i < nbBlocks; i++)
+    {
+        if(tmp_states[i]==3){
+            // shortToBytes_d(o, offsets[i]);
+            // buf = (unsigned char*)
+            
+//	    printf("here2\n");
+            cudaMemcpyAsync(o, offsets+i, 2, cudaMemcpyDeviceToDevice, stream[0]);
+            o += sizeof(short);
+        
+    //	    printf("here2.1\n");
+            // printf("offsets %ld\n", col_off);
+            cudaMemcpyAsync(nc, meta+(nbBlocks+i*mSize), mSize, cudaMemcpyDeviceToDevice, stream[1]);
+                // memcpy(nc, meta+(nbBlocks+i*mSize), mSize);
+                
+            nc += mSize; 
+                
+    //	    printf("here2.2\n");
+            //checkCudaErrors(cudaMemcpy(buf, offsets+i, sizeof(short), cudaMemcpyDeviceToHost));
+                
+    //	    //printf("here2.3 %d\n", buf);
+            cudaMemcpyAsync(nc, midBytes+(i*blockSize*sizeof(float)), (int)tmp_offsets[i], cudaMemcpyDeviceToDevice, stream[2]);
+            // memcpy(nc, midBytes+(i*blockSize*sizeof(float)), offsets[i]);
+            nc += tmp_offsets[i];
+            col_off+=tmp_offsets[i];
+       
+///	    printf("here2.4\n");
+       	}
+    }
+    cudaStreamDestroy(stream[0]);
+    cudaStreamDestroy(stream[1]);
+    cudaStreamDestroy(stream[2]);
+
+    free(tmp_states);
+    free(tmp_offsets); 
 }
 
 __global__ void ncblkCopy(unsigned char * c, unsigned char* o, unsigned char *nc, unsigned char* midBytes, unsigned char* meta,
@@ -682,8 +917,11 @@ size_t better_post_proc(size_t *outSize, float *oriData, unsigned char *meta,
     unsigned char* c = r;
     unsigned char* o = c+nbConstantBlocks*sizeof(float);
     unsigned char* nc = o+(nbBlocks-nbConstantBlocks)*sizeof(short);
-    ncblkCopy<<<1,1>>>(c, o, nc, midBytes, meta,nbBlocks, blockSize, offsets, mSize);
-    cudaDeviceSynchronize();
+    // ncblkCopy<<<1,1>>>(c, o, nc, midBytes, meta,nbBlocks, blockSize, offsets, mSize);
+    
+    ncblkCopy_h(c, o, nc, midBytes, meta,nbBlocks, blockSize, offsets, mSize);
+    ncblkCopy_fast(c, o, nc, midBytes, meta,nbBlocks, blockSize, offsets, mSize);
+    // cudaDeviceSynchronize();
     return (size_t) (nc-r_old);
     // checkCudaErrors(cudaMemcpy(outSize, (size_t)(nc-r_old), sizeof(size_t)));
     // *outSize = (size_t) (nc-r_old);
@@ -1499,7 +1737,7 @@ float* device_ptr_cuSZx_decompress_float(size_t nbEle, unsigned char* cmpBytes)
     nbBlocks_h, ncBlocks_h, stateArray,
     constantMedianArray);
     cudaDeviceSynchronize();
-    print_newdata<<<1,1>>>(newData, nbBlocks_h, bs);
+//    print_newdata<<<1,1>>>(newData, nbBlocks_h, bs);
 	cudaFree(stateArray);
 	cudaFree(constantMedianArray);
 	cudaFree(data);
