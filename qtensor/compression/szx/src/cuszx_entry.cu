@@ -1320,7 +1320,7 @@ __global__ void setup_data_stateArray(float *newData, size_t nbEle, unsigned cha
 }
 
 __global__ void decomp_startup_kernel(unsigned char* r, size_t nbConstantBlocks, 
-unsigned char *data, int blockSize, size_t mSize, size_t ncBlocks, float *constantMedianArray){
+unsigned char *data, int blockSize, size_t mSize, size_t ncBlocks, float *constantMedianArray, uint64_t* g_leng){
     unsigned char * fr = r; //fr is the starting address of constant median values.
     int i = 0, j = 0, k = 0;
   //  printf("%p\n", r);
@@ -1333,31 +1333,68 @@ unsigned char *data, int blockSize, size_t mSize, size_t ncBlocks, float *consta
 
 //    printf("nbconstant: %f\n", ((float*)tmp_r)[0]);
 // nbConstantBlocks
-    for(i = blockDim.x*blockIdx.x + threadIdx.x; i < nbConstantBlocks; i += blockDim.x*gridDim.x, j+=4){ //get the median values for constant-value blocks
+    for(i = blockDim.x*blockIdx.x + threadIdx.x; i < nbConstantBlocks; i += blockDim.x*gridDim.x){ //get the median values for constant-value blocks
 	    
-    	    tmp_r[0]=fr[j];
-    	    tmp_r[1]=fr[j+1];
-    	    tmp_r[2]=fr[j+2];
-    	    tmp_r[3]=fr[j+3];
+    	    tmp_r[0]=fr[4*i];
+    	    tmp_r[1]=fr[4*i+1];
+    	    tmp_r[2]=fr[4*i+2];
+    	    tmp_r[3]=fr[4*i+3];
 	    float tmp = ((float*)tmp_r)[0];
 	    constantMedianArray[i] = tmp;
-	    // printf("%d %f\n", i, tmp);
+	    //printf("%d %f\n", i, tmp);
     }
+   
 
+/** PROBLEM AREA, CAN FIX WITH PARALLELIZATION BUT WATCH *FR and *P **/
+
+    // if(threadIdx.x==0 && blockIdx.x==0){
     fr += nbConstantBlocks*sizeof(float);
     unsigned char* p = fr + ncBlocks * sizeof(short);
-    for(i = blockDim.x*blockIdx.x + threadIdx.x;i < ncBlocks;i += blockDim.x*gridDim.x){
+    unsigned char* basefr = fr;
+    unsigned char* basep = p;
+    for(i = blockDim.x*blockIdx.x + threadIdx.x;i < ncBlocks;i+=blockDim.x*gridDim.x){
+        fr = basefr+(sizeof(short)*i);
         int leng = (int)bytesToShort(fr)+mSize;
-        fr += sizeof(short);
+        g_leng[i] = (uint64_t)leng;
+        // fr += sizeof(short);
         if (leng > blockSize*sizeof(float))
         {
             printf("Warning: compressed block is larger than the original block!\n");
             return;
             // exit(0);
         }
+        // memcpy(data+i*blockSize*sizeof(float), p, leng);
+
+        // p += leng;
+    }
+    
+    // }
+}
+
+__global__ void decompress_ncblk_kernel(unsigned char* r, size_t nbConstantBlocks, 
+unsigned char *data, int blockSize, size_t mSize, size_t ncBlocks, float *constantMedianArray, uint64_t* g_leng){
+    unsigned char * fr = r;
+    fr += nbConstantBlocks*sizeof(float);
+    unsigned char* p = fr + ncBlocks * sizeof(short);
+    unsigned char* basefr = fr;
+    unsigned char* basep = p;
+
+    for(int i = blockDim.x*blockIdx.x + threadIdx.x;i < ncBlocks;i+=blockDim.x*gridDim.x){
+        fr = basefr+(sizeof(short)*i);
+        int leng = (int)bytesToShort(fr)+mSize;
+        // g_leng[i] = leng;
+        // // fr += sizeof(short);
+        // if (leng > blockSize*sizeof(float))
+        // {
+        //     printf("Warning: compressed block is larger than the original block!\n");
+        //     return;
+        //     // exit(0);
+        // }
+        p = basep + g_leng[i];
+
         memcpy(data+i*blockSize*sizeof(float), p, leng);
 
-	    p += leng;
+        // p += leng;
     }
 }
 
@@ -1370,6 +1407,7 @@ void decompress_startup_better(float *newData, size_t nbEle, unsigned char* r,
 ){
     blockSize = 256;
     size_t nb_tmp = (int) nbEle/256;
+    uint64_t* g_leng;
     /**
      * Structures to return:
      * blk_idx, blk_subidx, blk_sig, blk_vals, numSigValues (pointer)
@@ -1379,7 +1417,7 @@ void decompress_startup_better(float *newData, size_t nbEle, unsigned char* r,
 
 
     size_t stateNBBytes = nb_tmp%4==0 ? nb_tmp/4 : nb_tmp/4+1;
-
+    
     r += 4;
     r++;
     r += sizeof(size_t);
@@ -1395,14 +1433,21 @@ void decompress_startup_better(float *newData, size_t nbEle, unsigned char* r,
     
     // printf("before mallocs in kernel\n");
     checkCudaErrors(cudaMemcpy((newData)+nbBlocks*blockSize, r, (nbEle%blockSize)*sizeof(float), cudaMemcpyDeviceToDevice));
+    checkCudaErrors(cudaMalloc(&g_leng, sizeof(uint64_t)*ncBlocks));
     // memcpy((newData)+nbBlocks*blockSize, r, (nbEle%blockSize)*sizeof(float));
 
     //printf("before mallocs in kernel %p\n", r);
     r += (nbEle%blockSize)*sizeof(float);
     //printf("r: %p\n", r);
     //printf("%d, %d, %d\n",nbEle, 256, nbEle%256);
-    decomp_startup_kernel<<<40,256>>>(r, nbConstantBlocks,data, blockSize, mSize, ncBlocks, constantMedianArray);
+    decomp_startup_kernel<<<40,256>>>(r, nbConstantBlocks,data, blockSize, mSize, ncBlocks, constantMedianArray, g_leng);
     cudaDeviceSynchronize();
+
+    thrust::exclusive_scan(thrust::device, g_leng, g_leng + ncBlocks, g_leng, 0);
+
+    decompress_ncblk_kernel<<<40,256>>>(r, nbConstantBlocks, data, blockSize, mSize, ncBlocks, constantMedianArray, g_leng);
+    cudaDeviceSynchronize();
+    cudaFree(g_leng);
     r += nbConstantBlocks*sizeof(float);
 
     newCmpBytes = r;
@@ -1564,6 +1609,65 @@ __global__ void print_newdata(float *newData, size_t nbBlocks, int blockSize){
     
 }
 
+__global__ void generateNbNc(size_t nbBlocks, size_t ncBlocks, unsigned char *stateArray, uint64_t* nbs,  uint64_t* ncs){
+    for(int i = blockDim.x*blockIdx.x + threadIdx.x;i < nbBlocks;i+=blockDim.x*gridDim.x){
+        unsigned char state = stateArray[i];
+        if(state==0||state==1){
+            nbs[i] = 1;
+            ncs[i] = 0;
+        }else if(state==3){
+            nbs[i] = 0;
+            ncs[i] = 1;
+        }else{
+            nbs[i] = 0;
+            ncs[i] = 0;
+        }
+    }
+}
+
+__global__ void decompress_final_set(unsigned char *data, float *newData, int blockSize, 
+    size_t nbBlocks, size_t ncBlocks, unsigned char *stateArray,
+    float *constantMedianArray, uint64_t* nb, uint64_t* nc){
+    float* fdata = (float*)data;
+    for (int i = blockIdx.x;i < nbBlocks;i+=gridDim.x){
+        if (stateArray[i]==0 || stateArray[i]==1){
+            float Median = constantMedianArray[nb[i]];
+            // if (Median>1) printf("data%i:%f\n",i, Median);
+            for (int j = threadIdx.x; j < blockSize; j += blockDim.x)
+                *((newData)+i*blockSize+j) = Median;
+            // nb++;
+        }else if(stateArray[i]==3){
+            for (int j = threadIdx.x; j < blockSize; j += blockDim.x)
+                *((newData)+i*blockSize+j) = fdata[nc[i]*blockSize+j];
+            // nc++;
+        }
+        __syncthreads();
+    }
+}
+
+void decompress_post_proc_fast(unsigned char *data, float *newData, int blockSize, 
+    size_t nbBlocks, size_t ncBlocks, unsigned char *stateArray,
+    float *constantMedianArray
+){
+    // checkCudaErrors(cudaMemcpy(data, d_data, ncBlocks*blockSize*sizeof(float), cudaMemcpyDeviceToHost)); 
+    // checkCudaErrors(cudaMemcpy(*newData, d_newdata, nbBlocks*blockSize*sizeof(float), cudaMemcpyDeviceToHost));
+    
+    int i,j;
+    uint64_t *nb, *nc;
+    checkCudaErrors(cudaMalloc(&nb, sizeof(uint64_t)*nbBlocks));
+    checkCudaErrors(cudaMalloc(&nc, sizeof(uint64_t)*nbBlocks));
+
+    generateNbNc<<<40,256>>>(nbBlocks, ncBlocks, stateArray, nb,nc);
+    cudaDeviceSynchronize();
+    thrust::exclusive_scan(thrust::device, nb, nb + nbBlocks, nb, 0);
+    thrust::exclusive_scan(thrust::device, nc, nc + nbBlocks, nc, 0);
+
+    decompress_final_set<<<nbBlocks,256>>>(data, newData, blockSize,nbBlocks, ncBlocks, stateArray,constantMedianArray, nb, nc);
+    cudaDeviceSynchronize();
+    cudaFree(nb);
+    cudaFree(nc);
+}
+
 __global__ void decompress_post_proc(unsigned char *data, float *newData, int blockSize, 
     size_t nbBlocks, size_t ncBlocks, unsigned char *stateArray,
     float *constantMedianArray
@@ -1632,7 +1736,7 @@ float* device_ptr_cuSZx_decompress_float(size_t nbEle, unsigned char* cmpBytes)
     size_t *nbConstantBlocks, *nbBlocks, *ncBlocks, nbBlocks_h, ncBlocks_h, nbConstantBlocks_h;
     unsigned char *stateArray, *data;
     float *newData;
-
+    timer_GPU.StartCounter();
     unsigned char *oldCmpBytes = cmpBytes;
 	//*newData = (float*)malloc(sizeof(float)*nbEle);
 //    printf("cmpbytes check %d\n", (int)cmpBytes[0]);
@@ -1670,15 +1774,24 @@ float* device_ptr_cuSZx_decompress_float(size_t nbEle, unsigned char* cmpBytes)
     checkCudaErrors(cudaMalloc((void**)&blk_subidx, num_sig_h*sizeof(uint8_t)));
     checkCudaErrors(cudaMalloc((void**)&blk_sig, nbBlocks_h*sizeof(uint8_t)));
 
-    setup_data_stateArray<<<1,1>>>(newData, nbEle, cmpBytes, 
-        num_sig_h, bs,
-        nbConstantBlocks_h, nbBlocks_h, ncBlocks,
-        stateArray, cmpBytes
-    );
-    cudaDeviceSynchronize();
+    unsigned char* tmp_r = cmpBytes;
+    unsigned char* newR;
+    setup_data_stateArray_better(newData, nbEle, tmp_r, 
+    num_sig_h, bs,
+    nbConstantBlocks_h, nbBlocks_h, &ncBlocks_h,
+    stateArray, newR);
+    
+    
+    
+   // setup_data_stateArray<<<1,1>>>(newData, nbEle, cmpBytes, 
+   //      num_sig_h, bs,
+   //      nbConstantBlocks_h, nbBlocks_h, ncBlocks,
+   //      stateArray, cmpBytes
+   //  );
+   // cudaDeviceSynchronize();
 
    // printf("%s\n", cudaGetErrorString(cudaGetLastError())); 
-    checkCudaErrors(cudaMemcpy(&ncBlocks_h, ncBlocks, sizeof(size_t), cudaMemcpyDeviceToHost)); 
+   // checkCudaErrors(cudaMemcpy(&ncBlocks_h, ncBlocks, sizeof(size_t), cudaMemcpyDeviceToHost)); 
 
     checkCudaErrors(cudaMalloc((void**)&data, ncBlocks_h*bs*sizeof(float)));
     // cmpBytes = newCmpBytes;
@@ -1698,12 +1811,23 @@ float* device_ptr_cuSZx_decompress_float(size_t nbEle, unsigned char* cmpBytes)
     //printf("%s\n", cudaGetErrorString(cudaGetLastError())); 
     //test_nbBlks = (size_t *)malloc(sizeof(size_t));
     // printf("malloc\n");
-    decompress_startup<<<1,1>>>(newData, nbEle, cmpBytes, 
+    
+    
+    tmp_r = cmpBytes;
+    decompress_startup_better(newData, nbEle, tmp_r, 
     blk_idx, blk_subidx, blk_sig,
     blk_vals, num_sig_h, bs,
-    nbConstantBlocks_h, nbBlocks_h, ncBlocks_h,
-    stateArray, constantMedianArray, data, mSize_h, cmpBytes);
-    cudaDeviceSynchronize();
+     nbConstantBlocks_h, nbBlocks_h, ncBlocks_h,
+    stateArray, constantMedianArray, data,
+    mSize_h, newR);
+
+
+    //decompress_startup<<<1,1>>>(newData, nbEle, cmpBytes, 
+    // blk_idx, blk_subidx, blk_sig,
+    // blk_vals, num_sig_h, bs,
+    // nbConstantBlocks_h, nbBlocks_h, ncBlocks_h,
+    // stateArray, constantMedianArray, data, mSize_h, cmpBytes);
+    //cudaDeviceSynchronize();
     // cmpBytes = newCmpBytes;
 
     //printf("%s\n", cudaGetErrorString(cudaGetLastError())); 
@@ -1715,7 +1839,7 @@ float* device_ptr_cuSZx_decompress_float(size_t nbEle, unsigned char* cmpBytes)
     //printf("nblocks: %d bs: %d\n", nbBlocks_h, bs);
     checkCudaErrors(cudaMalloc(&d_newdata, nbBlocks_h*bs*sizeof(float)));
 
-    timer_GPU.StartCounter();
+    
     dim3 dimBlock(32, bs/32);
     dim3 dimGrid(65536, 1);
     const int sMemsize = bs * sizeof(float) + dimBlock.y * sizeof(int);
@@ -1726,18 +1850,22 @@ float* device_ptr_cuSZx_decompress_float(size_t nbEle, unsigned char* cmpBytes)
     //printf("GPU decompression timing: %f ms\n", timer_GPU.GetCounter());
     cudaDeviceSynchronize();
 
-    err = cudaGetLastError();        // Get error code
-    printf("CUDA Error: %s\n", cudaGetErrorString(err));
-    printf("GPU decompression timing: %f ms\n", timer_GPU.GetCounter());
+    
     // checkCudaErrors(cudaMemcpy(data, d_data, ncBlocks*blockSize*sizeof(float), cudaMemcpyDeviceToHost)); 
     checkCudaErrors(cudaMemcpy(newData, d_newdata, nbBlocks_h*bs*sizeof(float), cudaMemcpyDeviceToDevice));
     cudaFree(d_newdata);
 
-    decompress_post_proc<<<1,1>>>(data, newData, bs, 
+    // decompress_post_proc<<<1,1>>>(data, newData, bs, 
+    // nbBlocks_h, ncBlocks_h, stateArray,
+    // constantMedianArray);
+    // cudaDeviceSynchronize();
+    decompress_post_proc_fast(data, newData, bs, 
     nbBlocks_h, ncBlocks_h, stateArray,
     constantMedianArray);
-    cudaDeviceSynchronize();
-//    print_newdata<<<1,1>>>(newData, nbBlocks_h, bs);
+    err = cudaGetLastError();        // Get error code
+    printf("CUDA Error: %s\n", cudaGetErrorString(err));
+    printf("GPU decompression timing: %f ms\n", timer_GPU.GetCounter());
+    // print_newdata<<<1,1>>>(newData, nbBlocks_h, bs);
 	cudaFree(stateArray);
 	cudaFree(constantMedianArray);
 	cudaFree(data);
