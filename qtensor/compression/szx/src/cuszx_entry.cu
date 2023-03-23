@@ -9,6 +9,8 @@
 #include <cub/cub.cuh>
 
 #define SPARSITY_LEVEL 0.25
+#define BLOCKS 40
+#define THREADS_PER_BLOCK 256
 
 TimingGPU timer_GPU;
 void bin(unsigned n)
@@ -746,14 +748,14 @@ void ncblkCopy_fast(unsigned char * c, unsigned char* o, unsigned char *nc, unsi
     checkCudaErrors(cudaMalloc(&ncBlk_indices, sizeof(uint64_t)*nbBlocks));
     checkCudaErrors(cudaMalloc(&offset_indices, sizeof(uint64_t)*nbBlocks));
 
-    generateFlags<<<40,256>>>(meta, cBlk_indices, ncBlk_indices, offset_indices, offsets, nbBlocks);
+    generateFlags<<<BLOCKS,THREADS_PER_BLOCK>>>(meta, cBlk_indices, ncBlk_indices, offset_indices, offsets, nbBlocks);
     cudaDeviceSynchronize();
 
     thrust::exclusive_scan(thrust::device, cBlk_indices, cBlk_indices + nbBlocks, cBlk_indices, 0);
     thrust::exclusive_scan(thrust::device, ncBlk_indices, ncBlk_indices + nbBlocks, ncBlk_indices, 0);
     thrust::exclusive_scan(thrust::device, offset_indices, offset_indices + nbBlocks, offset_indices, 0);
 
-    nccopy_kernel<<<40,256>>>(c, o, nc, midBytes, meta, nbBlocks, blockSize, offsets, mSize, cBlk_indices,ncBlk_indices,offset_indices);
+    nccopy_kernel<<<BLOCKS,THREADS_PER_BLOCK>>>(c, o, nc, midBytes, meta, nbBlocks, blockSize, offsets, mSize, cBlk_indices,ncBlk_indices,offset_indices);
     // nccopy_kernel2<<<1,1>>>(c, o, nc, midBytes, meta, nbBlocks, blockSize, offsets, mSize, cBlk_indices,ncBlk_indices,offset_indices);
 
     cudaDeviceSynchronize();
@@ -877,7 +879,7 @@ size_t better_post_proc(size_t *outSize, float *oriData, unsigned char *meta,
     checkCudaErrors(cudaMemset(out_size_d, 0, sizeof(int)));
 
 
-    getNumNonConstantBlocks<<<40,256>>>(nbBlocks, offsets, meta, blockSize, nonconstant_d, out_size_d);
+    getNumNonConstantBlocks<<<BLOCKS,THREADS_PER_BLOCK>>>(nbBlocks, offsets, meta, blockSize, nonconstant_d, out_size_d);
     cudaDeviceSynchronize();
 
     checkCudaErrors(cudaMemcpy(&nonconstant_h, nonconstant_d, sizeof(int), cudaMemcpyDeviceToHost));
@@ -911,9 +913,9 @@ size_t better_post_proc(size_t *outSize, float *oriData, unsigned char *meta,
 	else
 		out_length = nbBlocks/4+1;
 
-    convert_state_to_out_kernel<<<40,256>>>(meta, nbBlocks, r, out_length);
+    convert_state_to_out_kernel<<<BLOCKS,THREADS_PER_BLOCK>>>(meta, nbBlocks, r, out_length);
     r+=out_length;
-    convert_block2_to_out_kernel<<<40,256>>>(r, nbBlocks,num_sig, blk_idx, blk_vals, blk_subidx, blk_sig);
+    convert_block2_to_out_kernel<<<BLOCKS,THREADS_PER_BLOCK>>>(r, nbBlocks,num_sig, blk_idx, blk_vals, blk_subidx, blk_sig);
     r += nbBlocks*4 + num_sig*sizeof(float) + num_sig*sizeof(uint8_t) + nbBlocks*sizeof(uint8_t);
 
     checkCudaErrors(cudaMemcpy(r, oriData+nbBlocks*blockSize, (nbEle%blockSize)*sizeof(float), cudaMemcpyDeviceToDevice));
@@ -1272,7 +1274,7 @@ __global__ void decompress_get_stats(float *newData, size_t nbEle, unsigned char
     // printf("cmp %d\n", (int)r[0]);
     // printf("state %d\n", (int)stateArray[0]);
     // convert_out_to_state(nbBlocks, r, stateArray);
-    convert_out_to_state_kernel<<<40,256>>>(nbBlocks,r,stateArray,stateNBBytes,
+    convert_out_to_state_kernel<<<BLOCKS,THREADS_PER_BLOCK>>>(nbBlocks,r,stateArray,stateNBBytes,
                             num_state2_d, ncBlocks_d);
     // printf("state %d\n", (int)stateArray[0]);
     // convertByteArray2IntArray_fast_1b_args(nbBlocks, r, stateNBBytes, stateArray); //get the stateArray
@@ -1430,7 +1432,7 @@ void decompress_startup_better(float *newData, size_t nbEle, unsigned char* r,
 
     r += stateNBBytes;
 
-    convert_out_to_block2_kernel<<<40,256>>>(r, nbBlocks, (uint64_t)num_sig, blk_idx, blk_vals, blk_subidx, blk_sig);
+    convert_out_to_block2_kernel<<<BLOCKS,THREADS_PER_BLOCK>>>(r, nbBlocks, (uint64_t)num_sig, blk_idx, blk_vals, blk_subidx, blk_sig);
     size_t to_add = nbBlocks*4 + num_sig*sizeof(float) + num_sig*sizeof(uint8_t) + nbBlocks*sizeof(uint8_t);
     r+= to_add;
 
@@ -1445,12 +1447,12 @@ void decompress_startup_better(float *newData, size_t nbEle, unsigned char* r,
     r += (nbEle%blockSize)*sizeof(float);
     //printf("r: %p\n", r);
     //printf("%d, %d, %d\n",nbEle, 256, nbEle%256);
-    decomp_startup_kernel<<<40,256>>>(r, nbConstantBlocks,data, blockSize, mSize, ncBlocks, constantMedianArray, g_leng);
+    decomp_startup_kernel<<<BLOCKS,THREADS_PER_BLOCK>>>(r, nbConstantBlocks,data, blockSize, mSize, ncBlocks, constantMedianArray, g_leng);
     cudaDeviceSynchronize();
 
     thrust::exclusive_scan(thrust::device, g_leng, g_leng + ncBlocks, g_leng, 0);
 
-    decompress_ncblk_kernel<<<40,256>>>(r, nbConstantBlocks, data, blockSize, mSize, ncBlocks, constantMedianArray, g_leng);
+    decompress_ncblk_kernel<<<BLOCKS,THREADS_PER_BLOCK>>>(r, nbConstantBlocks, data, blockSize, mSize, ncBlocks, constantMedianArray, g_leng);
     cudaDeviceSynchronize();
     cudaFree(g_leng);
     r += nbConstantBlocks*sizeof(float);
@@ -1662,7 +1664,7 @@ void decompress_post_proc_fast(unsigned char *data, float *newData, int blockSiz
     checkCudaErrors(cudaMalloc(&nb, sizeof(uint64_t)*nbBlocks));
     checkCudaErrors(cudaMalloc(&nc, sizeof(uint64_t)*nbBlocks));
 
-    generateNbNc<<<40,256>>>(nbBlocks, ncBlocks, stateArray, nb,nc);
+    generateNbNc<<<BLOCKS,THREADS_PER_BLOCK>>>(nbBlocks, ncBlocks, stateArray, nb,nc);
     cudaDeviceSynchronize();
     thrust::exclusive_scan(thrust::device, nb, nb + nbBlocks, nb, 0);
     thrust::exclusive_scan(thrust::device, nc, nc + nbBlocks, nc, 0);
