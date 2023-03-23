@@ -662,25 +662,30 @@ __global__ void nccopy_kernel(unsigned char * c, unsigned char* o, unsigned char
 	    // memcpy(&g, (meta+(nbBlocks+i*mSize)),sizeof(float));
 	    // printf("%d %f\n",i,g);
         }
-        // else if(meta[i] == 3){
+        else if(meta[i] == 3){
 	
-        // //     printf("ncblk 1\n");
-        //     shortToBytes_d(o+(sizeof(short)*ncBlk_indices[i]), offsets[i]);
-        //      // o += sizeof(short);
+        //     printf("ncblk 1\n");
+            shortToBytes_d(o+(sizeof(short)*ncBlk_indices[i]), offsets[i]);
+             // o += sizeof(short);
 
-        // //     printf("ncblk 2 nbBlocks %d %d \n", nbBlocks, i);
-        //     printf("nbBlkindices %ld offset_indices %ld\n", ncBlk_indices[i], offset_indices[i]);
-        // //     printf(" test 1%c\n",meta+(nbBlocks+i*mSize));
-        // //     printf("test 2%c\n", nc+(mSize*ncBlk_indices[i] + offset_indices[i]*ncBlk_indices[i]));
-        //     memcpy(nc+((mSize + offset_indices[i])*ncBlk_indices[i]), meta+(nbBlocks+i*mSize), mSize);
-        // //         // nc += mSize; 
+        //     printf("ncblk 2 nbBlocks %d %d \n", nbBlocks, i);
+            // printf("nbBlkindices %ld offset_indices %ld\n", ncBlk_indices[i], offset_indices[i]);
+        //     printf(" test 1%c\n",meta+(nbBlocks+i*mSize));
+        //     printf("test 2%c\n", nc+(mSize*ncBlk_indices[i] + offset_indices[i]*ncBlk_indices[i]));
+            memcpy(nc+((mSize*ncBlk_indices[i] + offset_indices[i])), meta+(nbBlocks+i*mSize), mSize);
+        //         // nc += mSize; 
                 
-        // //     printf("ncblk 3\n");
-        //     memcpy(nc+((mSize+mSize + offset_indices[i])*ncBlk_indices[i]), midBytes+(i*blockSize*sizeof(float)), offsets[i]);
-        // //         // nc += offsets[i];
+        //     printf("ncblk 3\n");
+            memcpy(nc+(((mSize*ncBlk_indices[i])+mSize + offset_indices[i])), midBytes+(i*blockSize*sizeof(float)), offsets[i]);
+        //         // nc += offsets[i];
             
-        // //     printf("ncblk 4\n");
-        // } 
+        //     printf("ncblk 4\n");
+        }
+        if (i==nbBlocks-1)
+        {
+            nc = nc+(((mSize*ncBlk_indices[i])+mSize + offset_indices[i]))+offsets[i];
+        }
+        
     }
     
 }
@@ -919,7 +924,7 @@ size_t better_post_proc(size_t *outSize, float *oriData, unsigned char *meta,
     unsigned char* nc = o+(nbBlocks-nbConstantBlocks)*sizeof(short);
     // ncblkCopy<<<1,1>>>(c, o, nc, midBytes, meta,nbBlocks, blockSize, offsets, mSize);
     
-    ncblkCopy_h(c, o, nc, midBytes, meta,nbBlocks, blockSize, offsets, mSize);
+    // ncblkCopy_h(c, o, nc, midBytes, meta,nbBlocks, blockSize, offsets, mSize);
     ncblkCopy_fast(c, o, nc, midBytes, meta,nbBlocks, blockSize, offsets, mSize);
     // cudaDeviceSynchronize();
     return (size_t) (nc-r_old);
@@ -1865,7 +1870,7 @@ float* device_ptr_cuSZx_decompress_float(size_t nbEle, unsigned char* cmpBytes)
     err = cudaGetLastError();        // Get error code
     printf("CUDA Error: %s\n", cudaGetErrorString(err));
     printf("GPU decompression timing: %f ms\n", timer_GPU.GetCounter());
-    // print_newdata<<<1,1>>>(newData, nbBlocks_h, bs);
+   // print_newdata<<<1,1>>>(newData, nbBlocks_h, bs);
 	cudaFree(stateArray);
 	cudaFree(constantMedianArray);
 	cudaFree(data);
