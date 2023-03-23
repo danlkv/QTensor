@@ -53,3 +53,15 @@ main.py process \
 ```
 
 The parent directory for each out file will be created automatically
+
+
+## Analysis
+
+Simple simulation analysis script: `analysis/compression_scaling_analysis.py`.
+Accepts a glob pattern for simulation output files
+
+Usage:
+
+```
+python analysis/compression_scaling_analysis.py ./data/simulations/maxcut/file\*
+``
