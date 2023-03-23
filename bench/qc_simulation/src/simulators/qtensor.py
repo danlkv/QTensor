@@ -184,7 +184,7 @@ def simulate(in_file, out_file, backend='einsum', compress=None, M=29, **kwargs)
     backend = qtensor.contraction_backends.get_backend(backend)
     if compress is not None:
         if compress == 'szx':
-            compressor = qtensor.compression.CUSZCompressor(r2r_error=5e-2, r2r_threshold=5e-2)
+            compressor = qtensor.compression.CUSZCompressor(r2r_error=1e-3, r2r_threshold=1e-3)
             compressor = qtensor.compression.ProfileCompressor(compressor)
         else:
             raise ValueError(f"Unknown compression algorithm: {compress}")
@@ -231,12 +231,18 @@ def simulate(in_file, out_file, backend='einsum', compress=None, M=29, **kwargs)
         del bcopy
         print("Result", res.data.flatten()[0])
         time.sleep(0.5)
-    print("Simulation result:", backend.get_result_data(res).flatten()[0])
+    sim_result = backend.get_result_data(res).flatten()[0]
+    print("Simulation result:", sim_result)
     end = time.time()
-    print("D", end - start)
+    print("Elapsed", end - start)
     out_file += ".json"
     C = {'time': 2**len(par_vars)*(end - start)}
+    C['elapsed'] = (end - start)
     C['memory'] = backend.max_mem
+    C['result'] = {
+        "Re": np.real(sim_result).tolist(),
+        "Im": np.imag(sim_result).tolist()
+    }
     if compress is not None:
         if isinstance(compressor, qtensor.compression.ProfileCompressor):
             C['compression'] = compressor.get_profile_data_json()
