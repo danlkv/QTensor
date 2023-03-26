@@ -30,6 +30,8 @@ def main():
         stats["result"] = (_res["Re"] , _res["Im"])
         stats["Time"] = fmt_unit(data["time"],'s')
         stats["Memory"] = str(data["memory"]/1024/1024) + " MB"
+        if data.get('nvmemory'):
+            stats["NVMemory"] = str(data["nvmemory"]/1024/1024) + " MB"
         print(file)
         _prefix = "  "
         last = lambda x: x==len(stats.items())-1

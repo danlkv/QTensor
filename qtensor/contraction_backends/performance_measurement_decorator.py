@@ -17,9 +17,20 @@ class MemProfBackend(ContractionBackend):
         self.print = print
         self.max_mem = 0
 
+        import nvidia_smi
+        nvidia_smi.nvmlInit()
+        self.nvsmi_handle = nvidia_smi.nvmlDeviceGetHandleByIndex(0)
+        self.nvsmi_max_mem = 0
+
     def _print(self, *args, **kwargs):
         if self.print:
             print(*args, **kwargs)
+
+    def _update_nvsmi(self):
+        import nvidia_smi
+        info = nvidia_smi.nvmlDeviceGetMemoryInfo(self.nvsmi_handle)
+        mem = info.used
+        self.nvsmi_max_mem = max(mem, self.nvsmi_max_mem)
 
     def check_store(self):
         import cupy
@@ -71,6 +82,7 @@ class MemProfBackend(ContractionBackend):
         if tsize>1024:
             self._print("Added tensor with data size", tsize/1024, "KB")
         self.check_store()
+        self._update_nvsmi()
 
     def process_bucket(self, bucket, no_sum=False):
         res = self.backend.process_bucket(bucket, no_sum=no_sum)
