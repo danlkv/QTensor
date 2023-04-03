@@ -15,22 +15,31 @@ class MemProfBackend(ContractionBackend):
         self.object_store = WeakValueDictionary()
         self.object_keys = []
         self.print = print
-        self.max_mem = 0
+        self.mem_history = []
 
         import nvidia_smi
         nvidia_smi.nvmlInit()
         self.nvsmi_handle = nvidia_smi.nvmlDeviceGetHandleByIndex(0)
-        self.nvsmi_max_mem = 0
 
     def _print(self, *args, **kwargs):
         if self.print:
             print(*args, **kwargs)
 
-    def _update_nvsmi(self):
+    def _get_nvsmi_mem(self):
         import nvidia_smi
         info = nvidia_smi.nvmlDeviceGetMemoryInfo(self.nvsmi_handle)
         mem = info.used
-        self.nvsmi_max_mem = max(mem, self.nvsmi_max_mem)
+        return mem
+
+    @property
+    def max_mem(self):
+        mems = [m['mem'] for m in self.mem_history]
+        return max(mems)
+
+    @property
+    def nvsmi_max_mem(self):
+        mems = [m['nvmem'] for m in self.mem_history]
+        return max(mems)
 
     def check_store(self):
         import cupy
@@ -51,12 +60,18 @@ class MemProfBackend(ContractionBackend):
 
         if total_mem>1024**2:
             self._print("Total memory usage", total_mem/1024/1024, "MB")
+            mempool.free_all_blocks()
         cupy_mem = mempool.used_bytes()
         # get maximum memory usage
         gpu_mem = cupy_mem
         if isinstance(self.backend, CompressionBackend):
             gpu_mem += 8*2**self.backend.max_tw
-        self.max_mem = max(self.max_mem, gpu_mem)
+        self.mem_history.append(dict(
+            mem=gpu_mem,
+            cupy_bufsize=mempool.total_bytes(),
+            nvmem = self._get_nvsmi_mem(),
+            tensors_sizes=[len(tensor.indices) for tensor in self.object_store.values()]
+        ))
         # --
         if cupy_mem>1024**2:
             self._print("CuPy memory usage", cupy_mem/1024/1024, "MB. Total MB:", mempool.total_bytes()/1024**2)
@@ -82,7 +97,6 @@ class MemProfBackend(ContractionBackend):
         if tsize>1024:
             self._print("Added tensor with data size", tsize/1024, "KB")
         self.check_store()
-        self._update_nvsmi()
 
     def process_bucket(self, bucket, no_sum=False):
         res = self.backend.process_bucket(bucket, no_sum=no_sum)

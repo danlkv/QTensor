@@ -239,6 +239,7 @@ def simulate(in_file, out_file,
     C = {'time': 2**len(par_vars)*(end - start)}
     C['elapsed'] = (end - start)
     C['memory'] = backend.max_mem
+    C['memory_history'] = backend.mem_history
     C['nvmemory'] = backend.nvsmi_max_mem
     C['result'] = {
         "Re": np.real(sim_result).tolist(),
