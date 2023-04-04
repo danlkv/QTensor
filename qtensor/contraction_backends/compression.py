@@ -46,7 +46,7 @@ class CompressionBackend(ContractionBackend):
         """
         ctr_kw = dict(zip(['einsum', 'move_data'], self._get_backend_specific_fns(self.backend)))
         bucket.sort(key=lambda x: len(x.indices))
-        print("Processing bucket", bucket)
+        #print("Processing bucket", bucket)
         accum = bucket[0]
         for t in bucket[1:-1]:
             accum = compressed_contract(
@@ -75,7 +75,7 @@ class CompressionBackend(ContractionBackend):
                         # (effectively converting pointer to pointer to addr to pointer to int64)
                         p_decompressed_int= ctypes.cast(p_decompressed_ptr, ctypes.POINTER(ctypes.c_uint64))
                         decompressed_int = p_decompressed_int.contents
-                        print("Freeing mem", decompressed_int.value)
+                        #print("Freeing mem", decompressed_int.value)
                         cupy.cuda.runtime.free(decompressed_int.value)
                     t.compressor.compressor.free_decompressed()
                     #raise ValueError("Done")
@@ -102,7 +102,7 @@ class CompressionBackend(ContractionBackend):
                     # (effectively converting pointer to pointer to addr to pointer to int64)
                     p_decompressed_int= ctypes.cast(p_decompressed_ptr, ctypes.POINTER(ctypes.c_uint64))
                     decompressed_int = p_decompressed_int.contents
-                    print("Freeing mem", decompressed_int.value)
+                    #print("Freeing mem", decompressed_int.value)
                     cupy.cuda.runtime.free(decompressed_int.value)
                 accum.compressor.compressor.free_decompressed()
             return res

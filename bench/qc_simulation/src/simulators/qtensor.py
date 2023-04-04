@@ -205,6 +205,8 @@ def simulate(in_file, out_file,
     print("Simulation result:", sim_result)
     end = time.time()
     print("Elapsed", end - start)
+    if mpi:
+        out_file += '_rank'+str(get_mpi_rank())
     out_file += ".json"
     C = {'time': 2**len(par_vars)*(end - start)}
     C['elapsed'] = (end - start)
@@ -223,26 +225,12 @@ def simulate(in_file, out_file,
     cupy.cuda.profiler.stop()
     return out_file
 
-def _simulate_wrapper(backend, tn, peo, par_vars, hpc=True):
-    from qtensor.contraction_algos import bucket_elimination
-    import cupy
+def _simulate_wrapper(backend, tn, peo, par_vars, hpc=False):
     """
     Backend is modified in the simulation
     """
 
     # -- Prepare buckets
-    relabelid = {}
-    for tensor in tn.tensors:
-        for i in tensor.indices:
-            relabelid[int(i)] = i
-    slice_ext = {relabelid[int(i)]: 0 for i in par_vars}
-
-    sim = qtensor.QtreeSimulator(backend=backend)
-    sim.tn = tn
-    sim.tn.backend = backend
-    sim.peo = peo
-    sim._slice_relabel_buckets(slice_ext)
-    buckets = sim.tn.buckets
     # --
 
     # --dbg
@@ -256,19 +244,77 @@ def _simulate_wrapper(backend, tn, peo, par_vars, hpc=True):
     #print(f"Sliced graph # nodes: {graph.number_of_nodes()} and #components: {len(components)} with sizes {[len(c) for c in components]}")
     #print(f"peo size without par_vars and ignore_vars: {len(peo) - len(ignore_vars)}")
     # --
+    def make_sim():
+        import copy
+        sim = qtensor.QtreeSimulator(backend=backend)
+        sim.tn = copy.deepcopy(tn)
+        sim.tn.backend = backend
+        sim.peo = copy.deepcopy(peo)
+        return sim
 
     if hpc:
-        res = _simulate_hpc(tn, backend)
+        res = _simulate_hpc(make_sim, par_vars)
     else:
-        for i in range(2**0):
-            print(f"P {i}", end='', flush=True)
-            bcopy = [b[:] for b in buckets]
-            res = bucket_elimination(
-                bcopy, backend,
-                n_var_nosum=len(tn.free_vars)
-            )
-            del bcopy
-            print("Result", res.data.flatten()[0])
-            time.sleep(0.5)
+        res = simulate_slice(make_sim, [0]*len(par_vars), par_vars)
+
+    return res
+
+def simulate_slice(make_sim, slice_values, par_vars):
+    from qtensor.contraction_algos import bucket_elimination
+    sim = make_sim()
+    tn = sim.tn
+    backend = sim.backend
+    if hasattr(backend, 'print'):
+        backend.print = False
+    relabelid = {}
+    for tensor in tn.tensors:
+        for i in tensor.indices:
+            relabelid[int(i)] = i
+
+    slice_ext = {relabelid[int(i)]: int(v) for i,v in zip(par_vars, slice_values)}
+    print("Slice extents", slice_ext)
+    sim._slice_relabel_buckets(slice_ext)
+    buckets = sim.tn.buckets
+    print(f"P {i}", end='', flush=True)
+    bcopy = [b[:] for b in buckets]
+    res = bucket_elimination(
+		bcopy, backend,
+		n_var_nosum=len(tn.free_vars)
+	)
+    del bcopy
     sim_result = backend.get_result_data(res).flatten()[0]
+    print("Result", sim_result)
     return sim_result
+
+def _get_mpi_unit(sim, par_vars):
+    def _mpi_unit(rank):
+        slice_values = np.unravel_index(rank, [2]*len(par_vars))
+        res = simulate_slice(sim, slice_values, par_vars)
+        return res
+    return _mpi_unit
+
+def get_mpi_rank():
+    from qtensor.tools.lazy_import import MPI
+    w = MPI.COMM_WORLD
+    comm = MPI.Comm
+    rank = comm.Get_rank(w)
+    return rank
+
+def _simulate_hpc(_sim, par_vars):
+    from qtensor.contraction_algos import bucket_elimination
+    import cupy
+    from qtensor.tools.lazy_import import MPI
+    from qtensor.tools.mpi.mpi_map import MPIParallel
+    mpi_unit = _get_mpi_unit(_sim, par_vars)
+    par = MPIParallel()
+    w = MPI.COMM_WORLD
+    comm = MPI.Comm
+    size = comm.Get_size(w)
+    rank = comm.Get_rank(w)
+    cupy.cuda.runtime.setDevice(rank%4)
+    if rank==0:
+        print(f'MPI::I:: There are {size} workers and {2**len(par_vars)} tasks over {par_vars}')
+    if len(par_vars)==0:
+        return
+    values = par.map(mpi_unit, range(2**len(par_vars)))
+    return np.sum(values)

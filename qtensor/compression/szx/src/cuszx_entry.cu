@@ -355,8 +355,8 @@ unsigned char* cuSZx_fast_compress_args_unpredictable_blocked_float(float *oriDa
     const int sMemsize = blockSize * sizeof(float) + dimBlock.y * sizeof(int);
     compress_float<<<dimGrid, dimBlock, sMemsize>>>(d_oriData, d_meta, d_offsets, d_midBytes, absErrBound, blockSize, nbBlocks, mSize, sparsity_level, d_blk_idx, d_blk_subidx,d_blk_vals, threshold, d_blk_sig);
     cudaError_t err = cudaGetLastError();        // Get error code
-    printf("CUDA Error: %s\n", cudaGetErrorString(err));
-    printf("GPU compression timing: %f ms\n", timer_GPU.GetCounter());
+    //printf("CUDA Error: %s\n", cudaGetErrorString(err));
+    //printf("GPU compression timing: %f ms\n", timer_GPU.GetCounter());
     cudaDeviceSynchronize();
     get_numsig<<<1,1>>>(d_num_sig);
     cudaDeviceSynchronize();
@@ -508,8 +508,8 @@ void cuSZx_fast_decompress_args_unpredictable_blocked_float(float** newData, siz
     decompress_state2<<<nbBlocks, 64>>>(d_newdata, d_stateArray,d_blk_idx, d_blk_vals, d_blk_subidx,blockSize, d_blk_sig);
     decompress_float<<<dimGrid, dimBlock, sMemsize>>>(d_data, blockSize, ncBlocks, mSize);
     cudaError_t err = cudaGetLastError();        // Get error code
-    printf("CUDA Error: %s\n", cudaGetErrorString(err));
-    printf("GPU decompression timing: %f ms\n", timer_GPU.GetCounter());
+    //printf("CUDA Error: %s\n", cudaGetErrorString(err));
+    //printf("GPU decompression timing: %f ms\n", timer_GPU.GetCounter());
     cudaDeviceSynchronize();
     checkCudaErrors(cudaMemcpy(data, d_data, ncBlocks*blockSize*sizeof(float), cudaMemcpyDeviceToHost)); 
     checkCudaErrors(cudaMemcpy(*newData, d_newdata, nbBlocks*blockSize*sizeof(float), cudaMemcpyDeviceToHost));
@@ -1154,9 +1154,9 @@ unsigned char* device_ptr_cuSZx_compress_float(float *oriData, size_t *outSize, 
     checkCudaErrors(cudaFree(d_offsets));
     checkCudaErrors(cudaFree(d_midBytes));
 //    printf("completed compression\n");
-    printf("Compression end timestamp: %f ms\n", timer_GPU.GetCounter());
+    //printf("Compression end timestamp: %f ms\n", timer_GPU.GetCounter());
     
-    printf("CUDA Error: %s\n", cudaGetErrorString(err));
+    //printf("CUDA Error: %s\n", cudaGetErrorString(err));
     return d_outBytes;
 }
 
@@ -1870,8 +1870,8 @@ float* device_ptr_cuSZx_decompress_float(size_t nbEle, unsigned char* cmpBytes)
     nbBlocks_h, ncBlocks_h, stateArray,
     constantMedianArray);
     err = cudaGetLastError();        // Get error code
-    printf("CUDA Error: %s\n", cudaGetErrorString(err));
-    printf("GPU decompression timing: %f ms\n", timer_GPU.GetCounter());
+    //printf("CUDA Error: %s\n", cudaGetErrorString(err));
+    //printf("GPU decompression timing: %f ms\n", timer_GPU.GetCounter());
    // print_newdata<<<1,1>>>(newData, nbBlocks_h, bs);
 	cudaFree(stateArray);
 	cudaFree(constantMedianArray);
