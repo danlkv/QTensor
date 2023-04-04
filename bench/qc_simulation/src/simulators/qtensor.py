@@ -284,6 +284,10 @@ def simulate_slice(make_sim, slice_values, par_vars):
     del bcopy
     sim_result = backend.get_result_data(res).flatten()[0]
     print("Result", sim_result)
+    try:
+        sim_result = sim_result.get()
+    except:
+        pass
     return sim_result
 
 def _get_mpi_unit(sim, par_vars):
