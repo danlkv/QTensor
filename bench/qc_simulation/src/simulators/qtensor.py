@@ -116,15 +116,7 @@ def preprocess(in_file, out_file, O='greedy', S=None, M=30, after_slice='run-aga
         components = list(nx.connected_components(graph))
         print(f"Sliced graph # nodes: {graph.number_of_nodes()} and #components: {len(components)} with sizes {[len(c) for c in components]}")
         print(f"peo size without par_vars and ignore_vars: {len(peo) - len(par_vars) - len(ignore_vars)}")
-        def inspect_node(g, n):
-            neighbors = sorted(list(g.neighbors(n)))
-            return f"{n} -> {len(neighbors)}({neighbors[0]}::{neighbors[-1]})"
-        # inspect first 10 nodes
-        graph, label_dict = qtree.graph_model.relabel_graph_nodes(
-            graph, dict(zip(opt.peo_ints, range(graph.number_of_nodes())))
-        ) 
-        for n in sorted(list(graph.nodes()))[127*2:127*4]:
-            print(inspect_node(graph, n), end='; ', flush=True)
+
         print()
         # --
     else:
@@ -165,7 +157,12 @@ def estimate(in_file, out_file, C=100, M=30, F=1e12, T=1e9, **kwargs):
     write_json(C, out_file)
     return out_file
 
-def simulate(in_file, out_file, backend='einsum', compress=None, M=29, **kwargs):
+def simulate(in_file, out_file,
+             backend='einsum',
+             compress=None,
+             M=29,
+             r2r_error=1e-3, r2r_threshold=1e-3,
+             **kwargs):
     """
     Args:
         in_file: file with preprocessed data
@@ -173,6 +170,8 @@ def simulate(in_file, out_file, backend='einsum', compress=None, M=29, **kwargs)
         backend: backend to use
         compress: compression algorithm
         M: memory threshold for compression
+        r2r_error: relative error for compression
+        r2r_threshold: relative threshold for compression
     """
     import time
     from qtensor.contraction_algos import bucket_elimination
@@ -184,7 +183,8 @@ def simulate(in_file, out_file, backend='einsum', compress=None, M=29, **kwargs)
     backend = qtensor.contraction_backends.get_backend(backend)
     if compress is not None:
         if compress == 'szx':
-            compressor = qtensor.compression.CUSZCompressor(r2r_error=5e-2, r2r_threshold=5e-2)
+            print(f"{r2r_error=} {r2r_threshold=}")
+            compressor = qtensor.compression.CUSZCompressor(r2r_error=r2r_error, r2r_threshold=r2r_threshold)
             compressor = qtensor.compression.ProfileCompressor(compressor)
         else:
             raise ValueError(f"Unknown compression algorithm: {compress}")
@@ -231,12 +231,20 @@ def simulate(in_file, out_file, backend='einsum', compress=None, M=29, **kwargs)
         del bcopy
         print("Result", res.data.flatten()[0])
         time.sleep(0.5)
-    print("Simulation result:", backend.get_result_data(res).flatten()[0])
+    sim_result = backend.get_result_data(res).flatten()[0]
+    print("Simulation result:", sim_result)
     end = time.time()
-    print("D", end - start)
+    print("Elapsed", end - start)
     out_file += ".json"
     C = {'time': 2**len(par_vars)*(end - start)}
+    C['elapsed'] = (end - start)
     C['memory'] = backend.max_mem
+    C['memory_history'] = backend.mem_history
+    C['nvmemory'] = backend.nvsmi_max_mem
+    C['result'] = {
+        "Re": np.real(sim_result).tolist(),
+        "Im": np.imag(sim_result).tolist()
+    }
     if compress is not None:
         if isinstance(compressor, qtensor.compression.ProfileCompressor):
             C['compression'] = compressor.get_profile_data_json()

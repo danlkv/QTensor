@@ -67,13 +67,19 @@ def cuszx_host_decompress(nbEle, cmpBytes):
     newData = __cuszx_host_decompress(nbEle_p,cmpBytes)
     return newData
 
+
 def cuszx_device_compress(oriData, absErrBound, nbEle, blockSize,threshold):
     __cuszx_device_compress = get_device_compress()
     
     variable = ctypes.c_size_t(0)
     outSize = ctypes.pointer(variable)
-    absErrBound = absErrBound*(cp.amax(oriData.get())-cp.amin(oriData.get()))
-    threshold = threshold*(cp.amax(oriData.get())-cp.amin(oriData.get()))
+    #absErrBound = absErrBound*(cp.amax(oriData.get())-cp.amin(oriData.get()))
+    #threshold = threshold*(cp.amax(oriData.get())-cp.amin(oriData.get()))
+    sample = oriData[::2]
+    d = cp.amax(sample) - cp.amin(sample)
+    d = d.get()
+    absErrBound = absErrBound*(d)
+    threshold = threshold*(d)
     oriData_p = ctypes.cast(oriData.data.ptr, ctypes.POINTER(c_float))
     
     o_bytes = __cuszx_device_compress(oriData_p, outSize,np.float32(absErrBound), np.ulonglong(nbEle), np.int32(blockSize),np.float32(threshold))
