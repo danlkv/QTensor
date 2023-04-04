@@ -162,6 +162,7 @@ def simulate(in_file, out_file,
              compress=None,
              M=29,
              r2r_error=1e-3, r2r_threshold=1e-3,
+             mpi=False,
              **kwargs):
     """
     Args:
@@ -174,12 +175,12 @@ def simulate(in_file, out_file,
         r2r_threshold: relative threshold for compression
     """
     import time
-    from qtensor.contraction_algos import bucket_elimination
     import cupy
     cupy.cuda.profiler.start()
     prep_data = read_preps(in_file)
     peo, par_vars, tn = prep_data
     
+    # -- Prepare backend
     backend = qtensor.contraction_backends.get_backend(backend)
     if compress is not None:
         if compress == 'szx':
@@ -192,46 +193,15 @@ def simulate(in_file, out_file,
         from qtensor.contraction_backends.performance_measurement_decorator import MemProfBackend
         backend = MemProfBackend(backend)
 
-    relabelid = {}
-    for tensor in tn.tensors:
-        for i in tensor.indices:
-            relabelid[int(i)] = i
-
-    slice_ext = {relabelid[int(i)]: 0 for i in par_vars}
 
     if len(par_vars) > 0:
         print("Parvars", par_vars)
         print(f"Detected {len(par_vars)} slice variables")
-    sim = qtensor.QtreeSimulator(backend=backend)
-    sim.tn = tn
-    sim.tn.backend = backend
-    sim.peo = peo
-    sim._slice_relabel_buckets(slice_ext)
-    buckets = sim.tn.buckets
-    # --dbg
-    #ignore_vars  = sim.tn.bra_vars + sim.tn.ket_vars 
-    #graph = qtree.graph_model.importers.buckets2graph(buckets, ignore_vars)
-    #graph, label_dict = qtree.graph_model.relabel_graph_nodes(
-        #graph, dict(zip(graph.nodes, np.array(list(graph.nodes)) - 127*2))
-    #) 
-    #import networkx as nx
-    #components = list(nx.connected_components(graph))
-    #print(f"Sliced graph # nodes: {graph.number_of_nodes()} and #components: {len(components)} with sizes {[len(c) for c in components]}")
-    #print(f"peo size without par_vars and ignore_vars: {len(peo) - len(ignore_vars)}")
-    # --
 
+    # -- simulate
     start = time.time()
-    for i in range(2**0):
-        print(f"P {i}", end='', flush=True)
-        bcopy = [b[:] for b in buckets]
-        res = bucket_elimination(
-            bcopy, backend,
-            n_var_nosum=len(tn.free_vars)
-        )
-        del bcopy
-        print("Result", res.data.flatten()[0])
-        time.sleep(0.5)
-    sim_result = backend.get_result_data(res).flatten()[0]
+    sim_result = _simulate_wrapper(backend, tn, peo, par_vars, hpc=mpi)
+
     print("Simulation result:", sim_result)
     end = time.time()
     print("Elapsed", end - start)
@@ -252,3 +222,53 @@ def simulate(in_file, out_file,
     write_json(C, out_file)
     cupy.cuda.profiler.stop()
     return out_file
+
+def _simulate_wrapper(backend, tn, peo, par_vars, hpc=True):
+    from qtensor.contraction_algos import bucket_elimination
+    import cupy
+    """
+    Backend is modified in the simulation
+    """
+
+    # -- Prepare buckets
+    relabelid = {}
+    for tensor in tn.tensors:
+        for i in tensor.indices:
+            relabelid[int(i)] = i
+    slice_ext = {relabelid[int(i)]: 0 for i in par_vars}
+
+    sim = qtensor.QtreeSimulator(backend=backend)
+    sim.tn = tn
+    sim.tn.backend = backend
+    sim.peo = peo
+    sim._slice_relabel_buckets(slice_ext)
+    buckets = sim.tn.buckets
+    # --
+
+    # --dbg
+    #ignore_vars  = sim.tn.bra_vars + sim.tn.ket_vars 
+    #graph = qtree.graph_model.importers.buckets2graph(buckets, ignore_vars)
+    #graph, label_dict = qtree.graph_model.relabel_graph_nodes(
+        #graph, dict(zip(graph.nodes, np.array(list(graph.nodes)) - 127*2))
+    #) 
+    #import networkx as nx
+    #components = list(nx.connected_components(graph))
+    #print(f"Sliced graph # nodes: {graph.number_of_nodes()} and #components: {len(components)} with sizes {[len(c) for c in components]}")
+    #print(f"peo size without par_vars and ignore_vars: {len(peo) - len(ignore_vars)}")
+    # --
+
+    if hpc:
+        res = _simulate_hpc(tn, backend)
+    else:
+        for i in range(2**0):
+            print(f"P {i}", end='', flush=True)
+            bcopy = [b[:] for b in buckets]
+            res = bucket_elimination(
+                bcopy, backend,
+                n_var_nosum=len(tn.free_vars)
+            )
+            del bcopy
+            print("Result", res.data.flatten()[0])
+            time.sleep(0.5)
+    sim_result = backend.get_result_data(res).flatten()[0]
+    return sim_result
