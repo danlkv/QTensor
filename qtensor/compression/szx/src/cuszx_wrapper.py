@@ -78,6 +78,9 @@ def cuszx_device_compress(oriData, absErrBound, nbEle, blockSize,threshold):
     sample = oriData[::2]
     d = cp.amax(sample) - cp.amin(sample)
     d = d.get()
+    if d.dtype == np.complex64:
+        #d = min(d.real, d.imag)
+        d = d.real
     absErrBound = absErrBound*(d)
     threshold = threshold*(d)
     oriData_p = ctypes.cast(oriData.data.ptr, ctypes.POINTER(c_float))
