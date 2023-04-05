@@ -7,6 +7,10 @@
 #include <thrust/copy.h>
 #include <thrust/execution_policy.h>
 #include <cub/cub.cuh>
+#include <thrust/extrema.h>
+#include <thrust/reduce.h>
+#include <thrust/functional.h>
+#include <cub/cub.cuh>
 
 #define SPARSITY_LEVEL 0.25
 #define BLOCKS 40
@@ -1032,8 +1036,34 @@ unsigned char* device_ptr_cuSZx_compress_float(float *oriData, size_t *outSize, 
      *  unsigned char* outBytes
      * 
      */
+    // float *dmin,*dmax, *hmin, *hmax;
+    // void *d_temp_storage = NULL;
+    // size_t temp_storage_bytes = 0;
     timer_GPU.StartCounter();
+//     cudaMalloc(&dmin, sizeof(float));
+//     cudaMalloc(&dmax, sizeof(float));
 
+//    // dmax = thrust::reduce(oriData, oriData+nbEle, -1, thrust::maximum<float>());
+//    // dmin = thrust::reduce(oriData, oriData+nbEle, 1, thrust::minimum<float>());
+//     cub::DeviceReduce::Max(d_temp_storage, temp_storage_bytes, oriData, dmax, nbEle);
+//     cudaMalloc(&d_temp_storage, temp_storage_bytes);
+//     cub::DeviceReduce::Max(d_temp_storage, temp_storage_bytes, oriData, dmax, nbEle);
+
+//     cudaFree(d_temp_storage);
+//     cub::DeviceReduce::Min(d_temp_storage, temp_storage_bytes, oriData, dmin, nbEle);
+//     cudaMalloc(&d_temp_storage, temp_storage_bytes);
+//     cub::DeviceReduce::Min(d_temp_storage, temp_storage_bytes, oriData, dmin, nbEle);
+
+//     cudaFree(d_temp_storage);
+//     // thrust::pair<float *, float *> result = thrust::minmax_element(thrust::device, oriData,oriData+nbEle);
+//     //printf("here\n");
+//     cudaMemcpy(hmin, dmin, sizeof(float), cudaMemcpyDeviceToHost);
+//     cudaMemcpy(hmax, dmax,sizeof(float), cudaMemcpyDeviceToHost);
+//     absErrBound = absErrBound*(hmax-hmin);
+//     threshold = threshold*(hmax-hmin);
+    // // printf("%f\n",absErrBound);
+    // cudaFree(dmin);
+    // cudaFree(dmax);
     float sparsity_level = SPARSITY_LEVEL;
 
     // Set the input data as the function parameter, this should be a device pointer
@@ -1153,11 +1183,21 @@ unsigned char* device_ptr_cuSZx_compress_float(float *oriData, size_t *outSize, 
     checkCudaErrors(cudaFree(d_meta));
     checkCudaErrors(cudaFree(d_offsets));
     checkCudaErrors(cudaFree(d_midBytes));
-//    printf("completed compression\n");
-    //printf("Compression end timestamp: %f ms\n", timer_GPU.GetCounter());
+
+    unsigned char *d_newout;
+    if (*outSize%4==0)
+    {
+        *outSize += *outSize%4;
+    }
+    checkCudaErrors(cudaMalloc(&d_newout, *outSize));
+    checkCudaErrors(cudaMemcpy(d_newout, d_outBytes, *outSize, cudaMemcpyDeviceToDevice));
     
-    //printf("CUDA Error: %s\n", cudaGetErrorString(err));
-    return d_outBytes;
+
+    checkCudaErrors(cudaFree(d_outBytes));
+    printf("Compression end timestamp: %f ms\n", timer_GPU.GetCounter());
+    
+    printf("CUDA Error: %s\n", cudaGetErrorString(err));
+    return d_newout;
 }
 
 __device__ inline long bytesToLong_bigEndian(unsigned char* b) {
