@@ -1310,7 +1310,7 @@ __global__ void decompress_get_stats(float *newData, size_t nbEle, unsigned char
 ){
 
     //printf("ma\n");
-    blockSize = 256;
+    // blockSize = 256;
     r += 4;
     r++;
     r += sizeof(size_t);
@@ -1350,7 +1350,7 @@ __global__ void setup_data_stateArray(float *newData, size_t nbEle, unsigned cha
     size_t nbConstantBlocks, size_t nbBlocks, size_t *ncBlks,
     unsigned char *stateArray, unsigned char *newR
 ){
-    blockSize = 256;
+    // blockSize = 256;
     r += 4;
     r++;
     r += sizeof(size_t);
@@ -1468,8 +1468,8 @@ void decompress_startup_better(float *newData, size_t nbEle, unsigned char* r,
     unsigned char *stateArray, float* constantMedianArray, unsigned char *data,
     size_t mSize, unsigned char *newCmpBytes
 ){
-    blockSize = 256;
-    size_t nb_tmp = (int) nbEle/256;
+    // blockSize = 256;
+    size_t nb_tmp = (int) nbEle/blockSize;
     uint64_t* g_leng;
     /**
      * Structures to return:
@@ -1531,8 +1531,8 @@ __global__ void decompress_startup(float *newData, size_t nbEle, unsigned char* 
     unsigned char *stateArray, float* constantMedianArray, unsigned char *data,
     size_t mSize, unsigned char *newCmpBytes
 ){
-    blockSize = 256;
-    size_t nb_tmp = (int) nbEle/256;
+    // blockSize = 256;
+    size_t nb_tmp = (int) nbEle/blockSize;
     /**
      * Structures to return:
      * blk_idx, blk_subidx, blk_sig, blk_vals, numSigValues (pointer)
@@ -1732,7 +1732,7 @@ void decompress_post_proc_fast(unsigned char *data, float *newData, int blockSiz
     thrust::exclusive_scan(thrust::device, nb, nb + nbBlocks, nb, 0);
     thrust::exclusive_scan(thrust::device, nc, nc + nbBlocks, nc, 0);
 
-    decompress_final_set<<<nbBlocks,256>>>(data, newData, blockSize,nbBlocks, ncBlocks, stateArray,constantMedianArray, nb, nc);
+    decompress_final_set<<<nbBlocks,blockSize>>>(data, newData, blockSize,nbBlocks, ncBlocks, stateArray,constantMedianArray, nb, nc);
     cudaDeviceSynchronize();
     cudaFree(nb);
     cudaFree(nc);
