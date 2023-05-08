@@ -70,7 +70,7 @@ class CompressionBackend(ContractionBackend):
                     for c in t.data:
                         cmp_bytes, num_elements_eff, isCuPy, shape, dtype, _ = c
                         import ctypes
-                        p_decompressed_ptr = ctypes.addressof(cmp_bytes)
+                        p_decompressed_ptr = ctypes.addressof(cmp_bytes[0])
                         # cast to int64 pointer
                         # (effectively converting pointer to pointer to addr to pointer to int64)
                         p_decompressed_int= ctypes.cast(p_decompressed_ptr, ctypes.POINTER(ctypes.c_uint64))
@@ -97,7 +97,7 @@ class CompressionBackend(ContractionBackend):
                 for c in accum.data:
                     cmp_bytes, num_elements_eff, isCuPy, shape, dtype, _ = c
                     import ctypes
-                    p_decompressed_ptr = ctypes.addressof(cmp_bytes)
+                    p_decompressed_ptr = ctypes.addressof(cmp_bytes[0])
                     # cast to int64 pointer
                     # (effectively converting pointer to pointer to addr to pointer to int64)
                     p_decompressed_int= ctypes.cast(p_decompressed_ptr, ctypes.POINTER(ctypes.c_uint64))
