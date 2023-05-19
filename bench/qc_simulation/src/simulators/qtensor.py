@@ -128,7 +128,7 @@ def preprocess(in_file, out_file, O='greedy', S=None, M=30, after_slice='run-aga
     write_preps(prep_data, out_file)
 
 
-def estimate(in_file, out_file, C=100, M=30, F=1e12, T=1e9, **kwargs):
+def estimate(in_file, out_file, C=100, M=30, F=1e12, T=1e9, S=0, **kwargs):
     """
     Arguments:
         in_file: file with preprocessed data
@@ -137,12 +137,17 @@ def estimate(in_file, out_file, C=100, M=30, F=1e12, T=1e9, **kwargs):
         M: Memory limit in log2(b/16)
         F: assumed FLOPS 
         T: Throughput of compression
+        S: Offset of slice variables. If S=0, full slicing is used. If S=n last
+           n par_vars are omitted
     """
     from qtensor.compression.cost_estimation import compressed_contraction_cost, Cost
     from dataclasses import asdict
     import json
     prep_data = read_preps(in_file)
     peo, par_vars, tn = prep_data
+    if S > 0:
+        par_vars = par_vars[:-S]
+        print("Offset par_vars", par_vars)
 
     tn.slice({i: slice(0, 1) for i in par_vars})
     peo = peo[:len(peo) - len(par_vars)]
