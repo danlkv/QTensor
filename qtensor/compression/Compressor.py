@@ -5,10 +5,15 @@ from pathlib import Path
 print(Path(__file__).parent/'szx/src/')
 sys.path.append(str(Path(__file__).parent/'szx/src/'))
 sys.path.append('./szx/src')
+sys.path.append(str(Path(__file__).parent/'szp/src/'))
+sys.path.append('./szp/src')
+#sys.path.append('/home/mkshah5/QTensor/qtensor/compression/szp/src')
 
 try:
-    from cuszx_wrapper import cuszx_host_compress, cuszx_host_decompress, cuszx_device_compress, cuszx_device_decompress
+    #from cuszx_wrapper import cuszx_host_compress, cuszx_host_decompress, cuszx_device_compress, cuszx_device_decompress
+    from cuSZp_wrapper import cuszp_device_compress, cuszp_device_decompress
 except:
+    print("import failed")
     # Silently fail on missing build of cuszx
     pass
 
@@ -146,8 +151,8 @@ class CUSZCompressor(Compressor):
     def decompress(self, obj):
         import cupy
         import ctypes
-        cmp_bytes, num_elements_eff, isCuPy, shape, dtype, _ = obj
-        decompressed_ptr = self.cuszx_decompress(isCuPy, cmp_bytes, num_elements_eff, self, dtype)
+        cmp_bytes, num_elements_eff, isCuPy, shape, dtype, cmpsize = obj
+        decompressed_ptr = self.cuszx_decompress(isCuPy, cmp_bytes, cmpsize, num_elements_eff, self, dtype)
         arr_cp = decompressed_ptr[0]
         self.decompressed_own.append(decompressed_ptr[1])
         # -- Workaround to convert GPU pointer to int
@@ -179,7 +184,7 @@ class CUSZCompressor(Compressor):
         if not isCuPy:
             cmp_bytes, outSize_ptr = cuszx_host_compress(data, r2r_error, num_elements, CUSZX_BLOCKSIZE, r2r_threshold)
         else:
-            cmp_bytes, outSize_ptr = cuszx_device_compress(data, r2r_error, num_elements, CUSZX_BLOCKSIZE, r2r_threshold)
+            cmp_bytes, outSize_ptr = cuszp_device_compress(data, r2r_error, num_elements,  r2r_threshold)
         return cmp_bytes, outSize_ptr
 
     ### Decompression API with cuSZx ###
@@ -192,10 +197,10 @@ class CUSZCompressor(Compressor):
     #
     # Notes: Use ctypes to cast decompressed data to Numpy or CuPy type
 
-    def cuszx_decompress(self, isCuPy, cmp_bytes, num_elements, owner, dtype):
+    def cuszx_decompress(self, isCuPy, cmp_bytes, cmpsize, num_elements, owner, dtype):
         if not isCuPy:
             decompressed_data = cuszx_host_decompress(num_elements, cmp_bytes)
         else:
-            decompressed_data = cuszx_device_decompress(num_elements, cmp_bytes, owner,dtype)
+            decompressed_data = cuszp_device_decompress(num_elements, cmp_bytes, cmpsize, owner,dtype)
 
         return decompressed_data
