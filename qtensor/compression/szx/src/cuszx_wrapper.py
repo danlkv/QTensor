@@ -7,8 +7,8 @@ import time
 import torch
 
 from pathlib import Path
-#LIB_PATH = str(Path(__file__).parent/'libcuszx_wrapper.so')
-LIB_PATH='/home/mkshah5/QTensor/qtensor/compression/szx/src/libcuszx_wrapper.so'
+LIB_PATH = str(Path(__file__).parent/'libcuszx_wrapper.so')
+# LIB_PATH='/home/mkshah5/QTensor/qtensor/compression/szx/src/libcuszx_wrapper.so'
 # unsigned char* cuSZx_integrated_compress(float *data, float r2r_threshold, float r2r_err, size_t nbEle, int blockSize, size_t *outSize)
 
 def get_host_compress():
