@@ -7,8 +7,8 @@ import time
 import torch
 
 from pathlib import Path
-LIB_PATH = str(Path(__file__).parent/'libcuszx_wrapper.so')
-
+#LIB_PATH = str(Path(__file__).parent/'libcuszx_wrapper.so')
+LIB_PATH='/home/mkshah5/QTensor/qtensor/compression/szx/src/libcuszx_wrapper.so'
 # unsigned char* cuSZx_integrated_compress(float *data, float r2r_threshold, float r2r_err, size_t nbEle, int blockSize, size_t *outSize)
 
 def get_host_compress():
@@ -161,6 +161,13 @@ class Comp():
     def __init__(self):
         self.name = "dummy"
 
+def free_compressed(ptr):
+    p_ptr = ctypes.addressof(ptr)
+    p_int = ctypes.cast(p_ptr, ctypes.POINTER(ctypes.c_uint64))
+    decomp_int = p_int.contents
+    cp.cuda.runtime.free(decomp_int.value)
+
+
 if __name__ == "__main__":
     
     DATA_SIZE = int(1024)
@@ -170,7 +177,7 @@ if __name__ == "__main__":
     r2r_threshold = 0.002
     r2r_error = 0.0001
 
-    in_vector = np.fromfile("real_sample.bin", dtype=np.float32)
+    in_vector = np.fromfile("all_sample.bin", dtype=np.complex64)
     #print(np.max(in_vector))
     DATA_SIZE = len(in_vector)
     #range_vr = np.max(in_vector)-np.min(in_vector)
@@ -189,22 +196,25 @@ if __name__ == "__main__":
     #    in_vector[i] = 0.001
 
     print(DATA_SIZE)
-    in_vector = in_vector.astype('float32')
+    #in_vector = in_vector.astype('float32')
     in_vector_gpu = cp.asarray(in_vector)
     
     # variable = ctypes.c_size_t(0)
     # outSize = ctypes.pointer(variable)
-    s_time = time.time()
-    o_bytes, outSize = cuszx_device_compress(in_vector_gpu, r2r_error, DATA_SIZE, 256, r2r_threshold)
-    print("Time python: "+str(time.time()-s_time))
-    print(outSize[0])
-    print("Compress Success...starting decompress ")
-    comp = Comp()
+    for i in range(200):
+        s_time = time.time()
+        o_bytes, outSize = cuszx_device_compress(in_vector_gpu, r2r_error, DATA_SIZE, 256, r2r_threshold)
+        print("Time python: "+str(time.time()-s_time))
+        print(outSize[0])
+        print("Compress Success...starting decompress ")
+        comp = Comp()
 
-    s_time = time.time()
-    (d_bytes,ptr )= cuszx_device_decompress(DATA_SIZE, o_bytes, comp, in_vector_gpu.dtype)
-    
-    print("Time python: "+str(time.time()-s_time))
+        s_time = time.time()
+        (d_bytes,ptr )= cuszx_device_decompress(DATA_SIZE*2, o_bytes, comp, in_vector_gpu.dtype)
+        
+        free_compressed(o_bytes[0])
+        cp.cuda.runtime.free(ptr)
+        print("Time python: "+str(time.time()-s_time))
     #for i in d_bytes:
     #    print(i)
-    print("Decompress Success")
+        print("Decompress Success")
