@@ -7,11 +7,10 @@ sys.path.append(str(Path(__file__).parent/'szx/src/'))
 sys.path.append('./szx/src')
 sys.path.append(str(Path(__file__).parent/'szp/src/'))
 sys.path.append('./szp/src')
+
 sys.path.append(str(Path(__file__).parent/'cusz/src'))
 sys.path.append('./cusz/src')
-#sys.path.append('/home/mkshah5/QTensor/qtensor/compression/szp/src')
-#sys.path.append('/home/mkshah5/QTensor/qtensor/compression/szx/src')
-#sys.path.append('/home/mkshah5/QTensor/qtensor/compression/cusz/src')
+
 try:
     from cuszx_wrapper import cuszx_host_compress, cuszx_host_decompress, cuszx_device_compress, cuszx_device_decompress
     from cuSZp_wrapper import cuszp_device_compress, cuszp_device_decompress
