@@ -137,8 +137,8 @@ class SlicesOptimizer(OrderingOptimizer):
 
         p_graph = graph.copy()
         max_tw = self._get_max_tw()
-        log.info('Maximum treewidth: {}', max_tw)
         max_tw = max_tw - self.tw_bias
+        log.info('Maximum treewidth: {}', max_tw)
 
         peo, par_vars = self._split_graph(p_graph, max_tw)
 
