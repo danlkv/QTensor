@@ -219,8 +219,8 @@ class SlicesOptimizer(Optimizer):
     def _get_ordering_ints(self, graph, inplace=True):
         p_graph = copy.deepcopy(graph)
         max_tw = self._get_max_tw()
-        log.info('Maximum treewidth: {}', max_tw)
         max_tw = max_tw - self.tw_bias
+        log.info('Maximum treewidth: {}', max_tw)
 
         self.peo_ints, path = self.base_ordering._get_ordering_ints(p_graph)
         self.treewidth = max(path)
