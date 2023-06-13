@@ -30,6 +30,16 @@ gamma, beta = [np.pi/3], [np.pi/2]
 E = QAOA_energy(G, gamma, beta)
 ```
 
+## GPU simulation
+
+```python
+import qtensor
+optimizer = qtensor.toolbox.get_ordering_algo('rgreedy_0.02_10')
+backend = qtensor.contraction_backends.get_backend('torch')
+sim = QAOAQtreeSimulator(backend=backend, optimizer=optimizer)
+# ... continue your simulation
+```
+
 ## Get treewidth
 
 ```python
@@ -49,6 +59,7 @@ peo, tn = opt.optimize(tn)
 treewidth = opt.treewidth
 
 ```
+
 
 ### Tamaki solver
 
