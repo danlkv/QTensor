@@ -3,7 +3,7 @@ import qtree
 import numpy as np
 from qtree import np_framework
 from qtensor.contraction_backends import ContractionBackend
-from .common import slice_numpy_tensor, get_einsum_expr
+from .common import get_slice_bounds, get_einsum_expr, slice_numpy_tensor
 import string
 CHARS = string.ascii_lowercase + string.ascii_uppercase
 
@@ -33,6 +33,42 @@ def get_einsum_expr_bucket(bucket, all_indices_list, result_indices):
 
 
 
+
+def permute_torch_tensor_data(data:np.ndarray, indices_in, indices_out):
+    """
+    Permute the data of a numpy tensor to the given indices_out.
+    
+    Returns:
+        permuted data
+    """
+    # permute indices
+    out_locs = {idx: i for i, idx in enumerate(indices_out)}
+    perm = [out_locs[i] for i in indices_in]
+    # permute tensor
+    return torch.permute(data, perm)
+
+def slice_torch_tensor(data:np.ndarray, indices_in, indices_out, slice_dict):
+    """
+    Args:
+        data : np.ndarray
+        indices_in: list of `qtree.optimizer.Var`
+        indices_out: list of `qtree.optimizer.Var`
+        slice_dict: dict of `qtree.optimizer.Var` to `slice`
+
+    Returns:
+        new data, new indices
+    """
+    slice_bounds = get_slice_bounds(slice_dict, indices_in)
+    s_data = data[slice_bounds]
+    indices_sliced = [
+        i for sl, i in zip(slice_bounds, indices_in) if not isinstance(sl, int)
+    ]
+    indices_sized = [v.copy(size=size) for v, size in zip(indices_sliced, s_data.shape)]
+    indices_out = [v for v in indices_out if not isinstance(slice_dict.get(v, None), int)]
+    assert len(indices_sized) == len(s_data.shape)
+    assert len(indices_sliced) == len(s_data.shape)
+    st_data = permute_torch_tensor_data(s_data, indices_sliced, indices_out)
+    return st_data, indices_out
 
 
 class TorchBackend(ContractionBackend):
@@ -147,8 +183,6 @@ class TorchBackend(ContractionBackend):
                 out_indices = list(sorted(tensor.indices, key=int, reverse=True))
                 data = data_dict[tensor.data_key]
                 # Works for torch tensors just fine
-                data, new_indices = slice_numpy_tensor(data, tensor.indices, out_indices, slice_dict)
-
                 if not isinstance(data, torch.Tensor):             
                     if self.device == 'gpu' and torch.cuda.is_available():
                         cuda = torch.device('cuda')
@@ -158,6 +192,8 @@ class TorchBackend(ContractionBackend):
                 else:
                     data = data.type(torch.complex128)
                 # slice data
+                data, new_indices = slice_torch_tensor(data, tensor.indices, out_indices, slice_dict)
+
                 sliced_bucket.append(
                     tensor.copy(indices=new_indices, data=data))
             sliced_buckets.append(sliced_bucket)
@@ -165,4 +201,4 @@ class TorchBackend(ContractionBackend):
         return sliced_buckets
 
     def get_result_data(self, result):
-        return np.transpose(result.data)
+        return torch.permute(result.data, tuple(reversed(range(result.data.ndim))))
