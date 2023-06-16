@@ -37,9 +37,10 @@ def quant_device_compress(oriData, nbEle, blockSize,threshold):
     # oriData = cp.reshape(oriData, (-1, blockSize))  # Reshape to blocksize
     tensor = torch.as_tensor(oriData, device='cuda')
     print("Min val: "+str(min_val)+" range: "+str(d))
-    zero_point = int((min_val/d)*127)
+    scale = d/255.0
+    zero_point = -1*round(min_val*scale) - 128
 
-    q_tensor = torch.quantize_per_tensor(tensor, 0.1, zero_point, dtype=torch.qint8)
+    q_tensor = torch.quantize_per_tensor(tensor, scale, zero_point, dtype=torch.qint8)
 
     return (q_tensor), nbEle/4
 
