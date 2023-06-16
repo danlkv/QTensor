@@ -7,8 +7,8 @@ import time
 import torch
 
 from pathlib import Path
-LIB_PATH = str(Path(__file__).parent/'libcuszp_wrapper.so')
-
+#LIB_PATH = str(Path(__file__).parent/'libcuszp_wrapper.so')
+LIB_PATH = '/home/mkshah5/QTensor/qtensor/compression/szp/src/libcuszp_wrapper.so'
 # unsigned char* cuSZp_device_compress(float *oriData, size_t *outSize, float absErrBound, size_t nbEle){
 
 def get_device_compress():
@@ -41,10 +41,10 @@ def cuszp_device_compress(oriData, absErrBound, nbEle,threshold):
     outSize = ctypes.pointer(variable)
     
     oriData = oriData.flatten()
-    ori_real = oriData.real
-    ori_imag = oriData.imag
-    oriData = cp.concatenate((ori_real, ori_imag))
-    sample = oriData[::2]
+    #ori_real = oriData.real
+    #ori_imag = oriData.imag
+    #oriData = cp.concatenate((ori_real, ori_imag))
+    #sample = oriData[::2]
     
     
     d = cp.amax(oriData) - cp.amin(oriData)
@@ -58,11 +58,11 @@ def cuszp_device_compress(oriData, absErrBound, nbEle,threshold):
     s_1 = time.time() 
     #print(cp.get_array_module(oriData))    
     truth_values = cp.absolute(oriData)<=threshold
-    oriData[truth_values] = 0.0
+    #oriData[truth_values] = 0.0
     truth_values = cp.invert(truth_values)
-    oriData = oriData[truth_values]
+    # oriData = oriData[truth_values]
     bitmap = truth_values
-    nbEle = oriData.shape[0]
+    nbEle = oriData.shape[0]*2
     
 
     oriData_p = ctypes.cast(oriData.data.ptr, ctypes.POINTER(c_float))
@@ -72,13 +72,13 @@ def cuszp_device_compress(oriData, absErrBound, nbEle,threshold):
 
     mempool = cp.get_default_memory_pool()
     pinned_mempool = cp.get_default_pinned_memory_pool()
-    del oriData
+    #del oriData
 
     #print("tg and max time (s): "+str(time.time()-s_1))
     #print("bitmap shape: "+str(bitmap.shape[0]))
     #print("percent nonzero bytes: "+str(bitmap[cp.nonzero(bitmap)].shape[0]/bitmap.shape[0]))
     #print("CR")
-    print((ori_nbEle*4)/(outSize[0] + bitmap.shape[0]/8))
+    #print((ori_nbEle*4)/(outSize[0] + bitmap.shape[0]/8))
     return (o_bytes,bitmap, absErrBound), outSize
 
 
@@ -88,9 +88,9 @@ def cuszp_device_decompress(nbEle, cmpBytes, cmpSize, owner, dtype):
     #print("bitmap len:" +str(len(bitmap)))
     #print(nbEle)
     #tmp_nbEle = nbEle
-    tmp_nbEle = cp.count_nonzero(bitmap).item()
+    # tmp_nbEle = cp.count_nonzero(bitmap).item()
 #    print(tmp_nbEle)
-    nbEle_p = ctypes.c_size_t(tmp_nbEle)
+    nbEle_p = ctypes.c_size_t(nbEle)
     # size_t nbEle, unsigned char* cmpBytes, size_t cmpSize, float errorBound
     newData = __cuszp_device_decompress(nbEle_p,cmpBytes, np.ulonglong(cmpSize), np.float32(absErrBound))
 
@@ -104,16 +104,16 @@ def cuszp_device_decompress(nbEle, cmpBytes, cmpSize, owner, dtype):
     # --
     pointer_for_free = decompressed_int.value
     # self.decompressed_own.append(decompressed_int.value)
-    mem = cp.cuda.UnownedMemory(decompressed_int.value, tmp_nbEle, owner, device_id=0)
+    mem = cp.cuda.UnownedMemory(decompressed_int.value, nbEle, owner, device_id=0)
     mem_ptr = cp.cuda.memory.MemoryPointer(mem, 0)
     #print("mem ptr")
     #print(mem_ptr)
-    arr = cp.ndarray(shape=tmp_nbEle, dtype=cp.float32, memptr=mem_ptr)
+    arr = cp.ndarray(shape=nbEle, dtype=cp.float32, memptr=mem_ptr)
 #    print("attempt alloc")
-    res = cp.zeros(nbEle,dtype=cp.float32)
+    # res = cp.zeros(nbEle,dtype=cp.float32)
 #    print("alloc passed")
     ## need to convert newData to cupy
-    cp.putmask(res,bitmap,arr)
+    # cp.putmask(res,bitmap,arr)
     mempool = cp.get_default_memory_pool()
     pinned_mempool = cp.get_default_pinned_memory_pool()
     #del arr
@@ -121,17 +121,17 @@ def cuszp_device_decompress(nbEle, cmpBytes, cmpSize, owner, dtype):
     #print(res[0])
     #print(res[int(nbEle/2)])
     #reshaped_data = arr.reshape(-1,2)
-    reshaped_data = res.reshape(-1,2)
-    
-    c_res = reshaped_data.view(dtype=cp.complex64)
+    reshaped_data = arr.reshape(-1,2)
+    #c_res = arr
+    c_res = reshaped_data.view(dtype=np.complex64)
     #print(c_res[0])
     #c_res = cp.zeros(int(nbEle/2), np.complex64)
     #c_res.real = res[0:int(nbEle/2)]
     #c_res.imag = res[int(nbEle/2):]
     #del res
-    del bitmap
-    mempool.free_all_blocks()
-    pinned_mempool.free_all_blocks()
+    #del bitmap
+    #mempool.free_all_blocks()
+    #pinned_mempool.free_all_blocks()
 
     return (c_res, pointer_for_free)
 
@@ -173,17 +173,18 @@ if __name__ == "__main__":
     
     # variable = ctypes.c_size_t(0)
     # outSize = ctypes.pointer(variable)
-    s_time = time.time()
-    o_bytes, outSize = cuszp_device_compress(in_vector_gpu, r2r_error, DATA_SIZE,r2r_threshold)
-    print("Time python: "+str(time.time()-s_time))
-    print(outSize[0])
-    print("Compress Success...starting decompress ")
-    comp = Comp()
+    for i in range(30):
+        s_time = time.time()
+        o_bytes, outSize = cuszp_device_compress(in_vector_gpu, r2r_error, DATA_SIZE,r2r_threshold)
+        print("Time python: "+str(time.time()-s_time))
+        print(outSize[0])
+        print("Compress Success...starting decompress ")
+        comp = Comp()
 
-    s_time = time.time()
-    (d_bytes,ptr )= cuszp_device_decompress(DATA_SIZE, o_bytes,outSize[0], comp, in_vector_gpu.dtype)
+        s_time = time.time()
+        (d_bytes,ptr )= cuszp_device_decompress(DATA_SIZE, o_bytes,outSize[0], comp, in_vector_gpu.dtype)
     
-    print("Time python: "+str(time.time()-s_time))
+        print("Time python: "+str(time.time()-s_time))
     #for i in d_bytes:
     #    print(i)
-    print("Decompress Success")
+        print("Decompress Success")

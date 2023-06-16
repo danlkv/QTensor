@@ -17,7 +17,7 @@ extern "C"{
         cudaMalloc((void**)&d_finalCmpBytes, *outSize);
         cudaMemcpy(d_finalCmpBytes, d_cmpBytes, *outSize, cudaMemcpyDeviceToDevice);
         cudaFree(d_cmpBytes);
-
+	//cudaFree(oriData);
         return d_finalCmpBytes;
     }
 
@@ -30,7 +30,8 @@ extern "C"{
         cudaStreamCreate(&stream);
         cudaMalloc((void**)&d_decData, sizeof(float)*nbEle);
         SZp_decompress_deviceptr(d_decData, cmpBytes, nbEle, cmpSize, errorBound, stream);
-        return d_decData;
+        cudaFree(cmpBytes);
+	return d_decData;
     }
     
 }

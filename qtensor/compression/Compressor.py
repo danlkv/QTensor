@@ -5,13 +5,19 @@ from pathlib import Path
 print(Path(__file__).parent/'szx/src/')
 sys.path.append(str(Path(__file__).parent/'szx/src/'))
 sys.path.append('./szx/src')
-sys.path.append(str(Path(__file__).parent/'szp/src/'))
-sys.path.append('./szp/src')
-# sys.path.append('/home/mkshah5/QTensor/qtensor/compression/szp/src')
-# sys.path.append('/home/mkshah5/QTensor/qtensor/compression/szx/src')
+# sys.path.append(str(Path(__file__).parent/'szp/src/'))
+# sys.path.append('./szp/src')
+
+# sys.path.append(str(Path(__file__).parent/'cusz/src'))
+# sys.path.append('./cusz/src')
+sys.path.append(str(Path(__file__).parent/'torch_quant'))
+sys.path.append('./torch_quant')
+
 try:
     from cuszx_wrapper import cuszx_host_compress, cuszx_host_decompress, cuszx_device_compress, cuszx_device_decompress
-    from cuSZp_wrapper import cuszp_device_compress, cuszp_device_decompress
+    # from cuSZp_wrapper import cuszp_device_compress, cuszp_device_decompress
+    # from cusz_wrapper import cusz_device_compress, cusz_device_decompress
+    from torch_quant import quant_device_compress, quant_device_decompress
 except:
     print("import failed")
     # Silently fail on missing build of cuszx
@@ -116,6 +122,8 @@ class CUSZCompressor(Compressor):
         import cupy
         print("Cleanup", len(self.decompressed_own))
         for x in self.decompressed_own:
+            if x == None:
+                continue
             print("CUDA Free", x)
             cupy.cuda.runtime.free(x)
         self.decompressed_own = []
@@ -143,7 +151,9 @@ class CUSZCompressor(Compressor):
 
         dtype = data.dtype
         cmp_bytes, outSize_ptr = self.cuszx_compress(isCuPy, data, num_elements_eff, self.r2r_error, self.r2r_threshold)
-        return (cmp_bytes, num_elements_eff, isCuPy, data.shape, dtype, outSize_ptr.contents.value)
+        return (cmp_bytes, num_elements_eff, isCuPy, data.shape, dtype, outSize_ptr)
+
+        # return (cmp_bytes, num_elements_eff, isCuPy, data.shape, dtype, outSize_ptr.contents.value)
 
     def compress_size(self, ptr):
         return ptr[5]
@@ -187,7 +197,7 @@ class CUSZCompressor(Compressor):
         else:
             #cmp_bytes, outSize_ptr = cuszp_device_compress(data, r2r_error, num_elements,  r2r_threshold)
 
-            cmp_bytes, outSize_ptr = cuszx_device_compress(data, r2r_error, num_elements, CUSZX_BLOCKSIZE, r2r_threshold)
+            cmp_bytes, outSize_ptr = quant_device_compress(data, num_elements, CUSZX_BLOCKSIZE, r2r_threshold)
         return cmp_bytes, outSize_ptr
 
     ### Decompression API with cuSZx ###
@@ -205,6 +215,6 @@ class CUSZCompressor(Compressor):
             decompressed_data = cuszx_host_decompress(num_elements, cmp_bytes)
         else:
             #decompressed_data = cuszp_device_decompress(num_elements, cmp_bytes, cmpsize, owner,dtype)
-
-            decompressed_data = cuszx_device_decompress(num_elements, cmp_bytes, owner,dtype)
+# oriData, absErrBound, nbEle, blockSize,threshold
+            decompressed_data = quant_device_decompress(num_elements, cmp_bytes, owner,dtype)
         return decompressed_data

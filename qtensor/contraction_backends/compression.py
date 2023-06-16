@@ -69,14 +69,15 @@ class CompressionBackend(ContractionBackend):
                 if isinstance(t, CompressedTensor):
                     for c in t.data:
                         cmp_bytes, num_elements_eff, isCuPy, shape, dtype, _ = c
-                        import ctypes
-                        p_decompressed_ptr = ctypes.addressof(cmp_bytes[0])
-                        # cast to int64 pointer
-                        # (effectively converting pointer to pointer to addr to pointer to int64)
-                        p_decompressed_int= ctypes.cast(p_decompressed_ptr, ctypes.POINTER(ctypes.c_uint64))
-                        decompressed_int = p_decompressed_int.contents
-                        #print("Freeing mem", decompressed_int.value)
-                        cupy.cuda.runtime.free(decompressed_int.value)
+                        del cmp_bytes
+                        # import ctypes
+                        # p_decompressed_ptr = ctypes.addressof(cmp_bytes[0])
+                        # # cast to int64 pointer
+                        # # (effectively converting pointer to pointer to addr to pointer to int64)
+                        # p_decompressed_int= ctypes.cast(p_decompressed_ptr, ctypes.POINTER(ctypes.c_uint64))
+                        # decompressed_int = p_decompressed_int.contents
+                        # print("Freeing mem", decompressed_int.value)
+                        # cupy.cuda.runtime.free(decompressed_int.value)
                     t.compressor.compressor.free_decompressed()
                     #raise ValueError("Done")
                 else:
@@ -96,14 +97,15 @@ class CompressionBackend(ContractionBackend):
                 import cupy
                 for c in accum.data:
                     cmp_bytes, num_elements_eff, isCuPy, shape, dtype, _ = c
-                    import ctypes
-                    p_decompressed_ptr = ctypes.addressof(cmp_bytes[0])
+                    del cmp_bytes
+                    #import ctypes
+                    #p_decompressed_ptr = ctypes.addressof(cmp_bytes[0])
                     # cast to int64 pointer
                     # (effectively converting pointer to pointer to addr to pointer to int64)
-                    p_decompressed_int= ctypes.cast(p_decompressed_ptr, ctypes.POINTER(ctypes.c_uint64))
-                    decompressed_int = p_decompressed_int.contents
+                    #p_decompressed_int= ctypes.cast(p_decompressed_ptr, ctypes.POINTER(ctypes.c_uint64))
+                    #decompressed_int = p_decompressed_int.contents
                     #print("Freeing mem", decompressed_int.value)
-                    cupy.cuda.runtime.free(decompressed_int.value)
+                    #cupy.cuda.runtime.free(decompressed_int.value)
                 accum.compressor.compressor.free_decompressed()
             return res
 
