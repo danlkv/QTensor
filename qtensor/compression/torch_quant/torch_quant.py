@@ -50,16 +50,19 @@ def quant_device_compress(oriData, nbEle, blockSize,threshold):
     q_tensor = torch.quantize_per_tensor(tensor, scale, zero_point, dtype=torch.qint8)
     del tensor
     torch.cuda.empty_cache()
+    bitmap = cp.packbits(truth_values)
+    del truth_values
     #q_ten2 = torch.dequantize(q_tensor)
     #print(tensor)
     #print(q_ten2)
     #print("Max PW error")
     #print(torch.max(torch.div(torch.abs(torch.sub(tensor[tensor!=0.0],q_ten2[tensor!=0.0])),tensor[tensor!=0.0])))
-    return (q_tensor, truth_values), (nbEle/4)+(ori_len/8)
+    return (q_tensor, bitmap), (nbEle/4)+(ori_len/8)
 
 
 def quant_device_decompress(nbEle, cmpBytes, owner, dtype):
     (q_tensor, bitmap) = cmpBytes
+    bitmap = cp.unpackbits(bitmap)
     restored = torch.dequantize(q_tensor)
     arr = cp.asarray(restored)
     # uint8_t* cmpbytes, size_t len, size_t compressed_len, float r2r_error
