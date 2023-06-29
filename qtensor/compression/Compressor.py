@@ -12,7 +12,7 @@ sys.path.append('./szx/src')
 # sys.path.append('./cusz/src')
 sys.path.append(str(Path(__file__).parent/'torch_quant'))
 sys.path.append('./torch_quant')
-
+import torch
 try:
     from cuszx_wrapper import cuszx_host_compress, cuszx_host_decompress, cuszx_device_compress, cuszx_device_decompress
     # from cuSZp_wrapper import cuszp_device_compress, cuszp_device_decompress
@@ -122,10 +122,16 @@ class CUSZCompressor(Compressor):
         import cupy
         print("Cleanup", len(self.decompressed_own))
         for x in self.decompressed_own:
-            if x == None:
-                continue
-            print("CUDA Free", x)
-            cupy.cuda.runtime.free(x)
+            #print(x)
+            #if x == None:
+            #    continue
+            #else:
+                #print("CUDA Free", x)
+            #cupy.cuda.runtime.free(x)
+            del x
+            cupy.get_default_memory_pool().free_all_blocks()
+            cupy.get_default_pinned_memory_pool().free_all_blocks()
+        torch.cuda.empty_cache()
         self.decompressed_own = []
 
     def free_compressed(self, ptr):
@@ -177,6 +183,7 @@ class CUSZCompressor(Compressor):
         # mem = cupy.cuda.UnownedMemory(decompressed_int.value, num_elements_eff, self, device_id=0)
         # mem_ptr = cupy.cuda.memory.MemoryPointer(mem, 0)
         arr = cupy.reshape(arr_cp, shape)
+        self.decompressed_own.append(arr)
         # arr = cupy.ndarray(shape, dtype=dtype, memptr=mem_ptr)
         return arr
     
@@ -198,6 +205,8 @@ class CUSZCompressor(Compressor):
             #cmp_bytes, outSize_ptr = cuszp_device_compress(data, r2r_error, num_elements,  r2r_threshold)
 
             cmp_bytes, outSize_ptr = quant_device_compress(data, num_elements, CUSZX_BLOCKSIZE, r2r_threshold)
+            del data
+            torch.cuda.empty_cache()
         return cmp_bytes, outSize_ptr
 
     ### Decompression API with cuSZx ###
