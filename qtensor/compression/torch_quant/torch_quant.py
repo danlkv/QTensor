@@ -32,37 +32,47 @@ def quant_device_compress(oriData, nbEle, blockSize,threshold):
     oriData[truth_values] = 0.0
     truth_values = cp.invert(truth_values)
     ori_len = oriData.shape[0]
-    print("Percent nonzero: "+str(cp.count_nonzero(oriData)/oriData.shape[0]))
-    oriData = oriData[truth_values]
+    nonzero_percent = cp.count_nonzero(oriData)/oriData.shape[0]
+    print("Percent nonzero: "+str(nonzero_percent))
+
+    isGrouped = False
+    if nonzero_percent<=0.5:
+        isGrouped=True
+        oriData = oriData[truth_values]
     
     nbEle = oriData.shape[0]
     
     # oriData = cp.reshape(oriData, (-1, blockSize))  # Reshape to blocksize
     tensor = torch.as_tensor(oriData, device='cuda')
-    print("Min val: "+str(cp.amin(oriData).get())+" range: "+str(d))
+    # print("Min val: "+str(cp.amin(oriData).get())+" range: "+str(d))
 #    scale = d/255.0
 #    zero_point = -1*round(min_val*scale) - 128
 
     scale = d/((2**8) - 1)
-    zero_point = -1*round(min_val*scale) - 2^7
+    #zero_point = -1*round(min_val*scale)
+    zero_point = -1*round(min_val*scale)+32
 #    q_tensor = torch.quantize_per_tensor(tensor, scale, zero_point, dtype=torch.qint8)
     
     q_tensor = torch.quantize_per_tensor(tensor, scale, zero_point, dtype=torch.qint8)
     del tensor
     torch.cuda.empty_cache()
-    bitmap = cp.packbits(truth_values)
+    if isGrouped:
+        bitmap = cp.packbits(truth_values)
+    else:
+        bitmap = None
     del truth_values
     #q_ten2 = torch.dequantize(q_tensor)
     #print(tensor)
     #print(q_ten2)
     #print("Max PW error")
     #print(torch.max(torch.div(torch.abs(torch.sub(tensor[tensor!=0.0],q_ten2[tensor!=0.0])),tensor[tensor!=0.0])))
-    return (q_tensor, bitmap), (nbEle/4)+(ori_len/8)
+    return (q_tensor, bitmap, isGrouped), (nbEle/4)+(ori_len/8)
 
 
 def quant_device_decompress(nbEle, cmpBytes, owner, dtype):
-    (q_tensor, bitmap) = cmpBytes
-    bitmap = cp.unpackbits(bitmap)
+    (q_tensor, bitmap, isGrouped) = cmpBytes
+    if isGrouped:
+        bitmap = cp.unpackbits(bitmap)
     restored = torch.dequantize(q_tensor)
     arr = cp.asarray(restored)
     # uint8_t* cmpbytes, size_t len, size_t compressed_len, float r2r_error
@@ -83,16 +93,21 @@ def quant_device_decompress(nbEle, cmpBytes, owner, dtype):
     #print(mem_ptr)
     # arr = cp.ndarray(shape=(nbEle,), dtype=np.float32, memptr=mem_ptr)
     #print(nbEle)
-    res = cp.zeros((nbEle,))
+    if isGrouped:
+        res = cp.zeros((nbEle,))
     # ## need to convert newData to cupy
-    cp.place(res,bitmap,arr)
+        cp.place(res,bitmap,arr)
 
-    c_res = cp.zeros(int(nbEle/2), np.complex64)
+        c_res = cp.zeros(int(nbEle/2), np.complex64)
     #c_res.real = arr[0:int(nbEle/2)]
     #c_res.imag = arr[int(nbEle/2):]
 
-    c_res.real = res[0:int(nbEle/2)]
-    c_res.imag = res[int(nbEle/2):]
+        c_res.real = res[0:int(nbEle/2)]
+        c_res.imag = res[int(nbEle/2):]
+    else:
+        c_res = cp.zeros(int(nbEle/2), np.complex64)
+        c_res.real = arr[0:int(nbEle/2)]
+        c_res.imag = arr[int(nbEle/2):]
     return (c_res, None)
 
 ### Example of device compress/decompress wrapper usage
