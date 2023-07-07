@@ -8,7 +8,7 @@ import torch
 
 from pathlib import Path
 
-BS = 16
+BS = 32
 
 def quant_device_compress(oriData, nbEle, blockSize,threshold):
     #print(nbEle)
@@ -36,7 +36,7 @@ def quant_device_compress(oriData, nbEle, blockSize,threshold):
     print("Percent nonzero: "+str(nonzero_percent))
 
     isGrouped = False
-    if nonzero_percent<=0.00:
+    if nonzero_percent<=0.5:
         isGrouped=True
         oriData = oriData[truth_values]
     
@@ -47,6 +47,14 @@ def quant_device_compress(oriData, nbEle, blockSize,threshold):
     # print("Min val: "+str(cp.amin(oriData).get())+" range: "+str(d))
 #    scale = d/255.0
 #    zero_point = -1*round(min_val*scale) - 128
+    if isGrouped:
+        pad_rows = int(nbEle/BS)
+        if nbEle%BS != 0:
+            pad_rows +=1
+
+        padded = torch.zeros(pad_rows*BS, device='cuda')
+        padded[:nbEle] = tensor
+        tensor = padded
     tensor = torch.reshape(tensor, (-1, BS))
     maxs = torch.flatten(torch.max(tensor, dim=1)[0])
     mins = torch.flatten(torch.min(tensor, dim=1)[0])
@@ -57,7 +65,8 @@ def quant_device_compress(oriData, nbEle, blockSize,threshold):
     #print(torch.max(torch.sub(maxs,mins)))
     scales = torch.abs(torch.sub(maxs,mins))/127.0
     zero_points = torch.zeros(tensor.shape[0], device='cuda')
-    #zero_points = torch.abs(torch.round(torch.div(mins,scales)))-127
+    #zero_points = torch.round(torch.div(torch.add(maxs,mins)/2,scales))
+    #zero_points = torch.neg(torch.round(torch.div(mins,scales)))+64
 
     #print(zero_points)
 
