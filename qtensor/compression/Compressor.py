@@ -256,9 +256,9 @@ class CUSZXCompressor(Compressor):
 
         dtype = data.dtype
         cmp_bytes, outSize_ptr = self.cuszx_compress(isCuPy, data, num_elements_eff, self.r2r_error, self.r2r_threshold)
-        return (cmp_bytes, num_elements_eff, isCuPy, data.shape, dtype, outSize_ptr)
+        # return (cmp_bytes, num_elements_eff, isCuPy, data.shape, dtype, outSize_ptr)
 
-        # return (cmp_bytes, num_elements_eff, isCuPy, data.shape, dtype, outSize_ptr.contents.value)
+        return (cmp_bytes, num_elements_eff, isCuPy, data.shape, dtype, outSize_ptr.contents.value)
 
     def compress_size(self, ptr):
         return ptr[5]
@@ -373,9 +373,9 @@ class CUSZCompressor(Compressor):
 
         dtype = data.dtype
         cmp_bytes, outSize_ptr = self.cuszx_compress(isCuPy, data, num_elements_eff, self.r2r_error, self.r2r_threshold)
-        return (cmp_bytes, num_elements_eff, isCuPy, data.shape, dtype, outSize_ptr)
+        # return (cmp_bytes, num_elements_eff, isCuPy, data.shape, dtype, outSize_ptr)
 
-        # return (cmp_bytes, num_elements_eff, isCuPy, data.shape, dtype, outSize_ptr.contents.value)
+        return (cmp_bytes, num_elements_eff, isCuPy, data.shape, dtype, outSize_ptr.contents.value)
 
     def compress_size(self, ptr):
         return ptr[5]
