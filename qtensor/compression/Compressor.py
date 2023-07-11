@@ -226,11 +226,11 @@ class CUSZXCompressor(Compressor):
             #    continue
             #else:
                 #print("CUDA Free", x)
-            #cupy.cuda.runtime.free(x)
-            del x
-            cupy.get_default_memory_pool().free_all_blocks()
-            cupy.get_default_pinned_memory_pool().free_all_blocks()
-        torch.cuda.empty_cache()
+            cupy.cuda.runtime.free(x)
+            # del x
+            # cupy.get_default_memory_pool().free_all_blocks()
+            # cupy.get_default_pinned_memory_pool().free_all_blocks()
+        # torch.cuda.empty_cache()
         self.decompressed_own = []
 
     def free_compressed(self, ptr):
@@ -343,11 +343,11 @@ class CUSZCompressor(Compressor):
             #    continue
             #else:
                 #print("CUDA Free", x)
-            #cupy.cuda.runtime.free(x)
-            del x
-            cupy.get_default_memory_pool().free_all_blocks()
-            cupy.get_default_pinned_memory_pool().free_all_blocks()
-        torch.cuda.empty_cache()
+            cupy.cuda.runtime.free(x)
+            # del x
+            # cupy.get_default_memory_pool().free_all_blocks()
+            # cupy.get_default_pinned_memory_pool().free_all_blocks()
+        # torch.cuda.empty_cache()
         self.decompressed_own = []
 
     def free_compressed(self, ptr):
