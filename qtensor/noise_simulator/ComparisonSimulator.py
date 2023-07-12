@@ -2,18 +2,17 @@ from NoiseSimulator import NoiseSimulator
 from NoiseModel import NoiseModel 
 from NoiseSimComparisonResult import NoiseSimComparisonResult
 from helper_functions import get_qaoa_params
-# from qtensor.tests.test_composers import QtreeSimulator, NumpyBackend
 from qtensor.Simulate import QtreeSimulator, NumpyBackend
 from qtensor.contraction_backends import CuPyBackend
 from qtensor import QiskitQAOAComposer
 from qtree.operators import from_qiskit_circuit
 from qtensor import tools
 
-
 from qiskit import execute
 from qiskit.providers.aer import AerSimulator, noise, AerError
 
 import numpy as np
+from sigpy import get_array_module
 from qtensor.tools.lazy_import import cupy as cp
 from itertools import repeat
 import time
@@ -32,15 +31,6 @@ class QAOAComparisonSimulator(ComparisonSimulator):
         self.num_circs_list = num_circs_list
         self.num_circs_simulated = []
         self.results = []
-
-        # We can save on simulation time by not recomputing previous work. This is done by 
-        # using the results of a previous, smaller ensemble simulation: 
-        # i.e. if we ran 1,000 circuits in the previous simulation, and now we want to run 10,000 
-        # circuits using the exact same circuit and parameters, we actually only need to run
-        # 9,000 circuits, add the previous results, and renormalize. 
-        # The downside of this approach is that it requires the storage of an extra state 
-        # in memory. Therefore it should only be done for simulations that do not require 
-        # all of the available memory
         self.recompute_previous_ensemble: bool
 
         self._check_params()
@@ -62,19 +52,16 @@ class QAOAComparisonSimulator(ComparisonSimulator):
             if i == 0 or recompute_previous_ensemble == False:
                 self.num_circs_simulated.append(num_circs)
                 noise_sim.simulate_batch_ensemble(sum(self.qtensor_circ, []), num_circs, self.num_qubits)
-                #print("num_circs: {}".format(num_circs))
                 self.qtensor_probs = noise_sim.normalized_ensemble_probs
             else: 
                 actual_num_circs = num_circs - self.num_circs_list[i - 1]
                 self.num_circs_simulated.append(actual_num_circs)
-                #print("num_circs: {}, actual_num_circs: {}".format(num_circs, actual_num_circs_to_sim))
                 noise_sim.simulate_batch_ensemble(sum(self.qtensor_circ, []), actual_num_circs, self.num_qubits)
                 prev_qtensor_probs = self.prev_probs
                 curr_qtensor_probs = noise_sim.normalized_ensemble_probs
                 self.qtensor_probs = (curr_qtensor_probs + prev_qtensor_probs) / 2
             
             if recompute_previous_ensemble == True:
-                #self._check_correct_num_circs_simulated(i)
                 self.prev_probs = self.qtensor_probs
 
             qtensor_sim_time = noise_sim.time_taken
@@ -90,14 +77,8 @@ class QAOAComparisonSimulator(ComparisonSimulator):
 
     def _mpi_parallel_unit(self, args):
         noise_sim, qtensor_circ, num_circs, num_qubits = args
-        # #print("this workers num_circs: ", num_circs)
-        # if noise_sim.backend == CuPyBackend():
-        #     noise_sim.simulate_batch_ensemble(cupy.array(sum(qtensor_circ, [])), num_circs, num_qubits)
-        # else: 
-        #     noise_sim.simulate_batch_ensemble(sum(qtensor_circ, []), num_circs, num_qubits)
         noise_sim.simulate_batch_ensemble(sum(qtensor_circ, []), num_circs, num_qubits)
         fraction_of_qtensor_probs = noise_sim.normalized_ensemble_probs
-        # fraction_of_qtensor_probs = [0] * 2**self.n
         return fraction_of_qtensor_probs
 
     def qtensor_qiskit_noisy_qaoa_mpi(self,  num_nodes: int, num_jobs_per_node: int, backend = NumpyBackend(), recompute_previous_ensemble: bool = False, print_stats: bool = True, pbar: bool = True):
@@ -120,7 +101,6 @@ class QAOAComparisonSimulator(ComparisonSimulator):
                 if i == 0 or recompute_previous_ensemble == False: 
                     self.qtensor_probs = sum(qtensor_probs_list) / self._total_jobs
                 else:
-                    #prev_qtensor_probs = self.results[i - 1].qtensor_probs
                     prev_qtensor_probs = self.prev_probs
                     curr_qtensor_probs = sum(qtensor_probs_list) / self._total_jobs
                     self.qtensor_probs = (curr_qtensor_probs + prev_qtensor_probs) / 2
@@ -178,10 +158,6 @@ class QAOAComparisonSimulator(ComparisonSimulator):
             num_circs = self.num_circs_list[i]
         else:
             num_circs = self.num_circs_list[i] - self.num_circs_list[i - 1]
-        ## We make sure that each job has a minimum number of circuits. We do this because 
-        ## if there are too few circuits for each unit of work, the overhead from 
-        ## parallelization removes any advantage gained 
-        ## TODO: determine a better minimum number of circuits. Currently 10 is chosen arbitrarily
         min_circs_per_job = min(10, num_circs)
         if self.num_nodes * self.num_jobs_per_node > num_circs / min_circs_per_job:
             num_circs_per_job = min_circs_per_job
@@ -197,7 +173,6 @@ class QAOAComparisonSimulator(ComparisonSimulator):
                 repeat(num_circs_per_job, total_jobs), repeat(self.n, total_jobs)))
             self._total_jobs = total_jobs
             self.num_circs_simulated.append(num_circs)
-            #print("num_circs: {}, actual num_circs simulated on this iteration: {}".format(self.num_circs_list[i], num_circs))
         else: 
             if num_circs_per_job == min_circs_per_job:
                 self._arggen = list(zip(repeat(self.noise_sim, total_jobs - 1), repeat(self.qtensor_circ, total_jobs - 1), 
@@ -208,19 +183,14 @@ class QAOAComparisonSimulator(ComparisonSimulator):
             else: 
                 first_set_of_jobs = num_circs - (total_jobs * num_circs_per_job)
                 second_set_of_jobs = total_jobs - first_set_of_jobs
-                print("first_set_of_jobs: {}, second_set_of_jobs: {}".format(first_set_of_jobs, second_set_of_jobs))
                 self._arggen = list(zip(repeat(self.noise_sim, first_set_of_jobs), repeat(self.qtensor_circ,  first_set_of_jobs), 
                     repeat(num_circs_per_job + 1,  first_set_of_jobs), repeat(self.n, first_set_of_jobs)))
                 self._arggen.extend(list(zip(repeat(self.noise_sim, second_set_of_jobs), repeat(self.qtensor_circ,  second_set_of_jobs), 
                     repeat(num_circs_per_job,  second_set_of_jobs), repeat(self.n, second_set_of_jobs))))  
                 actual_num_circs = first_set_of_jobs * (num_circs_per_job + 1) + second_set_of_jobs * num_circs_per_job
             self._total_jobs = total_jobs
-            print("actual_num_circs: {}, num_circs: {}, num_nodes: {}, num_jobs_per_node: {}, total_jobs: {}".format(
-                actual_num_circs, num_circs, self.num_nodes, self.num_jobs_per_node, self._total_jobs))
             assert num_circs == actual_num_circs
             self.num_circs_simulated.append(actual_num_circs)
-            #print("num_circs: {}, actual num_circs simulated on this iteration: {}, total jobs: {}".format(self.num_circs_list[i], actual_num_circs, total_jobs))
-        print("total_jobs: ", total_jobs)
 
 
     def simulate_qiskit_density_matrix(self, circuit, noise_model_qiskit, backend, take_trace = True):
@@ -235,14 +205,11 @@ class QAOAComparisonSimulator(ComparisonSimulator):
                 print(e)
         result = execute(circuit, qiskit_backend, shots=1).result()
         result = qiskit_backend.run(circuit).result()
-        #result = execute(circuit, Aer.get_backend('aer_simulator_density_matrix'), shots=1, noise_model=noise_model_qiskit).result()
-        print(type(backend))
         if take_trace:
             if isinstance(backend, NumpyBackend):
                 self.qiskit_probs = np.diagonal(result.results[0].data.density_matrix.real)
             elif isinstance(backend, CuPyBackend):
                 ## TODO: Simulate Qiskit on GPU instead. copying from CPU to GPU will have a serious performance cost
-                #self.qiskit_probs = cp.diagonal(result.results[0].data.density_matrix.real)
                 self.qiskit_probs = cp.diagonal(cp.array(result.results[0].data.density_matrix.real))
         else:
             self.qiskit_density_matrix = result.results[0].data.density_matrix.real

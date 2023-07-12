@@ -1,10 +1,11 @@
 from qtensor.Simulate import QtreeSimulator, NumpyBackend
 from qtensor.contraction_backends import CuPyBackend
-from qtensor.tools.lazy_import import cupy as cp
+# from qtensor.tools.lazy_import import cupy as cp
 import qtree
 from NoiseModel import NoiseModel
 
 import numpy as np
+from sigpy import get_array_module
 import time
 
 class NoiseSimulator(QtreeSimulator):
@@ -17,58 +18,43 @@ class NoiseSimulator(QtreeSimulator):
 
 
     def simulate_batch_ensemble(self, qc, num_circs, batch_vars=0, peo=None):
-        """Stoachastic noise simulator using statevector approach
-        
-        This method uses significantly less memory than the density matrix approach (2^n vs 4^n). However, one should note that 
-        while this uses the statevector approach to simulate, the user never gets the amplitudes, only probabilities. 
-        This is because we must take the modulus squared of each statevector in the ensemble to conserve probability. Thus the user will 
-        receive a probability density vector, not a probability amplitude vector.  
-        """
+        """Stoachastic noise simulator using statevector approach"""
     
         start = time.time_ns() / (10 ** 9)
         if num_circs < 0 or not isinstance(num_circs, int):
             raise Exception("Error: The argument num_circs must be a positive integer")
-        if isinstance(self.backend, CuPyBackend):
-            unnormalized_ensemble_probs = cp.zeros(shape = 2**batch_vars, dtype = cp.complex128)
-            for _ in range(num_circs):
-                noisy_state_amps = self.simulate_batch(qc, batch_vars, peo)
-                noisy_state_probs = cp.square(cp.absolute(noisy_state_amps))
-                unnormalized_ensemble_probs += noisy_state_probs
-        elif isinstance(self.backend, NumpyBackend):
-            unnormalized_ensemble_probs = [0] * 2**batch_vars
-            for _ in range(num_circs):
-                noisy_state_amps = self.simulate_batch(qc, batch_vars, peo)
-                noisy_state_probs = np.square(np.absolute(noisy_state_amps))
-                unnormalized_ensemble_probs += noisy_state_probs
         
+        xp = get_array_module(self)
+
+        unnormalized_ensemble_probs = xp.zeros(shape = 2**batch_vars, dtype = complex)
+        for _ in range(num_circs):
+            noisy_state_amps = self.simulate_batch(qc, batch_vars, peo)
+            noisy_state_probs = xp.square(xp.absolute(noisy_state_amps))
+            unnormalized_ensemble_probs += noisy_state_probs
+
         normalized_ensemble_probs = unnormalized_ensemble_probs / num_circs
         self.normalized_ensemble_probs = normalized_ensemble_probs
         end = time.time_ns() / (10 ** 9)
         self.time_taken = end - start
-        #return normalized_ensemble_probs
 
     def simulate_batch_ensemble_density(self, qc, num_circs, batch_vars=0, peo=None):
-        """Stochastic noise simulator using density matrix apporach.
-        
-        Uses significantly more memory than the statevector approach, but gives more information. 
-        The user will get the relative phaseses as well as the probabilities.
-        """
+        """Stochastic noise simulator using density matrix apporach."""
         start = time.time_ns() / (10 ** 9)
         if num_circs < 0 or not isinstance(num_circs, int):
             raise Exception("Error: The argument num_circs must be a positive integer")
         
-        unnormalized_ensemble_density_matrix = np.zeros(shape=(2**batch_vars, 2**batch_vars), dtype=complex)
+        xp = get_array_module(self)
+
+        unnormalized_ensemble_density_matrix = xp.zeros(shape=(2**batch_vars, 2**batch_vars), dtype=complex)
         for _ in range(num_circs):
             noisy_state_amps = self.simulate_batch(qc, batch_vars, peo)
             conj_noisy_state_amps = noisy_state_amps.conj()
-            noisy_state_density_matrix = np.outer(conj_noisy_state_amps, noisy_state_amps)
+            noisy_state_density_matrix = xp.outer(conj_noisy_state_amps, noisy_state_amps)
             unnormalized_ensemble_density_matrix += noisy_state_density_matrix
         
-        self.normalized_ensemble_density_matrix = np.divide(unnormalized_ensemble_density_matrix, num_circs)
+        self.normalized_ensemble_density_matrix = xp.divide(unnormalized_ensemble_density_matrix, num_circs)
         end = time.time_ns() / (10 ** 9)
         self.time_taken = end - start
-        #normalized_ensemble_density_matrix = np.divide(unnormalized_ensemble_density_matrix, num_circs)
-        #return normalized_ensemble_density_matrix
     
     def simulate_ensemble(self, qc, num_circs):
         """Simulates and returns only the first amplitude of the ensemble"""
@@ -87,7 +73,7 @@ class NoiseSimulator(QtreeSimulator):
         
     def _apply_channel(self, gate):
         """A noisy gate has all of the proper noise channels applied to it"""
-
+        
         for i in range(len(self.noise_model.noise_gates[gate.name].channels)):
             error_name = self.noise_model.noise_gates[gate.name].channels[i].name
             if error_name == 'depolarizing':

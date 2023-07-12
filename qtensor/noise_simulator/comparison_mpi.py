@@ -39,8 +39,8 @@ num_gpus_per_node = 4
 
 num_jobs_per_node = num_cores_per_node * num_threads_per_core * num_gpus_per_node
 
-num_circs_list = [10, 18, 32, 100, 178, 316, 1000, 1780, 3160, 10000]
-#num_circs_list = [10]
+#num_circs_list = [10, 18, 32, 100, 178, 316, 1000, 1780, 3160, 10000]
+num_circs_list = [10]
 
 outfile_name = '{}.json'.format(datetime.now().isoformat())
 results = []
@@ -53,6 +53,16 @@ max_p = 3
 
 min_d = 4
 max_d = 5
+
+from qtensor.tools.lazy_import import cupy as cp
+import numpy as np
+def checkType(a_list):
+    for element in a_list:
+        for i in element:
+            if isinstance(i, cp.ndarray) or isinstance(i, np.ndarray):
+                f"{i} is an ndarray type" 
+            if isinstance(element[i], cp.ndarray) or isinstance(element[i], np.ndarray):
+                f"{element[i]} is an ndarray type" 
 
 for n in range(min_n, max_n):
     for p in range(min_p, max_p):
@@ -73,4 +83,5 @@ for n in range(min_n, max_n):
                 comparison.qtensor_qiskit_noisy_qaoa_mpi(num_nodes=num_nodes, num_jobs_per_node=num_jobs_per_node)
                 results.extend(comparison.results)
 if results:
+    #checkType(results)
     save_dict_to_file(results, name = outfile_name) 

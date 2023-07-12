@@ -10,6 +10,7 @@ import jsbeautifier
 import jsonpickle
 import numpy as np
 from numpy.linalg import norm as Norm
+from sigpy import get_array_module
 
 
 from qtensor import QiskitQAOAComposer
@@ -101,48 +102,95 @@ class NoiseSimComparisonResult:
             f.write(', ')
 
     def _calc_similarity(self):
-        qiskit_probs_root = np.sqrt(np.diagonal(self.qiskit_density_matrix))
-        qtensor_probs_root = np.sqrt(np.diagonal(self.qtensor_density_matrix))
+        xp = get_array_module(self)
+        qiskit_probs_root = xp.sqrt(xp.diagonal(self.qiskit_density_matrix))
+        qtensor_probs_root = xp.sqrt(xp.diagonal(self.qtensor_density_matrix))
+        noiseless_qtensor_probs_root = xp.sqrt(xp.abs(self.exact_qtensor_amps)**2)
+        uniform_probs_root = xp.sqrt(xp.ones(2**self.n)/2**self.n)
         
         self.cos_sim = cosine_similarity(qiskit_probs_root, qtensor_probs_root)
         self.fidelity = fidelity(self.qiskit_density_matrix.data, self.qtensor_density_matrix)
 
+        self.cos_sim = xp.inner(self.qiskit_probs, self.qtensor_probs) / (xp.linalg.norm(self.qiskit_probs)* xp.linalg.norm(self.qtensor_probs)) 
+
     def _calc_similarity_of_probs(self):
-        if isinstance(self.backend, NumpyBackend):
-            qiskit_probs_root = np.sqrt(self.qiskit_probs)
-            qtensor_probs_root = np.sqrt(self.qtensor_probs)
-            noiseless_qtensor_probs_root = np.sqrt(np.abs(self.exact_qtensor_amps)**2)
-            uniform_probs_root = np.sqrt(np.ones(2**self.n)/2**self.n)
+        xp = get_array_module(self)
+        qiskit_probs_root = xp.sqrt(self.qiskit_probs)
+        qtensor_probs_root = xp.sqrt(self.qtensor_probs)
+        noiseless_qtensor_probs_root = xp.sqrt(xp.abs(self.exact_qtensor_amps)**2)
+        uniform_probs_root = xp.sqrt(xp.ones(2**self.n)/2**self.n)
 
-            # we don't need to take the conjugate, as both population density vectors are strictly 
-            # real by the time they have made it here. 
+        # we don't need to take the conjugate, as both population density vectors are strictly 
+        # real by the time they have made it here. 
 
-            """Measures the fidelity between the qiskit density matrix noisy state and the qtensoir stochastic noisy state"""
-            self.noisy_fidelity = np.abs((np.inner(qiskit_probs_root, qtensor_probs_root)))**2
+        self.cos_sim = xp.inner(self.qiskit_probs, self.qtensor_probs) / (xp.linalg.norm(self.qiskit_probs)* xp.linalg.norm(self.qtensor_probs)) 
+        print(f"{'Cosine Similarity (old):':<20}{xp.round(self.cos_sim.real, 7):<10}")
+        self.cos_sim = self._cos_sim(self.qiskit_probs, self.qtensor_probs)
 
-            """Measures the fidelity between a noisy qtensor state and the noiseless version of the same state"""
-            self.noiseless_fidelity = np.abs((np.inner(noiseless_qtensor_probs_root, qtensor_probs_root)))**2
+        """Measures the fidelity between the qiskit density matrix noisy state and the qtensor stochastic noisy state"""
+        self.noisy_fidelity = xp.abs((xp.inner(qiskit_probs_root, qtensor_probs_root)))**2
+        print(f"\n{'Noisy Fidelity (old):':<20}{xp.round(self.noisy_fidelity.real, 7):<10}")
+        self.noisy_fidelity = self._fidelity(qiskit_probs_root, qtensor_probs_root)
 
-            """Measures the fidelity between a qiskit noisy state and a uniform distribution state"""
-            self.uniform_qiskit_fidelity = np.abs((np.inner(uniform_probs_root, qiskit_probs_root)))**2
+        """Measures the fidelity between a noisy qtensor state and the noiseless version of the same state"""
+        self.noiseless_fidelity = xp.abs((xp.inner(noiseless_qtensor_probs_root, qtensor_probs_root)))**2
+        print(f"\n{'Noiseless Fidelity (old):':<20}{xp.round(self.noiseless_fidelity.real, 7):<10}")
+        self.noiseless_fidelity = self._fidelity(noiseless_qtensor_probs_root, qtensor_probs_root)
 
-            """Measures the fidelity between a qtensor noisy state and a uniform distribution state"""
-            self.uniform_qtensor_fidelity = np.abs((np.inner(uniform_probs_root, qtensor_probs_root)))**2
-            #self.cos_sim = cosine_similarity(self.qiskit_probs, self.qtensor_probs)
-            self.cos_sim = np.inner(self.qiskit_probs, self.qtensor_probs) / (Norm(self.qiskit_probs)* Norm(self.qtensor_probs)) 
+        """Measures the fidelity between a qiskit noisy state and a uniform distribution state"""
+        self.uniform_qiskit_fidelity = xp.abs((xp.inner(uniform_probs_root, qiskit_probs_root)))**2
+        print(f"\n{'Uniform Qiskit Fidelity (old): ':<20}{xp.round(self.uniform_qiskit_fidelity.real, 7):<10}")
+        self.uniform_qiskit_fidelity = self._fidelity(uniform_probs_root, qiskit_probs_root)
 
-        elif isinstance(self.backend, CuPyBackend):
-            qiskit_probs_root = cp.sqrt(self.qiskit_probs)
-            qtensor_probs_root = cp.sqrt(self.qtensor_probs)
-            noiseless_qtensor_probs_root = cp.sqrt(cp.abs(self.exact_qtensor_amps)**2)
-            uniform_probs_root = cp.sqrt(cp.ones(2**self.n)/2**self.n)
+        """Measures the fidelity between a qtensor noisy state and a uniform distribution state"""
+        self.uniform_qtensor_fidelity = xp.abs((xp.inner(uniform_probs_root, qtensor_probs_root)))**2
+        print(f"\n{'Uniform QTensor Fidelity (old): ':<20}{xp.round(self.uniform_qtensor_fidelity.real, 7):<10}")
+        self.uniform_qtensor_fidelity = self._fidelity(uniform_probs_root, qtensor_probs_root)
 
-            self.noisy_fidelity = cp.abs((cp.inner(qiskit_probs_root, qtensor_probs_root)))**2
-            self.noiseless_fidelity = cp.abs((cp.inner(noiseless_qtensor_probs_root, qtensor_probs_root)))**2
-            self.uniform_qiskit_fidelity = cp.abs((cp.inner(uniform_probs_root, qiskit_probs_root)))**2
-            self.uniform_qtensor_fidelity = cp.abs((cp.inner(uniform_probs_root, qtensor_probs_root)))**2
-            # self.cos_sim = cosine_similarity(self.qiskit_probs, self.qtensor_probs)
-            self.cos_sim = cp.inner(self.qiskit_probs, self.qtensor_probs) / (cp.linalg.norm(self.qiskit_probs)* cp.norm(self.qtensor_probs)) 
+        #self.cos_sim = cosine_similarity(self.qiskit_probs, self.qtensor_probs)
+        # if isinstance(self.backend, NumpyBackend):
+        #     qiskit_probs_root = np.sqrt(self.qiskit_probs)
+        #     qtensor_probs_root = np.sqrt(self.qtensor_probs)
+        #     noiseless_qtensor_probs_root = np.sqrt(np.abs(self.exact_qtensor_amps)**2)
+        #     uniform_probs_root = np.sqrt(np.ones(2**self.n)/2**self.n)
+
+        #     # we don't need to take the conjugate, as both population density vectors are strictly 
+        #     # real by the time they have made it here. 
+
+        #     """Measures the fidelity between the qiskit density matrix noisy state and the qtensoir stochastic noisy state"""
+        #     self.noisy_fidelity = np.abs((np.inner(qiskit_probs_root, qtensor_probs_root)))**2
+
+        #     """Measures the fidelity between a noisy qtensor state and the noiseless version of the same state"""
+        #     self.noiseless_fidelity = np.abs((np.inner(noiseless_qtensor_probs_root, qtensor_probs_root)))**2
+
+        #     """Measures the fidelity between a qiskit noisy state and a uniform distribution state"""
+        #     self.uniform_qiskit_fidelity = np.abs((np.inner(uniform_probs_root, qiskit_probs_root)))**2
+
+        #     """Measures the fidelity between a qtensor noisy state and a uniform distribution state"""
+        #     self.uniform_qtensor_fidelity = np.abs((np.inner(uniform_probs_root, qtensor_probs_root)))**2
+        #     #self.cos_sim = cosine_similarity(self.qiskit_probs, self.qtensor_probs)
+        #     self.cos_sim = np.inner(self.qiskit_probs, self.qtensor_probs) / (Norm(self.qiskit_probs)* Norm(self.qtensor_probs)) 
+
+        # elif isinstance(self.backend, CuPyBackend):
+        #     qiskit_probs_root = cp.sqrt(self.qiskit_probs)
+        #     qtensor_probs_root = cp.sqrt(self.qtensor_probs)
+        #     noiseless_qtensor_probs_root = cp.sqrt(cp.abs(self.exact_qtensor_amps)**2)
+        #     uniform_probs_root = cp.sqrt(cp.ones(2**self.n)/2**self.n)
+
+        #     self.noisy_fidelity = cp.abs((cp.inner(qiskit_probs_root, qtensor_probs_root)))**2
+        #     self.noiseless_fidelity = cp.abs((cp.inner(noiseless_qtensor_probs_root, qtensor_probs_root)))**2
+        #     self.uniform_qiskit_fidelity = cp.abs((cp.inner(uniform_probs_root, qiskit_probs_root)))**2
+        #     self.uniform_qtensor_fidelity = cp.abs((cp.inner(uniform_probs_root, qtensor_probs_root)))**2
+        #     # self.cos_sim = cosine_similarity(self.qiskit_probs, self.qtensor_probs)
+        #     self.cos_sim = cp.inner(self.qiskit_probs, self.qtensor_probs) / (cp.linalg.norm(self.qiskit_probs)* cp.norm(self.qtensor_probs)) 
+
+    def _fidelity(self, A, B): 
+        xp = get_array_module(self)
+        return  xp.abs((xp.inner(A, B)))**2
+    
+    def _cos_sim(self, A, B):
+        xp = get_array_module(self)
+        return xp.inner(A, B) / (xp.linalg.norm(A) * xp.linalg.norm(B)) 
 
     def _to_dict(self):
         #self.experiment_dict['name'] = self.name
