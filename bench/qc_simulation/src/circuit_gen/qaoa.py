@@ -1,5 +1,6 @@
 import networkx
 import numpy as np
+from qtensor.tools import BETHE_QAOA_VALUES
 
 def generate_ibm_connectivity(arch):
     """
@@ -27,6 +28,8 @@ def generate_ibm_connectivity(arch):
         # IBM quantum volume 64
         from qiskit.providers.fake_provider import FakeCairoV2
         return coupling_map_from_provider(FakeCairoV2)
+    else:
+        raise ValueError("IBM architecture {} not supported".format(arch))
 
 def save_terms_format(file, terms):
     """
@@ -45,8 +48,10 @@ def generate_graph(n, d, type="random"):
     elif type[:4] == "ibm_":
         arch = type[4:]
         return generate_ibm_connectivity(arch)
+    else:
+        raise ValueError("Unknown graph type {}".format(type))
 
-def generate_maxcut(out_file, N, p, d, graph_type='random', seed=None):
+def generate_maxcut(out_file, N, p, d, graph_type='random', seed=None, parameters='random'):
     """
     Generate a random regular maxcut problem
 
@@ -55,16 +60,23 @@ def generate_maxcut(out_file, N, p, d, graph_type='random', seed=None):
         N (int): Number of nodes
         p (int): Number of layers
         d (int): Random regular graph degree 
+        parameters (str): One of ["random", "fixed_angles"]
 
     Returns:
         str: Path to output file
     """
-    G = generate_graph(N, d, graph_type)
+    G: networkx.Graph = generate_graph(N, d, graph_type)
     terms = []
     for u, v in G.edges:
         terms.append((1, (u, v)))
-    gamma = np.random.uniform(0, 2 * np.pi, p)
-    beta = np.random.uniform(0, np.pi, p)
+    if parameters == "random":
+        gamma = np.random.uniform(0, 2 * np.pi, p)
+        beta = np.random.uniform(0, np.pi, p)
+    elif parameters == "fixed_angles":
+        gammabeta = np.array(BETHE_QAOA_VALUES[str(p)]['angles'])
+        gamma, beta = gammabeta[:p]*2, gammabeta[p:]
+    else:
+        raise ValueError("Unknown parameters type {}. Use one of ['random', 'fixed_angles']".format(parameters))
     pb = {"terms": terms, "gamma": gamma.tolist(), "beta": beta.tolist()}
 
     return save_terms_format(out_file, pb)
