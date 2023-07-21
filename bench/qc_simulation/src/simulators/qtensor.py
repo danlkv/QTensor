@@ -180,6 +180,8 @@ def simulate(in_file, out_file,
         r2r_threshold: relative threshold for compression
     """
     import time
+    from qtensor.contraction_algos import bucket_elimination
+    from qtensor.compression.Compressor import CUSZCompressor, CUSZXCompressor, TorchCompressor
     import cupy
     cupy.cuda.profiler.start()
     prep_data = read_preps(in_file)
@@ -190,7 +192,15 @@ def simulate(in_file, out_file,
     if compress is not None:
         if compress == 'szx':
             print(f"{r2r_error=} {r2r_threshold=}")
-            compressor = qtensor.compression.CUSZCompressor(r2r_error=r2r_error, r2r_threshold=r2r_threshold)
+            compressor = CUSZXCompressor(r2r_error=r2r_error, r2r_threshold=r2r_threshold)
+            compressor = qtensor.compression.ProfileCompressor(compressor)
+        elif compress == 'cusz':
+            print(f"{r2r_error=} {r2r_threshold=}")
+            compressor = CUSZCompressor(r2r_error=r2r_error, r2r_threshold=r2r_threshold)
+            compressor = qtensor.compression.ProfileCompressor(compressor)
+        elif compress == 'torch':
+            print(f"{r2r_error=} {r2r_threshold=}")
+            compressor = TorchCompressor(r2r_error=r2r_error, r2r_threshold=r2r_threshold)
             compressor = qtensor.compression.ProfileCompressor(compressor)
         else:
             raise ValueError(f"Unknown compression algorithm: {compress}")
