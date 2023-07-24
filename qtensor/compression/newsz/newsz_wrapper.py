@@ -8,8 +8,10 @@ import torch
 
 from pathlib import Path
 LIB_PATH = str(Path(__file__).parent/'libnewsz_wrapper.so')
+ 
+NVCOMP_PATH = str(Path(__file__).parent/'libnvcomp.so')
+#NVCOMP_PATH= './libnvcomp.so'
 #LIB_PATH = './libnewsz_wrapper.so'
-NVCOMP_PATH=r'/home/mkshah5/nvcomp/build/lib/libnvcomp.so'
 
 # unsigned char* newSZ_device_compress(float *oriData, size_t *outSize, size_t nbEle, int blockSize)
 def get_device_compress():
@@ -100,7 +102,7 @@ def free_compressed(ptr):
     p_ptr = ctypes.addressof(ptr)
     p_int = ctypes.cast(p_ptr, ctypes.POINTER(ctypes.c_uint64))
     decomp_int = p_int.contents
-    #cp.cuda.runtime.free(decomp_int.value)
+    cp.cuda.runtime.free(decomp_int.value)
 
 
 if __name__ == "__main__":
@@ -137,7 +139,7 @@ if __name__ == "__main__":
     # variable = ctypes.c_size_t(0)
     # outSize = ctypes.pointer(variable)
     #print(in_vector[0:16])
-    for i in range(2):
+    for i in range(200):
         s_time = time.time()
         #o_bytes, outSize = cusz_device_compress(in_vector_gpu, r2r_error, DATA_SIZE, 256, r2r_threshold)
 
