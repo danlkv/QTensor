@@ -175,7 +175,7 @@ def simulate(in_file, out_file,
     """
     import time
     from qtensor.contraction_algos import bucket_elimination
-    from qtensor.compression.Compressor import CUSZCompressor, CUSZXCompressor, TorchCompressor
+    from qtensor.compression.Compressor import CUSZCompressor, CUSZXCompressor, TorchCompressor, NEWSZCompressor
     import cupy
     cupy.cuda.profiler.start()
     prep_data = read_preps(in_file)
@@ -194,6 +194,10 @@ def simulate(in_file, out_file,
         elif compress == 'torch':
             print(f"{r2r_error=} {r2r_threshold=}")
             compressor = TorchCompressor(r2r_error=r2r_error, r2r_threshold=r2r_threshold)
+            compressor = qtensor.compression.ProfileCompressor(compressor)
+        elif compress == 'newsz':
+            print(f"{r2r_error=} {r2r_threshold=}")
+            compressor = NEWSZCompressor(r2r_error=r2r_error, r2r_threshold=r2r_threshold)
             compressor = qtensor.compression.ProfileCompressor(compressor)
         else:
             raise ValueError(f"Unknown compression algorithm: {compress}")
