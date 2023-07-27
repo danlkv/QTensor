@@ -28,7 +28,8 @@ from qtree.operators import from_qiskit_circuit
 from qtensor.Simulate import QtreeSimulator, NumpyBackend
 from qtensor import QiskitQAOAComposer, QtreeQAOAComposer
 from qtensor.tools.mpi import mpi_map
-from qtensor.contraction_backends import CuPyBackend
+from qtensor.contraction_backends import CuPyBackend, TorchBackend
+import torch
 
 def invert_counts(count_dict):
     return {k[::-1]:v for k, v in count_dict.items()}
@@ -69,12 +70,25 @@ def qaoa_obj(G, p, args):
         return compute_maxcut_energy(invert_counts(counts), G)
     return fun
 
+#def qaoa_obj(G, p, args, sim):
+#    def fun(theta):
+#        beta= theta[:p]
+#        gamma = theta[p:]
+#        composer = QtreeQAOAComposer(G, gamma = gamma, beta = beta)
+#        # qc = get_maxcut_qaoa_ckt(G, beta, gamma, args)
+#        # qc.measure_all()
+#        composer.ansatz_state()
+#        circ = composer.circuit
+#        counts = attach_qubit_names(sim.simulate_batch(qc = circ, batch_vars = composer.n_qubits))
+#        return cupy.asnumpy(compute_maxcut_energy((counts), G))
+#    return fun
 
 
 def compute_energy_graph(G, p, args, sim):
     init_pt = np.random.uniform(0, 1, size=(2*p))
     obj = qaoa_obj(G, p, args)
     result = minimize(obj, init_pt, method='COBYLA', options={'maxiter':2500, 'disp': False})
+    #result = minimize(cupy.asnumpy(obj), init_pt, method='COBYLA', options={'maxiter':2500, 'disp': False})
     optimal = result['x']
     composer = QtreeQAOAComposer(G, gamma = optimal[p:], beta = optimal[:p])
     composer.ansatz_state()
@@ -110,7 +124,11 @@ def main(args):
     
     mixer_layers = ['x', 'xx', 'y', 'yy']
     
-    sim = QtreeSimulator(backend=CuPyBackend())
+    #sim = QtreeSimulator(backend=CuPyBackend())
+    #if torch.cuda.is_available():
+    #    print(torch.cuda.device_count())
+    device = 'cuda:0'
+    sim = QtreeSimulator(backend=TorchBackend(device = device))
     results = []
     p = args.p
     for i, g in enumerate(graphs):
