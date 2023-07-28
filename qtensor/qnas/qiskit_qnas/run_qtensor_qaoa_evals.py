@@ -49,37 +49,27 @@ def compute_maxcut_energy(counts, G):
         total_counts += meas_count
     return energy / total_counts
 
-
-
-def qaoa_obj(G, p, args):
-    backend = Aer.get_backend('qasm_simulator')
-
-    # args = argparse.Namespace()
-    # args.n_rots = 2
-    # args.n_ents = 2
-    # args.n_reps = 2
-
+def qaoa_obj(G, p, args, sim):
     def fun(theta):
-        beta= theta[:p]
-        gamma = theta[p:]
-        qc = get_maxcut_qaoa_ckt(G, beta, gamma, args)
-        qc.measure_all()
-        counts = execute(qc, backend).result().get_counts()
-        return compute_maxcut_energy(invert_counts(counts), G)
+       beta= theta[:p]
+       gamma = theta[p:]
+       composer = QtreeQAOAComposer(G, gamma = gamma, beta = beta)
+       composer.ansatz_state()
+       circ = composer.circuit
+       counts = attach_qubit_names(sim.simulate_batch(qc = circ, batch_vars = composer.n_qubits))
+       return compute_maxcut_energy((counts), G)
     return fun
-
 
 
 def compute_energy_graph(G, p, args, sim):
     init_pt = np.random.uniform(0, 1, size=(2*p))
-    obj = qaoa_obj(G, p, args)
+    obj = qaoa_obj(G, p, args, sim)
     result = minimize(obj, init_pt, method='COBYLA', options={'maxiter':2500, 'disp': False})
     optimal = result['x']
     composer = QtreeQAOAComposer(G, gamma = optimal[p:], beta = optimal[:p])
     composer.ansatz_state()
     circ = composer.circuit
     counts = attach_qubit_names(sim.simulate_batch(qc = circ, batch_vars = composer.n_qubits))
-    # counts = attach_qubit_names(counts)
     best_cut, best_solution = min([(max_cut_obj(x,G),x) for x in counts.keys()], key=itemgetter(0))
     return best_cut, circ
 
@@ -88,26 +78,16 @@ def par_fn(G, p, args, sim):
 
 def mpi_parallel_unit(arggen):
     G, p, args, sim = arggen
-    #print(f"G: {G}, p: {p}, args: {args}, sim: {sim}")
     return compute_energy_graph(G, p, args, sim)
 
 def get_args(G, p, args, sim):
     num_jobs = args.num_workers * args.num_samples_per_job
     return list(zip(repeat(G, num_jobs), repeat(p, num_jobs), repeat(args, num_jobs), repeat(sim, num_jobs)))
 
-    # if jobs % num_workers == 0:
-    #     # return arggen list of length jobs, each of which has jobs_per_worker number of 
-    # else:
-    #     first_set_of_jobs = num_circs - (total_jobs * num_circs_per_job)
-    #     second_set_of_jobs = total_jobs - first_set_of_jobs
-
-
 # TODO: add way to get circuit from population
 def main(args):
     graphs, energies = get_graphs('/home/wberquis/repos/QTensor/qtensor/qnas/qiskit_qnas/QAOA_Dataset/20_10_node_erdos_renyi_graphs.txt',
             '/home/wberquis/repos/QTensor/qtensor/qnas/qiskit_qnas/QAOA_Dataset/20_10_node_erdos_renyi_graphs_energies.txt')
-    #graphs, energies = get_graphs('qtensor/qnas/qiskit_qnas/QAOA_Dataset/20_10_node_erdos_renyi_graphs.txt',
-    #                          'qtensor/qnas/qiskit_qnas/QAOA_Dataset/20_10_node_erdos_renyi_graphs_energies.txt')
     
     mixer_layers = ['x', 'xx', 'y', 'yy']
     
@@ -118,10 +98,8 @@ def main(args):
         print("running graph: ", i)
         arggen = get_args(g, p, args, sim)
         comp = mpi_map(mpi_parallel_unit, arggen, pbar = True, total = args.num_nodes)
-        #print(len(comp), comp)
         if comp:
             best_energy, best_model = sorted([c for c in comp], key=lambda x: x[0])[0]
-        # best_energy, best_model = compute_energy_graph(g, p, args, sim)
             results.append((best_energy, best_model))
     if results:
         return results
@@ -143,7 +121,7 @@ if __name__ == '__main__':
     args.nents = 2
     args.reps = 2
 
-    # add to parser
+    # TODO: Add to parser so we don't ned to manually set
     args.num_nodes = 2
     num_gpus = 1
     num_cpus = 32
