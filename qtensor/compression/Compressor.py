@@ -564,3 +564,41 @@ class CUSZCompressor(Compressor):
 # oriData, absErrBound, nbEle, blockSize,threshold
             # decompressed_data = quant_device_decompress(num_elements, cmp_bytes, owner,dtype)
         return decompressed_data
+
+class WriteToDiskCompressor(Compressor):
+    def __init__(self, path):
+        from pathlib import Path
+        Path(path).mkdir(exist_ok=True, parents=True)
+        self.path = path
+    
+    def _gen_random_filename(self, info):
+        dtype, shape, isCupy = info
+        k = np.random.randint(0, 100000000)
+        s = hex(k)[2:]
+        return self.path + f'/qtensor_data_{s}_{str(dtype)}.bin'
+
+    def compress(self, data):
+        import cupy
+        if isinstance(data, cupy.ndarray):
+            isCupy=False
+        else:
+            isCupy=True
+        fname = self._gen_random_filename((data.dtype, data.shape, isCupy))
+        data.tofile(fname)
+        return (fname, data.dtype, data.shape, isCupy)
+
+    def compress_size(self, ptr):
+        return 0.1
+
+    def decompress(self, obj):
+        import cupy
+        fname, dtype, shape, isCupy = obj
+        if isCupy:
+            return cupy.fromfile(fname).view(dtype).reshape(shape)
+        else:
+            return np.fromfile(fname).view(dtype).reshape(shape)
+
+    def free_compressed(self, ptr):
+        pass
+    def free_decompressed(self):
+        pass

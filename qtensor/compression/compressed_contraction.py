@@ -40,8 +40,8 @@ def contract_two_tensors(A, B, T_out, einsum=np.einsum):
         result_ints = [relabel_dict_int[int(i)] for i in result_indices]
     else:
         result_ints = list(map(int, result_indices))
-    print(A.data.shape)
-    print(B.data.shape)
+    #print(A.data.shape)
+    #print(B.data.shape)
     out = einsum(A.data, A_ints, B.data, B_ints, result_ints)
     if len(result_ints)>0:
         # This copying is reqiured because cupy doesn't support `out` argument.

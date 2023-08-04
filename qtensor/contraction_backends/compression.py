@@ -68,8 +68,9 @@ class CompressionBackend(ContractionBackend):
             for t in [accum, t]:
                 if isinstance(t, CompressedTensor):
                     for c in t.data:
-                        cmp_bytes, num_elements_eff, isCuPy, shape, dtype, _ = c
-                        del cmp_bytes
+                        if len(c)==6:
+                            cmp_bytes, num_elements_eff, isCuPy, shape, dtype, _ = c
+                            del cmp_bytes
                         # import ctypes
                         # p_decompressed_ptr = ctypes.addressof(cmp_bytes[0])
                         # # cast to int64 pointer
