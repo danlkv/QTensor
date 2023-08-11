@@ -15,6 +15,7 @@ sys.path.append('./torch_quant')
 sys.path.append(str(Path(__file__).parent/'newsz'))
 sys.path.append('./newsz')
 
+
 import torch
 try:
     from cuszx_wrapper import cuszx_host_compress, cuszx_host_decompress, cuszx_device_compress, cuszx_device_decompress
@@ -28,6 +29,22 @@ except:
     pass
 
 CUSZX_BLOCKSIZE = 256
+
+# -- helper functions
+
+def _get_data_info(data):
+    import cupy
+    if isinstance(data, cupy.ndarray):
+        isCuPy = True
+    else:
+        isCuPy = False
+    num_elements = data.size
+    # Adapt numele depending on itemsize
+    itemsize = data.dtype.itemsize
+    num_elements_eff = int(num_elements*itemsize/4) 
+    return isCuPy, num_elements_eff
+
+# -- Compressor classes
 
 class Compressor():
     def compress(self, data):
@@ -143,16 +160,7 @@ class TorchCompressor(Compressor):
         cupy.cuda.runtime.free(decompressed_int.value)
 
     def compress(self, data):
-        import cupy
-        if isinstance(data, cupy.ndarray):
-            isCuPy = True
-        else:
-            isCuPy = False
-        num_elements = data.size
-        # Adapt numele depending on itemsize
-        itemsize = data.dtype.itemsize
-        num_elements_eff = int(num_elements*itemsize/4) 
-
+        isCupy, num_elements_eff = _get_data_info(data)
         dtype = data.dtype
         cmp_bytes, outSize_ptr = self.cuszx_compress(isCuPy, data, num_elements_eff, self.r2r_error, self.r2r_threshold)
         return (cmp_bytes, num_elements_eff, isCuPy, data.shape, dtype, outSize_ptr)
@@ -247,16 +255,7 @@ class NEWSZCompressor(Compressor):
         cupy.cuda.runtime.free(decompressed_int.value)
 
     def compress(self, data):
-        import cupy
-        if isinstance(data, cupy.ndarray):
-            isCuPy = True
-        else:
-            isCuPy = False
-        num_elements = data.size
-        # Adapt numele depending on itemsize
-        itemsize = data.dtype.itemsize
-        num_elements_eff = int(num_elements*itemsize/4) 
-
+        isCuPy, num_elements_eff = _get_data_info(data)
         dtype = data.dtype
         cmp_bytes, outSize_ptr = self.cuszx_compress(isCuPy, data, num_elements_eff, self.r2r_error, self.r2r_threshold)
         # return (cmp_bytes, num_elements_eff, isCuPy, data.shape, dtype, outSize_ptr)
@@ -304,9 +303,9 @@ class NEWSZCompressor(Compressor):
         if not isCuPy:
             cmp_bytes, outSize_ptr = cuszx_host_compress(data, r2r_error, num_elements, CUSZX_BLOCKSIZE, r2r_threshold)
         else:
-            #cmp_bytes, outSize_ptr = cuszp_device_compress(data, r2r_error, num_elements,  r2r_threshold)
-            cmp_bytes, outSize_ptr = newsz_device_compress(data,num_elements, CUSZX_BLOCKSIZE,r2r_threshold)
-            # cmp_bytes, outSize_ptr = quant_device_compress(data, num_elements, CUSZX_BLOCKSIZE, r2r_threshold)
+            print('Before compress')
+            cmp_bytes, outSize_ptr = newsz_device_compress(data, num_elements, CUSZX_BLOCKSIZE, r2r_threshold)
+            print('After compress')
             del data
             torch.cuda.empty_cache()
         return cmp_bytes, outSize_ptr
@@ -364,16 +363,7 @@ class CUSZXCompressor(Compressor):
         cupy.cuda.runtime.free(decompressed_int.value)
 
     def compress(self, data):
-        import cupy
-        if isinstance(data, cupy.ndarray):
-            isCuPy = True
-        else:
-            isCuPy = False
-        num_elements = data.size
-        # Adapt numele depending on itemsize
-        itemsize = data.dtype.itemsize
-        num_elements_eff = int(num_elements*itemsize/4) 
-
+        isCuPy, num_elements_eff = _get_data_info(data)
         dtype = data.dtype
         cmp_bytes, outSize_ptr = self.cuszx_compress(isCuPy, data, num_elements_eff, self.r2r_error, self.r2r_threshold)
         # return (cmp_bytes, num_elements_eff, isCuPy, data.shape, dtype, outSize_ptr)
@@ -406,17 +396,19 @@ class CUSZXCompressor(Compressor):
         # arr = cupy.ndarray(shape, dtype=dtype, memptr=mem_ptr)
         return arr
     
-    ### Compression API with cuSZx ###
-    # Parameters:
-    # - isCuPy = boolean, true if data is CuPy array, otherwise is numpy array
-    # - data = Numpy or Cupy ndarray, assumed to be 1-D, np.float32 type
-    # - num_elements = Number of floating point elements in data
-    # - r2r_error = relative-to-value-range error bound for lossy compression
-    # - r2r_threshold = relative-to-value-range threshold to floor values to zero
-    # Returns:
-    # - cmp_bytes = Unsigned char pointer to compressed bytes
-    # - outSize_ptr = Pointer to size_t representing length in bytes of cmp_bytes
     def cuszx_compress(self, isCuPy, data, num_elements, r2r_error, r2r_threshold):
+        """
+        ## Compression API with cuSZx ###
+        Parameters:
+         - isCuPy = boolean, true if data is CuPy array, otherwise is numpy array
+         - data = Numpy or Cupy ndarray, assumed to be 1-D, np.float32 type
+         - num_elements = Number of floating point elements in data
+         - r2r_error = relative-to-value-range error bound for lossy compression
+         - r2r_threshold = relative-to-value-range threshold to floor values to zero
+         Returns:
+         - cmp_bytes = Unsigned char pointer to compressed bytes
+         - outSize_ptr = Pointer to size_t representing length in bytes of cmp_bytes
+         """
         
         if not isCuPy:
             cmp_bytes, outSize_ptr = cuszx_host_compress(data, r2r_error, num_elements, CUSZX_BLOCKSIZE, r2r_threshold)
@@ -428,17 +420,19 @@ class CUSZXCompressor(Compressor):
             torch.cuda.empty_cache()
         return cmp_bytes, outSize_ptr
 
-    ### Decompression API with cuSZx ###
-    # Parameters:
-    # - isCuPy = boolean, true if data is CuPy array, otherwise is numpy array
-    # - cmp_bytes = Unsigned char pointer to compressed bytes
-    # - num_elements = Number of floating point elements in original data
-    # Returns:
-    # - decompressed_data = Float32 pointer to decompressed data
-    #
-    # Notes: Use ctypes to cast decompressed data to Numpy or CuPy type
 
     def cuszx_decompress(self, isCuPy, cmp_bytes, cmpsize, num_elements, owner, dtype):
+        """
+        ## Decompression API with cuSZx ###
+         Parameters:
+         - isCuPy = boolean, true if data is CuPy array, otherwise is numpy array
+         - cmp_bytes = Unsigned char pointer to compressed bytes
+         - num_elements = Number of floating point elements in original data
+         Returns:
+         - decompressed_data = Float32 pointer to decompressed data
+        
+         Notes: Use ctypes to cast decompressed data to Numpy or CuPy type
+         """
         if not isCuPy:
             decompressed_data = cuszx_host_decompress(num_elements, cmp_bytes)
         else:
@@ -458,11 +452,6 @@ class CUSZCompressor(Compressor):
         import cupy
         print("Cleanup", len(self.decompressed_own))
         for x in self.decompressed_own:
-            #print(x)
-            #if x == None:
-            #    continue
-            #else:
-                #print("CUDA Free", x)
             cupy.cuda.runtime.free(x)
             # del x
             # cupy.get_default_memory_pool().free_all_blocks()
@@ -481,20 +470,10 @@ class CUSZCompressor(Compressor):
         cupy.cuda.runtime.free(decompressed_int.value)
 
     def compress(self, data):
-        import cupy
-        if isinstance(data, cupy.ndarray):
-            isCuPy = True
-        else:
-            isCuPy = False
-        num_elements = data.size
-        # Adapt numele depending on itemsize
-        itemsize = data.dtype.itemsize
-        num_elements_eff = int(num_elements*itemsize/4) 
+        isCuPy, num_elements_eff = _get_data_info(data)
 
         dtype = data.dtype
         cmp_bytes, outSize_ptr = self.cuszx_compress(isCuPy, data, num_elements_eff, self.r2r_error, self.r2r_threshold)
-        # return (cmp_bytes, num_elements_eff, isCuPy, data.shape, dtype, outSize_ptr)
-
         return (cmp_bytes, num_elements_eff, isCuPy, data.shape, dtype, outSize_ptr.contents.value)
 
     def compress_size(self, ptr):
@@ -538,7 +517,6 @@ class CUSZCompressor(Compressor):
         if not isCuPy:
             cmp_bytes, outSize_ptr = cuszx_host_compress(data, r2r_error, num_elements, CUSZX_BLOCKSIZE, r2r_threshold)
         else:
-            #cmp_bytes, outSize_ptr = cuszp_device_compress(data, r2r_error, num_elements,  r2r_threshold)
             cmp_bytes, outSize_ptr = cusz_device_compress(data, r2r_error, num_elements, CUSZX_BLOCKSIZE,r2r_threshold)
             # cmp_bytes, outSize_ptr = quant_device_compress(data, num_elements, CUSZX_BLOCKSIZE, r2r_threshold)
             del data
