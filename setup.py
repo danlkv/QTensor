@@ -15,7 +15,7 @@ REQUIRED_PACKAGES = [
     ,'click'
     ,'qtensor-qtree'
     ,'lazy-import'
-    ,'pynauty-nice'
+    ,'pynauty'
     ,'sarge'
     ,'cartesian-explorer'
 
