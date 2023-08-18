@@ -31,3 +31,10 @@ result = sim.simulate(composer.circuit)
 
 # Not clear on how to contract the tn?
 # Qtree Basic Usage notebook shows how to contract using npfr. Is that what is meant? Or is there a QTensor api I'm missing?
+
+
+# adding contract API
+opt = GreedyOptimizer()
+peo, tn = opt.optimize(tn)
+
+tn.contract(peo)

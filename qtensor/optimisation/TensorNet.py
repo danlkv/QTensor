@@ -41,6 +41,35 @@ class QtreeTensorNet(TensorNet):
         mems, flops = qtree.graph_model.get_contraction_costs(g)
         return mems, flops
 
+    def contract(self, peo):
+        import qtree
+        if len(self.buckets) != len(peo):
+            _buckets = [[] for _ in peo]
+            _buckets[0] = sum(self.buckets, [])
+            self.buckets = _buckets
+        # TODO: where is _indices_to_vars from?
+        i_to_var = {int(v): v for v in self._indices_to_vars.values()}
+        peo = [i_to_var[int(pv)] for pv in peo]
+        #--
+        perm_buckets, perm_dict = qtree.optimizer.reorder_buckets(
+            self.qtn.buckets, peo
+        )
+
+        logger.trace("Permuted buckets: {}", perm_buckets)
+        sliced_buckets = self.backend.get_sliced_buckets(
+            perm_buckets, self.qtn.data_dict, {}
+        )
+        be = qtensor.contraction_algos.bucket_elimination
+        logger.trace("Sliced buckets: {}", sliced_buckets)
+
+        result = be(sliced_buckets, self.backend,
+            n_var_nosum=len(self.qtn.free_vars)
+           )
+        if isinstance(result, qtree.optimizer.Tensor):
+            return result.data
+        else:
+            return result
+
     @property
     def _tensors(self):
         return sum(self.buckets, [])
