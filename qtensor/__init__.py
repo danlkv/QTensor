@@ -7,6 +7,7 @@ log.add(sys.stderr, level='INFO')
 from qtensor import utils
 from qtensor.utils import get_edge_subgraph
 import networkx as nx
+import numpy as np
 
 from .CircuitComposer import QAOAComposer, OldQAOAComposer, ZZQAOAComposer, WeightedZZQAOAComposer, CircuitComposer
 from .OpFactory import CirqBuilder, QtreeBuilder, QiskitBuilder, TorchBuilder
@@ -37,6 +38,39 @@ class QiskitQAOAComposer(QAOAComposer):
 class QtreeQAOAComposer(QAOAComposer):
     def _get_builder_class(self):
         return QtreeBuilder
+    
+class NoisyQtreeQAOAComposer(QtreeQAOAComposer):
+    def __init__(self, graph, noise_prob=0.5, *args, **kwargs):
+        super().__init__(graph, *args, **kwargs)
+        self.noise_prob = noise_prob
+    
+    def apply_depolarizing_noise(self, qubit, noise_prob=0.5):
+        """ Apply depolarizing noise with probability noise_prob. """
+        if np.random.rand() < self.noise_prob:
+            print('applying random gate')
+            # Choose a random gate from a predefined list (e.g., X, Y, Z)
+            random_gate = np.random.choice([self.operators.X, self.operators.Y, self.operators.Z])
+            self.apply_gate(random_gate, qubit)
+            
+    def x_term(self, u, beta):
+        #self.circuit.append(self.operators.H(u))
+        self.apply_gate(self.operators.XPhase, u, alpha=2*beta)
+        #self.circuit.append(self.operators.H(u))
+        self.apply_depolarizing_noise(u)
+        
+            
+    def append_zz_term(self, q1, q2, gamma):
+        self.apply_gate(self.operators.cX, q1, q2)
+        self.apply_depolarizing_noise(q1)
+        self.apply_depolarizing_noise(q2)
+        
+        self.apply_gate(self.operators.ZPhase, q2, alpha=2*gamma)
+        self.apply_depolarizing_noise(q2)
+        
+        self.apply_gate(self.operators.cX, q1, q2)
+        self.apply_depolarizing_noise(q1)
+        self.apply_depolarizing_noise(q2)
+        
 
 class QtreeFullQAOAComposer(QAOAComposer):
     def _get_builder_class(self):
