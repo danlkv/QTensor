@@ -6,13 +6,13 @@ RUN    yes | apt update
 RUN    yes | apt install python3 python3-pip git htop vim
 
 WORKDIR /app
-RUN    git clone --recursive -b dev https://github.com/danlkv/QTensor.git
+RUN    git clone --recursive -b qtree-sample-api https://github.com/danlkv/QTensor.git
 RUN    cd QTensor/qtree && pip install .
 RUN    cd QTensor && pip install .
-
+COPY . .
 RUN    pip install quimb pyrofiler cartesian-explorer opt_einsum
 RUN    pip install --no-binary pynauty pynauty
-RUN    pip install torch
-RUN    pip install cupy-cuda110
+# RUN    pip install torch
+# RUN    pip install cupy-cuda110
 
-ENTRYPOINT ["python3"]
+ENTRYPOINT ["bash"]
