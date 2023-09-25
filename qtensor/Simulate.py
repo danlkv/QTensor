@@ -4,7 +4,7 @@ from qtensor.contraction_backends import NumpyBackend, ContractionBackend
 
 from qtensor.optimisation.TensorNet import QtreeTensorNet
 from qtensor.optimisation.Optimizer import DefaultOptimizer, Optimizer
-from qtensor import Bitstring as Bs, TNAdapter
+from qtensor import Bitstring as Bs, TNAdapter, QTensorTNAdapter
 from tqdm.auto import tqdm
 
 from loguru import logger as log
@@ -151,8 +151,8 @@ class QtreeSimulator(Simulator):
         return self.simulate_batch(qc, peo=peo, batch_vars=0)
 
     def sample(self):
-        # TODO: can use TNAdapter in init to avoid this operation again
-        tn_adapter = TNAdapter.from_qtree_gates(self.all_ages)
+        # TODO: can use QTensorTNAdapter in init to avoid this operation again
+        tn_adapter = QTensorTNAdapter.from_qtree_gates(self.all_gates)
         return _sequence_sample(tn, composer.qubits)
 
     def _sequence_sample(tn: TNAdapter, indices, batch_size=10, batch_fix_sequence=None, dim=2):
@@ -220,4 +220,4 @@ if __name__=="__main__":
 
     sim = QAOAQtreeSimulator(composer)
 
-    logger.debug('hello world')
+    log.debug('hello world')
