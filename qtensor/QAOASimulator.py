@@ -204,7 +204,8 @@ class QAOASimulatorSymmetryAccelerated(QAOASimulator):
 
 
 class QAOAQtreeSimulator(QAOASimulator, QtreeSimulator):
-    pass
+    def sample(self):
+        super(QtreeSimulator, self).sample()
 
 
 class QAOAQtreeSimulatorSymmetryAccelerated(QAOASimulatorSymmetryAccelerated, QtreeSimulator):
