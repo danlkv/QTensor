@@ -145,15 +145,14 @@ class QtreeSimulator(Simulator):
         return self.backend.get_result_data(result).flatten()
 
     def simulate(self, qc):
-        import pdb; pdb.set_trace()
         return self.simulate_state(qc)
 
     def simulate_state(self, qc, peo=None):
         return self.simulate_batch(qc, peo=peo, batch_vars=0)
 
-    def sample(self):
+    def sample(self, circuit):
         # TODO: can use QTensorTNAdapter in init to avoid this operation again
-        tn_adapter = QTensorTNAdapter.from_qtree_gates(self.all_gates)
+        tn_adapter = QTensorTNAdapter.from_qtree_gates(circuit)
         return _sequence_sample(tn, composer.qubits)
 
     def _sequence_sample(tn: TNAdapter, indices, batch_size=10, batch_fix_sequence=None, dim=2):
@@ -209,16 +208,16 @@ class CirqSimulator(Simulator):
         return sim.simulate(qc)
 
 if __name__=="__main__":
-import networkx as nx
-import numpy as np
+    import networkx as nx
+    import numpy as np
 
-G = nx.random_regular_graph(3, 10)
-gamma, beta = [np.pi/3], [np.pi/2]
+    G = nx.random_regular_graph(3, 10)
+    gamma, beta = [np.pi/3], [np.pi/2]
 
-from qtensor import QtreeQAOAComposer, QAOAQtreeSimulator
-composer = QtreeQAOAComposer(graph=G, gamma=gamma, beta=beta)
-composer.ansatz_state()
+    from qtensor import QtreeQAOAComposer, QAOAQtreeSimulator
+    composer = QtreeQAOAComposer(graph=G, gamma=gamma, beta=beta)
+    composer.ansatz_state()
 
-sim = QAOAQtreeSimulator(composer)
+    sim = QAOAQtreeSimulator(composer)
 
-log.debug('hello world')
+    log.debug('hello world')

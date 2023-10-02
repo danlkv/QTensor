@@ -8,6 +8,8 @@ RUN apt update -y && \
 WORKDIR /app
 RUN pip install quimb pyrofiler cartesian-explorer opt_einsum
 RUN pip install --no-binary pynauty pynauty
+RUN cd qtree && pip install . 
 RUN pip install .
+RUN pip install pdbpp
 
 ENTRYPOINT ["bash"]
