@@ -5,11 +5,13 @@ ENV DEBIAN_FRONTEND=noninteractive
 RUN apt update -y && \
     apt install -y python3 python3-pip git htop vim
 
+# Make sure you first recursively clone down the git repo before building 
 WORKDIR /app
 RUN pip install quimb pyrofiler cartesian-explorer opt_einsum
 RUN pip install --no-binary pynauty pynauty
-RUN cd qtree && pip install . 
-RUN pip install .
+# Run the below commands after the container opens - because volume hasn't mounted yet
+# RUN cd qtree && pip install . 
+# RUN pip install .
 RUN pip install pdbpp
 
 ENTRYPOINT ["bash"]

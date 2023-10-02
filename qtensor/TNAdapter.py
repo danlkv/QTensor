@@ -92,8 +92,6 @@ def test_TNAdapter(cls):
 
 # -- QTensor tensor adapter
 
-import qtensor
-
 class QTensorContractionInfo(ContractionInfo):
     def __init__(self, peo, width):
         self.peo = peo
