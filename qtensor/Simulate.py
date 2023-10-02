@@ -37,9 +37,6 @@ class QtreeSimulator(Simulator):
         self.tn.free_vars = [self.tn.bra_vars[i] for i in free_final_qubits]
         self.tn.bra_vars = [var for var in self.tn.bra_vars if var not in self.tn.free_vars]
 
-    def _optimize_buckets(self):
-        self.peo = self.optimize_buckets()
-
     def _reorder_buckets(self):
         """
         Permutes indices in the tensor network and peo
@@ -87,16 +84,20 @@ class QtreeSimulator(Simulator):
         return slice_dict
     #-- 
 
-    def optimize_buckets(self):
-        peo, self.tn = self.optimizer.optimize(self.tn)
-        # print('Treewidth', self.optimizer.treewidth)
-        # print(peo)
-        return peo
-    
-    def _prepare_state(self, qc, batch_vars=0, peo=None, tn=None):
-        pass
+    def optimize_buckets(self, peo=None):
+        if peo is not None:
+            self.peo, self.tn = self.optimizer.optimize(self.tn)
+            if self.max_tw:
+                if self.optimizer.treewidth > self.max_tw:
+                    raise ValueError(f'Treewidth {self.optimizer.treewidth} is larger than max_tw={self.max_tw}.')
+        
+        all_indices = sum([list(t.indices) for bucket in self.tn.buckets for t in bucket], [])
+        identity_map = {int(v): v for v in all_indices}
+        peo = [identity_map[int(i)] for i in self.peo]
+        self._reorder_buckets()
 
-    def contract_tn(self, qc, batch_vars=0, peo=None, tn=None):
+    
+    def _prepare_state(self, qc, batch_vars=0, tn=None):
         self.all_gates = qc
         if tn is None:
             self.tn = QtreeTensorNet.from_qtree_gates(self.all_gates,
@@ -111,24 +112,11 @@ class QtreeSimulator(Simulator):
             free_final_qubits = batch_vars
 
         self._set_free_qubits(free_final_qubits)
-        if peo is None:
-            self._optimize_buckets()
-            if self.max_tw:
-                if self.optimizer.treewidth > self.max_tw:
-                    raise ValueError(f'Treewidth {self.optimizer.treewidth} is larger than max_tw={self.max_tw}.')
-        else:
-            self.peo = peo
 
-        all_indices = sum([list(t.indices) for bucket in self.tn.buckets for t in bucket], [])
-        identity_map = {int(v): v for v in all_indices}
-        self.peo = [identity_map[int(i)] for i in self.peo]
-
-        self._reorder_buckets()
-        slice_dict = self._get_slice_dict()
-        log.info('batch slice {}', slice_dict)
-
-        sliced_buckets = self.tn.slice(slice_dict)
-        self.buckets = sliced_buckets
+    def contract_tn(self, qc, batch_vars=0, peo=None, tn=None):
+        self._prepare_state(qc, batch_vars, tn)
+        self.optimize_buckets(peo)
+        self.slice()
         
         result = qtree.optimizer.bucket_elimination(
             self.buckets, self.backend.process_bucket,
@@ -136,6 +124,14 @@ class QtreeSimulator(Simulator):
         )
 
         return result
+    
+    def slice(self):
+        slice_dict = self._get_slice_dict()
+        log.info('batch slice {}', slice_dict)
+
+        sliced_buckets = self.tn.slice(slice_dict)
+        self.buckets = sliced_buckets
+
 
     def simulate_batch(self, qc, batch_vars=0, peo=None):
         result = self.contract_tn(qc, batch_vars, peo)
@@ -151,20 +147,6 @@ class QtreeSimulator(Simulator):
         # TODO: can use QTensorTNAdapter in init to avoid this operation again
         tn_adapter = QTensorTNAdapter.from_qtree_gates(circuit)
         return _sequence_sample(tn_adapter, composer.qubits)
-
-    # def contract_tn(self, tn, slice_dict, free_indices):
-    #     # TODO:(@dallon)
-    #     #     tn_ = tn.slice(slice_dict)
-    #     # c_info = tn_.optimize(free_indices)
-    #     # return tn_.contract(c_info)
-    #     #         1. `QtreeTensorNet.from_qtree_gates(self.all_gates)`
-    #     # 2. Prepare list of “free” and “bra” vars (those will be fixed later)
-    #     # 3. `peo, [self.tn](http://self.tn/) = self.optimizer.optimize([self.tn](http://self.tn/))`
-    #     # 4. `perm_buckets, perm_dict = qtree.optimizer.reorder_buckets(self.tn.buckets, self.peo)` According to the contraction order (`peo`)
-    #     # 5. `slice_dict = qtree.utils.slice_from_bits(initial_state, self.tn.ket_vars)`
-    #     # 6. `sliced_buckets = self.tn.slice(slice_dict)`
-    #     # 7. `result = qtree.optimizer.bucket_elimination(`
-    #     pass
 
     def _sequence_sample(tn: TNAdapter, circuit, indices, batch_size=10, batch_fix_sequence=None, dim=2):
         K = int(np.ceil(len(indices) / batch_size))
