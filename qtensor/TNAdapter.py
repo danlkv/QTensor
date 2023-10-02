@@ -111,75 +111,7 @@ class QTensorTNAdapter(TNAdapter):
     def _all_indices(self):
         return set(self._indices_to_vars.keys())
 
-    # def optimize(self, out_indices: Iterable = [],
-    #              opt:qtensor.optimisation.Optimizer=qtensor.optimisation.GreedyOptimizer()) -> QTensorContractionInfo:
-    #     logger.trace("Optimizing buckets: {}", self.qtn.buckets)
-    #     free_indices = out_indices
-    #     free_vars = [self._indices_to_vars[i] for i in free_indices]
-    #     self.qtn.free_vars = free_vars
-    #     logger.debug("Free vars: {}", free_vars)
-    #     peo, tn = opt.optimize(self.qtn)
-    #     logger.debug("Contraction path: {}", peo)
-    #     return QTensorContractionInfo(peo, opt.treewidth)
     
-    # def slice(self, slice_dict: dict):
-    #     slice_dict = {self._indices_to_vars[k]:v for k,v in slice_dict.items()}
-    #     logger.trace("Buckets before slicing: {}", self.qtn.buckets)
-    #     sliced_buckets = self.qtn.backend.get_sliced_buckets(
-    #         self.qtn.buckets, self.qtn.data_dict, slice_dict
-    #     )
-    #     new_tn = QTensorTNAdapter()
-    #     logger.trace("slice dict {}, buckets: {}", slice_dict, sliced_buckets)
-    #     new_tn.qtn.buckets = sliced_buckets
-    #     new_tn.qtn.data_dict = self.qtn.data_dict
-    #     new_tn.qtn.bra_vars = self.qtn.bra_vars
-    #     new_tn.qtn.ket_vars = self.qtn.ket_vars
-    #     new_tn.qtn.backend = self.qtn.backend
-    #     new_tn.qtn.free_vars = self.qtn.free_vars
-    #     new_tn._indices_to_vars = self._indices_to_vars
-    #     return new_tn
-
-    # def contract(self, contraction_info: QTensorContractionInfo):
-    #     import qtree
-    #     peo = contraction_info.peo
-    #     if len(self.qtn.buckets) != len(peo):
-    #         _buckets = [[] for _ in peo]
-    #         _buckets[0] = sum(self.qtn.buckets, [])
-    #         self.qtn.buckets = _buckets
-    #     # -- fixer peo
-    #     i_to_var = {int(v): v for v in self._indices_to_vars.values()}
-    #     peo = [i_to_var[int(pv)] for pv in peo]
-    #     #--
-    #     perm_buckets, perm_dict = qtree.optimizer.reorder_buckets(
-    #         self.qtn.buckets, peo
-    #     )
-        
-    #     logger.trace("Permuted buckets: {}", perm_buckets)
-    #     sliced_buckets = self.qtn.backend.get_sliced_buckets(
-    #         perm_buckets, self.qtn.data_dict, {}
-    #     )
-    #     be = qtensor.contraction_algos.bucket_elimination
-    #     logger.trace("Sliced buckets: {}", sliced_buckets)
-        
-    #     result = be(sliced_buckets, self.qtn.backend,
-    #         n_var_nosum=len(self.qtn.free_vars)
-    #        )
-    #     if isinstance(result, qtree.optimizer.Tensor):
-    #         return result.data
-    #     else:
-    #         return result
-    
-    # def add_tensor(self, data, indices):
-    #     import qtree
-    #     shape = data.shape
-    #     indices_v = {i: qtree.optimizer.Var(i, size=s) for i,s in zip(indices, shape)}
-    #     self._indices_to_vars.update(indices_v)
-    #     indices_v = list(indices_v.values())
-    #     tensor = qtree.optimizer.Tensor(name='t', indices=indices_v, data_key=id(data))
-    #     self.qtn.data_dict[id(data)] = data
-    #     self.qtn.buckets.append([tensor])
-    #     logger.trace("Added tensor {}.", tensor)
-
     @classmethod
     def from_qtree_gates(cls, qc, init_state=None, **kwargs):
         all_gates = qc
