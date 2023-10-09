@@ -155,3 +155,77 @@ class CirqSimulator(Simulator):
         sim = cirq.Simulator(**params)
         return sim.simulate(qc)
 
+if __name__=="__main__":
+    import networkx as nx
+    import numpy as np
+    import tensornetwork as tn
+
+    G = nx.random_regular_graph(3, 10)
+    gamma, beta = [np.pi/3], [np.pi/2]
+
+    from qtensor import QtreeQAOAComposer, QAOAQtreeSimulator
+    composer = QtreeQAOAComposer(graph=G, gamma=gamma, beta=beta)
+    composer.ansatz_state()
+
+    sim = QAOAQtreeSimulator(composer)
+
+    # now let's run the prepare buckets method to init the tn
+    sim.simulate_batch(composer.circuit)
+    buckets = sim.tn.buckets
+
+    # now let's use these buckets to square the TN
+    def conj(buckets):
+        # turn each bucket into a node
+        nodes = []
+        for bucket in buckets:
+            node = tn.Node(np.array(bucket))
+            nodes.append(node)
+        
+        # now for each node, append its conjugate
+        conj_nodes = []
+        for node in nodes:
+            conj = np.conj(node.tensor)
+            conj_node = tn.Node(conj)
+            conj_nodes.append(conj_node)
+        
+
+        indices = {}
+
+        for node in nodes:
+            for conj_node in conj_nodes:
+                # check if there is a shared index between a node and a conj_node
+                node_indices = node.get_all_dangling()
+                conj_indices = conj_node.get_all_dangling()
+
+                shared_indices = set(node_indices).intersection(set(conj_indices))
+                if shared_indices:
+                    if node not in indices:
+                        indices[node] = shared_indices
+                    else:
+                        indices[node].update(shared_indices)
+
+                    if conj_node not in indices:
+                        indices[conj_node] = shared_indices
+                    else:
+                        indices[conj_node].update(shared_indices)
+            
+        for node, shared_indices in indices.items():
+            for pair_node in indices.keys():
+                if node == pair_node:
+                    continue
+                # if there are shared indices, connect an edge
+                if shared_indices.intersection(set(pair_node.get_all_dangling())):
+                    edge = tn.connect(node, pair_node)
+        
+        # TODO: TNAdapter should support tensornetwork.Node
+        # So that we can contract this resulting tensor network directly
+        return []
+    
+    tn_with_conj = conj(buckets)
+
+    # TODO: contract or sample using tn_with_conj based on method in other branch
+
+
+
+    log.debug('hello world')
+    import pdb; pdb.set_trace()

@@ -1,0 +1,18 @@
+FROM nvidia/cuda:11.0.3-runtime-ubuntu20.04
+
+ENV DEBIAN_FRONTEND=noninteractive 
+
+RUN apt update -y && \
+    apt install -y python3 python3-pip git htop vim
+
+# Make sure you first recursively clone down the git repo before building 
+WORKDIR /app
+RUN pip install quimb pyrofiler cartesian-explorer opt_einsum
+RUN pip install --no-binary pynauty pynauty
+# Run the below commands after the container opens - because volume hasn't mounted yet
+# RUN cd qtree && pip install . 
+# RUN pip install .
+RUN pip install pdbpp
+RUN pip install tensornetwork
+
+ENTRYPOINT ["bash"]
