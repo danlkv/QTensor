@@ -18,13 +18,15 @@ def test_from_wavefunction_random():
     wavefunction = np.random.rand(2**n)
     wavefunction = wavefunction / np.linalg.norm(wavefunction, ord = 2)
     mps = MPS.construct_mps_from_wavefunction(wavefunction, 'q', n, 2)
+
     assert np.allclose(mps.get_wavefunction(), wavefunction)
 
 def test_apply_one_qubit_mps_operation_xgate():
-    mps = MPS("q", 2, 2)
     # q0q1 = 00
     # On apply x gate |00> -> |10>
+    mps = MPS("q", 2, 2)
     mps.apply_single_qubit_gate(xgate(), 0)
+
     assert np.allclose(mps.get_wavefunction(), np.array([0.0, 0.0, 1.0, 0.0], dtype=np.complex64))
 
 def test_apply_twoq_cnot_two_qubits():
@@ -33,12 +35,14 @@ def test_apply_twoq_cnot_two_qubits():
     mps = MPS("q", 2, 2)
     mps.apply_single_qubit_gate(xgate(), 0)
     mps.apply_two_qubit_gate(cnot(), [0, 1])
+
     assert np.allclose(mps.get_wavefunction(), np.array([0.0, 0.0, 0.0, 1.0], dtype=np.complex64))
 
 def test_apply_gate_for_bell_circuit():
     mps = MPS("q", 2, 2)
     mps.apply_single_qubit_gate(hgate(), 0)
     mps.apply_two_qubit_gate(cnot(), [0,1])
+    
     assert np.allclose(mps.get_wavefunction(), np.array([0.707, 0.0, 0.0, 0.707], dtype=np.complex64))
 
 def test_apply_gate_for_ghz_circuit():

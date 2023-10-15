@@ -16,15 +16,12 @@ class MPS:
             raise ValueError("Number of tensors should be >= 2")
         # Initialise as |0> = [1.0 0.0
         #                      0.0 0.0]
-        # nodes = [tn.Node(np.array([[1.0], *[[0.0]]*(physical_dim-1)], dtype=np.complex64), name = tensor_name+ "_" +str(0))]
-        # for i in range(N-2):
-        #     node = tn.Node(np.array([[[1.0]], *[[[0.0]]]*(physical_dim-1)], dtype=np.complex64), name = tensor_name + "_" + str(i+1))
-        #     nodes.append(node)
-        # nodes.append(tn.Node(np.array([[1.0], *[[0.0]]*(physical_dim-1)], dtype=np.complex64), name = tensor_name+ "_" +str(0)))
-        nodes = [tn.Node(np.array([[[1.0]], *[[[0.0]]]*(physical_dim -1)],  dtype=np.complex64), name = tensor_name + str(i+1)) for i in range(N-2)]
-        nodes.insert(0, tn.Node(np.array([[1.0], *[[0.0]]*(physical_dim -1)],  dtype=np.complex64), name = tensor_name + str(0)))
-        nodes.append(tn.Node(np.array([[1.0], *[[0.0]]*(physical_dim -1)],  dtype=np.complex64), name = tensor_name + str(N-1)))
-
+        nodes = [tn.Node(np.array([[1.0], *[[0.0]]*(physical_dim-1)], dtype=np.complex64), name = tensor_name+ "_" +str(0))]
+        for i in range(N-2):
+            node = tn.Node(np.array([[[1.0]], *[[[0.0]]]*(physical_dim-1)], dtype=np.complex64), name = tensor_name + "_" + str(i+1))
+            nodes.append(node)
+        nodes.append(tn.Node(np.array([[1.0], *[[0.0]]*(physical_dim-1)], dtype=np.complex64), name = tensor_name+ "_" +str(0)))
+        
         for i in range(1, N-2):
             tn.connect(nodes[i].get_edge(2), nodes[i+1].get_edge(1))
 
@@ -118,19 +115,19 @@ class MPS:
         return wavefunction
     
     def apply_single_qubit_gate(self, gate, index) -> None:
-    #     """
-    #     Assumption: Gates are unitary
+        """
+        Assumption: Gates are unitary
 
-    #      0
-    #      |
-    #     gate
-    #      |
-    #      1
+         0
+         |
+        gate
+         |
+         1
 
-    #      |
-    #     MPS
-    #      |
-    #     """
+         |
+        MPS
+         |
+        """
         mps_index_edge = list(self._nodes[index].get_all_dangling())[0]
         gate_edge = gate[1]
         temp_node = tn.connect(mps_index_edge, gate_edge)
