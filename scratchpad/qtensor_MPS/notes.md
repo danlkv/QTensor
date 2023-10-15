@@ -6,13 +6,14 @@
 - ~~Add test for Bell circuit~~
 - Add expectation values
 - Implememt calculation of probablities
+- Implement sampling
+
    _____  
   |__A__|
    | | |
   _______ 
   |__A'__|   
   
-- Implement sampling
 
 
 # Readings
