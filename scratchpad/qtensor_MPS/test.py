@@ -1,7 +1,7 @@
 import numpy as np
 import tensornetwork as tn
 import xyzpy as xyz
-from mps_operation import xgate, cnot, hgate
+from gates import xgate, cnot, hgate
 from mps import MPS
 
 def test_from_wavefunction_all_zero_state():
