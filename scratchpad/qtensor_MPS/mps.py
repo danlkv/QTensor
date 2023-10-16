@@ -199,5 +199,33 @@ class MPS:
         self._nodes[operating_qubits[0]] = new_left
         self._nodes[operating_qubits[1]] = new_right
 
+    def inner_product(self, wMPS):
+
+        T = self.get_mps_nodes(False)
+        W = wMPS.get_mps_nodes(False)
+
+        for wNode in W:
+            wNode.set_tensor(np.conj(wNode.tensor))
+
+        for i in range(self.N):
+            tn.connect(T[i].get_all_dangling().pop(), W[i].get_all_dangling().pop())
+        
+        for i in range(self.N-1):
+            TW_i = tn.contract_between(T[i], W[i])
+            new_node = tn.contract_between(TW_i, W[i+1])
+            W[i+1] = new_node
+
+        return np.complex128((tn.contract_between(T[-1], W[-1])).tensor)
+    
+    def get_norm(self):
+        return np.sqrt(self.inner_product(self).real)
+    
+    def get_expectation(self):
+
+
+
+
+
+
 
 

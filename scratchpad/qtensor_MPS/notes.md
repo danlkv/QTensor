@@ -4,7 +4,7 @@
 - ~~Add 2 qubit code~~
 - ~~Add test for GHZ circuit~~
 - ~~Add test for Bell circuit~~
-- Add expectation values
+- ~~Add expectation values~~
 - Implememt calculation of probablities
 - Implement sampling
 
@@ -19,4 +19,3 @@
 # Readings
 - https://www.nature.com/articles/s41586-023-06096-3
 - How IBM has simulated 127 qubits? (https://arxiv.org/abs/2309.15642)
-- 
