@@ -62,6 +62,3 @@ def test_apply_gate_for_ghz_circuit():
     mps.apply_two_qubit_gate(cnot(), [1,2])
     assert mps.get_norm() == 1
     assert np.allclose(mps.get_wavefunction(), np.array([ 0.7071, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.7071], dtype=np.complex64))
-
-
-test_apply_one_qubit_mps_operation_xgate()

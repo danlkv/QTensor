@@ -36,6 +36,7 @@ class MPS:
     @staticmethod
     def construct_mps_from_wavefunction(wavefunction, tensor_name, N, physical_dim = 1) -> 'MPS':
         """
+        Method to create wavefunction from mps
         """
         if wavefunction.size != physical_dim**N:
             raise ValueError()
@@ -116,6 +117,7 @@ class MPS:
     
     def apply_single_qubit_gate(self, gate, index) -> None:
         """
+        Method to apply single qubit gate on mps
         Assumption: Gates are unitary
 
          0
@@ -137,6 +139,8 @@ class MPS:
     
     def apply_two_qubit_gate(self, gate, operating_qubits):
         """
+        Method to apply two qubit gates on mps
+
             0  1
             |  |
             gate
@@ -200,6 +204,9 @@ class MPS:
         self._nodes[operating_qubits[1]] = new_right
 
     def inner_product(self, wMPS):
+        """
+        Method to calculate inner product of mps
+        """
 
         T = self.get_mps_nodes(False)
         W = wMPS.get_mps_nodes(False)
@@ -218,9 +225,13 @@ class MPS:
         return np.complex128((tn.contract_between(T[-1], W[-1])).tensor)
     
     def get_norm(self):
+        """
+        Method to calculate norm of mps
+        """
         return np.sqrt(self.inner_product(self).real)
     
     def get_expectation(self):
+        pass
 
 
 
