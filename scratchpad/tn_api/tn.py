@@ -2,9 +2,10 @@ import numpy as np
 import math
 from dataclasses import dataclass
 from typing import TypeVar, Generic, Iterable
+from qtree import np_framework
 
 class Array(np.ndarray):
-    shape: tuple[int]
+    shape: tuple
 
 D = TypeVar('D') # tensor data type (numpy, torch, etc.)
 
@@ -52,16 +53,21 @@ class Port:
 class TensorNetwork(TensorNetworkIFC[np.ndarray]):
     tensors: Iterable[np.ndarray]
     shape: tuple
-    edges: tuple[tuple[Port]]
+    edges: tuple
 
     def __init__(self, *args, **kwargs):
         self._tensors = []
         self._edges = tuple()
         self.shape = tuple()
+        self.buckets = []
+        self.data_dict = {}
 
     # slice not inplace
     def slice(self, slice_dict: dict) -> 'TensorNetwork':
-        ...
+        tn = self.copy()
+        sliced_buckets = np_framework.get_sliced_np_buckets(self.buckets, self.data_dict, slice_dict)
+        tn.buckets = sliced_buckets
+        return tn
 
     def copy(self):
         new = TensorNetwork()
@@ -153,4 +159,6 @@ class TensorNetwork(TensorNetworkIFC[np.ndarray]):
 
 
 
-
+if __name__ == "__main__":
+    tn = TensorNetwork.new_random_cpu(2, 3, 4)
+    import pdb; pdb.set_trace()
