@@ -243,6 +243,7 @@ class TamakiOptimizer(GreedyOptimizer):
         super().__init__(*args, **kwargs)
         self.wait_time = wait_time
         self.max_width = max_width
+        self._update_callback = **kwargs.get('update_callback')
 
     def _get_ordering(self, graph, inplace=True):
         node_names = nx.get_node_attributes(graph, 'name')
