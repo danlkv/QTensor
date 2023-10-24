@@ -3,11 +3,22 @@ import numpy as np
 import qtensor.tests
 import pytest
 from qtensor.tools.benchmarking import simulators
-from qtensor.tools.benchmarking.simulators import BenchSimulator
+from qtensor.tools.benchmarking.simulators import SIMULATORS, BenchSimulator
 from functools import lru_cache
 
+TEST_SIMS = ['qtensor', 'qtensor_merged', 'acqdp', 'quimb']
 
-@pytest.fixture(params=['qtensor', 'qtensor_merged', 'acqdp', 'quimb'])
+try:
+    import acqdp
+except:
+    TEST_SIMS.remove('acqdp')
+
+try:
+    import quimb, cotengra
+except:
+    TEST_SIMS.remove('quimb')
+
+@pytest.fixture(params=TEST_SIMS)
 def simulator(request):
     sim = simulators.SIMULATORS[request.param]
     return sim()

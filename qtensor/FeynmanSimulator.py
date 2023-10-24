@@ -10,6 +10,7 @@ from qtensor.contraction_backends import NumpyBackend
 from qtensor.Simulate import Simulator, QtreeSimulator
 from qtensor.optimisation.Optimizer import SlicesOptimizer
 from qtensor.optimisation.TensorNet import QtreeTensorNet
+import copy
 import psutil
 
 from loguru import logger as log
@@ -50,7 +51,8 @@ class FeynmanSimulator(QtreeSimulator):
     def _parallel_unit(self, par_idx):
         slice_dict = self._get_slice_dict(par_state=par_idx)
 
-        sliced_buckets = self.tn.slice(slice_dict)
+        tn_copy = copy.copy(self.tn)
+        sliced_buckets = tn_copy.slice(slice_dict)
         result = qtree.optimizer.bucket_elimination(
             sliced_buckets, self.backend.process_bucket
         , n_var_nosum=len(self.tn.free_vars + self.parallel_vars))

@@ -1,8 +1,8 @@
 from qtensor.contraction_backends import TransposedBackend
 from qtree import np_framework
 import numpy as np
-import torch as torch
 from qtensor.tools.lazy_import import cupy as cp
+from qtensor.tools.lazy_import import torch as torch
 from qtensor.tools.lazy_import import cutensor as cupy_cutensor
 
 class NumpyTranspoedBackend(TransposedBackend):

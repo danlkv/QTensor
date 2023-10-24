@@ -1,5 +1,5 @@
 import qtree
-import cirq
+from qtensor.tools.lazy_import import cirq
 from qtensor.contraction_backends import NumpyBackend, ContractionBackend
 
 from qtensor.optimisation.TensorNet import QtreeTensorNet
@@ -120,8 +120,9 @@ class QtreeSimulator(Simulator):
             self.peo = peo
 
         all_indices = sum([list(t.indices) for bucket in self.tn.buckets for t in bucket], [])
-        identity_map = {v.name: v for v in all_indices}
-        self.peo = [identity_map[i.name] for i in self.peo]
+        identity_map = {int(v): v for v in all_indices}
+        self.peo = [identity_map[int(i)] for i in self.peo]
+
 
         self._reorder_buckets()
         slice_dict = self._get_slice_dict()

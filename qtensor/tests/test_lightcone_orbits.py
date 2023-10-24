@@ -1,5 +1,6 @@
-import networkx as nx
 import pytest
+pytest.importorskip("pynauty")
+import networkx as nx
 import numpy as np
 from qtensor import QAOA_energy, QAOAQtreeSimulatorSymmetryAccelerated, QtreeQAOAComposer
 

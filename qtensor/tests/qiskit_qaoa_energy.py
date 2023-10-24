@@ -2,10 +2,6 @@ import numpy as np
 import networkx as nx
 from functools import partial
 
-from qiskit import QuantumCircuit, ClassicalRegister, QuantumRegister
-from qiskit import Aer, execute
-from qiskit.circuit import Parameter
-
 
 def maxcut_obj(x, G):
     """
@@ -66,6 +62,7 @@ def create_qaoa_circ(G, theta):
     Returns:
         qc: qiskit circuit
     """
+    from qiskit import QuantumCircuit
     nqubits = len(G.nodes())
     p = len(theta)//2  # number of alternating unitaries
     qc = QuantumCircuit(nqubits)
@@ -94,6 +91,7 @@ def get_expectation(G, shots=512):
         p: int,
            Number of repetitions of unitaries
     """
+    from qiskit import Aer
     backend = Aer.get_backend('qasm_simulator')
 
     def execute_circ(theta):

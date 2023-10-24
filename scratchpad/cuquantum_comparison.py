@@ -4,11 +4,14 @@ import quimb as qu
 import networkx as nx
 import time
 import re
+import random, numpy as np
 
-from quimb.tensor.tensor_core import concat, _gen_output_inds, _inds_to_eq
+random.seed(10)
+np.random.seed(10)
 
-N = 32
-p = 4
+
+N = 4
+p = 2
 gamma, beta = [.2]*p, [.3]*p
 G = nx.random_regular_graph(3, N)
 
@@ -50,6 +53,7 @@ tdata = [t.data for t in qu_tn.tensors]
 # Turn cuquantum logging on.
 import logging
 #logging.basicConfig(level=logging.DEBUG, format='%(asctime)s %(levelname)-8s %(message)s', force=True )
+print('CuQuantum eq', eq)
 network = cq.Network(eq, *tdata)
 
 # Compute the path.
