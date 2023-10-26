@@ -124,3 +124,5 @@ local.properties
 *.cobaltlog
 *.error
 *.output
+
+bench/qc_simulation/data/
