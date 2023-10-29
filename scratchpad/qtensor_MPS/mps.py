@@ -16,11 +16,11 @@ class MPS:
             raise ValueError("Number of tensors should be >= 2")
         # Initialise as |0> = [1.0 0.0
         #                      0.0 0.0]
-        nodes = [tn.Node(np.array([[1.0], *[[0.0]]*(physical_dim-1)], dtype=np.complex64), name = tensor_name+ "_" +str(0))]
+        nodes = [tn.Node(np.array([[1.0], *[[0.0]]*(physical_dim-1)], dtype=np.complex64), name = tensor_name + str(0))]
         for i in range(N-2):
-            node = tn.Node(np.array([[[1.0]], *[[[0.0]]]*(physical_dim-1)], dtype=np.complex64), name = tensor_name + "_" + str(i+1))
+            node = tn.Node(np.array([[[1.0]], *[[[0.0]]]*(physical_dim-1)], dtype=np.complex64), name = tensor_name + str(i+1))
             nodes.append(node)
-        nodes.append(tn.Node(np.array([[1.0], *[[0.0]]*(physical_dim-1)], dtype=np.complex64), name = tensor_name+ "_" +str(0)))
+        nodes.append(tn.Node(np.array([[1.0], *[[0.0]]*(physical_dim-1)], dtype=np.complex64), name = tensor_name + str(0)))
         
         for i in range(1, N-2):
             tn.connect(nodes[i].get_edge(2), nodes[i+1].get_edge(1))
@@ -170,7 +170,12 @@ class MPS:
         right_connected_edge = None
 
         for edge in new_node.get_all_nondangling():
-            index = int(edge.node1.name.split(self.name)[-1])
+            if self.name in edge.node1.name:
+                # Use the "node1" node by default
+                index = int(edge.node1.name.split(self.name)[-1])
+            else:
+                # If "node1" is the new_mps_node, use "node2"
+                index = int(edge.node2.name.split(self.name)[-1])
 
             if index <= operating_qubits[0]:
                 left_connected_edge = edge
@@ -229,9 +234,42 @@ class MPS:
         Method to calculate norm of mps
         """
         return np.sqrt(self.inner_product(self).real)
+
+
+    def left_cannoise(self, i):
+        nodes = []
+        for  i in range(i):
+            left_edges = []
+            right_edges = []
+
+            for edge in to_split.get_all_dangling():
+                if edge.name == str(i):
+                    left_edges.append(edge)
+                else:
+                    right_edges.append(edge)
+            
+            if nodes:
+                for edge in nodes[-1].get_all_nondangling():
+                    if to_split in edge.get_nodes():
+                        left_edges.append(edge)
+
+            left, right, _ = tn.split_node(to_split, left_edges, right_edges, left_name="q"+str(i))
+
+            nodes.append(left)
+            to_split = right
+        to_split.name = "q" + str(i)
+        nodes.append(to_split)
+
+    def __copy__(self):
+        copy_mps = MPS(self.name, self._N, self._physical_dim)
+        copy_mps._nodes = self.get_mps_nodes(original=False)
+        return copy_mps
     
-    def get_expectation(self):
-        pass
+    def get_expectation(self, observable, idx):
+        mps_copy = self.__copy__()
+        mps_copy.apply_single_qubit_gate(observable, idx)
+        return self.inner_product(mps_copy)
+
 
 
 
