@@ -193,20 +193,29 @@ class MPS:
             if edge != None:
                 right_edges.append(edge)
 
-        u, s, vdag, _ = tn.split_node_full_svd(
-            new_node,
-            left_edges=left_edges,
-            right_edges=right_edges
-        )
+        try:
+            u, s, vdag, _ = tn.split_node_full_svd(
+                new_node,
+                left_edges=left_edges,
+                right_edges=right_edges
+            )
 
-        new_left = u
-        new_right = tn.contract_between(s, vdag)
+            new_left = u
+            new_right = tn.contract_between(s, vdag)
 
-        new_left.name = self._nodes[operating_qubits[0]].name
-        new_right.name = self._nodes[operating_qubits[1]].name
+            new_left.name = self._nodes[operating_qubits[0]].name
+            new_right.name = self._nodes[operating_qubits[1]].name
 
-        self._nodes[operating_qubits[0]] = new_left
-        self._nodes[operating_qubits[1]] = new_right
+            self._nodes[operating_qubits[0]] = new_left
+            self._nodes[operating_qubits[1]] = new_right
+
+            print("After svd : ", new_left.tensor)
+            print("At ", operating_qubits)
+
+        except:
+            print(operating_qubits)
+            print(new_node.tensor)
+
 
     def inner_product(self, wMPS):
         """

@@ -1,12 +1,12 @@
 import numpy as np
 
-_hmatrix = (
+hmatrix = (
     1 / np.sqrt(2) * np.array([[1.0, 1.0], [1.0, -1.0]], dtype=np.complex64)
 )
 _imatrix = np.array([[1.0, 0.0], [0.0, 1.0]], dtype=np.complex64)
-_xmatrix = np.array([[0.0, 1.0], [1.0, 0.0]], dtype=np.complex64)
-_ymatrix = np.array([[0.0, -1j], [1j, 0.0]], dtype=np.complex64)
-_zmatrix = np.array([[1.0, 0.0], [0.0, -1.0]], dtype=np.complex64)
+xmatrix = np.array([[0.0, 1.0], [1.0, 0.0]], dtype=np.complex64)
+ymatrix = np.array([[0.0, -1j], [1j, 0.0]], dtype=np.complex64)
+zmatrix = np.array([[1.0, 0.0], [0.0, -1.0]], dtype=np.complex64)
 
 _cnot_matrix = np.array(
     [
@@ -29,9 +29,9 @@ _swap_matrix = np.array(
 swap_matrix = np.reshape(_swap_matrix, newshape=(2, 2, 2, 2))
 
 _hbar = 1.0545718*10e-34
-_sigma_z =  _hbar * 0.5 * _zmatrix
-_sigma_x_pos = _hbar * 0.5* (_xmatrix + 1j*_ymatrix)
-_sigma_x_neg =  _hbar * 0.5* (_xmatrix - 1j*_ymatrix)
+_sigma_z =  _hbar * 0.5 * zmatrix
+_sigma_x_pos =  _hbar * 0.5* (xmatrix + 1j*ymatrix)
+_sigma_x_neg =  _hbar * 0.5* (xmatrix - 1j*ymatrix)
 
 _sigma_z_sigma_z_gate_matrix = np.tensordot(_sigma_z, _sigma_z, 0)
 sigma_z_sigma_z_gate_matrix = np.reshape(_sigma_z_sigma_z_gate_matrix, newshape=(2,2,2,2))
