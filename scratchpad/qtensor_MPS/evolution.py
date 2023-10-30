@@ -4,16 +4,13 @@ from mps import MPS
 from gates import *
 import matplotlib.pyplot as plt
 
-cutoff = 1e-8
-tau = 0.1
-ttotal = 2.0
+# Take cutoff into consideration
 
-gates = []
+cutoff = 1e-8
 N = 10
-n = N
 mps = MPS("q", N+1, 2)
 evolution_range = np.linspace(0, 1, 5)
-js = np.arange(0, n)
+js = np.arange(0, N)
 
 magnetization = []
 for t in evolution_range:
