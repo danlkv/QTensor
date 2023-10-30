@@ -20,7 +20,7 @@ class MPS:
         for i in range(N-2):
             node = tn.Node(np.array([[[1.0]], *[[[0.0]]]*(physical_dim-1)], dtype=np.complex64), name = tensor_name + str(i+1))
             nodes.append(node)
-        nodes.append(tn.Node(np.array([[1.0], *[[0.0]]*(physical_dim-1)], dtype=np.complex64), name = tensor_name + str(0)))
+        nodes.append(tn.Node(np.array([[1.0], *[[0.0]]*(physical_dim-1)], dtype=np.complex64), name = tensor_name + str(N-1)))
         
         for i in range(1, N-2):
             tn.connect(nodes[i].get_edge(2), nodes[i+1].get_edge(1))
@@ -234,7 +234,8 @@ class MPS:
         """
         Method to calculate norm of mps
         """
-        return np.sqrt(self.inner_product(self).real)
+        val = np.sqrt(self.inner_product(self).real)
+        return val
 
 
     def left_cannoise(self, i):
