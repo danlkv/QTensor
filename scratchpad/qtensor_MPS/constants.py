@@ -28,10 +28,11 @@ _swap_matrix = np.array(
 )
 swap_matrix = np.reshape(_swap_matrix, newshape=(2, 2, 2, 2))
 
-_hbar = 1.0545718*10e-34
+# _hbar = 1.0545718*10e-34
+_hbar = 1
 _sigma_z =  _hbar * 0.5 * zmatrix
-_sigma_x_pos =  _hbar * 0.5* (xmatrix + 1j*ymatrix)
-_sigma_x_neg =  _hbar * 0.5* (xmatrix - 1j*ymatrix)
+_sigma_x_pos =  _hbar * 0.5 * (xmatrix + 1j*ymatrix)
+_sigma_x_neg =  _hbar * 0.5 * (xmatrix - 1j*ymatrix)
 
 _sigma_z_sigma_z_gate_matrix = np.tensordot(_sigma_z, _sigma_z, 0)
 sigma_z_sigma_z_gate_matrix = np.reshape(_sigma_z_sigma_z_gate_matrix, newshape=(2,2,2,2))

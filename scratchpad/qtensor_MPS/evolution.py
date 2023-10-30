@@ -9,7 +9,7 @@ import matplotlib.pyplot as plt
 cutoff = 1e-8
 N = 10
 mps = MPS("q", N+1, 2)
-evolution_range = np.linspace(0, 1, 5)
+evolution_range = np.linspace(0, 80, 10)
 js = np.arange(0, N)
 
 magnetization = []
