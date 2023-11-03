@@ -3,9 +3,13 @@ import tensornetwork as tn
 import numpy as np
 from constants import *
 from copy import deepcopy
+from scipy.linalg import qr
 
 def xgate() -> tn.Node:
     return tn.Node(deepcopy(xmatrix), name="xgate")
+
+def igate() -> tn.Node:
+    return tn.Node(deepcopy(imatrix), name="igate")
 
 def zgate() -> tn.Node:
     return tn.Node(deepcopy(zmatrix), name="xgate")
@@ -17,7 +21,14 @@ def hgate() -> tn.Node:
     return tn.Node(deepcopy(hmatrix), name="hgate")
 
 def sigmaZZ(t) -> tn.Node:
-    return tn.Node(deepcopy(np.exp(sigma_z_sigma_z_gate_matrix * -1j * t * 0.5)), name="sigmaZZ")
+    gate_matrix = np.exp(sigma_z_sigma_z_gate_matrix * -1j * t * 0.5)
+    gate_matrix = gate_matrix
+    q, r = np.linalg.qr(gate_matrix)
+    diag = np.diag(r).copy()
+    diag /= np.abs(diag)
+    tensor = q * diag
+    tensor = np.reshape(tensor, newshape=(2,2,2,2))
+    return tn.Node(deepcopy(tensor), name="sigmaZZ")
 
 def sigmaXposXneg(t) -> tn.Node:
     return tn.Node(deepcopy(np.exp(sigma_x_pos_sigma_x_neg_gate_matrix * -1j * t * 0.5)), name="sigmaXposXneg")

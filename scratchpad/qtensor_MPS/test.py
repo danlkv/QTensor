@@ -77,4 +77,18 @@ def test_apply_gate_for_ghz_circuit():
     assert np.isclose(mps.get_norm(), 1.)
     assert np.allclose(mps.get_wavefunction(), np.array([ 0.7071, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.7071], dtype=np.complex64))
 
+def test_expectation_value_hgate():
+    mps = MPS("q", 2, 2)
+    copy = mps.__copy__()
 
+    np.isclose(mps.get_expectation(hgate(), 0), 0.707)
+    assert(mps.get_norm() == copy.get_norm())
+
+    mps.apply_single_qubit_gate(xgate(), 0)
+    np.isclose(mps.get_expectation(hgate(), 0), -0.707)
+
+def test_expectation_value_xgate():
+    mps = MPS("q", 2, 2)
+    copy = mps.__copy__()
+    np.isclose(mps.get_expectation(xgate(), 0), 0.)
+    assert(mps.get_norm() == copy.get_norm())
