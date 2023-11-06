@@ -72,7 +72,10 @@ class TensorNetwork(TensorNetworkIFC[np.ndarray]):
             if idx >= len(tn._edges):
                 continue
             
-            edge = tn._edges.pop(idx)
+            edge_list = list(tn._edges)
+            edge = edge_list.pop(idx)
+            # now put the updated edges back on the class
+            tn._edges = tuple(edge_list)
             # get all tensors indexed by this edge
             tensors_to_slice = set(port.tensor_ref for port in edge)
             # store slice index and value for each tensor
@@ -130,24 +133,26 @@ class TensorNetwork(TensorNetworkIFC[np.ndarray]):
 
     # contract to produce a new tensor
     def contract(self, contraction_info: ContractionInfo) -> np.ndarray:
-        tensors_to_contract = [self._tensors[port.tensor_ref] for port in self._edges]
+        tensors_to_contract = [self._tensors[port.tensor_ref] for edge in self._edges for port in edge if port.tensor_ref != -1]
         einsum_expr = self._get_einsum_expr(contraction_info)
-
+        import pdb; pdb.set_trace()
         return np.einsum(einsum_expr, *tensors_to_contract)
 
     # based on implementation in 
     # qtensor/contraction_backends/numpy.py -> get_einsum_expr
     def _get_einsum_expr(self, contraction_info: ContractionInfo) -> str:
         # map each index to a character
-        all_indices = sorted(set(port.ix for port in self._edges))
+        all_indices = sorted(set(port.ix for edge in self._edges for port in edge))
+        # TODO: is this the correct mapping?
+
         if len(all_indices) > len(CHARS):
             raise ValueError("too many indices to map to CHARS")
         index_to_char = {index: CHARS[i] for i, index in enumerate(all_indices)}
-
-        # i think this is missing buckets, comparing to other einsums that look like this
+        import pdb; pdb.set_trace()
+        # TODO: i think this is missing buckets?, comparing to other einsums that look like this
         # np.einsum('ijk,ijl->jkl', a, b)
-        expr = ''.join(index_to_char[port.ix] for port in self._edges) + '->' + \
-           ''.join(index_to_char[ix] for ix in contraction_info.result_indices)
+        expr = ''.join(index_to_char[port.ix] for edge in self._edges for port in edge) + '->' + \
+       ''.join(index_to_char[ix] for ix in contraction_info.result_indices)
 
         return expr
 
@@ -213,9 +218,9 @@ if __name__ == "__main__":
     slice_dict = {0: slice(0, 2), 1: slice(1, 3)}
     sliced_tn = tn.slice(slice_dict)
 
-    random_index_to_contract = np.random.randint(0, len(sliced_tn.shape))
+    random_indices_to_contract = (np.random.randint(0, 50), )
 
-    contraction_info = ContractionInfo(random_index_to_contract)
+    contraction_info = ContractionInfo(random_indices_to_contract)
     
     contracted_tensor = sliced_tn.contract(contraction_info)
 
