@@ -1,15 +1,26 @@
 import numpy as np
 import math
+import string
 from dataclasses import dataclass
-from typing import TypeVar, Generic, Iterable
+from typing import TypeVar, Generic, Iterable, Tuple
 
 class Array(np.ndarray):
     shape: tuple
 
 D = TypeVar('D') # tensor data type (numpy, torch, etc.)
 
+CHARS = string.ascii_lowercase + string.ascii_uppercase
+
+N = TypeVar('N', bound=np.ndarray)
+
+@dataclass
+class Port:
+    tensor_ref: int
+    ix: int
+
+@dataclass
 class ContractionInfo:
-    pass
+    result_indices: Iterable[int]
 
 class TensorNetworkIFC(Generic[D]):
     def __init__(self, *args, **kwargs):
@@ -41,13 +52,6 @@ class TensorNetworkIFC(Generic[D]):
     def __eq__(a, b):
         ...
 
-
-N = TypeVar('N', bound=np.ndarray)
-
-@dataclass
-class Port:
-    tensor_ref: int
-    ix: int
 
 class TensorNetwork(TensorNetworkIFC[np.ndarray]):
     tensors: Iterable[np.ndarray]
@@ -100,7 +104,6 @@ class TensorNetwork(TensorNetworkIFC[np.ndarray]):
         new._tensors = self._tensors
         new._edges = self._edges
         new.shape = self.shape
-        new.indices = self.indices
         return new
 
     def add(self, other: "TensorNetwork | np.ndarray"):
@@ -127,7 +130,26 @@ class TensorNetwork(TensorNetworkIFC[np.ndarray]):
 
     # contract to produce a new tensor
     def contract(self, contraction_info: ContractionInfo) -> np.ndarray:
-        raise NotImplementedError()
+        tensors_to_contract = [self._tensors[port.tensor_ref] for port in self._edges]
+        einsum_expr = self._get_einsum_expr(contraction_info)
+
+        return np.einsum(einsum_expr, *tensors_to_contract)
+
+    # based on implementation in 
+    # qtensor/contraction_backends/numpy.py -> get_einsum_expr
+    def _get_einsum_expr(self, contraction_info: ContractionInfo) -> str:
+        # map each index to a character
+        all_indices = sorted(set(port.ix for port in self._edges))
+        if len(all_indices) > len(CHARS):
+            raise ValueError("too many indices to map to CHARS")
+        index_to_char = {index: CHARS[i] for i, index in enumerate(all_indices)}
+
+        # i think this is missing buckets, comparing to other einsums that look like this
+        # np.einsum('ijk,ijl->jkl', a, b)
+        expr = ''.join(index_to_char[port.ix] for port in self._edges) + '->' + \
+           ''.join(index_to_char[ix] for ix in contraction_info.result_indices)
+
+        return expr
 
     def optimize(self, out_indices: Iterable = []) -> ContractionInfo:
         raise NotImplementedError()
@@ -190,4 +212,11 @@ if __name__ == "__main__":
     tn = TensorNetwork.new_random_cpu(2, 3, 4)
     slice_dict = {0: slice(0, 2), 1: slice(1, 3)}
     sliced_tn = tn.slice(slice_dict)
+
+    random_index_to_contract = np.random.randint(0, len(sliced_tn.shape))
+
+    contraction_info = ContractionInfo(random_index_to_contract)
+    
+    contracted_tensor = sliced_tn.contract(contraction_info)
+
     import pdb; pdb.set_trace()
