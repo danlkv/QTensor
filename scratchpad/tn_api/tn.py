@@ -58,23 +58,14 @@ class TensorNetwork(TensorNetworkIFC[np.ndarray]):
         self._tensors = []
         self._edges = tuple()
         self.shape = tuple()
-        self._indices = {}
 
     # slice not inplace
     def slice(self, slice_dict: dict) -> 'TensorNetwork':
         tn = self.copy()
 
-        # hydrate the index map of edge index to tensor and dimension (via port object)
-        for idx, edge in enumerate(tn._edges):
-            for port in edge:
-                if idx in tn._indices:
-                    tn._indices[idx].append(port)
-                else:
-                    tn._indices[idx] = [port]
-
         for idx, slice_val in slice_dict.items():
-            # don't care about indices that are not in TN
-            if idx not in tn._indices:
+            # make sure idx is valid
+            if idx >= len(tn._edges):
                 continue
             
             edge = tn._edges.pop(idx)
@@ -85,7 +76,7 @@ class TensorNetwork(TensorNetworkIFC[np.ndarray]):
             for current_tensor_ref in tensors_to_slice:
                 slice_dict = {}
                 # get all ports for the current tensor
-                current_tensor_ref_ports = [port for port in edge where port.tensor_ref == current_tensor_ref]
+                current_tensor_ref_ports = [port for port in edge if port.tensor_ref == current_tensor_ref]
                 for current_port in current_tensor_ref_ports:
                     slice_dict[current_port.ix] = slice_val
                 # store the slice params for this tensor in the local dict
