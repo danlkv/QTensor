@@ -1,7 +1,7 @@
 import numpy as np
 import tensornetwork as tn
 import xyzpy as xyz
-from gates import xgate, cnot, hgate
+from gates import xgate, cnot, hgate, zgate
 from mps import MPS
 
 def test_from_wavefunction_all_zero_state():
@@ -81,14 +81,43 @@ def test_expectation_value_hgate():
     mps = MPS("q", 2, 2)
     copy = mps.__copy__()
 
-    np.isclose(mps.get_expectation(hgate(), 0), 0.707)
+    # <00|HI|00> = 1 / sqrt(2)
+    np.isclose(mps.get_expectation(hgate(), 0), 1. / np.sqrt(2))
     assert(mps.get_norm() == copy.get_norm())
-
-    mps.apply_single_qubit_gate(xgate(), 0)
-    np.isclose(mps.get_expectation(hgate(), 0), -0.707)
 
 def test_expectation_value_xgate():
     mps = MPS("q", 2, 2)
     copy = mps.__copy__()
+
+    # <00|XI|00> = 0
     np.isclose(mps.get_expectation(xgate(), 0), 0.)
     assert(mps.get_norm() == copy.get_norm())
+
+def test_expectation_value_xhgate():
+    mps = MPS("q", 2, 2)
+    copy = mps.__copy__()
+
+    # <10|HI|10> = - 1 / sqrt(2)
+    mps.apply_single_qubit_gate(xgate(), 0)
+    np.isclose(mps.get_expectation(hgate(), 0), -1. / np.sqrt(2))
+    assert(mps.get_norm() == copy.get_norm())
+
+def test_expectation_value_zgate():
+    mps = MPS("q", 2, 2)
+    copy = mps.__copy__()
+    np.isclose(mps.get_expectation(zgate(), 0), 1.)
+    assert(mps.get_norm() == copy.get_norm())
+
+def test_expectation_value_xgate_at_k():
+    k = 3
+    n = 5
+    mps = MPS("q", n, 2)
+    copy = mps.__copy__()
+    mps.apply_single_qubit_gate(xgate(), k)
+
+    expectation_array = []
+
+    for i in range(n):
+        expectation_array.append(mps.get_expectation(zgate(), i))
+
+    np.allclose(expectation_array, [1.0, 1.0, 1.0, -1.0, 1.0])

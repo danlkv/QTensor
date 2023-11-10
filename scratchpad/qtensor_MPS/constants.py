@@ -39,10 +39,10 @@ sigma_z_sigma_z_gate_matrix = _sigma_z_sigma_z_gate_matrix
 # TODO: Check zz matrix is diagonal
 # TODO: What does it look if hamiltonian is e^(I) / e^(0)
 
-_sigma_x_pos_sigma_x_neg_gate_matrix = np.kron(_sigma_x_pos, _sigma_x_neg, 0)
+_sigma_x_pos_sigma_x_neg_gate_matrix = np.kron(_sigma_x_pos, _sigma_x_neg)
 sigma_x_pos_sigma_x_neg_gate_matrix = np.reshape(_sigma_x_pos_sigma_x_neg_gate_matrix, newshape=(2,2,2,2))
 
-_sigma_x_neg_sigma_x_pos_gate_matrix = np.kron(_sigma_x_neg, _sigma_x_pos, 0)
+_sigma_x_neg_sigma_x_pos_gate_matrix = np.kron(_sigma_x_neg, _sigma_x_pos)
 sigma_x_neg_sigma_x_pos_gate_matrix = np.reshape(_sigma_x_neg_sigma_x_pos_gate_matrix, newshape=(2,2,2,2))
 
 # _ising_hamiltonian_matrix = sigma_z_sigma_z_gate_matrix + 0.5 * sigma_x_pos_sigma_x_neg_gate_matrix + 0.5 * sigma_x_neg_sigma_x_pos_gate_matrix

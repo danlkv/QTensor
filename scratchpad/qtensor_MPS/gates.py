@@ -20,6 +20,22 @@ def cnot() -> tn.Node:
 def hgate() -> tn.Node:
     return tn.Node(deepcopy(hmatrix), name="hgate")
 
+
+def sigmaRZZ(t) -> tn.Node:
+    _hbar = 1.0545718*10e-34
+    theta = 1j * t * 0.5 * _hbar * 0.5
+
+    gate_matrix = np.array(
+        [
+            [np.exp(theta/2), 0.0, 0.0, 0.0],
+            [0.0, np.exp(theta/2), 0.0, 0.0],
+            [0.0, 0.0, np.exp(theta/2), 0.0],
+            [0.0, 0.0, 0.0, np.exp(theta/2)],
+        ]
+    )
+    tensor = np.reshape(gate_matrix, newshape=(2,2,2,2))
+    return tn.Node(deepcopy(tensor), name="sigmaZZ")
+
 def sigmaZZ(t) -> tn.Node:
     gate_matrix = np.exp(sigma_z_sigma_z_gate_matrix * -1j * t * 0.5)
     gate_matrix = gate_matrix
