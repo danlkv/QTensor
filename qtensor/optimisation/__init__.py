@@ -1,5 +1,6 @@
 from . RGreedy import RGreedyOptimizer
 from qtensor.optimisation.Optimizer import TamakiTrimSlicing, TamakiOptimizer
+from qtensor.optimisation.Optimizer import TamakiExactOptimizer
 
 from qtensor.optimisation.Optimizer import GreedyOptimizer, WithoutOptimizer
 from qtensor.optimisation.Optimizer import Optimizer, SlicesOptimizer
