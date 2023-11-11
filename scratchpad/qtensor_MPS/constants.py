@@ -44,7 +44,6 @@ sigma_x_pos_sigma_x_neg_gate_matrix = np.reshape(_sigma_x_pos_sigma_x_neg_gate_m
 
 _sigma_x_neg_sigma_x_pos_gate_matrix = np.kron(_sigma_x_neg, _sigma_x_pos)
 sigma_x_neg_sigma_x_pos_gate_matrix = np.reshape(_sigma_x_neg_sigma_x_pos_gate_matrix, newshape=(2,2,2,2))
-
 # _ising_hamiltonian_matrix = sigma_z_sigma_z_gate_matrix + 0.5 * sigma_x_pos_sigma_x_neg_gate_matrix + 0.5 * sigma_x_neg_sigma_x_pos_gate_matrix
 _ising_hamiltonian_matrix = sigma_z_sigma_z_gate_matrix
 ising_hamiltonian_matrix = np.reshape(_ising_hamiltonian_matrix, newshape=(2,2,2,2))
