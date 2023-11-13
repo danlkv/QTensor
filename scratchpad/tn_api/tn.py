@@ -143,6 +143,22 @@ class TensorNetwork(TensorNetworkIFC[np.ndarray]):
         # other types can also be supported, such as QTensor and Quimb
         # those would require setting up the optimize method to build the buckets
         # TODO is read through and understand what it would take to set each of those up
+
+
+    def _get_random_indices_to_contract(self, count=2):
+        import random
+        tn_copy = self.copy()
+        indices_to_contract = []
+        counter = 0
+        edges_with_indices = [idx for idx, port in enumerate(list(tn_copy._edges))]
+
+        while counter < count:
+            random_element = random.choice(edges_with_indices)
+            edges_with_indices.remove(random_element)
+            indices_to_contract.append(random_element)
+            counter += 1
+        
+        return sorted(indices_to_contract)
         
 
     # based on implementation in 
@@ -184,13 +200,6 @@ class TensorNetwork(TensorNetworkIFC[np.ndarray]):
             substrs_to_join.append(substr)
         
         expr = ','.join(substrs_to_join) + '->' + ''.join(edge_to_char[ix] for ix in contraction_info.result_indices)
-
-
-        # expr = ','.join(''.join(index_to_char[edge_idx] for edge_idx in t_ref_to_edges[t]) for t in t_ref_to_edges.keys()) + '->' + \
-        #     ''.join(index_to_char[ix] for ix in contraction_info.result_indices)
-
-        # expr = ','.join(''.join(index_to_char[self._edges[edge_index][i].ix] for i in range(len(self._edges[edge_index])) if self._edges[edge_index][i].tensor_ref == t_idx) for t_idx in range(len(self._tensors))) + '->' + \
-        #    ''.join(index_to_char[ix] for ix in contraction_info.result_indices)
         return expr
 
     def optimize(self, out_indices: Iterable = []) -> ContractionInfo:
@@ -249,13 +258,17 @@ class TensorNetwork(TensorNetworkIFC[np.ndarray]):
 
 
 if __name__ == "__main__":
-    tn = TensorNetwork.new_random_cpu(2, 3, 4)
-    # slice_dict = {0: slice(0, 2), 1: slice(1, 3)}
-    # sliced_tn = tn.slice(slice_dict)
+    dim = 3
+    tn = TensorNetwork.new_random_cpu(2, dim, 4)
+    slice_dict = {0: slice(0, 2), 1: slice(1, 3)}
+    sliced_tn = tn.slice(slice_dict)
 
     # can also do "contract all except..." by knowing indices of edges in tn
-    random_indices_to_contract = (np.random.randint(0, len(tn._edges)), )
-    contraction_info = ContractionInfo(random_indices_to_contract)
+    # generate random indices to contract
+
+    random_indices_to_contract = tn._get_random_indices_to_contract(2)
+    # random_indices_to_contract = (np.random.randint(0, len(tn._edges)), np.random.randint(0, len(tn._edges)), np.random.randint(0, len(tn._edges)),)
+    contraction_info = ContractionInfo(tuple(random_indices_to_contract))
     
     contracted_tensor = tn.contract(contraction_info)
     import pdb; pdb.set_trace()
