@@ -263,6 +263,9 @@ if __name__ == "__main__":
     slice_dict = {0: slice(0, 2), 1: slice(1, 3)}
     sliced_tn = tn.slice(slice_dict)
 
+    # Where did I leave off?
+    # Having trouble verifying tests, perhaps logic is incorrect but it makes sense to me
+
     # can also do "contract all except..." by knowing indices of edges in tn
     # generate random indices to contract
 
