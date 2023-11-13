@@ -1,2 +1,3 @@
 mongocat
 PyInquirer
+pre-commit
