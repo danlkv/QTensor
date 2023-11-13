@@ -133,32 +133,68 @@ class TensorNetwork(TensorNetworkIFC[np.ndarray]):
 
     # contract to produce a new tensor
     def contract(self, contraction_info: ContractionInfo) -> np.ndarray:
-        tensors_to_contract = [self._tensors[port.tensor_ref] for edge in self._edges for port in edge if port.tensor_ref != -1]
         einsum_expr = self._get_einsum_expr(contraction_info)
         import pdb; pdb.set_trace()
-        return np.einsum(einsum_expr, *tensors_to_contract)
+        return np.einsum(einsum_expr, self._tensors)
+
+
+        # what can I understand next?
+        # if i setup this contract method to work for QTensorNet, it would be pretty similar becuase it also uses np.einsum
+        # other types can also be supported, such as QTensor and Quimb
+        # those would require setting up the optimize method to build the buckets
+        # TODO is read through and understand what it would take to set each of those up
+        
 
     # based on implementation in 
     # qtensor/contraction_backends/numpy.py -> get_einsum_expr
     def _get_einsum_expr(self, contraction_info: ContractionInfo) -> str:
-        # map each index to a character
-        all_indices = sorted(set(port.ix for edge in self._edges for port in edge))
-        # TODO: is this the correct mapping?
+        # mapping from tensor index to a tuple of edges that preserves ordering
+        # st can lookup tix -> tuple(idx of edges) # this iterable needs to be sorted by of port.ix
+        t_ref_to_edges = {}
+        for t_idx in range(0, len(self._tensors)):
+            connected_edges_dict = {} # use a dict to dedup
+            for edge_index, edge in enumerate(self._edges):
+                for port in edge:
+                    if port.tensor_ref == t_idx:
+                        connected_edges_dict[edge_index] = port.ix
+            # now sort by port ix
+            connected_edges = [(edge_index, port_ix) for edge_index, port_ix in connected_edges_dict.items()]
+            connected_edges_sorted = sorted(connected_edges, key=lambda x: x[1])
+            # extract the ix of the global edge
+            edge_indices_sorted = [edge_index for edge_index, port_ix in connected_edges_sorted]
+            t_ref_to_edges[t_idx] = edge_indices_sorted
 
-        if len(all_indices) > len(CHARS):
-            raise ValueError("too many indices to map to CHARS")
-        index_to_char = {index: CHARS[i] for i, index in enumerate(all_indices)}
-        import pdb; pdb.set_trace()
-        # TODO: i think this is missing buckets?, comparing to other einsums that look like this
-        # np.einsum('ijk,ijl->jkl', a, b)
-        expr = ''.join(index_to_char[port.ix] for edge in self._edges for port in edge) + '->' + \
-       ''.join(index_to_char[ix] for ix in contraction_info.result_indices)
+        # i:0, j:1, k:2, l:3 -> int is index is self._edges
+        # s[0] = (012), s[1]=(103) where index to s is the index in self._tensors
+        # edge 0 is (Port(t_ref=0, ix=0), Port(t_ref=1, ix=1)) # i
+        # edge 1 is (Port(t_ref=0, ix=1), Port(t_ref=1, ix=0)) # j
+        # edge 2 is (Port(t_ref=0, ix=2)) #k 
+        # edge 3 is (Port(t_ref=1, ix=2)) #l 
 
+        edge_to_char = {i: CHARS[i] for i in range(0, len(self._edges))}
+        # np.einsum('ijk,jil->jkl', a, b)
+        # expr = ','.join(''.join(index_to_char[port.ix] for edge in self._edges for port in edge) for t in self._tensors) + '->' + \
+        #    ''.join(index_to_char[ix] for ix in contraction_info.result_indices)
+
+        substrs_to_join = []
+        for t_idx, t in enumerate(self._tensors):
+            substr = ''
+            for edge_idx in t_ref_to_edges[t_idx]:
+                substr += edge_to_char[edge_idx]
+            substrs_to_join.append(substr)
+        
+        expr = ','.join(substrs_to_join) + '->' + ''.join(edge_to_char[ix] for ix in contraction_info.result_indices)
+
+
+        # expr = ','.join(''.join(index_to_char[edge_idx] for edge_idx in t_ref_to_edges[t]) for t in t_ref_to_edges.keys()) + '->' + \
+        #     ''.join(index_to_char[ix] for ix in contraction_info.result_indices)
+
+        # expr = ','.join(''.join(index_to_char[self._edges[edge_index][i].ix] for i in range(len(self._edges[edge_index])) if self._edges[edge_index][i].tensor_ref == t_idx) for t_idx in range(len(self._tensors))) + '->' + \
+        #    ''.join(index_to_char[ix] for ix in contraction_info.result_indices)
         return expr
 
     def optimize(self, out_indices: Iterable = []) -> ContractionInfo:
         raise NotImplementedError()
-    
 
     @classmethod
     def new_random_cpu(cls, count, size, dim: int):
@@ -212,16 +248,14 @@ class TensorNetwork(TensorNetworkIFC[np.ndarray]):
         return f"TensorNetwork({self.shape})<{self._tensors}, {self._edges}>"
 
 
-
 if __name__ == "__main__":
     tn = TensorNetwork.new_random_cpu(2, 3, 4)
-    slice_dict = {0: slice(0, 2), 1: slice(1, 3)}
-    sliced_tn = tn.slice(slice_dict)
+    # slice_dict = {0: slice(0, 2), 1: slice(1, 3)}
+    # sliced_tn = tn.slice(slice_dict)
 
-    random_indices_to_contract = (np.random.randint(0, 50), )
-
+    # can also do "contract all except..." by knowing indices of edges in tn
+    random_indices_to_contract = (np.random.randint(0, len(tn._edges)), )
     contraction_info = ContractionInfo(random_indices_to_contract)
     
-    contracted_tensor = sliced_tn.contract(contraction_info)
-
+    contracted_tensor = tn.contract(contraction_info)
     import pdb; pdb.set_trace()
