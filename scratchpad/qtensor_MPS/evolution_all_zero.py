@@ -5,9 +5,9 @@ from gates import *
 import matplotlib.pyplot as plt
 
 cutoff = 1e-8
-N = 3
+N = 10
 mps = MPS("q", N + 1, 2)
-evolution_range = np.linspace(0, 1, 100)
+evolution_range = np.linspace(0, 1, 20)
 js = np.array(range(N))
 
 magnetization = []
@@ -17,9 +17,11 @@ for t in evolution_range:
 
     for j in js:
         mps.apply_two_qubit_gate(sigmaRzz(t), [j, j + 1])
+        mps.apply_single_qubit_gate(sigmaRx(t), j)
 
-    for j in js:
-        mps.apply_two_qubit_gate(sigmaRzz(t), [N - 1 - j, N - j])
+    # for j in js:
+    #     mps.apply_two_qubit_gate(sigmaRzz(-1*t), [N - 1 - j, N - j])
+    #     mps.apply_single_qubit_gate(sigmaRx(-1*t), N-1-j)
 
     # ZIIIII..
     # IZIIII...
