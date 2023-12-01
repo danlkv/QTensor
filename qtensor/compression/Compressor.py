@@ -101,6 +101,9 @@ class ProfileCompressor(Compressor):
         compress_ratios = np.mean([x.size_in/x.size_out for x in compress])
         compress_size = sum([x.size_out for x in compress])
         return compress_time, decompress_time, compress_size, compress_ratios
+
+    def compress_size(self, ptr):
+        return self.compressor.compress_size(ptr)
 # --
 
 class NumpyCompressor(Compressor):
