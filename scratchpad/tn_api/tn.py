@@ -66,7 +66,7 @@ class TensorNetwork(TensorNetworkIFC[np.ndarray]):
     # slice not inplace
     def slice(self, slice_dict: dict) -> 'TensorNetwork':
         tn = self.copy()
-
+        new_edge_list = []
         for idx, slice_val in slice_dict.items():
             # make sure idx is valid
             if idx >= len(tn._edges):
@@ -75,7 +75,7 @@ class TensorNetwork(TensorNetworkIFC[np.ndarray]):
             edge_list = list(tn._edges)
             edge = edge_list.pop(idx)
             # now put the updated edges back on the class
-            tn._edges = tuple(edge_list)
+            tn._edges = tuple(edge_list) # TODO @dallon - is this the issue, that i'm getting rid of all of the edges?
             # get all tensors indexed by this edge
             tensors_to_slice = set(port.tensor_ref for port in edge)
             # store slice index and value for each tensor
@@ -98,7 +98,17 @@ class TensorNetwork(TensorNetworkIFC[np.ndarray]):
                         slice_bounds.append(slice_dict[idx])
                     except KeyError:
                         slice_bounds.append(slice(None))
-                tn._tensors[current_tensor_ref] = tn._tensors[current_tensor_ref][tuple(slice_bounds)]
+                sliced_tensor = tn._tensors[current_tensor_ref][tuple(slice_bounds)]
+                tn._tensors[current_tensor_ref] = sliced_tensor
+        
+                # TODO: this is just a guess - but i am adding the ports from the popped edge back to the list of slices
+        #         for port in edge:
+        #             if port.ix in slice_dict and port.tensor_ref == current_tensor_ref:
+        #                 new_edge_list.append(Port(tensor_ref=current_tensor_ref, ix=port.ix))
+
+        #     # update the tensor network's edges with the new edges
+        # tn._edges = tuple(new_edge_list)
+
 
         return tn
 
@@ -154,11 +164,17 @@ class TensorNetwork(TensorNetworkIFC[np.ndarray]):
         print([t.shape for t in self._tensors])
         print(self._edges)
         print(len(self._tensors))
-        import pdb; pdb.set_trace()
         try:
             return np.einsum(einsum_expr, *self._tensors)
-        except:
+        except Exception as e:
+            print(e)
             import pdb; pdb.set_trace()
+            keep_going = True
+            while keep_going:
+                einsum_expr = self._get_einsum_expr(contraction_info)
+                res = np.einsum(einsum_expr, *self._tensors)
+                import pdb; pdb.set_trace()
+            
 
     # for reference, see qtensor/contraction_backends/numpy.py -> get_einsum_expr
     def _get_einsum_expr(self, contraction_info: ContractionInfo) -> str:
@@ -266,21 +282,31 @@ if __name__ == "__main__":
     dim = 3
     tn = TensorNetwork.new_random_cpu(2, dim, 4)
     slice_dict = {0: slice(0, 2), 1: slice(1, 3)}
-    sliced_tn = tn.slice(slice_dict) # TODO: go through debugger here to make sure that certain edges of the same port aren't being skipped
+    sliced_tn = tn.slice(slice_dict)
+    print(len(sliced_tn._edges))
+    import pdb; pdb.set_trace()
+    # TODO: go through slice method debugger here to make sure that certain edges of the same port aren't being skipped
     # TODO: st i can run contract on a sliced tn without it breaking
-
-    # Where did I leave off?
-    # Having trouble verifying tests, perhaps logic is incorrect but it makes sense to me
+    """
+    # TODO: issue is that slicing results in no edges
+    ,-> #einsum expression
+    [(2, 2, 2), (2, 2, 2)] #tensor shapes
+    () #edges
+    2 #tensors count
+    """
 
     # can also do "contract all except..." by knowing indices of edges in tn
     # generate random indices to contract
 
-    random_indices_to_contract = tn._get_random_indices_to_contract(2)
+    random_indices_to_contract = sliced_tn._get_random_indices_to_contract(2)
     
     contraction_info = ContractionInfo(tuple(random_indices_to_contract))
-    import pdb; pdb.set_trace()
-    contracted_tensor = tn.contract(contraction_info)
-    print("success")
+    print("starting not sliced tensor")
+    contracted_tensor_not_slice = tn.contract(contraction_info)
+    print("finished not sliced tensor")
+    print("starting sliced tensor")
+    contracted_tensor = sliced_tn.contract(contraction_info)
+    print("finished sliced tensor")
     import pdb; pdb.set_trace()
 
 """
