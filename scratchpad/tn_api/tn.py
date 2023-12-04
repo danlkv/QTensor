@@ -104,9 +104,9 @@ class TensorNetwork(TensorNetworkIFC[np.ndarray]):
 
     def copy(self):
         new = TensorNetwork()
-        new._tensors = self._tensors
-        new._edges = self._edges
-        new.shape = self.shape
+        new._tensors = self._tensors[:]
+        new._edges = self._edges[:]
+        new.shape = self.shape[:]
         return new
 
     def add(self, other: "TensorNetwork | np.ndarray"):
@@ -154,6 +154,7 @@ class TensorNetwork(TensorNetworkIFC[np.ndarray]):
         print([t.shape for t in self._tensors])
         print(self._edges)
         print(len(self._tensors))
+        import pdb; pdb.set_trace()
         try:
             return np.einsum(einsum_expr, *self._tensors)
         except:
@@ -235,6 +236,7 @@ class TensorNetwork(TensorNetworkIFC[np.ndarray]):
 
         # add "self" tensor indices to partition
         # commented out to debug einsum err
+        # TODO: need to fix this einsum issue
         # for i in range(len(out.shape)):
         #     eix = partition_fn()
         #     new_port = Port(tensor_ref=-1, ix=i)
@@ -263,8 +265,8 @@ class TensorNetwork(TensorNetworkIFC[np.ndarray]):
 if __name__ == "__main__":
     dim = 3
     tn = TensorNetwork.new_random_cpu(2, dim, 4)
-    # slice_dict = {0: slice(0, 2), 1: slice(1, 3)} # TODO: this shouldn't affect original tn
-    # sliced_tn = tn.slice(slice_dict) # TODO: go through debugger here to make sure that certain edges of the same port aren't being skipped
+    slice_dict = {0: slice(0, 2), 1: slice(1, 3)}
+    sliced_tn = tn.slice(slice_dict) # TODO: go through debugger here to make sure that certain edges of the same port aren't being skipped
     # TODO: st i can run contract on a sliced tn without it breaking
 
     # Where did I leave off?
@@ -276,10 +278,10 @@ if __name__ == "__main__":
     random_indices_to_contract = tn._get_random_indices_to_contract(2)
     
     contraction_info = ContractionInfo(tuple(random_indices_to_contract))
-    
+    import pdb; pdb.set_trace()
     contracted_tensor = tn.contract(contraction_info)
     print("success")
-    # import pdb; pdb.set_trace()
+    import pdb; pdb.set_trace()
 
 """
 dae,dca->be
