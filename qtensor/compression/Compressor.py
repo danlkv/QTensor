@@ -351,9 +351,9 @@ class CUSZXCompressor(Compressor):
                 #print("CUDA Free", x)
             cupy.cuda.runtime.free(x)
             # del x
-            # cupy.get_default_memory_pool().free_all_blocks()
-            # cupy.get_default_pinned_memory_pool().free_all_blocks()
-        # torch.cuda.empty_cache()
+            cupy.get_default_memory_pool().free_all_blocks()
+            cupy.get_default_pinned_memory_pool().free_all_blocks()
+        torch.cuda.empty_cache()
         self.decompressed_own = []
 
     def free_compressed(self, ptr):
@@ -365,6 +365,9 @@ class CUSZXCompressor(Compressor):
         p_decompressed_int= ctypes.cast(p_decompressed_ptr, ctypes.POINTER(ctypes.c_uint64))
         decompressed_int = p_decompressed_int.contents
         cupy.cuda.runtime.free(decompressed_int.value)
+        cupy.get_default_memory_pool().free_all_blocks()
+        cupy.get_default_pinned_memory_pool().free_all_blocks()
+        torch.cuda.empty_cache()
 
     def compress(self, data):
         import cupy
