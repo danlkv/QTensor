@@ -40,8 +40,8 @@ def contract_two_tensors(A, B, T_out, einsum=np.einsum):
         result_ints = [relabel_dict_int[int(i)] for i in result_indices]
     else:
         result_ints = list(map(int, result_indices))
-    print(A.data.shape)
-    print(B.data.shape)
+    #print(A.data.shape)
+    #print(B.data.shape)
     out = einsum(A.data, A_ints, B.data, B_ints, result_ints)
     if len(result_ints)>0:
         # This copying is reqiured because cupy doesn't support `out` argument.
@@ -119,13 +119,13 @@ def compressed_contract(A:Tensor, B: Tensor,
 
             C_ixs = [v for v in result_chunk_ixs if v not in exist_compressed]
             C = Tensor('tmp', indices=C_ixs, data=chunk_view)
-            contract_two_tensors(A_slice, B_slice, C)
+            contract_two_tensors(A_slice, B_slice, C, einsum=einsum)
             # Free temp slices
             #import cupy
             #print("Flags", A_slice.data.flags, B_slice.data.flags, C.data.flags)
             #cupy.cuda.runtime.free(A_slice.data.data.ptr)
             #cupy.cuda.runtime.free(B_slice.data.data.ptr)
-            compressor.compressor.free_decompressed()
+            compressor.free_decompressed()
         if len(need_compressed)==0:
             R = Tensor(new_tensor_name, result_indices, data=chunk)
         else:

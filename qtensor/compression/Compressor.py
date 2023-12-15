@@ -104,6 +104,12 @@ class ProfileCompressor(Compressor):
 
     def compress_size(self, ptr):
         return self.compressor.compress_size(ptr)
+    
+    def free_decompressed(self):
+        self.compressor.free_decompressed()
+    
+    def free_compressed(self, ptr):
+        self.compressor.free_compressed(ptr)
 # --
 
 class NumpyCompressor(Compressor):
