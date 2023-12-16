@@ -175,7 +175,7 @@ class TorchCompressor(Compressor):
 
     def decompress(self, obj):
         import cupy
-        cmp_bytes, num_elements_eff, isCuPy, shape, dtype, cmpsize = obj
+        cmp_bytes, num_elements_eff, shape, dtype, cmpsize = obj
         decompressed_ptr = quant_device_decompress(num_elements_eff, cmp_bytes, self, dtype)
         arr_cp = decompressed_ptr[0]
 
