@@ -898,6 +898,7 @@ size_t better_post_proc(size_t *outSize, float *oriData, unsigned char *meta,
     //outBytes = (unsigned char*)malloc(out_size);
 	unsigned char* r = outBytes;
     unsigned char* r_old = outBytes;
+    // cudaDeviceSynchronize(); printf("%s\n",cudaGetLastError());
     checkCudaErrors(cudaMemset(r, SZx_VER_MAJOR, sizeof(char)));
     checkCudaErrors(cudaMemset(r+1, SZx_VER_MINOR, sizeof(char)));
     checkCudaErrors(cudaMemset(r+2, 1, sizeof(char)));

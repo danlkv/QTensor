@@ -4,8 +4,9 @@ from qtree.optimizer import Tensor
 from qtree.system_defs import NP_ARRAY_TYPE
 from .Compressor import NumpyCompressor, Compressor
 
+
 def iterate_indices(indices: list):
-    if len(indices)==0:
+    if len(indices) == 0:
         return [tuple()]
     ranges = [range(v.size) for v in indices]
     return itertools.product(*ranges)
@@ -18,11 +19,16 @@ class CompressedTensor(Tensor):
     The data array is split along several indices S into 2^|S| parts
 
     """
-    def __init__(self, name, indices,
-                 data_key=None, data=None,
-                 slice_indices=[],
-                 compressor:Compressor=NumpyCompressor()
-                ):
+
+    def __init__(
+        self,
+        name,
+        indices,
+        data_key=None,
+        data=None,
+        slice_indices=[],
+        compressor: Compressor = NumpyCompressor(),
+    ):
         """
         Initialize the tensor
         name: str,
@@ -49,7 +55,14 @@ class CompressedTensor(Tensor):
             self._dtype = None
 
     @classmethod
-    def empty(cls, name, indices, slice_indices=[], compressor=NumpyCompressor(), dtype:type=NP_ARRAY_TYPE):
+    def empty(
+        cls,
+        name,
+        indices,
+        slice_indices=[],
+        compressor=NumpyCompressor(),
+        dtype: type = NP_ARRAY_TYPE,
+    ):
         t = super().empty(name, indices, dtype)
         t.compressor = compressor
         if slice_indices:
@@ -63,18 +76,14 @@ class CompressedTensor(Tensor):
 
         Does not support compressing when already compressed
         """
-        slice_dict = {
-            i: slice(None) for i in self.indices
-        }
+        slice_dict = {i: slice(None) for i in self.indices}
         data_chunks = []
         for ivals in iterate_indices(indices):
             for ix, ival in zip(indices, ivals):
-                slice_dict[ix] = ival# slice(ival, ival+1)
+                slice_dict[ix] = ival  # slice(ival, ival+1)
             dslice = self.data[tuple(slice_dict[i] for i in self.indices)]
 
-            data_chunks.append(
-                self.compressor.compress(dslice)
-            )
+            data_chunks.append(self.compressor.compress(dslice))
             del dslice
         self._data = data_chunks
         self.slice_indices = indices
@@ -92,7 +101,7 @@ class CompressedTensor(Tensor):
 
     def get_chunk(self, ivals):
         dims = [v.size for v in self.slice_indices]
-        if len(ivals)==0:
+        if len(ivals) == 0:
             flat_ix = 0
         else:
             flat_ix = np.ravel_multi_index(ivals, dims)
@@ -104,13 +113,15 @@ class CompressedTensor(Tensor):
         if self._dtype is None:
             self._dtype = chunk.dtype
         else:
-            assert self.dtype == chunk.dtype, f"Chunk dtype {chunk.dtype} does not match tensor dtype {self.dtype}"
+            assert (
+                self.dtype == chunk.dtype
+            ), f"Chunk dtype {chunk.dtype} does not match tensor dtype {self.dtype}"
         # --
 
         if self._data is None:
-            self._data = np.empty(2**len(self.slice_indices), dtype=object)
+            self._data = np.empty(2 ** len(self.slice_indices), dtype=object)
         dims = [v.size for v in self.slice_indices]
-        if len(ivals)==0:
+        if len(ivals) == 0:
             flat_ix = 0
         else:
             flat_ix = np.ravel_multi_index(ivals, dims)
@@ -138,11 +149,10 @@ class CompressedTensor(Tensor):
         chunk_slice = chunk[tuple(chunk_slices_ints)]
         return Tensor(new_name, new_indices, data=chunk_slice)
 
-
     def __str__(self):
-        array_ix = ','.join(map(str, self.array_indices))
-        split_ix= ','.join(map(str, self.slice_indices))
-        return f'{self._name}{{{split_ix}}}({array_ix})'
+        array_ix = ",".join(map(str, self.array_indices))
+        split_ix = ",".join(map(str, self.slice_indices))
+        return f"{self._name}{{{split_ix}}}({array_ix})"
 
     def copy(self, name=None, indices=None, data_key=None, data=None):
         raise NotImplementedError()
@@ -150,5 +160,8 @@ class CompressedTensor(Tensor):
     def __repr__(self):
         return self.__str__()
 
-
-
+    def __del__(self):
+        if self._data is not None:
+            for chunk in self._data:
+                self.compressor.free_compressed(chunk)
+        del self

@@ -64,7 +64,7 @@ def test_leak_contract():
     dtype = cupy.complex64
     dtype_size = dtype(0).nbytes
     MB_elems = int(1024**2 / dtype_size)
-    MB_target = 128 # target for largest tensor
+    MB_target = 64  # target for largest tensor
     N = MB_target * MB_elems
     W_target = int(np.log2(N))
     print(f"== Testing memory leak with {N} elements and {MB_target} MB array ==")
@@ -73,7 +73,7 @@ def test_leak_contract():
     _nvsmi_handle = _init_nvsmi()
 
     As, Bs = W_target - 4, W_target - 2
-    common_num = int((As + Bs - W_target)/2)
+    common_num = int((As + Bs - W_target) / 2)
     print(f"Common indices: {common_num}, W_target: {W_target}")
     avars = [Var(i) for i in range(As)]
     bvars = [Var(i) for i in range(common_num)] + [
@@ -82,20 +82,27 @@ def test_leak_contract():
     print("A vars", avars)
     print("B vars", bvars)
     TA = Tensor.empty("A", avars)
+    TA.data = np.random.rand(*TA.shape).astype(dtype)
     TB = Tensor.empty("B", bvars)
+    TB.data = np.random.rand(*TB.shape).astype(dtype)
 
+    _mem_histories = []
     for j in range(100):
         res = compressed_contract(
             TA,
             TB,
             avars[:common_num],
-            W_target,
+            W_target - 1,
             c,
             einsum=cupy.einsum,
             move_data=cupy.array,
         )
+        [c.free_compressed(x) for x in res.data]
         print(f"Result indices: {res.indices}")
         print(f"Result: {res}")
+        _mem = _get_nvsmi_mem(_nvsmi_handle) / 1024**3
+        print(f"== [{j}] Memory usage: {_mem} GB ==")
+        _mem_histories.append(_mem)
         print(
-            f"== [{j}] Memory usage: {_get_nvsmi_mem(_nvsmi_handle) / 1024 ** 3} GB =="
+            f"== [{j}] Memory history: {[np.round(x, 2) for x in _mem_histories]} GB =="
         )
