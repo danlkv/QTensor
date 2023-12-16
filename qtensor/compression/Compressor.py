@@ -159,77 +159,30 @@ class TorchCompressor(Compressor):
         self.decompressed_own = []
 
     def free_compressed(self, ptr):
-        import ctypes, cupy
-        cmp_bytes, num_elements_eff, isCuPy, shape, dtype, _ = ptr
-        p_decompressed_ptr = ctypes.addressof(cmp_bytes[0])
-        # cast to int64 pointer
-        # (effectively converting pointer to pointer to addr to pointer to int64)
-        p_decompressed_int= ctypes.cast(p_decompressed_ptr, ctypes.POINTER(ctypes.c_uint64))
-        decompressed_int = p_decompressed_int.contents
-        cupy.cuda.runtime.free(decompressed_int.value)
+        cmp_bytes, num_elements_eff, shape, dtype, _ = ptr
+        del cmp_bytes
 
     def compress(self, data):
         isCupy, num_elements_eff = _get_data_info(data)
         dtype = data.dtype
-        cmp_bytes, outSize_ptr = self.cuszx_compress(isCuPy, data, num_elements_eff, self.r2r_error, self.r2r_threshold)
-        return (cmp_bytes, num_elements_eff, isCuPy, data.shape, dtype, outSize_ptr)
+        cmp_bytes, outSize_ptr = quant_device_compress(data, num_elements_eff, CUSZX_BLOCKSIZE, self.r2r_threshold)
+        return (cmp_bytes, num_elements_eff, data.shape, dtype, outSize_ptr)
 
         # return (cmp_bytes, num_elements_eff, isCuPy, data.shape, dtype, outSize_ptr.contents.value)
 
     def compress_size(self, ptr):
-        return ptr[5]
+        return ptr[4]
 
     def decompress(self, obj):
         import cupy
-        import ctypes
         cmp_bytes, num_elements_eff, isCuPy, shape, dtype, cmpsize = obj
-        decompressed_ptr = self.cuszx_decompress(isCuPy, cmp_bytes, cmpsize, num_elements_eff, self, dtype)
+        decompressed_ptr = quant_device_decompress(num_elements_eff, cmp_bytes, self, dtype)
         arr_cp = decompressed_ptr[0]
 
         arr = cupy.reshape(arr_cp, shape)
         self.decompressed_own.append(arr)
         return arr
     
-    ### Compression API with cuSZx ###
-    # Parameters:
-    # - isCuPy = boolean, true if data is CuPy array, otherwise is numpy array
-    # - data = Numpy or Cupy ndarray, assumed to be 1-D, np.float32 type
-    # - num_elements = Number of floating point elements in data
-    # - r2r_error = relative-to-value-range error bound for lossy compression
-    # - r2r_threshold = relative-to-value-range threshold to floor values to zero
-    # Returns:
-    # - cmp_bytes = Unsigned char pointer to compressed bytes
-    # - outSize_ptr = Pointer to size_t representing length in bytes of cmp_bytes
-    def cuszx_compress(self, isCuPy, data, num_elements, r2r_error, r2r_threshold):
-        
-        if not isCuPy:
-            cmp_bytes, outSize_ptr = cuszx_host_compress(data, r2r_error, num_elements, CUSZX_BLOCKSIZE, r2r_threshold)
-        else:
-            #cmp_bytes, outSize_ptr = cuszp_device_compress(data, r2r_error, num_elements,  r2r_threshold)
-
-            cmp_bytes, outSize_ptr = quant_device_compress(data, num_elements, CUSZX_BLOCKSIZE, r2r_threshold)
-            del data
-            torch.cuda.empty_cache()
-        return cmp_bytes, outSize_ptr
-
-    ### Decompression API with cuSZx ###
-    # Parameters:
-    # - isCuPy = boolean, true if data is CuPy array, otherwise is numpy array
-    # - cmp_bytes = Unsigned char pointer to compressed bytes
-    # - num_elements = Number of floating point elements in original data
-    # Returns:
-    # - decompressed_data = Float32 pointer to decompressed data
-    #
-    # Notes: Use ctypes to cast decompressed data to Numpy or CuPy type
-
-    def cuszx_decompress(self, isCuPy, cmp_bytes, cmpsize, num_elements, owner, dtype):
-        if not isCuPy:
-            decompressed_data = cuszx_host_decompress(num_elements, cmp_bytes)
-        else:
-            #decompressed_data = cuszp_device_decompress(num_elements, cmp_bytes, cmpsize, owner,dtype)
-# oriData, absErrBound, nbEle, blockSize,threshold
-            decompressed_data = quant_device_decompress(num_elements, cmp_bytes, owner,dtype)
-        return decompressed_data
 
 class NEWSZCompressor(Compressor):
     def __init__(self, r2r_error=1e-3, r2r_threshold=1e-3):
