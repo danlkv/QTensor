@@ -161,6 +161,7 @@ def simulate_tn(prep_data,
     import time
     from qtensor.contraction_algos import bucket_elimination
     from qtensor.compression.Compressor import CUSZCompressor, CUSZXCompressor, TorchCompressor, NEWSZCompressor
+    from qtensor.compression.Compressor import WriteToDiskCompressor
     import cupy
     cupy.cuda.profiler.start()
     peo, par_vars, tn = prep_data
@@ -183,6 +184,9 @@ def simulate_tn(prep_data,
         elif compress == 'newsz':
             print(f"{r2r_error=} {r2r_threshold=}")
             compressor = NEWSZCompressor(r2r_error=r2r_error, r2r_threshold=r2r_threshold)
+            compressor = qtensor.compression.ProfileCompressor(compressor)
+        elif compress == 'disk':
+            compressor = WriteToDiskCompressor(f'/grand/QTensor/compression/data/tensors_compressed_M{M}/')
             compressor = qtensor.compression.ProfileCompressor(compressor)
         else:
             raise ValueError(f"Unknown compression algorithm: {compress}")

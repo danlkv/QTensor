@@ -6,6 +6,8 @@ import numpy as np
 # -- QAOA generic parser
 
 def parse_qaoa_composer(data):
+    import json
+    data = json.loads(data)
     terms = data["terms"]
     gamma = np.array(data["gamma"])/np.pi/2
     beta = np.array(data["beta"])/np.pi
@@ -17,6 +19,18 @@ def parse_qaoa_composer(data):
     return composer
 # --
 
+def read_circ(circ_f, type=None):
+
+    if type is None:
+        type = circ_f.path.name.split(".")[-1]
+
+    print("Reading circuit of type", type)
+    if type == "jsonterms":
+        b = circ_f.f.read()
+        return parse_qaoa_composer(b)
+
+    elif type == "qasm":
+        raise Exception("only jsonterms is supported for energy calculations")
 
 def read_preps(prep_f):
     import pickle
@@ -62,16 +76,17 @@ def preprocess_circ(circ, S, O, M, after_slice):
     #print("W", opt.treewidth)
     return (peo, par_vars, tn), opt.treewidth
 
-def preprocess(composer, out_file, O='greedy', S=None, M=30, after_slice='run-again'):
+def preprocess(in_file, out_file, O='greedy', S=None, M=30, after_slice='run-again'):
     """
     Arguments:
-        composer: input file
+        in_file: input file
         out_file: output file
         O: ordering algorithm 
         S: slicing algorithm 
         M: Memory limit for slicing 
     """
     import copy
+    composer = read_circ(in_file)
     G = composer.graph
     prep_data = []
     for edge in G.edges:
