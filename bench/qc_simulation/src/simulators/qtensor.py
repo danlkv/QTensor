@@ -71,68 +71,51 @@ def read_circ(circ_f, type=None):
         N, circ = qtree.operators.read_circuit_stream(f)
         return sum(circ, [])
 
-def read_preps(prep_f):
-    import pickle
-    return pickle.load(prep_f.f)
+def _debug_graph_components(graph, nodes_remove):
+    import networkx as nx
+    for pv in nodes_remove:
+        graph.remove_node(int(pv))
+    components = list(nx.connected_components(graph))
+    print(f"Sliced graph # nodes: {graph.number_of_nodes()} and #components: {len(components)} with sizes {[len(c) for c in components]}")
 
-def write_preps(peo, prep_f):
-    import pickle
-    pickle.dump(peo, open(prep_f, 'wb'))
+    print()
 
-def write_json(data, out_file):
-    import json
-    with open(out_file, 'w') as f:
-        json.dump(data, f)
-        # This newline plays nice when cat-ing multiple files
-        f.write('\n')
-
-def preprocess(in_file, out_file, O='greedy', S=None, M=30, after_slice='run-again'):
+def preprocess_tn(tn, O='greedy', M=30, after_slice='run-again'):
     """
     Arguments:
-        in_file: input file
-        out_file: output file
+        tn: tensornet
         O: ordering algorithm 
         S: slicing algorithm 
         M: Memory limit for slicing 
+
+    Returns:
+        prep_data: tuple of (widths, peos, par_vars, tn)
+        widths and peos are tuples for each par_vars size
     """
-    circ = read_circ(in_file)
-    tn = qtensor.optimisation.QtreeTensorNet.from_qtree_gates(circ)
     opt = qtensor.toolbox.get_ordering_algo(O)
-    if S:
-        # ignore argument type mismatch for pyright -- opt can be `Optimizer`
-        # pyright: reportGeneralTypeIssues=false
-        opt = qtensor.optimisation.TreeTrimSplitter(
-            tw_bias=0, max_tw=M, base_ordering=opt,
-            peo_after_slice_strategy=after_slice
-        )
-        
-        peo, par_vars, _ = opt.optimize(tn)
-        # --dbg
-        import networkx as nx
-        graph = tn.get_line_graph()
-        ignore_vars = tn.bra_vars + tn.ket_vars
-        for pv in par_vars:
-            graph.remove_node(int(pv))
-        components = list(nx.connected_components(graph))
-        print(f"Sliced graph # nodes: {graph.number_of_nodes()} and #components: {len(components)} with sizes {[len(c) for c in components]}")
-        print(f"peo size without par_vars and ignore_vars: {len(peo) - len(par_vars) - len(ignore_vars)}")
-
-        print()
-        # --
-    else:
-        peo, _ = opt.optimize(tn)
-        par_vars = []
-    print("W", opt.treewidth)
+    # ignore argument type mismatch for pyright -- opt can be `Optimizer`
+    opt = qtensor.optimisation.TreeTrimSplitter(
+        tw_bias=0, max_tw=M, base_ordering=opt,
+        peo_after_slice_strategy=after_slice
+    )
+    opt.par_var_step = 1
+    
+    peo, par_vars, _ = opt.optimize(tn)
+    history = opt._slice_hist
+    # --dbg
+    # _debug_graph_components(tn.get_line_graph())
+    # --
+    _, widths, peos = zip(*history)
+    print("W", widths)
     # -- qtensor_estim
-    prep_data = (peo, par_vars, tn)
-    write_preps(prep_data, out_file)
+    prep_data = (widths, peos, par_vars, tn)
+    return prep_data
 
 
-def estimate(in_file, out_file, C=100, M=30, F=1e12, T=1e9, S=0, **kwargs):
+def estimate(prep_data, C=100, M=30, F=1e12, T=1e9, S=0, **kwargs):
     """
     Arguments:
-        in_file: file with preprocessed data
-        out_file: file to write the results to
+        prep_data: tuple of (peo, par_vars, tn)
         C: Compression ratio
         M: Memory limit in log2(b/16)
         F: assumed FLOPS 
@@ -143,7 +126,6 @@ def estimate(in_file, out_file, C=100, M=30, F=1e12, T=1e9, S=0, **kwargs):
     from qtensor.compression.cost_estimation import compressed_contraction_cost, Cost
     from dataclasses import asdict
     import json
-    prep_data = read_preps(in_file)
     peo, par_vars, tn = prep_data
     if S > 0:
         par_vars = par_vars[:-S]
@@ -158,11 +140,9 @@ def estimate(in_file, out_file, C=100, M=30, F=1e12, T=1e9, S=0, **kwargs):
     C['time'] = time*2**len(par_vars)
     C['slices'] = 2**len(par_vars)
     print("C", C)
-    out_file += ".json"
-    write_json(C, out_file)
-    return out_file
+    return C
 
-def simulate(in_file, out_file,
+def simulate_tn(prep_data,
              backend='einsum',
              compress=None,
              M=29,
@@ -171,8 +151,7 @@ def simulate(in_file, out_file,
              **kwargs):
     """
     Args:
-        in_file: file with preprocessed data
-        out_file: file to write the results to
+        prep_data: tuple of (peo, par_vars, tn)
         backend: backend to use
         compress: compression algorithm
         M: memory threshold for compression
@@ -184,7 +163,6 @@ def simulate(in_file, out_file,
     from qtensor.compression.Compressor import CUSZCompressor, CUSZXCompressor, TorchCompressor, NEWSZCompressor
     import cupy
     cupy.cuda.profiler.start()
-    prep_data = read_preps(in_file)
     peo, par_vars, tn = prep_data
     
     # -- Prepare backend
@@ -240,9 +218,8 @@ def simulate(in_file, out_file,
         if isinstance(compressor, qtensor.compression.ProfileCompressor):
             C['compression'] = compressor.get_profile_data_json()
 
-    write_json(C, out_file)
     cupy.cuda.profiler.stop()
-    return out_file
+    return C
 
 def _simulate_wrapper(backend, tn, peo, par_vars, hpc=False):
     """
