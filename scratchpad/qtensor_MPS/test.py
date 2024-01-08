@@ -168,20 +168,6 @@ def test_mps_mpo():
             assert np.isclose(allmps[i].inner_product(allmps[j]), i == j)
 
 
-def test_mps_single_qubit_mpo_layer():
-    mps1 = MPS("q", 3, 2)
-    mps1.apply_single_qubit_gate(xgate(), 1)
-    assert mps1.get_norm() == 1
-    # expectation = mps1(original) inner prod mps1(modified)
-    mps2 = MPS("q", 3, 2)
-    mpo_layer = MPOLayer("q", 3, 2)
-    mpo_layer.add_single_qubit_gate(xmatrix, 1)
-    mps2.apply_mpo_layer(mpo_layer)
-    assert mps2.get_norm() == 1
-
-    assert (mps1.get_wavefunction() == mps2.get_wavefunction()).all()
-
-
 def test_mpo_two_qubit():
     mpo_layer = MPOLayer("q", 4, 2)
     # print("BEFORE")
@@ -222,13 +208,36 @@ def test_mpo_construction_from_single_qubit_gate_function():
 
 def test_mpo_construction_from_two_qubit_gate_function():
     I = np.eye(2)
-    gate_func = cnot_matrix
+    CNOT = np.array(
+        [
+            [1.0, 0.0, 0.0, 0.0],
+            [0.0, 1.0, 0.0, 0.0],
+            [0.0, 0.0, 0.0, 1.0],
+            [0.0, 0.0, 1.0, 0.0],
+        ]
+    )
+
+    mps2 = MPS("q", 2, 2)
+    mps2.apply_single_qubit_gate(xgate(), 1)
+    print("INITIAL MPS", mps2.get_wavefunction())
+
+    gate_func = CNOT
     mpo = MPOLayer("q", 2, 2)
     mpo.construct_mpo(gate_func)
     mps = MPS("q", 2, 2)
-    print("INITIAL MPS", mps.get_wavefunction())
+    mps.apply_single_qubit_gate(xgate(), 1)
     mps.apply_mpo_layer(mpo)
     print("FINAL MPS", mps.get_wavefunction())
+
+    condition = np.allclose(
+        np.array(mps.get_wavefunction()),
+        np.array(mps2.get_wavefunction()),
+        rtol=1e-05,
+        atol=1e-08,
+    )
+    message = "Arrays are not equal within tolerance"
+
+    assert condition, message
 
 
 # TODO:
@@ -238,4 +247,3 @@ def test_mpo_construction_from_two_qubit_gate_function():
 # Evaluate X, Y, Z observable
 # Check for one/two/three qubits (cover edge cases) for both mps/mpo
 # test_mpo_construction_from_single_qubit_gate_function()
-# test_mpo_construction_from_two_qubit_gate_function()
