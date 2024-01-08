@@ -62,20 +62,18 @@ class MPOLayer:
     def get_mpo_node(self, index, original) -> list[tn.Node]:
         return self.get_mpo_nodes(original)[index]
 
-    def construct_mpo(self, gate_function, tensor_name, N, physical_dim=1) -> "MPO":
+    def construct_mpo(self, gate_function) -> "MPO":
         # IIZ
-        gate_function = gate_function.reshape([physical_dim] * 2 * N)
-        print(gate_function.shape)
+        gate_function = gate_function.reshape([self.physical_dim] * 2 * self.N)
         to_split = tn.Node(
             gate_function,
-            axis_names=["u" + str(i) for i in range(N)]
-            + ["d" + str(i) for i in range(N)],
+            axis_names=["u" + str(i) for i in range(self.N)]
+            + ["d" + str(i) for i in range(self.N)],
         )
-        print(to_split.shape)
 
         nodes = []
 
-        for i in range(N - 1):
+        for i in range(self.N - 1):
             left_edges = []
             right_edges = []
 
@@ -94,12 +92,12 @@ class MPOLayer:
                 to_split,
                 left_edges,
                 right_edges,
-                left_name=tensor_name + str(i),
+                left_name=self.tensor_name + str(i),
                 max_singular_values=1,
             )
             nodes.append(left)
             to_split = right
-        to_split.name = tensor_name + str(N - 1)
+        to_split.name = self.tensor_name + str(self.N - 1)
         nodes.append(to_split)
 
         self._nodes = nodes
