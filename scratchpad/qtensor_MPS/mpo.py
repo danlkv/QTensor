@@ -64,9 +64,14 @@ class MPOLayer:
 
     def construct_mpo(self, gate_function, tensor_name, N, physical_dim=1) -> "MPO":
         # IIZ
-        gate_function = gate_function.reshape([2 * physical_dim] * N)
+        gate_function = gate_function.reshape([physical_dim] * 2 * N)
         print(gate_function.shape)
-        to_split = tn.Node(gate_function, axis_names=[str(i) for i in range(N)])
+        to_split = tn.Node(
+            gate_function,
+            axis_names=["u" + str(i) for i in range(N)]
+            + ["d" + str(i) for i in range(N)],
+        )
+        print(to_split.shape)
 
         nodes = []
 
@@ -75,20 +80,10 @@ class MPOLayer:
             right_edges = []
 
             for edge in to_split.get_all_dangling():
-                if edge.name == str(i):
-                    temp = tn.split_edge(
-                        edge, (physical_dim, physical_dim), ["a" + str(i), "b" + str(i)]
-                    )
-                    for e in temp:
-                        left_edges.append(e)
+                if edge.name == "u" + str(i) or edge.name == "d" + str(i):
+                    left_edges.append(edge)
                 else:
-                    temp = tn.split_edge(
-                        edge,
-                        (physical_dim, physical_dim),
-                        ["a" + str(i + 1), "b" + str(i + 1)],
-                    )
-                    for e in temp:
-                        right_edges.append(e)
+                    right_edges.append(edge)
 
             if nodes:
                 for edge in nodes[-1].get_all_nondangling():
@@ -96,7 +91,11 @@ class MPOLayer:
                         left_edges.append(edge)
 
             left, right, _ = tn.split_node(
-                to_split, left_edges, right_edges, left_name=tensor_name + str(i)
+                to_split,
+                left_edges,
+                right_edges,
+                left_name=tensor_name + str(i),
+                max_singular_values=1,
             )
             nodes.append(left)
             to_split = right
