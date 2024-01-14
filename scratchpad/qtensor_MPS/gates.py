@@ -6,6 +6,11 @@ from copy import deepcopy
 from scipy.linalg import qr
 
 
+def get_gate(gc):
+    gates = {"X": xgate, "I": igate, "Y": ygate, "Z": zgate}
+    return gates.get(gc, lambda: None)().tensor
+
+
 def xgate() -> tn.Node:
     return tn.Node(deepcopy(xmatrix), name="xgate")
 
@@ -15,7 +20,11 @@ def igate() -> tn.Node:
 
 
 def zgate() -> tn.Node:
-    return tn.Node(deepcopy(zmatrix), name="xgate")
+    return tn.Node(deepcopy(zmatrix), name="zgate")
+
+
+def ygate() -> tn.Node:
+    return tn.Node(deepcopy(ymatrix), name="ygate")
 
 
 def cnot() -> tn.Node:
@@ -29,7 +38,7 @@ def hgate() -> tn.Node:
 def sigmaRx(t) -> tn.Node:
     _hbar = 1.0545718 * 10e-34
     # theta =  -1j * t * 0.5 * _hbar * 0.5
-    theta = 1j * 0.1
+    theta = 0.1 * t
 
     gate_matrix = np.array(
         [
@@ -45,13 +54,13 @@ def sigmaRzz(t) -> tn.Node:
     _hbar = 1.0545718 * 10e-34
     # theta =  -1j * t * 0.5 * _hbar * 0.5 * _hbar * 0.5
     # J = 0.1Hz
-    theta = -1j * 0.7
+    theta = -1j * 0.7 * t
 
     gate_matrix = np.array(
         [
             [np.exp(theta / 2), 0.0, 0.0, 0.0],
-            [0.0, np.exp(theta / 2), 0.0, 0.0],
-            [0.0, 0.0, np.exp(theta / 2), 0.0],
+            [0.0, np.exp(-1 * theta / 2), 0.0, 0.0],
+            [0.0, 0.0, np.exp(-1 * theta / 2), 0.0],
             [0.0, 0.0, 0.0, np.exp(theta / 2)],
         ]
     )

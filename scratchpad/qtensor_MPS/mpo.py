@@ -1,7 +1,9 @@
 import tensornetwork as tn
 import numpy as np
-from gates import igate
+from gates import igate, get_gate, xgate
+from constants import pauli_matrices, xmatrix
 from typing import List, Union, Text, Optional, Any, Type
+from copy import deepcopy
 
 
 class MPOLayer:
@@ -62,62 +64,87 @@ class MPOLayer:
     def get_mpo_node(self, index, original) -> list[tn.Node]:
         return self.get_mpo_nodes(original)[index]
 
-    def construct_mpo(self, gate_function) -> "MPO":
-        # IIZ
-        gate_function = gate_function.reshape([self.physical_dim] * 2 * self.N)
-        to_split = tn.Node(
-            gate_function,
-            axis_names=["u" + str(i) for i in range(self.N)]
-            + ["d" + str(i) for i in range(self.N)],
-        )
+    def construct_mpo(self, pauli_string) -> "MPO":
+        # check if all elements are pauli matrices
+        paulis = list(pauli_string)
 
-        nodes = []
+        if any(pstring not in pauli_matrices for pstring in paulis):
+            print("Error: Not all are pauli string")
+            # Comments: change gatefunction - paulistring
+            pauli_string = pauli_string.reshape([self.physical_dim] * 2 * self.N)
+            to_split = tn.Node(
+                pauli_string,
+                axis_names=["u" + str(i) for i in range(self.N)]
+                + ["d" + str(i) for i in range(self.N)],
+            )
 
-        for i in range(self.N - 1):
-            left_edges = []
-            right_edges = []
+            nodes = []
 
-            for edge in to_split.get_all_dangling():
-                if edge.name == "u" + str(i) or edge.name == "d" + str(i):
-                    left_edges.append(edge)
-                else:
-                    right_edges.append(edge)
+            for i in range(self.N - 1):
+                left_edges = []
+                right_edges = []
 
-            if nodes:
-                for edge in nodes[-1].get_all_nondangling():
-                    if to_split in edge.get_nodes():
+                for edge in to_split.get_all_dangling():
+                    if edge.name == "u" + str(i) or edge.name == "d" + str(i):
                         left_edges.append(edge)
+                    else:
+                        right_edges.append(edge)
 
-            left, right, _ = tn.split_node(
-                to_split,
-                left_edges,
-                right_edges,
-                left_name=self.tensor_name + str(i),
-                max_singular_values=1,
-            )
-            nodes.append(left)
-            to_split = right
-        to_split.name = self.tensor_name + str(self.N - 1)
-        nodes.append(to_split)
+                if nodes:
+                    for edge in nodes[-1].get_all_nondangling():
+                        if to_split in edge.get_nodes():
+                            left_edges.append(edge)
 
-        self._nodes = nodes
+                left, right, _ = tn.split_node(
+                    to_split,
+                    left_edges,
+                    right_edges,
+                    left_name=self.tensor_name + str(i),
+                    # max_singular_values=1,
+                )
+                nodes.append(left)
+                to_split = right
+            to_split.name = self.tensor_name + str(self.N - 1)
+            nodes.append(to_split)
 
-    def add_single_qubit_gate(self, gate_matrix, idx):
-        if idx in range(1, self.N):
-            gate_matrix = gate_matrix.reshape(
-                self.physical_dim, 1, 1, self.physical_dim
-            )
+            self._nodes = nodes
+
         else:
-            gate_matrix = gate_matrix.reshape(self.physical_dim, 1, self.physical_dim)
+            if len(pauli_string) != self.N:
+                # pad pauli string
+                pauli_string += "I" * (self.N - len(pauli_string))
 
-        gate_node = tn.Node(
-            gate_matrix,
-            name=self.tensor_name + str(idx + 1),
-        )
+            nodes = self.get_mpo_nodes(False)
+            paulis = list(pauli_string)
 
-        self._nodes[idx] = gate_node
+            for i, (node, pauli) in enumerate(zip(nodes, paulis)):
+                pauli_gate = get_gate(pauli)
 
-    def two_qubit_svd(self, new_node, operating_qubits):
+                if i == 0 or i == self.N - 1:
+                    pauli_gate = pauli_gate.reshape(
+                        self.physical_dim, 1, self.physical_dim
+                    )
+                else:
+                    pauli_gate = pauli_gate.reshape(
+                        self.physical_dim, 1, 1, self.physical_dim
+                    )
+
+                node.set_tensor(pauli_gate)
+
+            self._nodes = nodes
+
+    def add_single_qubit_gate(self, gate, idx):
+        node = self._nodes[idx]
+        lst = list(node.get_all_dangling())
+        mps_index_edge = lst[0]
+        gate_edge = gate[1]
+        temp_node = tn.connect(mps_index_edge, gate_edge)
+        new_node = tn.contract(temp_node, name=self._nodes[idx].name)
+        self._nodes[idx] = new_node
+
+    def two_qubit_svd(
+        self, new_node, operating_qubits, left_gate_edge, right_gate_edge
+    ):
         left_connected_edge = None
         right_connected_edge = None
 
@@ -137,21 +164,13 @@ class MPOLayer:
         left_edges = []
         right_edges = []
 
-        # for edge in (left_gate_edge, left_connected_edge):
-        #     if edge != None:
-        #         left_edges.append(edge)
+        for edge in (*left_gate_edge, left_connected_edge):
+            if edge != None:
+                left_edges.append(edge)
 
-        # for edge in (right_gate_edge, right_connected_edge):
-        #     if edge != None:
-        #         right_edges.append(edge)
-
-        left_edges.append(new_node.get_all_dangling()[0])
-        left_edges.append(new_node.get_all_dangling()[2])
-        left_edges.append(left_connected_edge)
-
-        right_edges.append(new_node.get_all_dangling()[1])
-        right_edges.append(new_node.get_all_dangling()[3])
-        right_edges.append(right_connected_edge)
+        for edge in (*right_gate_edge, right_connected_edge):
+            if edge != None:
+                right_edges.append(edge)
 
         u, s, vdag, _ = tn.split_node_full_svd(
             new_node, left_edges=left_edges, right_edges=right_edges
@@ -182,11 +201,7 @@ class MPOLayer:
             |   |
             c   d
 
-            0  1
-            |  |
-            gate'
-            |  |
-            2  3
+
         """
         # transpose
         gateT = tn.Node(np.conj(gate.tensor))
@@ -199,31 +214,38 @@ class MPOLayer:
         temp_nodesA = tn.connect(mpo_indexA, gate.get_edge(2))
         temp_nodesB = tn.connect(mpo_indexB, gate.get_edge(3))
 
-        left_gate_edge = gate.get_edge(0)
-        right_gate_edge = gate.get_edge(1)
+        left_gate_edge = [gate.get_edge(0)]
+        right_gate_edge = [gate.get_edge(1)]
+
+        left_gate_edge.append(mpo_indexC)
+        right_gate_edge.append(mpo_indexD)
         # left_gate_edgeT = gateT.get_edge(2)
         # right_gate_edgeT = gateT.get_edge(3)
 
         new_node = tn.contract_between(
             self._nodes[operating_qubits[0]], self._nodes[operating_qubits[1]]
         )
+
+        x = self.get_mpo_node(operating_qubits[0], True).get_all_dangling()[1]
+        y = self.get_mpo_node(operating_qubits[1], True).get_all_dangling()[1]
+
         node_gate_edge = tn.flatten_edges_between(new_node, gate)
         new_node = tn.contract(node_gate_edge)
 
-        self.two_qubit_svd(new_node, operating_qubits)
+        self.two_qubit_svd(new_node, operating_qubits, left_gate_edge, right_gate_edge)
 
         # Try connecting edges of gate 2, 3
         # Check transposition of gate, try multiindexing gate
-        temp_nodesC = tn.connect(mpo_indexC, gateT.get_edge(0))
-        temp_nodesD = tn.connect(mpo_indexD, gateT.get_edge(1))
+        # temp_nodesC = tn.connect(mpo_indexC, gateT.get_edge(0))
+        # temp_nodesD = tn.connect(mpo_indexD, gateT.get_edge(1))
 
-        new_node = tn.contract_between(
-            self._nodes[operating_qubits[0]], self._nodes[operating_qubits[1]]
-        )
-        node_gate_edge = tn.flatten_edges_between(new_node, gateT)
-        new_node = tn.contract(node_gate_edge)
+        # new_node = tn.contract_between(
+        #     self._nodes[operating_qubits[0]], self._nodes[operating_qubits[1]]
+        # )
+        # node_gate_edge = tn.flatten_edges_between(new_node, gateT)
+        # new_node = tn.contract(node_gate_edge)
 
-        self.two_qubit_svd(new_node, operating_qubits)
+        # self.two_qubit_svd(new_node, operating_qubits)
 
     def mpo_mps_inner_prod(self, mps):
         mpo = self.get_mpo_nodes(False)
