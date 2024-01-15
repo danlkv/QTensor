@@ -253,6 +253,51 @@ def test_mpo_construction_from_pauli_string():
     assert condition, message
 
 
+def test_mpo_mps_inner_prod():
+    pauli_string = "IZI"
+    n = len(pauli_string)
+    mpo = MPOLayer("q", n, 2)
+    mpo.construct_mpo(pauli_string)
+
+    mps1 = MPS("q", n, 2)
+    inner_prod1 = mpo.mpo_mps_inner_prod(mps1)
+    condition1 = np.allclose(
+        inner_prod1,
+        np.complex128(1),
+        rtol=1e-05,
+        atol=1e-08,
+    )
+
+    mps2 = MPS("q", n, 2)
+    mps2.apply_single_qubit_gate(xgate(), 1)
+    inner_prod2 = mpo.mpo_mps_inner_prod(mps2)
+
+    condition2 = np.allclose(
+        inner_prod2,
+        np.complex128(-1),
+        rtol=1e-05,
+        atol=1e-08,
+    )
+
+    message = "MPO inner product gives error"
+
+    assert condition1 and condition2, message
+
+
+# test conjugate gate
+def test_mpo_gate_conjugate():
+    pauli_string = "IZI"
+    n = len(pauli_string)
+    mpo = MPOLayer("q", n, 2)
+    mpo.construct_mpo(pauli_string)
+    mpo.add_two_qubit_gate(cnot(), [0, 1])
+    mpo.add_two_qubit_gate(cnot(), [0, 1], True)
+
+    mps = MPS("q", 3, 2)
+
+    print(mpo.mpo_mps_inner_prod(mps))
+
+
 # def test_mpo_construction_from_two_qubit_gate_function():
 #     I = np.eye(2)
 #     CNOT = np.array(
@@ -299,3 +344,4 @@ def test_mpo_construction_from_pauli_string():
 # Initilisation given as pauli string and give mpo
 # Test for CNOT - Pauli then apply cnot + decompose cnot
 # expectation of an MPO - <psi| MPO | psi > psi = MPS (for this |psi | G1G2 X G2'G1' | psi>)
+test_mpo_gate_conjugate()

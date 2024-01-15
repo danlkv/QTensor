@@ -133,12 +133,43 @@ class MPOLayer:
 
             self._nodes = nodes
 
-    def add_single_qubit_gate(self, gate, idx):
+    def add_single_qubit_gate(self, gate, idx, conjugate=False):
+        """
+         0
+         |
+        gate
+         |
+         1
+
+         0
+         |
+        MPS
+         |
+         1
+
+         0
+         |
+        MPS
+         |
+         1
+
+         0
+         |
+        gate'
+         |
+         1
+        """
         node = self._nodes[idx]
         lst = list(node.get_all_dangling())
-        mps_index_edge = lst[0]
-        gate_edge = gate[1]
-        temp_node = tn.connect(mps_index_edge, gate_edge)
+        if not conjugate:
+            mpo_index_edge = lst[1]
+            gateT = tn.Node(np.conj(gate.tensor))
+            gate_edge = gateT[1]
+        else:
+            mpo_index_edge = lst[0]
+            gate_edge = gate[0]
+
+        temp_node = tn.connect(mpo_index_edge, gate_edge)
         new_node = tn.contract(temp_node, name=self._nodes[idx].name)
         self._nodes[idx] = new_node
 
@@ -185,7 +216,7 @@ class MPOLayer:
         self._nodes[operating_qubits[0]] = new_left
         self._nodes[operating_qubits[1]] = new_right
 
-    def add_two_qubit_gate(self, gate, operating_qubits):
+    def add_two_qubit_gate(self, gate, operating_qubits, conjugate=False):
         """
         Method to apply two qubit gates on mpo
 
@@ -202,50 +233,67 @@ class MPOLayer:
             c   d
 
 
-        """
-        # transpose
-        gateT = tn.Node(np.conj(gate.tensor))
+            a   b
+            |   |
+             MPO
+            |   |
+            c   d
 
+            0  1
+            |  |
+            gate'
+            |  |
+            2  3
+
+
+        """
         mpo_indexA = self.get_mpo_node(operating_qubits[0], True).get_all_dangling()[0]
         mpo_indexB = self.get_mpo_node(operating_qubits[1], True).get_all_dangling()[0]
         mpo_indexC = self.get_mpo_node(operating_qubits[0], True).get_all_dangling()[1]
         mpo_indexD = self.get_mpo_node(operating_qubits[1], True).get_all_dangling()[1]
 
-        temp_nodesA = tn.connect(mpo_indexA, gate.get_edge(2))
-        temp_nodesB = tn.connect(mpo_indexB, gate.get_edge(3))
+        if conjugate:
+            # transpose
+            gateT = tn.Node(np.conj(gate.tensor))
+            temp_nodesA = tn.connect(mpo_indexC, gateT.get_edge(0))
+            temp_nodesB = tn.connect(mpo_indexD, gateT.get_edge(1))
+            left_gate_edge = [gateT.get_edge(2)]
+            right_gate_edge = [gateT.get_edge(3)]
 
-        left_gate_edge = [gate.get_edge(0)]
-        right_gate_edge = [gate.get_edge(1)]
+            left_gate_edge.append(mpo_indexA)
+            right_gate_edge.append(mpo_indexB)
 
-        left_gate_edge.append(mpo_indexC)
-        right_gate_edge.append(mpo_indexD)
-        # left_gate_edgeT = gateT.get_edge(2)
-        # right_gate_edgeT = gateT.get_edge(3)
+            new_node = tn.contract_between(
+                self._nodes[operating_qubits[0]], self._nodes[operating_qubits[1]]
+            )
 
-        new_node = tn.contract_between(
-            self._nodes[operating_qubits[0]], self._nodes[operating_qubits[1]]
-        )
+            node_gate_edge = tn.flatten_edges_between(new_node, gateT)
+            new_node = tn.contract(node_gate_edge)
 
-        x = self.get_mpo_node(operating_qubits[0], True).get_all_dangling()[1]
-        y = self.get_mpo_node(operating_qubits[1], True).get_all_dangling()[1]
+            self.two_qubit_svd(
+                new_node, operating_qubits, left_gate_edge, right_gate_edge
+            )
 
-        node_gate_edge = tn.flatten_edges_between(new_node, gate)
-        new_node = tn.contract(node_gate_edge)
+        else:
+            _ = tn.connect(mpo_indexA, gate.get_edge(2))
+            _ = tn.connect(mpo_indexB, gate.get_edge(3))
 
-        self.two_qubit_svd(new_node, operating_qubits, left_gate_edge, right_gate_edge)
+            left_gate_edge = [gate.get_edge(0)]
+            right_gate_edge = [gate.get_edge(1)]
 
-        # Try connecting edges of gate 2, 3
-        # Check transposition of gate, try multiindexing gate
-        # temp_nodesC = tn.connect(mpo_indexC, gateT.get_edge(0))
-        # temp_nodesD = tn.connect(mpo_indexD, gateT.get_edge(1))
+            left_gate_edge.append(mpo_indexC)
+            right_gate_edge.append(mpo_indexD)
 
-        # new_node = tn.contract_between(
-        #     self._nodes[operating_qubits[0]], self._nodes[operating_qubits[1]]
-        # )
-        # node_gate_edge = tn.flatten_edges_between(new_node, gateT)
-        # new_node = tn.contract(node_gate_edge)
+            new_node = tn.contract_between(
+                self._nodes[operating_qubits[0]], self._nodes[operating_qubits[1]]
+            )
 
-        # self.two_qubit_svd(new_node, operating_qubits)
+            node_gate_edge = tn.flatten_edges_between(new_node, gate)
+            new_node = tn.contract(node_gate_edge)
+
+            self.two_qubit_svd(
+                new_node, operating_qubits, left_gate_edge, right_gate_edge
+            )
 
     def mpo_mps_inner_prod(self, mps):
         mpo = self.get_mpo_nodes(False)
