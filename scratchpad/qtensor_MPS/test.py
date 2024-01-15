@@ -260,6 +260,8 @@ def test_mpo_mps_inner_prod():
     mpo.construct_mpo(pauli_string)
 
     mps1 = MPS("q", n, 2)
+    # mps1.apply_single_qubit_gate(xgate(), 1)
+
     inner_prod1 = mpo.mpo_mps_inner_prod(mps1)
     condition1 = np.allclose(
         inner_prod1,
@@ -296,52 +298,14 @@ def test_mpo_gate_conjugate():
     mps = MPS("q", 3, 2)
 
     print(mpo.mpo_mps_inner_prod(mps))
-
-
-# def test_mpo_construction_from_two_qubit_gate_function():
-#     I = np.eye(2)
-#     CNOT = np.array(
-#         [
-#             [1.0, 0.0, 0.0, 0.0],
-#             [0.0, 1.0, 0.0, 0.0],
-#             [0.0, 0.0, 0.0, 1.0],
-#             [0.0, 0.0, 1.0, 0.0],
-#         ]
-#     )
-
-#     mps2 = MPS("q", 2, 2)
-#     mps2.apply_single_qubit_gate(xgate(), 0)
-#     mps2.apply_two_qubit_gate(cnot(), [0, 1])
-#     print("INITIAL MPS", mps2.get_wavefunction())
-
-#     gate_func = CNOT
-#     mpo = MPOLayer("q", 2, 2)
-#     mpo.construct_mpo(gate_func)
-#     mps = MPS("q", 2, 2)
-#     mps.apply_single_qubit_gate(xgate(), 0)
-#     mps.apply_mpo_layer(mpo)
-#     print("FINAL MPS", mps.get_wavefunction())
-
-#     condition = np.allclose(
-#         np.array(mps.get_wavefunction()),
-#         np.array(mps2.get_wavefunction()),
-#         rtol=1e-05,
-#         atol=1e-08,
-#     )
-#     message = "Arrays are not equal within tolerance"
-
-#     # assert condition, message
+    # Add assert statement
 
 
 # TODO:
-# Verify for two qubit gates. - (SVD and then apply it) (apply and then SVD)
-# Evolve half of circuit in mps and half in mpo.
-# Evaluate Bell state, epectation value of X at a particular index
-# Evaluate X, Y, Z observable
-# Check for one/two/three qubits (cover edge cases) for both mps/mpo
-# test_mpo_construction_from_pauli_string()
-# test_mpo_two_qubit_gate()
+
 # Initilisation given as pauli string and give mpo
 # Test for CNOT - Pauli then apply cnot + decompose cnot
 # expectation of an MPO - <psi| MPO | psi > psi = MPS (for this |psi | G1G2 X G2'G1' | psi>)
+
+# write vector of mps kronector of IZI ||
 test_mpo_gate_conjugate()
