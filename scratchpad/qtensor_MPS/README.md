@@ -20,7 +20,7 @@ If real part of magnetization is ploted
 ## Case1: Wavefunction as zero
 
 
-for fast transition `dt = 25/20` , `N=5` and `[0, 1, 20]`
+For fast transition `dt = 25/20` , `N=5` and `[0, 1, 20]`
 
 With only both single qubit and two qubit gates
 
@@ -36,7 +36,7 @@ With only single qubit gates
   <img src="./img/mps_magnetisation_all0_fast_transition2.png" alt="Second Image" width="400" />
 </p>
 
-for slow transition `dt = 5/20` , `N=5` and `[0, 1, 20]`
+For slow transition `dt = 5/20` , `N=5` and `[0, 1, 20]`
 
 With only single gates
 
