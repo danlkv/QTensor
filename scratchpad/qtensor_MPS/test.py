@@ -44,15 +44,16 @@ def test_apply_one_qubit_mps_operation_xgate():
 def test_apply_twoq_cnot_two_qubits():
     # In the following tests, the first qubit is always the control qubit.
     # Check that CNOT|10> = |11>
-    mps = MPS("q", 4, 2)
+    mps = MPS("q", 2, 2)
     assert np.isclose(mps.get_norm(), 1.0)
 
-    # mps.apply_single_qubit_gate(xgate(), 0)
-    mps.apply_two_qubit_gate(cnot(), [1, 2])
-    # assert np.isclose(mps.get_norm(), 1.0)
-    # assert np.allclose(
-    #     mps.get_wavefunction(), np.array([0.0, 0.0, 0.0, 1.0], dtype=np.complex64)
-    # )
+    mps.apply_single_qubit_gate(xgate(), 0)
+    mps.apply_two_qubit_gate(cnot(), [0, 1])
+    print(mps.get_wavefunction())
+    assert np.isclose(mps.get_norm(), 1.0)
+    assert np.allclose(
+        mps.get_wavefunction(), np.array([0.0, 0.0, 0.0, 1.0], dtype=np.complex64)
+    )
 
 
 def test_apply_two_twoq_cnot_two_qubits():
@@ -168,16 +169,6 @@ def test_mps_mpo():
             assert np.isclose(allmps[i].inner_product(allmps[j]), i == j)
 
 
-def test_mpo_two_qubit():
-    mpo_layer = MPOLayer("q", 4, 2)
-    # print("BEFORE")
-    # print(mpo_layer._nodes)
-    mpo_layer.add_two_qubit_gate(cnot(), [1, 2])
-    print("AFTER")
-    print(mpo_layer._nodes)
-    # assert (mps1.get_wavefunction() == mps2.get_wavefunction()).all()
-
-
 def test_mpo_single_qubit_gate():
     mps1 = MPS("q", 2, 2)
     mps1.apply_single_qubit_gate(xgate(), 0)
@@ -260,7 +251,6 @@ def test_mpo_mps_inner_prod():
     mpo.construct_mpo(pauli_string)
 
     mps1 = MPS("q", n, 2)
-    # mps1.apply_single_qubit_gate(xgate(), 1)
 
     inner_prod1 = mpo.mpo_mps_inner_prod(mps1)
     condition1 = np.allclose(
