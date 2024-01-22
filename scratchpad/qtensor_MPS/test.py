@@ -309,6 +309,23 @@ def test_mpo_gate_conjugate():
         atol=1e-08,
     )
 
+    pauli_string = "IZZ"
+    n = len(pauli_string)
+    mpo = MPOLayer("q", n, 2)
+    mpo.construct_mpo(pauli_string)
+
+    mps = MPS("q", 3, 2)
+    mps.apply_single_qubit_gate(xgate(), 1)
+
+    inner_prod1 = mpo.mpo_mps_inner_prod(mps)
+
+    condition3 = np.allclose(
+        inner_prod1,
+        np.complex128(-1),
+        rtol=1e-05,
+        atol=1e-08,
+    )
+
     message = "MPO inner product gives error"
 
-    assert condition1 and condition2, message
+    assert condition1 and condition2 and condition3, message
