@@ -38,7 +38,7 @@ def hgate() -> tn.Node:
 def sigmaRx(t) -> tn.Node:
     _hbar = 1.0545718 * 10e-34
     # theta =  -1j * t * 0.5 * _hbar * 0.5
-    theta = 0.1 * t
+    theta = t
 
     gate_matrix = np.array(
         [
@@ -54,7 +54,7 @@ def sigmaRzz(t) -> tn.Node:
     _hbar = 1.0545718 * 10e-34
     # theta =  -1j * t * 0.5 * _hbar * 0.5 * _hbar * 0.5
     # J = 0.1Hz
-    theta = -1j * 0.7 * t
+    theta = 1j * t
 
     gate_matrix = np.array(
         [

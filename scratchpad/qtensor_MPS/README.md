@@ -36,7 +36,7 @@ With only single qubit gates
   <img src="./img/mps_magnetisation_all0_fast_transition2.png" alt="Second Image" width="400" />
 </p>
 
-For slow transition `dt = 5/20` , `N=5` and `[0, 1, 20]`
+For slow transition `dt = 5/20` , `N=5` and `[0, 1, 100]`
 
 With only single gates
 

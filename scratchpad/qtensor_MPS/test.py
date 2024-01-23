@@ -3,7 +3,6 @@ from gates import xgate, cnot, hgate, zgate, igate
 from mps import MPS
 from mpo import MPO, MPOLayer
 import tensornetwork as tn
-from constants import xmatrix, cnot_matrix
 
 
 def test_from_wavefunction_all_zero_state():
@@ -172,13 +171,13 @@ def test_mps_mpo():
 def test_mpo_single_qubit_gate():
     mps1 = MPS("q", 2, 2)
     mps1.apply_single_qubit_gate(xgate(), 0)
-    print("MPS with gate", mps1.get_wavefunction())
+    assert np.isclose(mps1.get_norm(), 1.0)
 
     mpo = MPOLayer("q", 2, 2)
     mpo.add_single_qubit_gate(xgate(), 0)
     mps2 = MPS("q", 2, 2)
     mps2.apply_mpo_layer(mpo)
-    print("MPS with MPO", mps2.get_wavefunction())
+    assert np.isclose(mps2.get_norm(), 1.0)
 
     condition = np.allclose(
         np.array(mps1.get_wavefunction()),
@@ -186,7 +185,7 @@ def test_mpo_single_qubit_gate():
         rtol=1e-05,
         atol=1e-08,
     )
-    message = "Arrays are not equal within tolerance"
+    message = "MPO single qubit gate error"
 
     assert condition, message
 
@@ -195,6 +194,7 @@ def test_mpo_two_qubit_gate():
     mps1 = MPS("q", 2, 2)
     mps1.apply_single_qubit_gate(xgate(), 1)
     mps1.apply_two_qubit_gate(cnot(), [0, 1])
+    assert np.isclose(mps1.get_norm(), 1.0)
 
     mpo = MPOLayer("q", 2, 2)
     mpo.add_single_qubit_gate(xgate(), 1)
@@ -202,6 +202,7 @@ def test_mpo_two_qubit_gate():
     mps2 = MPS("q", 2, 2)
 
     mps2.apply_mpo_layer(mpo)
+    assert np.isclose(mps2.get_norm(), 1.0)
 
     condition = np.allclose(
         np.array(mps1.get_wavefunction()),
@@ -230,7 +231,8 @@ def test_mpo_construction_from_pauli_string():
 
     mps2 = MPS("q", n, 2)
     mps2.apply_mpo_layer(mpo)
-
+    assert np.isclose(mps2.get_norm(), 1.0)
+    assert np.isclose(mps1.get_norm(), 1.0)
     condition = np.allclose(
         np.array(mps1.get_wavefunction()),
         np.array(mps2.get_wavefunction()),
@@ -329,3 +331,55 @@ def test_mpo_gate_conjugate():
     message = "MPO inner product gives error"
 
     assert condition1 and condition2 and condition3, message
+
+
+def test_evolution():
+    n = 3
+    mps1 = MPS("q", n, 2)
+    mps1.apply_single_qubit_gate(xgate(), 1)
+    expectation1 = []
+    for i in range(n):
+        expectation1 += [mps1.get_expectation(zgate(), i)]
+
+    condition1 = np.allclose(
+        expectation1,
+        np.array([(1 + 0j), (-1 + 0j), (1 + 0j)]),
+        rtol=1e-05,
+        atol=1e-08,
+    )
+
+    mps2 = MPS("q", n, 2)
+    expectation2 = []
+    for i in range(n):
+        mpo = MPOLayer("q", n, 2)
+        mpo.add_single_qubit_gate(zgate(), i)
+        mpo.add_single_qubit_gate(xgate(), 1)
+        mpo.add_single_qubit_gate(xgate(), 1, True)
+        expectation2 += [mpo.mpo_mps_inner_prod(mps2)]
+
+    condition2 = np.allclose(
+        expectation2,
+        np.array([(1 + 0j), (-1 + 0j), (1 + 0j)]),
+        rtol=1e-05,
+        atol=1e-08,
+    )
+
+    message = "MPS and MPO evolution do not match"
+
+    assert condition1 and condition2, message
+
+
+# TODO:
+
+# Initilisation given as pauli string and give mpo
+# Test for CNOT - Pauli then apply cnot + decompose cnot
+# expectation of an MPO - <psi| MPO | psi > psi = MPS (for this |psi | G1G2 X G2'G1' | psi>)
+
+# write vector of mps kronector of IZI ||
+
+# Write formatting, clean code, comments, readme (plots compairing results from mps and mpo)
+test_evolution()
+
+# Inital state - mps apply evolution to state MPS + X -> MPS' -> <MPS' MPO MPS'> = -1
+# Take mpo apply evolution to mpo and (single gate), MPS 0 state, create a MPO (IZI) with X state <MPS MPO' MPS> = -1
+# Here MPO' is IZI with X gate and X conj gate
