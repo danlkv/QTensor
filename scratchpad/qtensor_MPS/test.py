@@ -48,7 +48,6 @@ def test_apply_twoq_cnot_two_qubits():
 
     mps.apply_single_qubit_gate(xgate(), 0)
     mps.apply_two_qubit_gate(cnot(), [0, 1])
-    print(mps.get_wavefunction())
     assert np.isclose(mps.get_norm(), 1.0)
     assert np.allclose(
         mps.get_wavefunction(), np.array([0.0, 0.0, 0.0, 1.0], dtype=np.complex64)
@@ -179,6 +178,12 @@ def test_mpo_single_qubit_gate():
     mps2.apply_mpo_layer(mpo)
     assert np.isclose(mps2.get_norm(), 1.0)
 
+    mpo = MPOLayer("q", 2, 2)
+    mpo.add_single_qubit_gate(xgate(), 0)
+    mps3 = MPS("q", 2, 2)
+    mpo.mpo_mps_inner_prod2(mps3)
+    assert np.isclose(mps2.get_norm(), 1.0)
+
     condition = np.allclose(
         np.array(mps1.get_wavefunction()),
         np.array(mps2.get_wavefunction()),
@@ -191,15 +196,17 @@ def test_mpo_single_qubit_gate():
 
 
 def test_mpo_two_qubit_gate():
-    mps1 = MPS("q", 2, 2)
+    mps1 = MPS("q", 3, 2)
     mps1.apply_single_qubit_gate(xgate(), 1)
-    mps1.apply_two_qubit_gate(cnot(), [0, 1])
+    mps1.apply_two_qubit_gate(cnot(), [1, 2])
+    mps1.apply_two_qubit_gate(cnot(), [1, 2])
     assert np.isclose(mps1.get_norm(), 1.0)
 
-    mpo = MPOLayer("q", 2, 2)
+    mpo = MPOLayer("q", 3, 2)
     mpo.add_single_qubit_gate(xgate(), 1)
-    mpo.add_two_qubit_gate(cnot(), [0, 1])
-    mps2 = MPS("q", 2, 2)
+    mpo.add_two_qubit_gate(cnot(), [1, 2])
+    mpo.add_two_qubit_gate(cnot(), [1, 2])
+    mps2 = MPS("q", 3, 2)
 
     mps2.apply_mpo_layer(mpo)
     assert np.isclose(mps2.get_norm(), 1.0)
@@ -254,7 +261,7 @@ def test_mpo_mps_inner_prod():
 
     mps1 = MPS("q", n, 2)
 
-    inner_prod1 = mpo.mpo_mps_inner_prod(mps1)
+    inner_prod1 = mpo.mpo_mps_inner_prod2(mps1)
     condition1 = np.allclose(
         inner_prod1,
         np.complex128(1),
@@ -264,7 +271,7 @@ def test_mpo_mps_inner_prod():
 
     mps2 = MPS("q", n, 2)
     mps2.apply_single_qubit_gate(xgate(), 1)
-    inner_prod2 = mpo.mpo_mps_inner_prod(mps2)
+    inner_prod2 = mpo.mpo_mps_inner_prod2(mps2)
 
     condition2 = np.allclose(
         inner_prod2,
@@ -333,7 +340,7 @@ def test_mpo_gate_conjugate():
     assert condition1 and condition2 and condition3, message
 
 
-def test_evolution():
+def test_mpo_expectation_with_single_qubit_gates():
     n = 3
     mps1 = MPS("q", n, 2)
     mps1.apply_single_qubit_gate(xgate(), 1)
@@ -369,6 +376,44 @@ def test_evolution():
     assert condition1 and condition2, message
 
 
+def test_mpo_expectation_with_two_qubit_gates():
+    n = 3
+    mps1 = MPS("q", n, 2)
+    mps1.apply_single_qubit_gate(xgate(), 1)
+
+    mps1.apply_two_qubit_gate(cnot(), [1, 2])
+    expectation1 = []
+    for i in range(n):
+        expectation1 += [mps1.get_expectation(zgate(), i)]
+
+    condition1 = np.allclose(
+        expectation1,
+        np.array([(1 + 0j), (-1 + 0j), (-1 + 0j)]),
+        rtol=1e-05,
+        atol=1e-08,
+    )
+    mps2 = MPS("q", n, 2)
+    mps2.apply_single_qubit_gate(xgate(), 1)
+    expectation2 = []
+
+    mpo = MPOLayer("q", n, 2)
+    mpo.apply_two_qubit_operator(cnot(), [1, 2])
+    for i in range(n):
+        mpo.add_single_qubit_gate(zgate(), i)
+        expectation2 += [mpo.mpo_mps_inner_prod(mps2, True)]
+
+    condition2 = np.allclose(
+        expectation2,
+        expectation1,
+        rtol=1e-05,
+        atol=1e-08,
+    )
+
+    message = "MPS and MPO evolution do not match"
+
+    assert condition1 and condition2, message
+
+
 # TODO:
 
 # Initilisation given as pauli string and give mpo
@@ -378,8 +423,7 @@ def test_evolution():
 # write vector of mps kronector of IZI ||
 
 # Write formatting, clean code, comments, readme (plots compairing results from mps and mpo)
-test_evolution()
-
+test_mpo_expectation_with_two_qubit_gates()
 # Inital state - mps apply evolution to state MPS + X -> MPS' -> <MPS' MPO MPS'> = -1
 # Take mpo apply evolution to mpo and (single gate), MPS 0 state, create a MPO (IZI) with X state <MPS MPO' MPS> = -1
 # Here MPO' is IZI with X gate and X conj gate

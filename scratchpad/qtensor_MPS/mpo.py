@@ -4,6 +4,7 @@ from gates import igate, get_gate, xgate
 from constants import pauli_matrices, xmatrix
 from typing import List, Union, Text, Optional, Any, Type
 from copy import deepcopy
+import gc
 
 
 class MPOLayer:
@@ -203,12 +204,12 @@ class MPOLayer:
             if edge != None:
                 right_edges.append(edge)
 
-        u, s, vdag, _ = tn.split_node_full_svd(
+        left, right, _ = tn.split_node(
             new_node, left_edges=left_edges, right_edges=right_edges
         )
 
-        new_left = u
-        new_right = tn.contract_between(s, vdag)
+        new_left = left
+        new_right = right
 
         new_left.name = self._nodes[operating_qubits[0]].name
         new_right.name = self._nodes[operating_qubits[1]].name
@@ -295,36 +296,93 @@ class MPOLayer:
                 new_node, operating_qubits, left_gate_edge, right_gate_edge
             )
 
-    def mpo_mps_inner_prod(self, mps):
-        mpo = self.get_mpo_nodes(False)
+    def apply_two_qubit_operator(self, gate, operating_qubits):
+        mpo_indexA = self.get_mpo_node(operating_qubits[0], True).get_all_dangling()[0]
+        mpo_indexB = self.get_mpo_node(operating_qubits[1], True).get_all_dangling()[0]
+        mpo_indexC = self.get_mpo_node(operating_qubits[0], True).get_all_dangling()[1]
+        mpo_indexD = self.get_mpo_node(operating_qubits[1], True).get_all_dangling()[1]
 
-        mps_original = mps.__copy__()
-        mps_original = mps_original.get_mps_nodes(False)
+        gateT = tn.Node(np.conj(gate.tensor))
 
-        mps = mps.get_mps_nodes(False)
+        _ = tn.connect(mpo_indexA, gate.get_edge(2))
+        _ = tn.connect(mpo_indexB, gate.get_edge(3))
+        _ = tn.connect(mpo_indexC, gateT.get_edge(0))
+        _ = tn.connect(mpo_indexD, gateT.get_edge(1))
 
-        for wNode in mps:
-            wNode.set_tensor(np.conj(wNode.tensor))
+        left_gate_edge = [gateT.get_edge(2), gate.get_edge(0)]
+        right_gate_edge = [gateT.get_edge(3), gate.get_edge(1)]
 
-        for i in range(self.N):
-            tn.connect(mpo[i].get_all_dangling()[0], mps[i].get_all_dangling()[0])
-            tn.connect(
-                mpo[i].get_all_dangling()[0], mps_original[i].get_all_dangling()[0]
-            )
+        # left_gate_edge.append(mpo_indexA)
+        # left_gate_edge.append(mpo_indexC)
+        # right_gate_edge.append(mpo_indexB)
+        # right_gate_edge.append(mpo_indexD)
 
-        for i in range(self.N - 1):
-            TW_i = tn.contract_between(mpo[i], mps[i])
-            TW_i = tn.contract_between(TW_i, mps_original[i])
-
-            new_node = tn.contract_between(TW_i, mpo[i + 1])
-            mpo[i + 1] = new_node
-
-        end_node = tn.contract_between(
-            tn.contract_between(mpo[-1], mps[-1]), mps_original[-1]
+        new_node = tn.contract_between(
+            self._nodes[operating_qubits[0]], self._nodes[operating_qubits[1]]
         )
 
-        inner_prod = np.complex128(end_node.tensor)
-        return inner_prod
+        node_gate_edge = tn.flatten_edges_between(new_node, gateT)
+        new_node = tn.contract(node_gate_edge)
+
+        node_gate_edge = tn.flatten_edges_between(new_node, gate)
+        new_node = tn.contract(node_gate_edge)
+
+        self.two_qubit_svd(new_node, operating_qubits, left_gate_edge, right_gate_edge)
+
+    def mpo_mps_inner_prod(self, mps, modify_mps=False):
+        if modify_mps:
+            mpo = self.get_mpo_nodes(False)
+
+            mps_original = mps.__copy__()
+
+            mps_nodes = mps.get_mps_nodes(False)
+
+            for i in range(self.N):
+                tn.connect(
+                    mpo[i].get_all_dangling()[1], mps_nodes[i].get_all_dangling()[0]
+                )
+
+            nodes = []
+            for i in range(self.N):
+                new_node = tn.contract_between(mpo[i], mps_nodes[i])
+                nodes.append(new_node)
+
+            for i in range(self.N - 1):
+                _ = tn.flatten_edges_between(nodes[i], nodes[i + 1])
+
+            mps._nodes = nodes
+            inner_prod = mps.inner_product(mps_original)
+            return inner_prod
+        else:
+            mpo = self.get_mpo_nodes(False)
+
+            mps_original = mps.__copy__()
+            mps_original = mps_original.get_mps_nodes(False)
+
+            mps = mps.get_mps_nodes(False)
+
+            for wNode in mps:
+                wNode.set_tensor(np.conj(wNode.tensor))
+
+            for i in range(self.N):
+                tn.connect(mpo[i].get_all_dangling()[0], mps[i].get_all_dangling()[0])
+                tn.connect(
+                    mpo[i].get_all_dangling()[0], mps_original[i].get_all_dangling()[0]
+                )
+
+            for i in range(self.N - 1):
+                TW_i = tn.contract_between(mpo[i], mps[i])
+                TW_i = tn.contract_between(TW_i, mps_original[i])
+
+                new_node = tn.contract_between(TW_i, mpo[i + 1])
+                mpo[i + 1] = new_node
+
+            end_node = tn.contract_between(
+                tn.contract_between(mpo[-1], mps[-1]), mps_original[-1]
+            )
+
+            inner_prod = np.complex128(end_node.tensor)
+            return inner_prod
 
 
 class MPO:
