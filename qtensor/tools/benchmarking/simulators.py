@@ -162,12 +162,13 @@ class QtensorSimulator(BenchSimulator):
         opt_time = 0
         ests = []
         opts = []
+        times = []
         for edge in self.iterate_edges(G, p):
             with profiles.timing() as t:
                 circuit = sim._edge_energy_circuit(G, gamma, beta, edge)
                 tn = qtensor.optimisation.TensorNet.QtreeTensorNet.from_qtree_gates(circuit)
                 peo, _ = opt.optimize(tn)
-            opt_time += t.result
+            times.append(t.result)
             mems, flops = tn.simulation_cost(peo)
             ests.append(ContractionEstimation(
                 width=opt.treewidth,
@@ -175,7 +176,7 @@ class QtensorSimulator(BenchSimulator):
                 flops=sum(flops)
             ))
             opts.append(peo)
-        return opts, ests, opt_time
+        return opts, ests, times
 
     def simulate_qaoa_energy(self, G, p, opt):
         gamma, beta = get_test_gamma_beta(p)
@@ -437,7 +438,7 @@ class QuimbSimulator(BenchSimulator):
             infos.append((rehs['info'], rehs['tn']))
             ests.append(self._rehs2est(rehs))
 
-        return infos, ests, sum(times)
+        return infos, ests, times
 
 
     def simulate_qaoa_energy(self, G, p, opts,
