@@ -116,11 +116,14 @@ def update_index(index_file, **kwargs):
 from src.simulators.qtensor import preprocess as qtensor_preprocess
 from src.simulators.qtensor import estimate as qtensor_estimate
 from src.simulators.qtensor import simulate as qtensor_simulate
+from src.simulators.qtensor_energy import simulate as qtensor_simulate_energy
+from src.simulators.qtensor_energy import preprocess as qtensor_preprocess_energy
 from src.circuit_gen.qaoa import generate_maxcut
 
 # -- Main
 sim_preprocessors = {
-    'qtensor': qtensor_preprocess
+    'qtensor': qtensor_preprocess,
+    'qtensor_energy': qtensor_preprocess_energy
 }
 
 sim_estimators = {
@@ -128,7 +131,8 @@ sim_estimators = {
 }
 
 sim_simulators = {
-    'qtensor': qtensor_simulate
+    'qtensor': qtensor_simulate,
+    'qtensor_energy': qtensor_simulate_energy
 }
 
 circ_generators = {

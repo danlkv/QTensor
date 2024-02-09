@@ -258,8 +258,8 @@ class SlicesOptimizer(Optimizer):
     def get_ordering_ints(self, graph, inplace=True):
         p_graph = copy.deepcopy(graph)
         max_tw = self._get_max_tw()
-        log.info('Maximum treewidth: {}', max_tw)
         max_tw = max_tw - self.tw_bias
+        log.info('Maximum treewidth: {}', max_tw)
 
         self.peo_ints, path = self.base_ordering.get_ordering_ints(p_graph)
         self.treewidth = max(path)
@@ -318,7 +318,7 @@ class TreeTrimSplitter(SlicesOptimizer):
         peo_ints = self.peo_ints
         tw = self.treewidth
         self._slice_hist = []
-        self._slice_hist.append([0, tw])
+        self._slice_hist.append([0, tw, peo_ints])
         log.info('Treewidth: {}', tw)
         log.info('Target treewidth: {}', max_tw)
         result = []
@@ -354,7 +354,7 @@ class TreeTrimSplitter(SlicesOptimizer):
 
             peo_ints, path = self._update_peo_after_slice(p_graph, result)
             tw = max(path)
-            self._slice_hist.append([pv_cnt, tw])
+            self._slice_hist.append([pv_cnt, tw, peo_ints])
             delta = tw - max_tw
 
         return peo_ints, result

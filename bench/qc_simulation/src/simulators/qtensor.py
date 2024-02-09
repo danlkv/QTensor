@@ -128,7 +128,7 @@ def preprocess(in_file, out_file, O='greedy', S=None, M=30, after_slice='run-aga
     write_preps(prep_data, out_file)
 
 
-def estimate(in_file, out_file, C=100, M=30, F=1e12, T=1e9, **kwargs):
+def estimate(in_file, out_file, C=100, M=30, F=1e12, T=1e9, S=0, **kwargs):
     """
     Arguments:
         in_file: file with preprocessed data
@@ -137,12 +137,17 @@ def estimate(in_file, out_file, C=100, M=30, F=1e12, T=1e9, **kwargs):
         M: Memory limit in log2(b/16)
         F: assumed FLOPS 
         T: Throughput of compression
+        S: Offset of slice variables. If S=0, full slicing is used. If S=n last
+           n par_vars are omitted
     """
     from qtensor.compression.cost_estimation import compressed_contraction_cost, Cost
     from dataclasses import asdict
     import json
     prep_data = read_preps(in_file)
     peo, par_vars, tn = prep_data
+    if S > 0:
+        par_vars = par_vars[:-S]
+        print("Offset par_vars", par_vars)
 
     tn.slice({i: slice(0, 1) for i in par_vars})
     peo = peo[:len(peo) - len(par_vars)]
@@ -162,6 +167,7 @@ def simulate(in_file, out_file,
              compress=None,
              M=29,
              r2r_error=1e-3, r2r_threshold=1e-3,
+             mpi=False,
              **kwargs):
     """
     Args:
@@ -175,13 +181,14 @@ def simulate(in_file, out_file,
     """
     import time
     from qtensor.contraction_algos import bucket_elimination
-    from qtensor.compression.Compressor import CUSZCompressor, CUSZXCompressor, TorchCompressor, NEWSZCompressor, CUSZPCompressor
+    from qtensor.compression.Compressor import CUSZCompressor, CUSZXCompressor, TorchCompressor, NEWSZCompressor
     from qtensor.compression.Compressor import WriteToDiskCompressor
     import cupy
     cupy.cuda.profiler.start()
     prep_data = read_preps(in_file)
     peo, par_vars, tn = prep_data
     
+    # -- Prepare backend
     backend = qtensor.contraction_backends.get_backend(backend)
     if compress is not None:
         if compress == 'szx':
@@ -199,13 +206,13 @@ def simulate(in_file, out_file,
         elif compress == 'newsz':
             print(f"{r2r_error=} {r2r_threshold=}")
             compressor = NEWSZCompressor(r2r_error=r2r_error, r2r_threshold=r2r_threshold)
-            compressor = qtensor.compression.ProfileCompressor(compressor)
-        elif compress == 'disk':
-            compressor = WriteToDiskCompressor(f'/grand/QTensor/compression/data/tensors_compressed_M{M}/')
-            compressor = qtensor.compression.ProfileCompressor(compressor)
+            compressor = qtensor.compression.ProfileCompressor(compressor) 
         elif compress == "cuszp":
             print(f"{r2r_error=} {r2r_threshold=}")
             compressor = CUSZPCompressor(r2r_error=r2r_error, r2r_threshold=r2r_threshold)
+            compressor = qtensor.compression.ProfileCompressor(compressor)
+        elif compress == 'disk':
+            compressor = WriteToDiskCompressor(f'/grand/QTensor/compression/data/tensors_compressed_M{M}/')
             compressor = qtensor.compression.ProfileCompressor(compressor)
         else:
             raise ValueError(f"Unknown compression algorithm: {compress}")
@@ -213,49 +220,20 @@ def simulate(in_file, out_file,
         from qtensor.contraction_backends.performance_measurement_decorator import MemProfBackend
         backend = MemProfBackend(backend)
 
-    relabelid = {}
-    for tensor in tn.tensors:
-        for i in tensor.indices:
-            relabelid[int(i)] = i
-
-    slice_ext = {relabelid[int(i)]: 0 for i in par_vars}
 
     if len(par_vars) > 0:
         print("Parvars", par_vars)
         print(f"Detected {len(par_vars)} slice variables")
-    sim = qtensor.QtreeSimulator(backend=backend)
-    sim.tn = tn
-    sim.tn.backend = backend
-    sim.peo = peo
-    sim._slice_relabel_buckets(slice_ext)
-    buckets = sim.tn.buckets
-    # --dbg
-    #ignore_vars  = sim.tn.bra_vars + sim.tn.ket_vars 
-    #graph = qtree.graph_model.importers.buckets2graph(buckets, ignore_vars)
-    #graph, label_dict = qtree.graph_model.relabel_graph_nodes(
-        #graph, dict(zip(graph.nodes, np.array(list(graph.nodes)) - 127*2))
-    #) 
-    #import networkx as nx
-    #components = list(nx.connected_components(graph))
-    #print(f"Sliced graph # nodes: {graph.number_of_nodes()} and #components: {len(components)} with sizes {[len(c) for c in components]}")
-    #print(f"peo size without par_vars and ignore_vars: {len(peo) - len(ignore_vars)}")
-    # --
 
+    # -- simulate
     start = time.time()
-    for i in range(2**0):
-        print(f"P {i}", end='', flush=True)
-        bcopy = [b[:] for b in buckets]
-        res = bucket_elimination(
-            bcopy, backend,
-            n_var_nosum=len(tn.free_vars)
-        )
-        del bcopy
-        print("Result", res.data.flatten()[0])
-        time.sleep(0.5)
-    sim_result = backend.get_result_data(res).flatten()[0]
+    sim_result = _simulate_wrapper(backend, tn, peo, par_vars, hpc=mpi)
+
     print("Simulation result:", sim_result)
     end = time.time()
     print("Elapsed", end - start)
+    if mpi:
+        out_file += '_rank'+str(get_mpi_rank())
     out_file += ".json"
     C = {'time': 2**len(par_vars)*(end - start)}
     C['elapsed'] = (end - start)
@@ -273,3 +251,101 @@ def simulate(in_file, out_file,
     write_json(C, out_file)
     cupy.cuda.profiler.stop()
     return out_file
+
+def _simulate_wrapper(backend, tn, peo, par_vars, hpc=False):
+    """
+    Backend is modified in the simulation
+    """
+
+    # -- Prepare buckets
+    # --
+
+    # --dbg
+    #ignore_vars  = sim.tn.bra_vars + sim.tn.ket_vars 
+    #graph = qtree.graph_model.importers.buckets2graph(buckets, ignore_vars)
+    #graph, label_dict = qtree.graph_model.relabel_graph_nodes(
+        #graph, dict(zip(graph.nodes, np.array(list(graph.nodes)) - 127*2))
+    #) 
+    #import networkx as nx
+    #components = list(nx.connected_components(graph))
+    #print(f"Sliced graph # nodes: {graph.number_of_nodes()} and #components: {len(components)} with sizes {[len(c) for c in components]}")
+    #print(f"peo size without par_vars and ignore_vars: {len(peo) - len(ignore_vars)}")
+    # --
+    def make_sim():
+        import copy
+        sim = qtensor.QtreeSimulator(backend=backend)
+        sim.tn = copy.deepcopy(tn)
+        sim.tn.backend = backend
+        sim.peo = copy.deepcopy(peo)
+        return sim
+
+    if hpc:
+        res = _simulate_hpc(make_sim, par_vars)
+    else:
+        res = simulate_slice(make_sim, [0]*len(par_vars), par_vars)
+
+    return res
+
+def simulate_slice(make_sim, slice_values, par_vars):
+    from qtensor.contraction_algos import bucket_elimination
+    sim = make_sim()
+    tn = sim.tn
+    backend = sim.backend
+    if hasattr(backend, 'print'):
+        backend.print = False
+    relabelid = {}
+    for tensor in tn.tensors:
+        for i in tensor.indices:
+            relabelid[int(i)] = i
+
+    slice_ext = {relabelid[int(i)]: int(v) for i,v in zip(par_vars, slice_values)}
+    print("Slice extents", slice_ext)
+    sim._slice_relabel_buckets(slice_ext)
+    buckets = sim.tn.buckets
+    print(f"P {i}", end='', flush=True)
+    bcopy = [b[:] for b in buckets]
+    res = bucket_elimination(
+		bcopy, backend,
+		n_var_nosum=len(tn.free_vars)
+	)
+    del bcopy
+    sim_result = backend.get_result_data(res).flatten()[0]
+    print("Result", sim_result)
+    try:
+        sim_result = sim_result.get()
+    except:
+        pass
+    return sim_result
+
+def _get_mpi_unit(sim, par_vars):
+    def _mpi_unit(rank):
+        slice_values = np.unravel_index(rank, [2]*len(par_vars))
+        res = simulate_slice(sim, slice_values, par_vars)
+        return res
+    return _mpi_unit
+
+def get_mpi_rank():
+    from qtensor.tools.lazy_import import MPI
+    w = MPI.COMM_WORLD
+    comm = MPI.Comm
+    rank = comm.Get_rank(w)
+    return rank
+
+def _simulate_hpc(_sim, par_vars):
+    from qtensor.contraction_algos import bucket_elimination
+    import cupy
+    from qtensor.tools.lazy_import import MPI
+    from qtensor.tools.mpi.mpi_map import MPIParallel
+    mpi_unit = _get_mpi_unit(_sim, par_vars)
+    par = MPIParallel()
+    w = MPI.COMM_WORLD
+    comm = MPI.Comm
+    size = comm.Get_size(w)
+    rank = comm.Get_rank(w)
+    cupy.cuda.runtime.setDevice(rank%4)
+    if rank==0:
+        print(f'MPI::I:: There are {size} workers and {2**len(par_vars)} tasks over {par_vars}')
+    if len(par_vars)==0:
+        return
+    values = par.map(mpi_unit, range(2**len(par_vars)))
+    return np.sum(values)

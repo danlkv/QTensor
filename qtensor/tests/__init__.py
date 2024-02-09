@@ -19,12 +19,11 @@ def get_test_problem(n=10, p=2, d=3, type='random'):
         n: number of nodes in graph
         p: number of qaoa cycles
         d: degree of graph
-        type: type of graph
+        type: type of graph (random, grid2d, line)
 
     Returns
         (nx.Graph, gamma, beta)
     """
-    print('Test problem: n, p, d', n, p, d)
     if type == 'random':
         G = nx.random_regular_graph(d, n)
     elif type == 'grid2d':
@@ -32,8 +31,10 @@ def get_test_problem(n=10, p=2, d=3, type='random'):
     elif type == 'line':
         G = nx.Graph()
         G.add_edges_from(zip(range(n-1), range(1, n)))
-    G = nx.convert_node_labels_to_integers(G)
+    else:
+        raise ValueError('Unknown graph type, use random, grid2d or line')
     gamma, beta = [np.pi/5]*p, [np.pi/2]*p
+    G = nx.convert_node_labels_to_integers(G)
     return G, gamma, beta
 
 @lru_cache

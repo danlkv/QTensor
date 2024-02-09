@@ -9,7 +9,7 @@ Or from source:
 ```bash
 git clone --recurse-submodules https://github.com/DaniloZZZ/QTensor
 cd QTensor
-cd qtree && pip install .
+cd qtree && pip install . && cd ..
 pip install .
 ```
 
@@ -28,6 +28,16 @@ G = nx.random_regular_graph(3, 10)
 gamma, beta = [np.pi/3], [np.pi/2]
 
 E = QAOA_energy(G, gamma, beta)
+```
+
+## GPU simulation
+
+```python
+import qtensor
+optimizer = qtensor.toolbox.get_ordering_algo('rgreedy_0.02_10')
+backend = qtensor.contraction_backends.get_backend('torch')
+sim = QAOAQtreeSimulator(backend=backend, optimizer=optimizer)
+# ... continue your simulation
 ```
 
 ## Get treewidth
@@ -50,6 +60,7 @@ treewidth = opt.treewidth
 
 ```
 
+
 ### Tamaki solver
 
 #### Instalation
@@ -60,7 +71,7 @@ The tamaki solver repository should be already cloned into
 To compile it, go to the directory and run `make heuristic`.
 
 ```bash
-> cd Qtensor/qtree/thirdparty/tamaki_treewidth
+> cd QTensor/qtree/thirdparty/tamaki_treewidth
 > make heuristic 
 javac tw/heuristic/*.java
 ```
@@ -69,6 +80,8 @@ Tamaki solver repository: https://github.com/TCS-Meiji/PACE2017-TrackA
 
 
 If you have memory errors, modify the `JFLAGS` variable in the bash script `./tw-heuristic`. I use `JFLAGS="-Xmx4g -Xms4g -Xss500m"`.
+
+Before running qtensor with tamaki, make sure `tw-heuristic` resolves as executable. For that, add the `tamaki_treewidth` dir to your `PATH`. Test with `which tw-heuristic`.
 
 #### Usage
 
