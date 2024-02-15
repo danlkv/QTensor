@@ -149,6 +149,46 @@ class NumpyCompressor(Compressor):
     def free_decompressed(self):
         return
 
+class CUSZPCompressor(Compressor):
+    def __init__(self, r2r_error=1e-3, r2r_threshold=1e-3):
+        self.r2r_error = r2r_error
+        self.r2r_threshold = r2r_threshold
+        self.decompressed_own = []
+
+    def free_decompressed(self):
+        import cupy
+        print("Cleanup", len(self.decompressed_own))
+        for x in self.decompressed_own:
+            del x
+        cupy.get_default_memory_pool().free_all_blocks()
+        cupy.get_default_pinned_memory_pool().free_all_blocks()
+        torch.cuda.empty_cache()
+        self.decompressed_own = []
+
+    def free_compressed(self, ptr):
+        cmp_bytes, num_elements_eff, shape, dtype, _ = ptr
+        del cmp_bytes
+
+    def compress(self, data):
+        isCupy, num_elements_eff = _get_data_info(data)
+        dtype = data.dtype
+        cmp_bytes, outSize_ptr = cuszp_device_compress(data, self.r2r_error,self.r2r_threshold)
+        return (cmp_bytes, num_elements_eff, data.shape, dtype, outSize_ptr)
+
+        # return (cmp_bytes, num_elements_eff, isCuPy, data.shape, dtype, outSize_ptr.contents.value)
+    def compress_size(self, ptr):
+        return ptr[4]
+
+    def decompress(self, obj):
+        import cupy
+        cmp_bytes, num_elements_eff, shape, dtype, cmpsize = obj
+        decompressed_ptr = cuszp_device_decompress(num_elements_eff, cmp_bytes)
+        arr_cp = decompressed_ptr[0]
+
+        arr = cupy.reshape(arr_cp, shape)
+        self.decompressed_own.append(arr)
+        return arr
+
 class TorchCompressor(Compressor):
     def __init__(self, r2r_error=1e-3, r2r_threshold=1e-3):
         self.r2r_error = r2r_error
