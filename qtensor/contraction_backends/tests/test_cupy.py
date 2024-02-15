@@ -64,7 +64,7 @@ def test_cupy_process_bucket():
         print('selected_bucket', selected_bucket)
 
         result = backend.process_bucket(selected_bucket)
-        return result.data
+        return backend.get_result_data(result)
 
     restr = contract_tn(btr, 1)
     resnp = contract_tn(bnp, 1)

@@ -300,7 +300,7 @@ class MergedQtensorSimulator(QtensorSimulator):
             with profiles.mem_util() as m:
                 # should not consume all iterator at once
                 for edge, (ibunch, merged_buckets) in zip(self.iterate_edges(G, p), opt):
-                    edge_contribution = qtensor.merged_indices.bucket_elimination(
+                    edge_contribution = qtensor.contraction_algos.merged_bucket_elimination(
                         [x.copy() for x in merged_buckets],
                         ibunch,
                         sim.backend.process_bucket_merged,

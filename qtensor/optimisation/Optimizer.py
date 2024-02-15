@@ -15,7 +15,7 @@ from loguru import logger as log
 
 
 class Optimizer:
-    def _get_ordering_ints(self, graph, inplace=True):
+    def get_ordering_ints(self, graph, inplace=True):
         raise NotImplementedError
 
     def _get_ordering(self, graph: nx.Graph, inplace=True):
@@ -27,7 +27,7 @@ class Optimizer:
         """
         node_names = nx.get_node_attributes(graph, 'name')
         node_sizes = nx.get_node_attributes(graph, 'size')
-        peo, path = self._get_ordering_ints(graph, inplace=inplace)
+        peo, path = self.get_ordering_ints(graph, inplace=inplace)
         # compatibility with slicing
         self.peo_ints = [int(x) for x in peo]
 
@@ -69,7 +69,7 @@ class Optimizer:
 
 class WithoutOptimizer(Optimizer):
 
-    def _get_ordering_ints(self, graph, inplace=True):
+    def get_ordering_ints(self, graph, inplace=True):
         peo = sorted([int(v) for v in graph.nodes()])
         # magic line
         peo = list(reversed(peo))
@@ -77,7 +77,7 @@ class WithoutOptimizer(Optimizer):
         return peo, path
 
 class GreedyOptimizer(Optimizer):
-    def _get_ordering_ints(self, graph, free_vars=[]):
+    def get_ordering_ints(self, graph, free_vars=[]):
         #mapping = {a:b for a,b in zip(graph.nodes(), reversed(list(graph.nodes())))}
         #graph = nx.relabel_nodes(graph, mapping)
         peo_ints, path = utils.get_neighbors_peo(graph)
@@ -165,10 +165,12 @@ class SlicesOptimizer(Optimizer):
 
     def __init__(self, tw_bias=2, max_tw=None, max_slice=None
                  , base_ordering='greedy'
+                 , peo_after_slice_strategy='run-again'
                  , **kwargs):
         self.tw_bias = tw_bias
         self.max_tw = max_tw
         self.max_slice = max_slice
+        self.peo_after_slice_strategy = peo_after_slice_strategy
         if isinstance(base_ordering, str):
             self.base_ordering = qtensor.toolbox.get_ordering_algo(base_ordering)
         else:
@@ -187,15 +189,53 @@ class SlicesOptimizer(Optimizer):
         # tw = log(cost/16) = log(cost) - 4
         return int(np.log2(avail)) - 4
 
+    def _update_peo_after_slice(self, p_graph, slice_vars):
+        if self.peo_after_slice_strategy == 'run-again':
+            peo_ints, path = self.base_ordering.get_ordering_ints(p_graph)
+        elif self.peo_after_slice_strategy == 'TD-reuse':
+            # Remove sliced vars from TD graph. Then, reconstruct peo from this TD
+            peo_old = self.peo_ints
+            peo_ints = [i for i in peo_old if i not in slice_vars]
+            nodes, path = qtensor.utils.get_neighbors_path(p_graph, peo_ints)
+            # -- Tree re-peo
+            g_components = list(nx.connected_components(p_graph))
+            print(f"# of components: {len(g_components)}, # of nodes total: {p_graph.number_of_nodes()}, # of nodes per component: {[len(c) for c in g_components]}")
+            from qtree.graph_model.clique_trees import (
+                get_tree_from_peo, get_peo_from_tree)
+            tree = get_tree_from_peo(p_graph, peo_ints)
+            clique_vertices = []
+            print("Calling get_peo_from_tree")
+            # ---- re-create peo from tree
+            peo_recreate = []
+            components = list(nx.connected_components(tree))
+            print("# of components: ", len(components))
+            for subtree in components:
+                peo_recreate += get_peo_from_tree(tree.subgraph(subtree).copy(), clique_vertices=clique_vertices)
+            # ----
+            nodes, path_recreate = qtensor.utils.get_neighbors_path(p_graph, peo_recreate)
+            log.info(f"Re-created peo width from tree: {max(path_recreate)}")
+            if max(path_recreate) < max(path):
+                log.info("Re-created peo is better than old peo. Using new peo.")
+                peo_ints = peo_recreate
+                path = path_recreate
+            # --
+
+        else:
+            raise ValueError('Unknown peo_after_slice_strategy: {}'
+                             .format(self.peo_after_slice_strategy))
+
+        self.peo_ints = peo_ints
+        self.treewidth = max(path)
+        log.info('Treewidth after slice: {}', self.treewidth)
+        return peo_ints, path
+
     def _split_graph(self, p_graph, max_tw):
-        peo_ints, path = self.base_ordering._get_ordering_ints(p_graph)
         searcher = GreedyParvars(p_graph)
         while True:
             #nodes, path = utils.get_neighbors_path(graph, peo=peo_ints)
             tw = self.treewidth
-            log.info('Treewidth: {}', tw)
             if tw < max_tw:
-                log.info('Found parvars: {}', searcher.result)
+                log.info(f'Found {len(searcher.result)} parvars: {searcher.result}')
                 break
             if self.max_slice is not None:
                 if len(searcher.result) > self.max_slice:
@@ -207,22 +247,21 @@ class SlicesOptimizer(Optimizer):
                 log.error('Memory is not enough. Max tw: {}', max_tw)
                 raise Exception('Estimated OOM')
 
-            peo_ints, path = self.base_ordering._get_ordering_ints(p_graph)
-            self.treewidth = max(path)
+            self._update_peo_after_slice(p_graph, searcher.result)
 
-        return peo_ints, searcher.result
+        return self.peo_ints, searcher.result
 
     def optimize(self, tensor_net):
         peo, tn = super().optimize(tensor_net)
         return peo+self.parallel_vars, self.parallel_vars, tn
 
-    def _get_ordering_ints(self, graph, inplace=True):
+    def get_ordering_ints(self, graph, inplace=True):
         p_graph = copy.deepcopy(graph)
         max_tw = self._get_max_tw()
         max_tw = max_tw - self.tw_bias
         log.info('Maximum treewidth: {}', max_tw)
 
-        self.peo_ints, path = self.base_ordering._get_ordering_ints(p_graph)
+        self.peo_ints, path = self.base_ordering.get_ordering_ints(p_graph)
         self.treewidth = max(path)
         peo, par_vars = self._split_graph(p_graph, max_tw)
 
@@ -235,24 +274,26 @@ class SlicesOptimizer(Optimizer):
         #log.info('peo {}', self.peo)
         return peo, [self.treewidth]
 
-class TamakiOptimizer(GreedyOptimizer):
+class TamakiOptimizer(Optimizer):
     def __init__(self, max_width=None, *args, wait_time=5, **kwargs):
         super().__init__(*args, **kwargs)
         self.wait_time = wait_time
         self.max_width = max_width
 
+    def get_ordering_ints(self, graph, inplace=True):
+        peo, tw = qtree.graph_model.peo_calculation.get_upper_bound_peo_pace2017_interactive(
+                graph, method="tamaki", max_time=self.wait_time, max_width=self.max_width)
+        return peo, [tw]
+
     def _get_ordering(self, graph, inplace=True):
         node_names = nx.get_node_attributes(graph, 'name')
         node_sizes = nx.get_node_attributes(graph, 'size')
-        peo, tw = qtree.graph_model.peo_calculation.get_upper_bound_peo_pace2017_interactive(
-                graph, method="tamaki", max_time=self.wait_time, max_width=self.max_width)
-
-
+        peo, path = self.get_ordering_ints(graph, inplace=inplace)
         peo = [qtree.optimizer.Var(var, size=node_sizes[var],
                         name=node_names[var])
                     for var in peo]
-        self.treewidth = tw
-        return peo, [tw]
+        self.treewidth = max(path)
+        return peo, path
 
 class TamakiExactOptimizer(GreedyOptimizer):
     def __init__(self, *args, **kwargs):
@@ -277,7 +318,7 @@ class TreeTrimSplitter(SlicesOptimizer):
         peo_ints = self.peo_ints
         tw = self.treewidth
         self._slice_hist = []
-        self._slice_hist.append([0, tw])
+        self._slice_hist.append([0, tw, peo_ints])
         log.info('Treewidth: {}', tw)
         log.info('Target treewidth: {}', max_tw)
         result = []
@@ -311,14 +352,10 @@ class TreeTrimSplitter(SlicesOptimizer):
             pv_cnt = len(result)
             log.info('Parvars count: {}. Amps count: {}', pv_cnt, 2**pv_cnt)
 
-            peo_ints, path = self.base_ordering._get_ordering_ints(p_graph)
+            peo_ints, path = self._update_peo_after_slice(p_graph, result)
             tw = max(path)
-            log.info('Treewidth: {}', tw)
-            self._slice_hist.append([pv_cnt, tw])
-
+            self._slice_hist.append([pv_cnt, tw, peo_ints])
             delta = tw - max_tw
-            self.treewidth = tw
-
 
         return peo_ints, result
 

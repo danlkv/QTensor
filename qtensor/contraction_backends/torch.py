@@ -3,7 +3,10 @@ import qtree
 import numpy as np
 from qtree import np_framework
 from qtensor.contraction_backends import ContractionBackend
-from qtensor.contraction_backends.numpy import get_einsum_expr
+from .common import get_slice_bounds, get_einsum_expr, slice_numpy_tensor
+import string
+CHARS = string.ascii_lowercase + string.ascii_uppercase
+
 def qtree2torch_tensor(tensor, data_dict):
     """ Converts qtree tensor to pytorch tensor using data dict"""
     if isinstance(tensor.data, torch.Tensor):
@@ -16,6 +19,57 @@ def qtree2torch_tensor(tensor, data_dict):
     data_dict[tensor.data_key] = torch_t
     return tensor.copy(data=torch_t)
 
+def get_einsum_expr_bucket(bucket, all_indices_list, result_indices):
+    # converting elements to int will make stuff faster, 
+    # but will drop support for char indices
+    # all_indices_list = [int(x) for x in all_indices]
+    # to_small_int = lambda x: all_indices_list.index(int(x))
+    to_small_int = lambda x: all_indices_list.index(x)
+    expr = ','.join(
+        ''.join(CHARS[to_small_int(i)] for i in t.indices)
+        for t in bucket) +\
+            '->'+''.join(CHARS[to_small_int(i)] for i in result_indices)
+    return expr
+
+
+
+
+def permute_torch_tensor_data(data:np.ndarray, indices_in, indices_out):
+    """
+    Permute the data of a numpy tensor to the given indices_out.
+    
+    Returns:
+        permuted data
+    """
+    # permute indices
+    out_locs = {idx: i for i, idx in enumerate(indices_out)}
+    perm = [out_locs[i] for i in indices_in]
+    # permute tensor
+    return torch.permute(data, perm)
+
+def slice_torch_tensor(data:np.ndarray, indices_in, indices_out, slice_dict):
+    """
+    Args:
+        data : np.ndarray
+        indices_in: list of `qtree.optimizer.Var`
+        indices_out: list of `qtree.optimizer.Var`
+        slice_dict: dict of `qtree.optimizer.Var` to `slice`
+
+    Returns:
+        new data, new indices
+    """
+    slice_bounds = get_slice_bounds(slice_dict, indices_in)
+    s_data = data[slice_bounds]
+    indices_sliced = [
+        i for sl, i in zip(slice_bounds, indices_in) if not isinstance(sl, int)
+    ]
+    indices_sized = [v.copy(size=size) for v, size in zip(indices_sliced, s_data.shape)]
+    indices_out = [v for v in indices_out if not isinstance(slice_dict.get(v, None), int)]
+    assert len(indices_sized) == len(s_data.shape)
+    assert len(indices_sliced) == len(s_data.shape)
+    st_data = permute_torch_tensor_data(s_data, indices_sliced, indices_out)
+    return st_data, indices_out
+
 
 class TorchBackend(ContractionBackend):
     def __init__(self, device='cpu'):
@@ -23,32 +77,26 @@ class TorchBackend(ContractionBackend):
         self.dtype = ['float', 'double', 'complex64', 'complex128']
         self.width_dict = [set() for i in range(30)]
         self.width_bc = [[0,0] for i in range(30)] #(#distinct_bc, #bc)
-        self.exprs = {}
-
 
     def process_bucket(self, bucket, no_sum=False):
+        bucket.sort(key = lambda x: len(x.indices))
         result_indices = bucket[0].indices
         result_data = bucket[0].data
         width = len(set(bucket[0].indices))
-        #print("w:",width)
 
-        for tensor in bucket[1:]:
+        for tensor in bucket[1:-1]:
 
-            expr = qtree.utils.get_einsum_expr(
+            expr = get_einsum_expr(
                 list(map(int, result_indices)), list(map(int, tensor.indices))
             )
-
-            if expr not in self.exprs.keys():
-                self.exprs[expr] = 1
-            else:
-                self.exprs[expr] += 1
 
             result_data = torch.einsum(expr, result_data, tensor.data)
 
             # Merge and sort indices and shapes
             result_indices = tuple(sorted(
                 set(result_indices + tensor.indices),
-                key=int)
+                key=int, reverse=True
+            )
             )
             
             size = len(set(tensor.indices))
@@ -59,26 +107,33 @@ class TorchBackend(ContractionBackend):
             self.width_bc[width][0] = len(self.width_dict[width])
             self.width_bc[width][1] += 1
 
+        if len(bucket)>1:
+            tensor = bucket[-1]
+            expr = get_einsum_expr(
+                list(map(int, result_indices)), list(map(int, tensor.indices))
+                , contract = 1
+            )
+            result_data = torch.einsum(expr, result_data, tensor.data)
+            result_indices = tuple(sorted(
+                set(result_indices + tensor.indices),
+                key=int, reverse=True
+            ))
+        else:
+            result_data = result_data.sum(axis=-1)
+
+
+
         if len(result_indices) > 0:
-            if not no_sum:  # trim first index
-                first_index, *result_indices = result_indices
-            else:
-                first_index, *_ = result_indices
+            first_index = result_indices[-1]
+            result_indices = result_indices[:-1]
             tag = first_index.identity
         else:
             tag = 'f'
             result_indices = []
 
         # reduce
-        if no_sum:
-            result = qtree.optimizer.Tensor(f'E{tag}', result_indices,
-                                data=result_data)
-        else:
-            result = qtree.optimizer.Tensor(f'E{tag}', result_indices,
-                                data=torch.sum(result_data, axis=0))
-        
-        #print("summary:",sorted(self.exprs.items(), key=lambda x: x[1], reverse=True))
-        #print("stats:",self.width_bc)
+        result = qtree.optimizer.Tensor(f'E{tag}', result_indices,
+                            data=result_data)
         return result
 
     def process_bucket_merged(self, ixs, bucket, no_sum=False):
@@ -103,13 +158,7 @@ class TorchBackend(ContractionBackend):
             for i in range(len(tensors)):
                 tensors[i] = tensors[i].type(torch.complex128)
         
-        expr = get_einsum_expr(bucket, all_indices_list, result_indices)
-        # print("expr:", expr)
-        if expr not in self.exprs.keys():
-            self.exprs[expr] = 1
-        else:
-            self.exprs[expr] += 1
-
+        expr = get_einsum_expr_bucket(bucket, all_indices_list, result_indices)
         expect = len(result_indices)
         result_data = torch.einsum(expr, *tensors)
 
@@ -122,8 +171,6 @@ class TorchBackend(ContractionBackend):
         result = qtree.optimizer.Tensor(f'E{tag}', result_indices,
                             data=result_data)
         
-        # print("summary:",sorted(self.exprs.items(), key=lambda x: x[1], reverse=True))
-        # print("# distinct buckets:", len(self.exprs))
         return result
 
     def get_sliced_buckets(self, buckets, data_dict, slice_dict):
@@ -133,41 +180,25 @@ class TorchBackend(ContractionBackend):
             for tensor in bucket:
                 # get data
                 # sort tensor dimensions
-                transpose_order = np.argsort(list(map(int, tensor.indices)))
+                out_indices = list(sorted(tensor.indices, key=int, reverse=True))
                 data = data_dict[tensor.data_key]
+                # Works for torch tensors just fine
                 if not isinstance(data, torch.Tensor):             
                     if self.device == 'gpu' and torch.cuda.is_available():
                         cuda = torch.device('cuda')
-                        data = torch.from_numpy(data).to(cuda)
+                        data = torch.from_numpy(data.astype(np.complex128)).to(cuda)
                     else:
-                        data = torch.from_numpy(data)
-
-                data = data.permute(tuple(transpose_order))
-                # transpose indices
-                indices_sorted = [tensor.indices[pp]
-                                  for pp in transpose_order]
-
+                        data = torch.from_numpy(data.astype(np.complex128))
+                else:
+                    data = data.type(torch.complex128)
                 # slice data
-                slice_bounds = []
-                for idx in indices_sorted:
-                    try:
-                        slice_bounds.append(slice_dict[idx])
-                    except KeyError:
-                        slice_bounds.append(slice(None))
-
-                data = data[tuple(slice_bounds)]
-
-                # update indices
-                indices_sliced = [idx.copy(size=size) for idx, size in
-                                  zip(indices_sorted, data.shape)]
-                indices_sliced = [i for sl, i in zip(slice_bounds, indices_sliced) if not isinstance(sl, int)]
-                assert len(data.shape) == len(indices_sliced)
+                data, new_indices = slice_torch_tensor(data, tensor.indices, out_indices, slice_dict)
 
                 sliced_bucket.append(
-                    tensor.copy(indices=indices_sliced, data=data))
+                    tensor.copy(indices=new_indices, data=data))
             sliced_buckets.append(sliced_bucket)
 
         return sliced_buckets
 
     def get_result_data(self, result):
-        return result.data
+        return torch.permute(result.data, tuple(reversed(range(result.data.ndim))))

@@ -1,7 +1,14 @@
 import networkx as nx
+import qtensor
 import numpy as np
 from functools import lru_cache
 
+def get_test_qaoa_ansatz_circ(n=10, p=2, d=3, type='random'):
+    G, gamma, beta = get_test_problem(n, p, d, type)
+    composer = qtensor.DefaultQAOAComposer(
+        graph=G, gamma=gamma, beta=beta)
+    composer.ansatz_state()
+    return composer.circuit
 
 @lru_cache(maxsize=2**12)
 def get_test_problem(n=10, p=2, d=3, type='random'):
