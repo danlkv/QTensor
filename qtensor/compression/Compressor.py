@@ -142,6 +142,13 @@ class NumpyCompressor(Compressor):
         ptr.seek(0)
         return  np.load(ptr)['arr_0']
 
+    def free_compressed(self, ptr):
+        del ptr
+        return
+
+    def free_decompressed(self):
+        return
+
 class TorchCompressor(Compressor):
     def __init__(self, r2r_error=1e-3, r2r_threshold=1e-3):
         self.r2r_error = r2r_error
