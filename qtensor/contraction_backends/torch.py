@@ -63,6 +63,7 @@ def slice_torch_tensor(data:np.ndarray, indices_in, indices_out, slice_dict):
     indices_sliced = [
         i for sl, i in zip(slice_bounds, indices_in) if not isinstance(sl, int)
     ]
+    print(f'indicies_in {indices_in}, slice_dict {slice_dict}, bounds {slice_bounds}, slicedix {indices_sliced}, sshape {s_data.shape}')
     indices_sized = [v.copy(size=size) for v, size in zip(indices_sliced, s_data.shape)]
     indices_out = [v for v in indices_out if not isinstance(slice_dict.get(v, None), int)]
     assert len(indices_sized) == len(s_data.shape)
@@ -181,7 +182,10 @@ class TorchBackend(ContractionBackend):
                 # get data
                 # sort tensor dimensions
                 out_indices = list(sorted(tensor.indices, key=int, reverse=True))
-                data = data_dict[tensor.data_key]
+                if tensor.data is None:
+                    data = data_dict[tensor.data_key]
+                else:
+                    data = tensor.data
                 # Works for torch tensors just fine
                 if not isinstance(data, torch.Tensor):             
                     if self.device == 'gpu' and torch.cuda.is_available():
