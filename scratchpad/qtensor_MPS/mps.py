@@ -4,7 +4,22 @@ import numpy as np
 
 
 class MPS:
-    def __init__(self, tensor_name, N, physical_dim=2) -> None:
+    """
+    Matrix Product State class for simulating quantum circuits
+
+    Atrributes:
+    N : int
+        Number of tensors in the MPS
+    physical_dim : int
+        Dimension of the physical qubit
+    name : str
+        Name of the node in MPS
+    _nodes : list[tn.Node]
+        List of nodes in the MPS
+
+    """
+
+    def __init__(self, tensor_name: str, N: int, physical_dim: int = 2) -> None:
         """
         Given: Bond dimension = 1
 
@@ -66,7 +81,7 @@ class MPS:
 
     @staticmethod
     def construct_mps_from_wavefunction(
-        wavefunction, tensor_name, N, physical_dim=1
+        wavefunction, tensor_name: str, N: int, physical_dim: int = 1
     ) -> "MPS":
         """
         Method to create wavefunction from mps
@@ -114,17 +129,17 @@ class MPS:
     def physical_dim(self):
         return self._physical_dim
 
-    def get_mps_nodes(self, original) -> list[tn.Node]:
+    def get_mps_nodes(self, original: bool) -> list[tn.Node]:
         if original:
             return self._nodes
 
         nodes, edges = tn.copy(self._nodes)
         return list(nodes.values())
 
-    def get_mps_node(self, index, original) -> tn.Node:
+    def get_mps_node(self, index: int, original: bool) -> tn.Node:
         return self.get_mps_nodes(original)[index]
 
-    def get_tensors(self, original) -> list[tn.Node]:
+    def get_tensors(self, original: bool) -> list[tn.Node]:
         nodes = []
 
         if original:
@@ -134,11 +149,8 @@ class MPS:
 
         return list([node.tensor for node in nodes])
 
-    def get_tensor(self, index, original) -> tn.Node:
+    def get_tensor(self, index: int, original: bool) -> tn.Node:
         return self.get_tensors(original)[index]
-
-    def is_unitary():
-        pass
 
     def get_wavefunction(self) -> np.array:
         nodes = self.get_mps_nodes(False)
@@ -147,7 +159,7 @@ class MPS:
         for node in nodes:
             curr = tn.contract_between(curr, node)
 
-        wavefunction = np.reshape(curr.tensor, newshape=(self._physical_dim**self._N))
+        wavefunction = np.reshape(curr.tensor, newshape=self._physical_dim**self._N)
         return wavefunction
 
     def apply_single_qubit_gate(self, gate, index) -> None:

@@ -8,6 +8,20 @@ import gc
 
 
 class MPOLayer:
+    """
+    Class to represent a layer of MPOs for a quantum circuit
+
+    Attributes:
+    -----------
+    tensor_name: Text
+        Name of the tensor
+    N: int
+        Number of tensors
+    physical_dim: int
+        Physical dimension of the tensor
+
+    """
+
     def __init__(self, tensor_name, N, physical_dim) -> None:
         """
         (0) physical dim                 (0) physical dim                (0) physical dim

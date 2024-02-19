@@ -1,56 +1,42 @@
 # MPS Evolution
+Simulating for N = 5, N representing the number of qubits in the tensor network system.
+
+Hamiltonian used : Ising Hamiltonian
+
 ## Case1: Wavefunction as zero
 
 for fast transition [0, 1, 20]
-![](./img/final_magnetisation_all0_fast.png)
+![](./img/mps_fast_transition_all0_state.png)
 
 for slow transition [0, 1, 100]
-![](./img/final_magnetisation_all0_slow.png)
+![](./img/mps_slow_transition_all0_state.png)
 
 As we can see the later one is much more smoother.
 
-## Case2: Wavefuction as |00100....0>
+## Case2: Wavefuction as |10010>
+for fast transition [0, 1, 20]
+![](./img/mps_fast_transition_10010_state.png)
 
-If real part of magnetization is ploted
-![](./img/final_magnetisation.png)
+for slow transition [0, 1, 100]
+![](./img/mps_slow_transition_10010_state.png)
 
 
-# Compairing MPS and MPO evolution
+# MPO evolution
 
 ## Case1: Wavefunction as zero
 
+for fast transition [0, 1, 20]
+![](./img/mpo_fast_transition_all0_state.png)
 
-For fast transition `dt = 25/20` , `N=5` and `[0, 1, 20]`
+for slow transition [0, 1, 100]
+![](./img/mpo_slow_transition_all0_state.png)
 
-With only both single qubit and two qubit gates
+## Case2: Wavefuction as |10010>
+for fast transition [0, 1, 20]
+![](./img/mpo_fast_transition_10010_state.png)
 
-<p float="left">
-  <img src="./img/mpo_magnetisation_all0_fast_transition.png" alt="First Image" width="400" />
-  <img src="./img/mps_magnetisation_all0_fast_transition.png" alt="Second Image" width="400" />
-</p>
-
-With only single qubit gates
-
-<p float="left">
-  <img src="./img/mpo_magnetisation_all0_fast_transition2.png" alt="First Image" width="400" />
-  <img src="./img/mps_magnetisation_all0_fast_transition2.png" alt="Second Image" width="400" />
-</p>
-
-For slow transition `dt = 5/20` , `N=5` and `[0, 1, 100]`
-
-With only single gates
-
-<p float="left">
-  <img src="./img/mpo_magnetisation_all0_slow_transition2.png" alt="First Image" width="400" />
-  <img src="./img/mps_magnetisation_all0_slow_transition2.png" alt="Second Image" width="400" />
-</p>
-
-With both single and two qubit gates
-
-<p float="left">
-  <img src="" alt="First Image" width="400" />
-  <img src="./img/mps_magnetisation_all0_slow_transition.png" alt="Second Image" width="400" />
-</p>
+for slow transition [0, 1, 100]
+![](./img/mpo_slow_transition_10010_state.png)
 
 ## TODO:
 ```
