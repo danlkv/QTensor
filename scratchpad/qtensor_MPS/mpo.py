@@ -20,40 +20,48 @@ class MPOLayer:
         self.N = N
         self.physical_dim = physical_dim
 
-        if N < 2:
-            raise ValueError("Number of tensors should be >= 2")
+        if N < 1:
+            raise ValueError("Number of tensors should be >= 1")
         #  [1.0 0.0
         #   0.0 0.1]
-        nodes = [
-            tn.Node(
-                np.array([[[1.0, 0.0]], [[0.0, 1.0]]], dtype=np.complex64),
-                name=tensor_name + str(0),
-            )
-        ]
-
-        for i in range(N - 2):
-            node = tn.Node(
-                np.array([[[[1.0, 0.0]]], [[[0.0, 1.0]]]], dtype=np.complex64),
-                name=tensor_name + str(i + 1),
-            )
-            nodes.append(node)
-
-        nodes.append(
-            tn.Node(
-                np.array([[[1.0, 0.0]], [[0.0, 1.0]]], dtype=np.complex64),
-                name=tensor_name + str(N - 1),
-            )
-        )
-
-        if N < 3:
-            tn.connect(nodes[0].get_edge(1), nodes[1].get_edge(1))
+        if N == 1:
+            self._nodes = [
+                tn.Node(
+                    np.array([[1.0, 0.0], [0.0, 1.0]], dtype=np.complex64),
+                    name=tensor_name + str(0),
+                )
+            ]
         else:
-            for i in range(1, N - 2):
-                tn.connect(nodes[i].get_edge(1), nodes[i + 1].get_edge(2))
-            tn.connect(nodes[0].get_edge(1), nodes[1].get_edge(2))
-            tn.connect(nodes[-1].get_edge(1), nodes[-2].get_edge(1))
+            nodes = [
+                tn.Node(
+                    np.array([[[1.0, 0.0]], [[0.0, 1.0]]], dtype=np.complex64),
+                    name=tensor_name + str(0),
+                )
+            ]
 
-        self._nodes = nodes
+            for i in range(N - 2):
+                node = tn.Node(
+                    np.array([[[[1.0, 0.0]]], [[[0.0, 1.0]]]], dtype=np.complex64),
+                    name=tensor_name + str(i + 1),
+                )
+                nodes.append(node)
+
+            nodes.append(
+                tn.Node(
+                    np.array([[[1.0, 0.0]], [[0.0, 1.0]]], dtype=np.complex64),
+                    name=tensor_name + str(N - 1),
+                )
+            )
+
+            if N < 3:
+                tn.connect(nodes[0].get_edge(1), nodes[1].get_edge(1))
+            else:
+                for i in range(1, N - 2):
+                    tn.connect(nodes[i].get_edge(1), nodes[i + 1].get_edge(2))
+                tn.connect(nodes[0].get_edge(1), nodes[1].get_edge(2))
+                tn.connect(nodes[-1].get_edge(1), nodes[-2].get_edge(1))
+
+            self._nodes = nodes
 
     def get_mpo_nodes(self, original) -> list[tn.Node]:
         if original:
@@ -144,13 +152,13 @@ class MPOLayer:
 
          0
          |
-        MPS
+        MPO
          |
          1
 
          0
          |
-        MPS
+        MPO
          |
          1
 
@@ -162,16 +170,28 @@ class MPOLayer:
         """
         node = self._nodes[idx]
         lst = list(node.get_all_dangling())
-        if not conjugate:
+        lst[1].set_name("mpo1")
+        lst[0].set_name("mpo0")
+
+        if conjugate:
             mpo_index_edge = lst[1]
-            gateT = tn.Node(np.conj(gate.tensor))
-            gate_edge = gateT[1]
+            gateT = tn.Node(np.conj(gate.tensor.T))
+            gate_edge = gateT[0]
+            temp_node = tn.connect(mpo_index_edge, gate_edge)
         else:
             mpo_index_edge = lst[0]
-            gate_edge = gate[0]
+            gate_edge = gate[1]
+            temp_node = tn.connect(gate_edge, mpo_index_edge)
 
-        temp_node = tn.connect(mpo_index_edge, gate_edge)
         new_node = tn.contract(temp_node, name=self._nodes[idx].name)
+
+        if conjugate:
+            x = new_node.get_all_dangling()[0].name
+            assert new_node.get_all_dangling()[0].name == "mpo0"
+        else:
+            x = new_node.get_all_dangling()[0].name
+            assert new_node.get_all_dangling()[1].name == "mpo1"
+
         self._nodes[idx] = new_node
 
     def two_qubit_svd(
@@ -248,21 +268,38 @@ class MPOLayer:
 
 
         """
-        mpo_indexA = self.get_mpo_node(operating_qubits[0], True).get_all_dangling()[0]
-        mpo_indexB = self.get_mpo_node(operating_qubits[1], True).get_all_dangling()[0]
-        mpo_indexC = self.get_mpo_node(operating_qubits[0], True).get_all_dangling()[1]
-        mpo_indexD = self.get_mpo_node(operating_qubits[1], True).get_all_dangling()[1]
+        mpo_indexA = self._nodes[operating_qubits[0]].get_all_dangling()[0]
+        mpo_indexB = self._nodes[operating_qubits[1]].get_all_dangling()[0]
+        mpo_indexC = self._nodes[operating_qubits[0]].get_all_dangling()[1]
+        mpo_indexD = self._nodes[operating_qubits[1]].get_all_dangling()[1]
+        mpo_indexA.set_name("mpoA")
+        mpo_indexB.set_name("mpoB")
+        mpo_indexC.set_name("mpoC")
+        mpo_indexD.set_name("mpoD")
+        edge0 = gate.get_edge(0)
+        edge1 = gate.get_edge(1)
+        edge2 = gate.get_edge(2)
+        edge3 = gate.get_edge(3)
+        edge0.set_name("g0")
+        edge1.set_name("g1")
+        edge2.set_name("g2")
+        edge3.set_name("g3")
+
+        x = gate.get_all_dangling()
 
         if conjugate:
             # transpose
             gateT = tn.Node(np.conj(gate.tensor))
-            temp_nodesA = tn.connect(mpo_indexC, gateT.get_edge(0))
-            temp_nodesB = tn.connect(mpo_indexD, gateT.get_edge(1))
-            left_gate_edge = [gateT.get_edge(2)]
-            right_gate_edge = [gateT.get_edge(3)]
+            temp_nodesA = tn.connect(
+                gateT.get_edge(0),
+                mpo_indexC,
+            )
+            temp_nodesB = tn.connect(gateT.get_edge(1), mpo_indexD)
+            left_gate_edge = [mpo_indexA, gateT.get_edge(2)]
+            right_gate_edge = [mpo_indexB, gateT.get_edge(3)]
 
-            left_gate_edge.append(mpo_indexA)
-            right_gate_edge.append(mpo_indexB)
+            # left_gate_edge.append()
+            # right_gate_edge.append()
 
             new_node = tn.contract_between(
                 self._nodes[operating_qubits[0]], self._nodes[operating_qubits[1]]
@@ -295,6 +332,17 @@ class MPOLayer:
             self.two_qubit_svd(
                 new_node, operating_qubits, left_gate_edge, right_gate_edge
             )
+
+        if conjugate:
+            x = self._nodes[operating_qubits[0]].get_all_dangling()
+            y = self._nodes[operating_qubits[1]].get_all_dangling()
+            print(x[1].name == "mpoA")
+            print(y[1].name == "mpoB")
+        else:
+            x = self._nodes[operating_qubits[0]].get_all_dangling()
+            y = self._nodes[operating_qubits[1]].get_all_dangling()
+            print(x[1].name == "mpoC")
+            print(y[1].name == "mpoD")
 
     def apply_two_qubit_operator(self, gate, operating_qubits):
         mpo_indexA = self.get_mpo_node(operating_qubits[0], True).get_all_dangling()[0]
@@ -329,60 +377,36 @@ class MPOLayer:
 
         self.two_qubit_svd(new_node, operating_qubits, left_gate_edge, right_gate_edge)
 
-    def mpo_mps_inner_prod(self, mps, modify_mps=False):
-        if modify_mps:
-            mpo = self.get_mpo_nodes(False)
+    def mpo_mps_inner_prod(self, mps):
+        mpo = self.get_mpo_nodes(False)
 
-            mps_original = mps.__copy__()
+        mps_original = mps.__copy__()
+        mps_original = mps_original.get_mps_nodes(False)
 
-            mps_nodes = mps.get_mps_nodes(False)
+        mps_conj = mps.get_mps_nodes(False)
 
-            for i in range(self.N):
-                tn.connect(
-                    mpo[i].get_all_dangling()[1], mps_nodes[i].get_all_dangling()[0]
-                )
+        for wNode in mps_conj:
+            wNode.set_tensor(np.conj(wNode.tensor))
 
-            nodes = []
-            for i in range(self.N):
-                new_node = tn.contract_between(mpo[i], mps_nodes[i])
-                nodes.append(new_node)
-
-            for i in range(self.N - 1):
-                _ = tn.flatten_edges_between(nodes[i], nodes[i + 1])
-
-            mps._nodes = nodes
-            inner_prod = mps.inner_product(mps_original)
-            return inner_prod
-        else:
-            mpo = self.get_mpo_nodes(False)
-
-            mps_original = mps.__copy__()
-            mps_original = mps_original.get_mps_nodes(False)
-
-            mps = mps.get_mps_nodes(False)
-
-            for wNode in mps:
-                wNode.set_tensor(np.conj(wNode.tensor))
-
-            for i in range(self.N):
-                tn.connect(mpo[i].get_all_dangling()[0], mps[i].get_all_dangling()[0])
-                tn.connect(
-                    mpo[i].get_all_dangling()[0], mps_original[i].get_all_dangling()[0]
-                )
-
-            for i in range(self.N - 1):
-                TW_i = tn.contract_between(mpo[i], mps[i])
-                TW_i = tn.contract_between(TW_i, mps_original[i])
-
-                new_node = tn.contract_between(TW_i, mpo[i + 1])
-                mpo[i + 1] = new_node
-
-            end_node = tn.contract_between(
-                tn.contract_between(mpo[-1], mps[-1]), mps_original[-1]
+        for i in range(self.N):
+            tn.connect(mpo[i].get_all_dangling()[1], mps_conj[i].get_all_dangling()[0])
+            tn.connect(
+                mpo[i].get_all_dangling()[0], mps_original[i].get_all_dangling()[0]
             )
 
-            inner_prod = np.complex128(end_node.tensor)
-            return inner_prod
+        for i in range(self.N - 1):
+            TW_i = tn.contract_between(mpo[i], mps_conj[i])
+            TW_i = tn.contract_between(TW_i, mps_original[i])
+
+            new_node = tn.contract_between(TW_i, mpo[i + 1])
+            mpo[i + 1] = new_node
+
+        end_node = tn.contract_between(
+            tn.contract_between(mpo[-1], mps_conj[-1]), mps_original[-1]
+        )
+
+        inner_prod = np.complex128(end_node.tensor)
+        return inner_prod
 
 
 class MPO:
