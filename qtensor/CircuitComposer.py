@@ -147,13 +147,10 @@ class OldQAOAComposer(CircuitComposer):
         self.apply_gate(self.operators.cX, q1, q2)
         self.apply_gate(self.operators.ZPhase, q2, alpha=2*gamma)
         self.apply_gate(self.operators.cX, q1, q2)
-    def cost_operator_circuit(self, gamma, edges=None):
-        if edges is None: edges = self.graph.edges()
-        for i, j in edges:
-            u, v = self.qubit_map[i], self.qubit_map[j]
-            self.append_zz_term(u, v, gamma)
-
-
+    
+    def z_term(self, u, gamma):
+        self.apply_gate(self.operators.ZPhase, u, alpha=2*gamma)
+        
     def ansatz_state(self):
         beta, gamma = self.params['beta'], self.params['gamma']
 
@@ -202,11 +199,20 @@ class QAOAComposer(OldQAOAComposer):
 
         self.circuit = first_part + second_part
 
-
+class MaxCutComposer(QAOAComposer):
+    def cost_operator_circuit(self, gamma, edges=None):
+        if edges is None: edges = self.graph.edges()
+        for i, j in edges:
+            u, v = self.qubit_map[i], self.qubit_map[j]
+            self.append_zz_term(u, v, gamma)
+            
 class ZZQAOAComposer(QAOAComposer):
     def append_zz_term(self, q1, q2, gamma):
         self.apply_gate(self.operators.ZZ, q1, q2, alpha=2*gamma)
 
+class MaxCutZZComposer(MaxCutComposer, ZZQAOAComposer):
+    pass
+    
 class QAOAComposerChords(ZZQAOAComposer):
     def cone_ansatz(self, edge):
         beta, gamma = self.params['beta'], self.params['gamma']
@@ -230,3 +236,74 @@ class WeightedZZQAOAComposer(ZZQAOAComposer):
         for i, j, w in self.graph.edges.data('weight', default=1):
             u, v = self.qubit_map[i], self.qubit_map[j]
             self.append_zz_term(u, v, gamma*w)
+
+class VCQAOAComposer(QAOAComposer):
+    def energy_expectation(self, i, j):
+        # Will need to deprecate stateful API and return the circuit
+        self.cone_ansatz(edge=(i, j))
+        self.energy_edge(i, j)
+        first_part = self.builder.circuit
+        self.builder.reset()
+        self.cone_ansatz(edge=(i, j))
+        self.builder.inverse()
+        second_part = self.builder.circuit
+        self.circuit = first_part.compose(second_part)
+        
+    def cost_operator_circuit(self, gamma, edges=None):
+        if edges is None: edges = self.graph.edges()
+        nodes = self.graph.nodes()
+        for i, j in edges:
+            u, v = self.qubit_map[i], self.qubit_map[j]
+            self.append_zz_term(u, v, gamma*3)
+            self.z_term(u, gamma*3)
+            self.z_term(v, gamma*3)
+        for i in nodes:
+            u = self.qubits[i]
+            self.z_term(u, gamma * (-1))
+            
+class PCQAOAComposer(QAOAComposer):
+    def energy_expectation(self, i, j):
+        # Will need to deprecate stateful API and return the circuit
+        self.cone_ansatz(edge=(i, j))
+        self.energy_edge(i, j)
+        first_part = self.builder.circuit
+        self.builder.reset()
+        self.cone_ansatz(edge=(i, j))
+        self.builder.inverse()
+        second_part = self.builder.circuit
+        self.circuit = first_part.compose(second_part)
+    
+    
+    def cost_operator_circuit(self, gamma, edges=None):
+        if edges is None: edges = self.graph.edges()
+        nodes = self.graph.nodes()
+        for i, j in edges:
+            u, v = self.qubit_map[i], self.qubit_map[j]
+            self.append_zz_term(u, v, gamma*(-1))
+            self.z_term(u, gamma)
+            self.z_term(v, gamma)
+        for i in nodes:
+            u = self.qubits[i]
+            self.z_term(u, gamma * (-1))
+            
+class VCZZQAOAComposer(VCQAOAComposer, ZZQAOAComposer):
+    def energy_expectation(self, i, j):
+        self.cone_ansatz(edge=(i, j))
+        self.energy_edge(i, j)
+        first_part = self.builder.circuit
+        self.builder.reset()
+        self.cone_ansatz(edge=(i, j))
+        self.builder.inverse()
+        second_part = self.builder.circuit
+        self.circuit = first_part + second_part
+            
+class PCZZQAOAComposer(PCQAOAComposer, ZZQAOAComposer):
+    def energy_expectation(self, i, j):
+        self.cone_ansatz(edge=(i, j))
+        self.energy_edge(i, j)
+        first_part = self.builder.circuit
+        self.builder.reset()
+        self.cone_ansatz(edge=(i, j))
+        self.builder.inverse()
+        second_part = self.builder.circuit
+        self.circuit = first_part + second_part

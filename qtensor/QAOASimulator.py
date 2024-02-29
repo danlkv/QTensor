@@ -228,3 +228,59 @@ class QAOACirqSimulator(QAOASimulator, CirqSimulator):
         trial_result = self.simulate(circuit)
         return np.sum(trial_result.state_vector())
     pass
+
+class VCQAOASimulator(QtreeSimulator):
+    def energy_expectation(self, G, gamma, beta):
+        """
+        Arguments:
+            G: VertexCover graph, Networkx
+            gamma, beta: list[float]
+        Returns: VertexCover energy expectation
+        """
+        total_E = 0
+        with tqdm(total=G.number_of_edges(), desc='Edge iteration', ) as pbar:
+            for i, edge in enumerate(G.edges()):
+                E = self._get_edge_energy(G, gamma, beta, edge)
+                # debt
+                pbar.set_postfix(Treewidth=self.optimizer.treewidth)
+                pbar.update(1)
+                total_E += E
+            if self.profile:
+                # debt
+                print(self.backend.gen_report())
+        return total_E
+        
+class PCQAOASimulator(QtreeSimulator):
+    def _post_process_energy(self, G, E):
+        if np.imag(E).any()>1e-6:
+            print(f"Warning: Energy result imaginary part was: {np.imag(E)}")
+        """
+        Calculate final energy of Profit Cover by adding the offsets
+        """
+        E = np.real(E)
+        
+        Ed = G.number_of_edges()
+        V = G.number_of_nodes()
+        
+        return E - Ed/4 + V/2
+        
+    def energy_expectation(self, G, gamma, beta):
+        """
+        Arguments:
+            G: ProfitCover graph, Networkx
+            gamma, beta: list[float]
+        Returns: ProfitCover energy expectation
+        """
+        total_E = 0
+        with tqdm(total=G.number_of_edges(), desc='Edge iteration', ) as pbar:
+            for i, edge in enumerate(G.edges()):
+                E = self._get_edge_energy(G, gamma, beta, edge)
+                # debt
+                pbar.set_postfix(Treewidth=self.optimizer.treewidth)
+                pbar.update(1)
+                total_E += E
+            if self.profile:
+                # debt
+                print(self.backend.gen_report())
+            C = self._post_process_energy(G, total_E)
+        return C

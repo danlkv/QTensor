@@ -8,13 +8,14 @@ from qtensor import utils
 from qtensor.utils import get_edge_subgraph
 import networkx as nx
 
-from .CircuitComposer import QAOAComposer, OldQAOAComposer, ZZQAOAComposer, WeightedZZQAOAComposer, CircuitComposer
+from .CircuitComposer import QAOAComposer, OldQAOAComposer, ZZQAOAComposer, WeightedZZQAOAComposer, CircuitComposer, VCQAOAComposer, PCQAOAComposer, VCZZQAOAComposer, PCZZQAOAComposer, MaxCutComposer
 from .OpFactory import CirqBuilder, QtreeBuilder, QiskitBuilder, TorchBuilder
 from .OpFactory import QtreeFullBuilder
 from qtensor.Simulate import CirqSimulator, QtreeSimulator
 from qtensor.QAOASimulator import QAOAQtreeSimulator
 from qtensor.QAOASimulator import QAOACirqSimulator
 from qtensor.QAOASimulator import QAOAQtreeSimulatorSymmetryAccelerated
+from qtensor.QAOASimulator import VCQAOASimulator
 from qtensor.FeynmanSimulator import FeynmanSimulator, FeynmanMergedSimulator
 from qtensor import contraction_backends
 from qtensor.contraction_backends import PerfNumpyBackend, NumpyBackend
@@ -33,8 +34,24 @@ class CirqQAOAComposer(QAOAComposer):
 class QiskitQAOAComposer(QAOAComposer):
     def _get_builder_class(self):
         return QiskitBuilder
-
-class QtreeQAOAComposer(QAOAComposer):
+        
+class VCQiskitQAOAComposer(VCQAOAComposer):
+    def _get_builder_class(self):
+        return QiskitBuilder
+        
+class PCQiskitQAOAComposer(PCQAOAComposer):
+    def _get_builder_class(self):
+        return QiskitBuilder
+        
+class VCQtreeQAOAComposer(VCZZQAOAComposer):
+    def _get_builder_class(self):
+        return QtreeBuilder
+        
+class PCQtreeQAOAComposer(PCZZQAOAComposer):
+    def _get_builder_class(self):
+        return QtreeBuilder    
+        
+class QtreeQAOAComposer(MaxCutComposer):
     def _get_builder_class(self):
         return QtreeBuilder
 
