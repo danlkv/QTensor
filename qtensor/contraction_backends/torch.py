@@ -264,11 +264,12 @@ class TorchBackendMatm(TorchBackend):
         kix = common - set(out)
         fix = common - kix
         common = list(kix) + list(fix)
-        a = tensors[0].transpose(*[
+        print(f'{ixa=} {ixb=} {ixout=}; {common=} {mix=} {nix=}')
+        a = tensors[0].permute(*[
             list(ixs[0]).index(x) for x in common + list(mix)
         ])
 
-        b = tensors[1].transpose(*[
+        b = tensors[1].permute(*[
             list(ixs[1]).index(x) for x in common + list(nix)
         ])
 
@@ -284,7 +285,7 @@ class TorchBackendMatm(TorchBackend):
         #print('outix', out, 'res', c.shape, 'kfmn',kix, fix, mix, nix)
 
         current_ord_ = list(fix) + list(mix) + list(nix)
-        c = c.transpose(*[current_ord_.index(i) for i in out])
+        c = c.permute(*[current_ord_.index(i) for i in out])
         return c
 
     def process_bucket(self, bucket, no_sum=False):
