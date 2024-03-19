@@ -140,7 +140,10 @@ class TorchBackend(ContractionBackend):
                 key=int, reverse=True
             ))
         else:
-            result_data = result_data.sum(axis=-1)
+            if not no_sum:
+                result_data = result_data.sum(axis=-1)
+            else:
+                result_data = result_data
 
 
 
