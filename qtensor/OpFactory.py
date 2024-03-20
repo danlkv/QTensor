@@ -182,6 +182,14 @@ class QiskitFactory:
         return qiskit_lib.CZGate
 
     @property
+    def X(cls):
+        return qiskit_lib.XGate
+
+    @property
+    def Y(cls):
+        return qiskit_lib.YGate
+
+    @property
     def Z(cls):
         return qiskit_lib.ZGate
     
