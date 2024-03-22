@@ -7,8 +7,8 @@ import time
 import torch
 
 from pathlib import Path
-#LIB_PATH = str(Path(__file__).parent/'libcuszp_wrapper.so')
-LIB_PATH = '/home/mkshah5/QTensor/qtensor/compression/szp/src/libcuszp_wrapper.so'
+LIB_PATH = str(Path(__file__).parent/'libcuszp_wrapper.so')
+#LIB_PATH = '/home/mkshah5/QTensor/qtensor/compression/szp/src/libcuszp_wrapper.so'
 # unsigned char* cuSZp_device_compress(float *oriData, size_t *outSize, float absErrBound, size_t nbEle){
 
 def get_device_compress():
