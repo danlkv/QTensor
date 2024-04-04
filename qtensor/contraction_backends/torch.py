@@ -264,7 +264,7 @@ class TorchBackendMatm(TorchBackend):
         kix = common - set(out)
         fix = common - kix
         common = list(kix) + list(fix)
-        print(f'{ixa=} {ixb=} {ixout=}; {common=} {mix=} {nix=}')
+        #print(f'{ixa=} {ixb=} {ixout=}; {common=} {mix=} {nix=}')
         a = tensors[0].permute(*[
             list(ixs[0]).index(x) for x in common + list(mix)
         ])
@@ -285,7 +285,8 @@ class TorchBackendMatm(TorchBackend):
         #print('outix', out, 'res', c.shape, 'kfmn',kix, fix, mix, nix)
 
         current_ord_ = list(fix) + list(mix) + list(nix)
-        c = c.permute(*[current_ord_.index(i) for i in out])
+        if len(out):
+            c = c.permute(*[current_ord_.index(i) for i in out])
         return c
 
     def process_bucket(self, bucket, no_sum=False):
@@ -293,6 +294,7 @@ class TorchBackendMatm(TorchBackend):
         result_indices = bucket[0].indices
         result_data = bucket[0].data
         width = len(set(bucket[0].indices))
+
 
         for tensor in bucket[1:-1]:
 
@@ -336,12 +338,10 @@ class TorchBackendMatm(TorchBackend):
             result_data = result_data_new
         else:
             result_data = result_data.sum(axis=-1)
-
-
+            result_indices = result_indices[:-1]
 
         if len(result_indices) > 0:
             first_index = result_indices[-1]
-            result_indices = result_indices[:-1]
             tag = first_index.identity
         else:
             tag = 'f'
