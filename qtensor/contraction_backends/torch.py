@@ -65,7 +65,7 @@ def slice_torch_tensor(data:np.ndarray, indices_in, indices_out, slice_dict):
     indices_sliced = [
         i for sl, i in zip(slice_bounds, indices_in) if not isinstance(sl, int)
     ]
-    #print(f'indicies_in {indices_in}, slice_dict {slice_dict}, bounds {slice_bounds}, slicedix {indices_sliced}, sshape {s_data.shape}')
+    #print(f'{indices_in=}, {indices_sliced=} {slice_dict=}, {slice_bounds=}, slicedix {indices_sliced}, sshape {s_data.shape}')
     indices_sized = [v.copy(size=size) for v, size in zip(indices_sliced, s_data.shape)]
     indices_out = [v for v in indices_out if not isinstance(slice_dict.get(v, None), int)]
     assert len(indices_sized) == len(s_data.shape)
@@ -130,7 +130,7 @@ class TorchBackend(ContractionBackend):
             tensor = bucket[-1]
             expr = get_einsum_expr(
                 list(map(int, result_indices)), list(map(int, tensor.indices))
-                , contract = 1
+                , contract = 0 if no_sum else 1
             )
             logger.trace('Before contract. Expr: {}, inputs: {}, {}', expr, result_data, tensor) 
             result_data = torch.einsum(expr, result_data, tensor.data)
@@ -140,13 +140,16 @@ class TorchBackend(ContractionBackend):
                 key=int, reverse=True
             ))
         else:
-            result_data = result_data.sum(axis=-1)
-
+            if not no_sum:
+                result_data = result_data.sum(axis=-1)
+            else:
+                result_data = result_data
 
 
         if len(result_indices) > 0:
             first_index = result_indices[-1]
-            result_indices = result_indices[:-1]
+            if not no_sum:
+                result_indices = result_indices[:-1]
             tag = first_index.identity
         else:
             tag = 'f'
