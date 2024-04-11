@@ -46,8 +46,8 @@ def permute_torch_tensor_data(data: np.ndarray, indices_in, indices_out):
         permuted data
     """
     # permute indices
-    out_locs = {idx: i for i, idx in enumerate(indices_out)}
-    perm = [out_locs[i] for i in indices_in]
+    in_locs = {idx: i for i, idx in enumerate(indices_in)}
+    perm = [in_locs[i] for i in indices_out]
     # permute tensor
     return torch.permute(data, perm)
 
@@ -138,7 +138,7 @@ class TorchBackend(ContractionBackend):
                 contract=0 if no_sum else 1,
             )
             logger.trace(
-                "Before contract. Expr: {}, inputs: {}, {}", expr, result_data, tensor
+                "Before contract. Expr: {}, inputs: {}, {}", expr, result_data, tensor.data
             )
             result_data = torch.einsum(expr, result_data, tensor.data)
             logger.trace(
