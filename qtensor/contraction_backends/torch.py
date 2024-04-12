@@ -68,15 +68,15 @@ def slice_torch_tensor(data: np.ndarray, indices_in, indices_out, slice_dict):
     indices_sliced = [
         i for sl, i in zip(slice_bounds, indices_in) if not isinstance(sl, int)
     ]
-    # print(f'{indices_in=}, {indices_sliced=} {slice_dict=}, {slice_bounds=}, slicedix {indices_sliced}, sshape {s_data.shape}')
-    indices_sized = [v.copy(size=size) for v, size in zip(indices_sliced, s_data.shape)]
+    #print(f'{indices_in=}, {indices_sliced=} {slice_dict=}, {slice_bounds=}, slicedix {indices_sliced}, sshape {s_data.shape}')
     indices_out = [
         v for v in indices_out if not isinstance(slice_dict.get(v, None), int)
     ]
-    assert len(indices_sized) == len(s_data.shape)
     assert len(indices_sliced) == len(s_data.shape)
     st_data = permute_torch_tensor_data(s_data, indices_sliced, indices_out)
-    return st_data, indices_out
+    indices_sized = [v.copy(size=size) for v, size in zip(indices_out, st_data.shape)]
+    assert len(indices_sized) == len(st_data.shape)
+    return st_data, indices_sized
 
 
 class TorchBackend(ContractionBackend):
@@ -164,6 +164,7 @@ class TorchBackend(ContractionBackend):
 
         # reduce
         result = qtree.optimizer.Tensor(f"E{tag}", result_indices, data=result_data)
+       # print("returning result", [t.data.sum() for t in bucket], bucket, result.data.sum(), no_sum)
         return result
 
     def process_bucket_merged(self, ixs, bucket, no_sum=False):
@@ -214,6 +215,7 @@ class TorchBackend(ContractionBackend):
                     data = data_dict[tensor.data_key]
                 else:
                     data = tensor.data
+                #print("data", data.shape, tensor.data_key, data.sum(), tensor.data is None)
                 # Works for torch tensors just fine
                 if not isinstance(data, torch.Tensor):
                     data = torch.from_numpy(data.astype(np.complex128)).to(self.device)
@@ -223,7 +225,13 @@ class TorchBackend(ContractionBackend):
                 data, new_indices = slice_torch_tensor(
                     data, tensor.indices, out_indices, slice_dict
                 )
+                #print("slice_dict", slice_dict)
+                #print("tensor", tensor)
+                #print("tensorshape", data.shape)
+                #print("tensorindices", new_indices)
+                #print("tensorindicessizes", [v.size for v in new_indices])
 
+                #print("sliced tensor: T, daata, indices", tensor, data.sum(), new_indices, ', old:', tensor.indices)
                 sliced_bucket.append(tensor.copy(indices=new_indices, data=data))
             sliced_buckets.append(sliced_bucket)
 
@@ -309,6 +317,28 @@ def permute_flattened(data, perm, shape):
         # print(f'{s=}, {t=}, {d2l=}, {l2d=}')
     return data
 
+def sum_flattened(data, axes, shape):
+    sprod = []
+    k = 1
+    for i in shape:
+        k *= i
+        sprod.append(k)
+    sprod.append(1)
+    ndim = len(shape)
+    for ix in axes:
+        ixd = sprod[ix] // sprod[ix - 1]
+        d3 = data.reshape(
+            (
+                sprod[ix - 1],
+                ixd,
+                sprod[ndim-1] // sprod[ix],
+            )
+        )
+        sprod = sprod[:ix] + list(np.array(sprod[ix + 1:]) * ixd)
+        data = d3.sum(axis=1).flatten()
+    return data
+
+
 
 class TorchBackendMatm(TorchBackend):
     def _get_index_sizes(self, *ixs, size_dict=None):
@@ -336,9 +366,12 @@ class TorchBackendMatm(TorchBackend):
         # print('all sum', sum_ix, 'a/b_sum', a_sum, b_sum)
         if len(a_sum):
             #a = a.sum(axis=tuple(ixa.index(x) for x in a_sum))
+            a = sum_flattened(a, [ixa.index(x) for x in a_sum], self._get_index_sizes(*ixa, size_dict=size_dict))
             ixa = [x for x in ixa if x not in a_sum]
+
         if len(b_sum):
             #b = b.sum(axis=tuple(ixb.index(x) for x in b_sum))
+            b = sum_flattened(b, [ixb.index(x) for x in b_sum], self._get_index_sizes(*ixb, size_dict=size_dict))
             ixb = [x for x in ixb if x not in b_sum]
         tensors = a, b
         # --
@@ -383,7 +416,7 @@ class TorchBackendMatm(TorchBackend):
         #if len(out):
             # print('out ix', out, 'kfmnix', kix, fix, mix, nix)
             #c = c.reshape(*self._get_index_sizes(*out, size_dict=size_dict))
-        # print('outix', out, 'res', c.shape, 'kfmn',kix, fix, mix, nix)
+        #print('outix', out, 'res', c.shape, 'kfmn',kix, fix, mix, nix)
 
         current_ord_ = list(fix) + list(mix) + list(nix)
         c = c.flatten()
@@ -402,7 +435,7 @@ class TorchBackendMatm(TorchBackend):
         result_indices = bucket[0].indices
         result_data = bucket[0].data
         width = len(set(bucket[0].indices))
-        print("bucket", bucket)
+        #print("bucket", bucket)
 
         for tensor in bucket[1:-1]:
             ixr = list(map(int, result_indices))
@@ -418,7 +451,7 @@ class TorchBackendMatm(TorchBackend):
                 size_dict[int(i)] = i.size
             for i in tensor.indices:
                 size_dict[int(i)] = i.size
-            logger.debug("result_indices: {}", result_indices)
+            logger.trace("result_indices: {}, out_indices {}, tensor {}, tensor.data.shape {}", result_indices, out_indices, tensor, tensor.data.shape)
             result_data_new = self.pairwise_sum_contract(
                 ixr, result_data, ixt, tensor.data, ixout, size_dict=size_dict
             )
@@ -443,10 +476,12 @@ class TorchBackendMatm(TorchBackend):
 
             ixr = list(map(int, result_indices))
             ixt = list(map(int, tensor.indices))
-            result_indices = tuple(
+            out_indices = tuple(
                 sorted(set(result_indices + tensor.indices), key=int, reverse=True)
-            )[:-1]
-            ixout = list(map(int, result_indices))
+            )
+            if not no_sum:
+                out_indices = out_indices[:-1]
+            ixout = list(map(int, out_indices))
 
             logger.trace("Before contract. expr: {}, {} -> {}", ixr, ixt, ixout)
             size_dict = {}
@@ -454,10 +489,11 @@ class TorchBackendMatm(TorchBackend):
                 size_dict[int(i)] = i.size
             for i in tensor.indices:
                 size_dict[int(i)] = i.size
-            # logger.debug("result_indices: {}", result_indices)
+            logger.trace("result_indices: {}, out_indices {}, tensor {}, tensor.data.shape {}", result_indices, out_indices, tensor, tensor.data.shape)
             result_data_new = self.pairwise_sum_contract(
                 ixr, result_data, ixt, tensor.data, ixout, size_dict=size_dict
             )
+            result_indices = out_indices
             # result_data = torch.einsum(expr, result_data, tensor.data)
             logger.trace(
                 "Data: {}, {} -> {}",
@@ -465,6 +501,11 @@ class TorchBackendMatm(TorchBackend):
                 tensor.data.mean(),
                 result_data_new.mean(),
             )
+            #print("result_data", result_data_new.shape)
+            #print("result_indices", result_indices)
+            #print("ixonut", ixout)
+            #print("result_indicessizes", [v.size for v in result_indices])
+            #print("size_dict", size_dict)
             # if result_data_new.mean() == 0:
             #    logger.warning("Result is zero")
             #    logger.debug("result_indices: {}", result_indices)
@@ -476,14 +517,17 @@ class TorchBackendMatm(TorchBackend):
             result_data = result_data_new
         else:
             # Sum the last index
-            print("result_data", result_data.shape)
-            #shape = self._get_index_sizes(*result_indices)
-            if result_data.numel() > 2:
-                result_data = result_data.reshape(-1, 2).sum(axis=-1)
-            else:
-                result_data = result_data.reshape(2, 1).sum(axis=-1)
+            #print("result_data", result_data.shape)
+            #print("result_indices", result_indices)
+            #print("result_indicessizes", [v.size for v in result_indices])
+            shape = self._get_index_sizes(*result_indices)
+            #print("shape", shape)
+            #print("no_sum", no_sum)
+            if not no_sum:
+                #print("reshaping",(-1, shape[-1]))
+                result_data = result_data.reshape(-1, shape[-1]).sum(axis=-1)
             #result_data = result_data.sum(axis=-1)
-            result_indices = result_indices[:-1]
+                result_indices = result_indices[:-1]
 
         if len(result_indices) > 0:
             first_index = result_indices[-1]
@@ -494,13 +538,16 @@ class TorchBackendMatm(TorchBackend):
 
         # reduce
         result = qtree.optimizer.Tensor(f"E{tag}", result_indices, data=result_data)
-        print("result", result)
-        print("result_data", result_data.shape)
+        #print("returning result", result)
+        #print("returning result_data.shape", result_data.shape)
+        #print("returning result", [t.data.sum() for t in bucket], bucket,'r', result, result.data.sum(), no_sum)
+        #print(f'{result.name}({len(result.indices)})', end='', flush=True)
         return result
 
 
     def get_result_data(self, result):
-        if len(result.indices):
+        # In theory, This condition is redundant, both should be either True or False.
+        if len(result.indices) or result.data.ndim > 1:
             d = result.data.reshape(self._get_index_sizes(*result.indices))
         else:
             d = result.data

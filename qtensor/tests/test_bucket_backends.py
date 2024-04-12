@@ -107,7 +107,9 @@ def contract_bucket_einsum(indices_list, data_dict):
     index_strs = ["".join([chr(97 + i) for i in ix]) for ix in indices_list]
     out_indices = []
     for ix in indices_list:
-        out_indices.extend(ix[1:])
+        for i in ix[1:]:
+            if i not in out_indices:
+                out_indices.append(i)
     expr = ",".join(index_strs) + "->" + "".join([chr(97 + i) for i in out_indices])
     print(f"expr: {expr}")
     res = np.einsum(expr, *[data_dict[i] for i in range(len(indices_list))])
@@ -186,9 +188,38 @@ def test_backend_single_bucket_one_index(backend, atol):
     indices_list = [[ix] for _ in range(n_tensors)]
     print(f"indices_list: {indices_list}")
     data_dict = {i: np.random.rand(*[2] * len(ix)) for i, ix in enumerate(indices_list)}
-
-    # Test the slicing correctness as well
     res_ref = contract_bucket_einsum(indices_list, data_dict)
+    res = contract_bucket(indices_list, backend, data_dict)
+    assert np.allclose(res, res_ref, atol=atol)
 
+@pytest.mark.parametrize(
+    ["backend", "atol"],
+    [
+        # NOTE: 04/02/24 temporary disable cupy backend, it is not working on my machine
+        # ('cupy', 1e-10),
+        (qtensor.contraction_backends.get_backend("einsum"), 1e-10),
+        (qtensor.contraction_backends.get_backend("torch"), 1e-10),
+        # ('cupy_compressed', 1e-10),
+        (TorchBackendMatm(), 1e-10),
+        # (CompressionBackend(
+        #    CuPyBackend(),
+        #    CUSZCompressor(r2r_error=1e-4, r2r_threshold=1e-5),
+        #    11 ),
+        #    1e-5)
+    ],
+)
+def test_backend_single_bucket_trick(backend, atol):
+    """
+
+    Test a single bucket with different common indices
+    """
+
+    # Simple bucket with decreasing number of indices
+    n_tensors = 3
+    ix = 1
+    indices_list = [[1, 2], [2, 3], [3]]
+    print(f"indices_list: {indices_list}")
+    data_dict = {i: np.random.rand(*[2] * len(ix)) for i, ix in enumerate(indices_list)}
+    res_ref = contract_bucket_einsum(indices_list, data_dict)
     res = contract_bucket(indices_list, backend, data_dict)
     assert np.allclose(res, res_ref, atol=atol)
