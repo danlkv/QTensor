@@ -551,4 +551,6 @@ class TorchBackendMatm(TorchBackend):
             d = result.data.reshape(self._get_index_sizes(*result.indices))
         else:
             d = result.data
+        # move to cpu
+        d = d.cpu()
         return torch.permute(d, tuple(reversed(range(d.ndim))))
