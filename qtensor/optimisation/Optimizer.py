@@ -104,7 +104,7 @@ class SlicesOptimizer(OrderingOptimizer):
         log.info('Memory available: {}', avail)
         # Cost = 16*2**tw
         # tw = log(cost/16) = log(cost) - 4
-        return np.int(np.log2(avail)) - 4
+        return int(np.log2(avail)) - 4
 
     def _split_graph(self, p_graph, max_tw):
         searcher = GreedyParvars(p_graph)

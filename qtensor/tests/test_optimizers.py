@@ -11,8 +11,6 @@ np.random.seed(42)
 import pytest
 
 def get_test_problem(n=14, p=2, d=3):
-    w = np.array([[0,1,1,0],[1,0,1,1],[1,1,0,1],[0,1,1,0]])
-    G = nx.from_numpy_matrix(w)
 
     G = nx.random_regular_graph(d, n)
     gamma, beta = [np.pi/3]*p, [np.pi/2]*p

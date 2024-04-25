@@ -11,6 +11,7 @@ from qtensor.Simulate import CirqSimulator, QtreeSimulator
 from qtensor.FeynmanSimulator import FeynmanSimulator
 from qtensor.optimisation.Optimizer import TamakiTrimSlicing, TreeTrimSplitter
 from qtensor.tests.qiskit_qaoa_energy import simulate_qiskit_amps
+qiskit_aer = pytest.importorskip('qiskit_aer')
 
 @lru_cache
 def get_test_problem(n=10, p=2, d=3, type='random'):
