@@ -17,6 +17,7 @@ sys.path.append('./newsz')
 
 
 import torch
+import cuszp
 try:
     from cuszx_wrapper import cuszx_host_compress, cuszx_host_decompress, cuszx_device_compress, cuszx_device_decompress
     from cuSZp_wrapper import cuszp_device_compress, cuszp_device_decompress
@@ -157,17 +158,30 @@ class CUSZPCompressor(Compressor):
 
     def free_decompressed(self):
         import cupy
-        print("Cleanup", len(self.decompressed_own))
+        print("Decompressed data Cleanup", len(self.decompressed_own))
         for x in self.decompressed_own:
-            del x
-        cupy.get_default_memory_pool().free_all_blocks()
-        cupy.get_default_pinned_memory_pool().free_all_blocks()
-        torch.cuda.empty_cache()
+            cupy.cuda.runtime.free(x)
+            # del x
+            # need to run this for every x?
+            cupy.get_default_memory_pool().free_all_blocks()
+            #cupy.get_default_pinned_memory_pool().free_all_blocks()
+        #torch.cuda.empty_cache()
         self.decompressed_own = []
+        #cupy.get_default_memory_pool().free_all_blocks()
+        #cupy.get_default_pinned_memory_pool().free_all_blocks()
+        #torch.cuda.empty_cache()
+        #self.decompressed_own = []
 
     def free_compressed(self, ptr):
+        #return
         import ctypes, cupy
-        cmp_bytes, num_elements_eff, shape, dtype, _ = ptr
+        #cmp_bytes, num_elements_eff, shape, dtype, _ = ptr
+        cmp_t_real, cmp_t_imag, shape, dtype = ptr
+        del cmp_t_real
+        del cmp_t_imag
+        torch.cuda.empty_cache()
+        return 
+        print(f"Freeing compressed data {num_elements_eff}")
         p_decompressed_ptr = ctypes.addressof(cmp_bytes[0])
         # cast to int64 pointer
         # (effectively converting pointer to pointer to addr to pointer to int64)
@@ -175,28 +189,48 @@ class CUSZPCompressor(Compressor):
         decompressed_int = p_decompressed_int.contents
         cupy.cuda.runtime.free(decompressed_int.value)
         cupy.get_default_memory_pool().free_all_blocks()
-        del cmp_bytes
+        #del cmp_bytes
 
     def compress(self, data):
         isCupy, num_elements_eff = _get_data_info(data)
         dtype = data.dtype
-        print("Compressing")
-        print(type(data), type(num_elements_eff))
-        cmp_bytes, outSize_ptr = cuszp_device_compress(data, self.r2r_error,num_elements_eff, self.r2r_threshold)
-        return (cmp_bytes, num_elements_eff, data.shape, dtype, outSize_ptr.contents.value)
+        # convert cupy to torch
+        data_imag = torch.as_tensor(data.imag, device='cuda').contiguous()
+        data_real = torch.as_tensor(data.real, device='cuda').contiguous()
+        print(f"cuszp Compressing {type(data)}")
+        #cmp_bytes, outSize_ptr = cuszp_device_compress(data, self.r2r_error, num_elements_eff, self.r2r_threshold)
+        cmp_t_real = cuszp.compress(data_real, self.r2r_error, 'rel')
+        cmp_t_imag = cuszp.compress(data_imag, self.r2r_error, 'rel')
+        return (cmp_t_real, cmp_t_imag, data.shape, dtype)
 
         # return (cmp_bytes, num_elements_eff, isCuPy, data.shape, dtype, outSize_ptr.contents.value)
     def compress_size(self, ptr):
-        return ptr[4]
+        #return ptr[4]
+        return ptr[0].nbytes + ptr[1].nbytes
 
     def decompress(self, obj):
         import cupy
-        cmp_bytes, num_elements_eff, shape, dtype, cmpsize = obj
-        decompressed_ptr = cuszp_device_decompress(num_elements_eff, cmp_bytes, cmpsize, self, dtype)
+        #cmp_bytes, num_elements_eff, shape, dtype, cmpsize = obj
+        #decompressed_ptr = cuszp_device_decompress(num_elements_eff, cmp_bytes, cmpsize, self, dtype)
+        cmp_t_real, cmp_t_imag, shape, dtype = obj
+        num_elements_decompressed = 1
+        for s in shape:
+            num_elements_decompressed *= s
+        decomp_t_real = cuszp.decompress(cmp_t_real, num_elements_decompressed, cmp_t_real.nbytes, self.r2r_error, 'rel')
+        decomp_t_imag = cuszp.decompress(cmp_t_imag, num_elements_decompressed, cmp_t_imag.nbytes, self.r2r_error, 'rel')
+        decomp_t = decomp_t_real + 1j * decomp_t_imag
+        arr_cp = cupy.asarray(decomp_t)
+        arr = cupy.reshape(arr_cp, shape)
+        return arr
         arr_cp = decompressed_ptr[0]
 
+        # Cupy memory management might not deallocate memory properly
+        #arr = cupy.reshape(arr_cp, shape)
+        #self.decompressed_own.append(arr)
+        # Use pointer instead, as in cuszx
+        arr_cp = decompressed_ptr[0]
+        self.decompressed_own.append(decompressed_ptr[1])
         arr = cupy.reshape(arr_cp, shape)
-        self.decompressed_own.append(arr)
         return arr
 
 class TorchCompressor(Compressor):

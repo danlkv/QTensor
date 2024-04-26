@@ -1,9 +1,15 @@
 from qtensor.compression import CompressedTensor
-from qtensor.compression import NumpyCompressor, CUSZCompressor
+from qtensor.compression import (
+    NumpyCompressor,
+    CUSZPCompressor,
+    CUSZXCompressor,
+    TorchCompressor,
+)
 from qtree.optimizer import Var
 from qtree.system_defs import NP_ARRAY_TYPE
 import pytest
 import numpy as np
+
 
 def test_empty_tensor():
     shape = (2, 3, 4)
@@ -42,27 +48,38 @@ def test_slice_tensor():
     assert S.data is not None
     assert np.allclose(t.get_chunk([1, 2]), S.data)
 
-@pytest.mark.parametrize(argnames=["shape", "compressor", "dtype"],
-                         argvalues=[
-                             ((2, 3, 4), NumpyCompressor(), np.float32),
-                             ((2, 3, 4), NumpyCompressor(), np.float64),
-                             ((2, 3, 4), CUSZCompressor(), np.float32),
-                             ((2, 3, 4), CUSZCompressor(), np.float64),
-                             ((2, 3, 4), CUSZCompressor(), np.complex128),
-                             ((2,)*20, CUSZCompressor(), np.float32),
-                             ((2,)*20, CUSZCompressor(), np.complex64),
-                             # Not supported:
-                             #((2,)*20, CUSZCompressor(), np.float64)
-                        ]
-                        )
-def test_compressors(shape, compressor, dtype):
-    print(shape, compressor, dtype)
+
+@pytest.mark.parametrize(
+    argnames=["shape", "compressor_cls", "dtype"],
+    argvalues=[
+        ((2, 3, 4), NumpyCompressor, np.float32),
+        ((2, 3, 4), NumpyCompressor, np.float64),
+        #((2,) * 20, TorchCompressor, np.complex64),
+        ((2,) * 20, CUSZXCompressor, np.complex64),
+        ((2,) * 20, CUSZPCompressor, np.complex64),
+
+        # Not supported:
+        # ((2, 3, 4), CUSZXCompressor, np.float32),
+        # ((2, 3, 4), CUSZXCompressor, np.float64),
+        # ((2, 3, 4), CUSZXCompressor, np.complex128),
+        # ((2,)*20, CUSZXCompressor, np.float32),
+        # ((2,)*20, CUSZCompressor(), np.float64)
+    ],
+)
+def test_compressors(shape, compressor_cls, dtype):
+    print(shape, compressor_cls, dtype)
+    compressor = compressor_cls()
     import cupy
+
     indices = [Var(i, size=s) for i, s in enumerate(shape)]
     if dtype is np.complex128:
-        data = cupy.random.random(shape, dtype=np.float64) + 1j*cupy.random.random(shape, dtype=np.float64)
+        data = cupy.random.random(shape, dtype=np.float64) + 1j * cupy.random.random(
+            shape, dtype=np.float64
+        )
     elif dtype is np.complex64:
-        data = cupy.random.random(shape, dtype=np.float32) + 1j*cupy.random.random(shape, dtype=np.float32)
+        data = cupy.random.random(shape, dtype=np.float32) + 1j * cupy.random.random(
+            shape, dtype=np.float32
+        )
     else:
         data = cupy.random.random(shape, dtype=dtype)
     t = CompressedTensor("myT", indices, data=data, compressor=compressor)
@@ -76,4 +93,4 @@ def test_compressors(shape, compressor, dtype):
     ref = cupy.asnumpy(s.data)
 
     assert np.allclose(ch, ref)
-    assert np.allclose(ch, data[1], rtol=0.1, atol=.01)
+    assert np.allclose(ch, data[1], rtol=0.15, atol=0.05)

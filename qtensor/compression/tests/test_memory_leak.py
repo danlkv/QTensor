@@ -106,3 +106,6 @@ def test_leak_contract():
         print(
             f"== [{j}] Memory history: {[np.round(x, 2) for x in _mem_histories]} GB =="
         )
+
+if __name__ == "__main__":
+    test_leak_contract()

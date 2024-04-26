@@ -77,7 +77,7 @@ class MemProfBackend(ContractionBackend):
         if isinstance(self.backend, CompressionBackend):
             gpu_mem += 8*2**self.backend.max_tw
         self.mem_history.append(dict(
-            mem=gpu_mem,
+            mem=total_mem,
             cupy_bufsize=mempool.total_bytes(),
             nvmem = self._get_nvsmi_mem(),
             cupybuf=mempool.total_bytes(),
@@ -85,7 +85,7 @@ class MemProfBackend(ContractionBackend):
             tensors_sizes=[len(tensor.indices) for tensor in self.object_store.values()]
         ))
         # --
-        print('MH', self.mem_history[-1])
+        #print('MH', self.mem_history[-1])
         if cupy_mem>1024**2:
             self._print("CuPy memory usage", cupy_mem/1024/1024, "MB. Total MB:", mempool.total_bytes()/1024**2)
 
