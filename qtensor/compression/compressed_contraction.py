@@ -203,5 +203,5 @@ def compressed_sum(A:Tensor, sum_ixs,
             R = Tensor(new_tensor_name, result_indices, data=chunk)
         else:
             R.set_chunk(r_i, chunk)
-        compressor.compressor.free_decompressed()
+        compressor.free_decompressed()
     return R
