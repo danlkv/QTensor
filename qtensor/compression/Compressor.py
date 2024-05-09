@@ -17,8 +17,8 @@ sys.path.append('./newsz')
 
 
 import torch
-import cuszp
 try:
+    import cuszp
     from cuszx_wrapper import cuszx_host_compress, cuszx_host_decompress, cuszx_device_compress, cuszx_device_decompress
     from cuSZp_wrapper import cuszp_device_compress, cuszp_device_decompress
     from cusz_wrapper import cusz_device_compress, cusz_device_decompress
