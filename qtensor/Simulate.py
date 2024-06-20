@@ -4,6 +4,7 @@ from qtensor.contraction_backends import NumpyBackend, ContractionBackend
 
 from qtensor.optimisation.TensorNet import QtreeTensorNet
 from qtensor.optimisation.Optimizer import DefaultOptimizer, Optimizer
+from qtensor import Bitstring as Bs, TNAdapter, QTensorTNAdapter
 from tqdm.auto import tqdm
 
 from loguru import logger as log
@@ -32,21 +33,9 @@ class QtreeSimulator(Simulator):
             self.optimizer = self.FallbackOptimizer()
         self.max_tw = max_tw
 
-    #-- Internal helpers
-    def _new_circuit(self, qc):
-        self.all_gates = qc
-
-    def _create_buckets(self):
-        self.tn = QtreeTensorNet.from_qtree_gates(self.all_gates,
-                                                 backend=self.backend)
-        self.tn.backend = self.backend
-
     def _set_free_qubits(self, free_final_qubits):
         self.tn.free_vars = [self.tn.bra_vars[i] for i in free_final_qubits]
         self.tn.bra_vars = [var for var in self.tn.bra_vars if var not in self.tn.free_vars]
-
-    def _optimize_buckets(self):
-        self.peo = self.optimize_buckets()
 
     def _reorder_buckets(self):
         """
@@ -95,15 +84,27 @@ class QtreeSimulator(Simulator):
         return slice_dict
     #-- 
 
-    def optimize_buckets(self):
-        peo, self.tn = self.optimizer.optimize(self.tn)
-        # print('Treewidth', self.optimizer.treewidth)
-        # print(peo)
-        return peo
+    def optimize_buckets(self, peo=None):
+        if peo is not None:
+            self.peo, self.tn = self.optimizer.optimize(self.tn)
+            if self.max_tw:
+                if self.optimizer.treewidth > self.max_tw:
+                    raise ValueError(f'Treewidth {self.optimizer.treewidth} is larger than max_tw={self.max_tw}.')
+        
+        all_indices = sum([list(t.indices) for bucket in self.tn.buckets for t in bucket], [])
+        identity_map = {int(v): v for v in all_indices}
+        peo = [identity_map[int(i)] for i in self.peo]
+        self._reorder_buckets()
 
-    def prepare_buckets(self, qc, batch_vars=0, peo=None):
-        self._new_circuit(qc)
-        self._create_buckets()
+    
+    def _prepare_state(self, qc, batch_vars=0, tn=None):
+        self.all_gates = qc
+        if tn is None:
+            self.tn = QtreeTensorNet.from_qtree_gates(self.all_gates,
+                                                 backend=self.backend)
+        else:
+            self.tn = tn
+        self.tn.backend = self.backend
         # Collect free qubit variables
         if isinstance(batch_vars, int):
             free_final_qubits = list(range(batch_vars))
@@ -111,43 +112,83 @@ class QtreeSimulator(Simulator):
             free_final_qubits = batch_vars
 
         self._set_free_qubits(free_final_qubits)
-        if peo is None:
-            self._optimize_buckets()
-            if self.max_tw:
-                if self.optimizer.treewidth > self.max_tw:
-                    raise ValueError(f'Treewidth {self.optimizer.treewidth} is larger than max_tw={self.max_tw}.')
-        else:
-            self.peo = peo
 
-        all_indices = sum([list(t.indices) for bucket in self.tn.buckets for t in bucket], [])
-        identity_map = {int(v): v for v in all_indices}
-        self.peo = [identity_map[int(i)] for i in self.peo]
-
-
-        self._reorder_buckets()
-        slice_dict = self._get_slice_dict()
-        #log.info('batch slice {}', slice_dict)
-
-        sliced_buckets = self.tn.slice(slice_dict)
-        #self.backend.pbar.set_total ( len(sliced_buckets))
-        self.buckets = sliced_buckets
-        # print("Buckets:")
-        # print(sliced_buckets)
-
-    def simulate_batch(self, qc, batch_vars=0, peo=None):
-        self.prepare_buckets(qc, batch_vars, peo)
-
+    def contract_tn(self, qc, batch_vars=0, peo=None, tn=None):
+        self._prepare_state(qc, batch_vars, tn)
+        self.optimize_buckets(peo)
+        self.slice()
+        
         result = qtree.optimizer.bucket_elimination(
             self.buckets, self.backend.process_bucket,
             n_var_nosum=len(self.tn.free_vars)
         )
+
+        return result
+    
+    def slice(self):
+        slice_dict = self._get_slice_dict()
+        log.info('batch slice {}', slice_dict)
+
+        sliced_buckets = self.tn.slice(slice_dict)
+        self.buckets = sliced_buckets
+
+
+    def simulate_batch(self, qc, batch_vars=0, peo=None):
+        result = self.contract_tn(qc, batch_vars, peo)
         return self.backend.get_result_data(result).flatten()
 
     def simulate(self, qc):
         return self.simulate_state(qc)
 
     def simulate_state(self, qc, peo=None):
-        return self.simulate_batch(qc, peo=peo, batch_vars=0)
+        return self.contract_tn(qc, peo=peo, batch_vars=0)
+
+    def sample(self, circuit):
+        # TODO: can use QTensorTNAdapter in init to avoid this operation again
+        tn_adapter = QTensorTNAdapter.from_qtree_gates(circuit)
+        return _sequence_sample(tn_adapter, composer.qubits)
+
+    def _sequence_sample(tn: TNAdapter, circuit, indices, batch_size=10, batch_fix_sequence=None, dim=2):
+        K = int(np.ceil(len(indices) / batch_size))
+        if batch_fix_sequence is None:
+            batch_fix_sequence = [1]*K
+        
+        cache = {}
+        samples = [Bs.str('', prob=1., dim=dim)]
+        z_0 = None
+        for i in range(K):
+            for j in range(len(samples)):
+                bs = samples.pop(0)
+                res = None
+                if len(bs)>0:
+                    res = cache.get(bs.to_int())
+                if res is None:
+                    free_batch_ix = indices[i*batch_size:(i+1)*batch_size]
+                    res = self.contract_tn(circuit, batch_vars=free_batch_ix, tn=tn)
+                    res = res.real**2
+                    if len(bs)>0:
+                        cache[bs.to_int()] = res
+                    
+                # result should be shaped accourdingly
+                if z_0 is None:
+                    z_0 = res.sum()
+                prob_prev = bs._prob
+                z_n = prob_prev * z_0
+                z_n = res.sum()
+                logger.debug('bs {}, Sum res {}, prev_Z {}, prob_prev {}',
+                            bs, res.sum(), prob_prev*z_0, prob_prev
+                            )
+                pdist = res.flatten() / z_n
+                logger.debug(f'Prob distribution: {pdist.round(4)}')
+                indices_bs = np.arange(len(pdist))
+                batch_ix = np.random.choice(indices_bs, batch_fix_sequence[i], p=pdist)
+                for ix in batch_ix:
+                    _new_s = bs + Bs.int(ix, width=len(free_batch_ix), prob=pdist[ix], dim=dim)
+                    logger.trace(f'New sample: {_new_s}')
+                    samples.append(_new_s)
+
+        return samples
+
 
 class CirqSimulator(Simulator):
 
@@ -155,3 +196,17 @@ class CirqSimulator(Simulator):
         sim = cirq.Simulator(**params)
         return sim.simulate(qc)
 
+if __name__=="__main__":
+    import networkx as nx
+    import numpy as np
+
+    G = nx.random_regular_graph(3, 10)
+    gamma, beta = [np.pi/3], [np.pi/2]
+
+    from qtensor import QtreeQAOAComposer, QAOAQtreeSimulator
+    composer = QtreeQAOAComposer(graph=G, gamma=gamma, beta=beta)
+    composer.ansatz_state()
+
+    sim = QAOAQtreeSimulator(composer)
+
+    log.debug('hello world')

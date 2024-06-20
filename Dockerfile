@@ -1,7 +1,5 @@
 FROM nvidia/cuda:11.0.3-runtime-ubuntu20.04
-
 ENV DEBIAN_FRONTEND=noninteractive 
-
 RUN    yes | apt update
 RUN    yes | apt install python3 python3-pip git htop vim
 
